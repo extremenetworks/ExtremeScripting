@@ -1,0 +1,97 @@
+enable cli scripting
+# @METADATASTART
+#@DetailDescriptionStart
+#############################################################################
+#
+# Script        	: Auto-VLAN Provisioning 
+# Revision      	: 1.1
+# EXOS Version(s)  	: 12.3.x and Newer
+# Last Updated  	: April 19, 2010
+#
+# Purpose: 
+# This script version will provision auto-configure to run on default bootup.
+#  
+# The script will initially show EDP to find the VLAN, VLAN ID and port that will be connected to 
+# the uplink.  The script will then create a VLAN, configure it with VLAN ID and add the port tagged
+# or untagged as necessary.
+# Note: The lack of whitespace is due to 5000 character limit in Dynamic scripts
+#
+###############################################################################
+#  Change Log
+#
+# 	19 April 2010: Script Created
+#	19 April 2010: added comment line
+#	21 April 2010: Changed to default.xsf configuration
+#	21 April 2010: Added Wait command
+###############################################################################
+#@DetailDescriptionEnd
+
+create upm profile autoprovision
+# Instructs UPM to wait 4 Minute for switch to boot and links to come active.
+# This will be faster and tune accordingly (e.g. (after <ms>)
+set var waitvar $tcl(after 240000)
+#initialize CLI.OUT to purge any data
+set var CLI.OUT " "
+# A list of commands configured for the VLAN
+show edp port all
+set var len $TCL(llength ${CLI.OUT})
+set var user_list $TCL(split ${CLI.OUT} "\n")
+delete var CLI.OUT
+set var count 0
+set var uplInfo 0
+# This variable needed as a seed key. Do not remove
+set var spacer ===========================================================================
+# The CLI.OUT has the results from a "show edp port all" command
+# This while statement will go through the CLI.OUT and pull the
+# and save the statements in a variable called cmd as a list
+while ($count < $len) do
+        set var curr $TCL(lindex $user_list $count)
+        set var temp $TCL(regexp -all ${spacer} $curr)
+        if ($temp) then
+                set var count ($count+1)
+                set var curr $TCL(lindex $user_list $count)
+                set var uplInfo $TCL(split $curr " ")
+                set var uplPort $TCL(lindex $uplInfo 0)
+				set var count 100
+        endif
+        set var count ($count+1)		
+endwhile
+set var CLI.OUT " "
+# A list of commands configured for the VLAN
+show edp port $uplPort detail
+set var edpDetail_list 0
+set var len $TCL(llength ${CLI.OUT})
+set var edpDetail_list $TCL(split ${CLI.OUT} "\n")
+delete var CLI.OUT
+set var count 0
+set var info 0
+set var uplDet 0
+set var spacer "Remote-Vlans:"
+# The CLI.OUT has the results from a "show edp port all" command
+# This while statement will go through the CLI.OUT and pull the
+# and save the statements in a variable called cmd as a list
+while ($count < $len) do
+        set var curr $TCL(lindex $edpDetail_list $count)
+        set var temp $TCL(regexp -all ${spacer} $curr)
+        if ($temp) then
+                set var count ($count+1)
+                set var curr $TCL(lindex $edpDetail_list $count)
+                set var uplDet $TCL(split $curr " ")
+                set var vlanName $TCL(lindex $uplDet 0)
+                set var vlanName $TCL(string trim $vlanName)
+                set var vlanID $TCL(lindex $uplDet 1)
+                set var idlen $TCL(string length $vlanID)
+                set var idlen ($idlen -2)
+                set var vlanID $TCL(string range $vlanID 1 $idlen)
+        endif
+        set var count ($count+1)		
+endwhile
+config default delete port all
+create vlan $vlanName
+config $vlanName tag $vlanID
+config $vlanName add ports all
+config $vlanName add port $uplPort tag
+# Leave the below period. It ends the UPM file
+.
+configure upm profile autoprovision maximum execution-time 1000
+run upm profile autoprovision

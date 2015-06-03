@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<du:index xmlns:du="du:http://www.extremenetworks.com/2007/du">
+   
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/switch"
+                source="../SDK/api/switch.wsdl"
+                file="switch.wsdl">
+      <du:content type="operation" name="get" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="set" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="create" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="delete" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="openSession" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="closeSession" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="keepAlive" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="service" name="switch" declaredType="" extends="" extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du" sourcens="urn:xapi urn:xapi"
+                source="../SDK/api/xos.wsdl"
+                file="xos.wsdl">
+      <du:content type="xs:complexType" name="Common-StringSequence" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Vlan-VlanEntry" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Vlan-VlanEntrySequence" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Fdb-FdbEntry" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Fdb-FdbEntrySequence" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Policy-ClearflowMatchType" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Policy-ClearflowConditionOperator" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Policy-ClearflowConditionType" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Policy-ClearflowActionSyslogLevel" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-Policy" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-AclRule" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowRule" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowMatch" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-AclCondition" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-AclAction" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowAction" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowCondition" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowActionQosProfile" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowActionAddDeleteAclRule"
+                  declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowActionSnmpTrap" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowActionSyslog" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-AclRuleSequence" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Policy-ClearflowRuleSequence" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Acl-InsertDirection" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Acl-Direction" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="createVlan" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="deleteVlan" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="getVlan" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="getAllVlan" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="createFdb" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="deleteFdb" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="getFdb" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="getAllFdb" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="savePolicy" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="deletePolicy" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="getPolicy" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="refreshPolicy" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="listPolicy" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="bindPolicyOnInterface" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="unbindPolicyOnInterface" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="listPolicyOnInterface" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="setDynamicAcl" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="deleteDynamicAcl" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="getDynamicAcl" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="listDynamicAcl" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="insertDynamicAclOnInterface" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="removeDynamicAclOnInterface" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="removeDynamicAclOnAllInterfaces" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="listDynamicAclOnInterface" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="execConfig" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="execCli" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="service" name="Xos" declaredType="" extends="" extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/upm"
+                source="../SDK/api/upm.wsdl"
+                file="upm.wsdl">
+      <du:content type="operation" name="openSession" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="runScript" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="getExecutionResult" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="keepAlive" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="closeSession" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="saveConfig" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="editProfile" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="createProfile" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="getProfile" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="deleteProfile" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="bindProfile" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="unbindProfile" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="getAllProfile" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="operation" name="getAllTimers" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="createTimer" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="operation" name="deleteTimer" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="service" name="upm" declaredType="" extends="" extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/event"
+                source="../SDK/api/event.wsdl"
+                file="event.wsdl">
+      <du:content type="operation" name="post" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="service" name="event" declaredType="" extends="" extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/vlan"
+                source="../SDK/api/xsd/vlan.xsd"
+                file="vlan.xsd">
+      <du:content type="xs:complexType" name="L3ProtocolList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ProtocolTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="VlanTagTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="PVlanTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="VlanTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Dot1ahModes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ProtocolData" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Protocol" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:simpleType" name="BPDUs" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:complexType" name="PortTagged" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="VirtualRouter" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="VlanConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="VlanTranslateMemberConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="VlanAggregateMemberConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="PrivateVlanMemberConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="RateLimit" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IsidService" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="CustomerVlanConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="Service" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:complexType" name="BackboneVlanConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/switch"
+                source="../SDK/api/xsd/switch.xsd"
+                file="switch.xsd">
+      <du:content type="xs:complexType" name="switchAccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="Objects" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="request" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="response" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="getRequest" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="getResponse" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="setRequest" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="setResponse" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="createRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="createResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="deleteRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="deleteResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/common"
+                source="../SDK/api/xsd/common.xsd"
+                file="common.xsd">
+      <du:content type="xs:simpleType" name="StringLen16" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen8" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen64" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen128" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen256" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen32" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen2K" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen1K" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen4K" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StringLen8K" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="TrueFalse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="IncludeExcludes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="NodeRoles" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="LicenseLevel" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="NodeStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="SSHStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="TelnetStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="YesNo" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ActiveStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="BlockedStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="uint8_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="uint16_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="uint32_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="uint64_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="int8_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="int16_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="int32_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="int64_t" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:complexType" name="stringSequence" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ExtensionType" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ExosBase" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ExosBaseClass" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="AccessRight" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ipv4" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ipv6" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="IPAddress" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="maskv6" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="maskv4" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Netmask" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="editOperationType" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ErrorObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ErrorObjectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="xxx" declaredType="IPAddressNetMask" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="session" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="hdr" declaredType="ClientHeader" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="ClientHeader" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IPAddressNetMask" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IPV6Address" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getAllSessionsRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getAllSessionsReply" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="openSessionRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="openSessionReply" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="closeSessionRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="closeSessionReply" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="exception" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="keepAliveRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="keepAliveReply" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/dhcp"
+                source="../SDK/api/xsd/dhcp.xsd"
+                file="dhcp.xsd">
+      <du:content type="xs:complexType" name="DHCPOptions" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="DHCPConfig" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/l2protocol"
+                source="../SDK/api/xsd/l2protocol.xsd"
+                file="l2protocol.xsd">
+      <du:content type="xs:simpleType" name="AdminStates" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/aaa"
+                source="../SDK/api/xsd/aaa.xsd"
+                file="aaa.xsd">
+      <du:content type="xs:simpleType" name="ServerTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ServerRoles" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="MgmtTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="SessionType" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="AuthorizationType" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="PasswordPolicy" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="UserAccount" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="BasicServerConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="AuthorizationServerConfig" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="AccountServerConfig" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="MgmtAuthServerConfig" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="MgmtAccountServerConfig" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="RadiusConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="TACACSConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="Session" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SessionHistory" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="IPAddress" declaredType="common:IPAddress" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/port"
+                source="../SDK/api/xsd/port.xsd"
+                file="port.xsd">
+      <du:content type="xs:simpleType" name="PortTransceiverStatus" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="PortTransceiverInfo" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:simpleType" name="LinkStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Percent" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="QoSTypes" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="QoSProfiles" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="QoSProfileInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="AggrQoSProfileInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="VlanInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="RateShaping" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="AdminStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Protocols" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="PreferredMediums" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Speeds" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Media" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="AutoNegotiations" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="DuplexValues" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="EtherTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="FloodingTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="SharingAlgoritms" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="LoadSharing" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="FloodRate" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="PortFlag" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="PortConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="PortUtilizationStats" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="PortQoSStats" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="PortTrafficStats" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="PortErrorStats" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="zzz" declaredType="objectList" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/snmp"
+                source="../SDK/api/xsd/snmp.xsd"
+                file="snmp.xsd">
+      <du:content type="xs:simpleType" name="Modes" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:simpleType" name="authProtocols" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="PrivacyProtocols" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ContextMatches" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="SecurityLevels" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="SecurityModels" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="GeneralConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SNMPStats" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="VacmViewTreeFamilyEntry" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SnmpCommunityEntry" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="VacmSecurityToGroupEntry" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SnmpTargetAddrEntry" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SnmpV1V2CTrapReceiver" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="UsmUserEntry" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="VacmAccessEntry" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/system"
+                source="../SDK/api/xsd/system.xsd"
+                file="system.xsd">
+      <du:content type="xs:simpleType" name="PortStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="StackingStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="EntityType" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="Topologies" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="HW_States" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="FanStates" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="License" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="PowerSupply" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="Fan" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="ConfigurationInfo" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="ImageInfo" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SwitchInfo" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="Odometer" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="SlotInfo" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="EntPhysicalEntry" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="StackPort" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="StackNodeTopology" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="StackNode" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getPortAccessObjectResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/upm"
+                source="../SDK/api/xsd/upm.xsd"
+                file="upm.xsd">
+      <du:content type="xs:simpleType" name="errorFlag" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="eventEnums" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="profileExecutionStatusCodes" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="timer" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:complexType" name="executionResult" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="eventStruct" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="eventObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="profileDetail" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="bindObjectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="bindingObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="createProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="createProfileResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="saveConfigRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="saveConfigResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="editProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="editProfileResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getAllProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getAllProfileReply" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getProfileReply" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="deleteProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="deleteProfileResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="bindProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="bindProfileResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="unbindProfileRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="unbindProfileResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="createTimerResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="createTimerRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="deleteTimerResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="deleteTimerRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getAllTimersRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getAllTimersResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="runScriptRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="runScriptReply" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getExecutionResultRequest" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="getExecutionResultReply" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/fdb"
+                source="../SDK/api/xsd/fdb.xsd"
+                file="fdb.xsd">
+      <du:content type="xs:complexType" name="MacTrackingEntry" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/idmgr"
+                source="../SDK/api/xsd/idmgr.xsd"
+                file="idmgr.xsd">
+      <du:content type="xs:simpleType" name="LoginStatusTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="AuthMethodTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="FeatureStatusTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="IdentityManagerEventTypes" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="AddressTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="DatasetTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="actionTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="connStatusTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="securityMechanismTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ListTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ListNames" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="ListEntryTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="GreyListEntryTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="UserIdentityData" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="Location" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrVlan" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrVlanInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdentityManagerConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="KerberosServer" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="DomainConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="LdapConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="LdapServerConfig" declaredType=""
+                  extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="UserRole" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="IdMgrPolicy" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrPolicyInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrChild" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrChildInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrIdentity" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IdMgrIdentityInfo" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="GreyListEntry" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="BlackListEntry" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="WhiteListEntry" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="RefreshUserRole" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="ListConfig" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="ListPrecedence" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/event"
+                source="../SDK/api/xsd/event.xsd"
+                file="event.xsd">
+      <du:content type="xs:complexType" name="ExosEvent" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="EventCommon" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="post" declaredType="" extends="" extendsLink="#"/>
+      <du:content type="xs:element" name="postResponse" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:element" name="eventHeader" declaredType="" extends="" extendsLink="#"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/ems"
+                source="../SDK/api/xsd/ems.xsd"
+                file="ems.xsd">
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="EventParam" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="EventParameters" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="EmsEvent" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+   </du:contents>
+   <du:contents xmlns:du="http://www.extremenetworks.com/2007/du"
+                sourcens="http://www.extremenetworks.com/XMLSchema/xos/ipfix"
+                source="../SDK/api/xsd/ipfix.xsd"
+                file="ipfix.xsd">
+      <du:content type="xs:simpleType" name="TransportTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="CollectorSocketStatusTypes" declaredType=""
+                  extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="FeatureStatusTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="IpfixIPv4FlowKeyType" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="IpfixIPv6FlowKeyTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="IpfixNonIPFlowKeyTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="RecordTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="FlowTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:simpleType" name="FlowDirectionTypes" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="IpfixGlobalData" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="IpfixPortData" declaredType="" extends="ExosBase"
+                  extendsLink="common.xsd.html#ExosBase"/>
+      <du:content type="xs:complexType" name="objectList" declaredType="" extends=""
+                  extendsLink="#"/>
+      <du:content type="xs:complexType" name="AccessObject" declaredType="" extends=""
+                  extendsLink="#"/>
+   </du:contents>
+      
+</du:index>

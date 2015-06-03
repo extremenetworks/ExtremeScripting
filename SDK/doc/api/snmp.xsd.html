@@ -1,0 +1,2107 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/snmp</span><br></h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getPortAccessObjectRequest">getPortAccessObjectRequest</a></b></td>
+            <td>(Not Used).<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getPortAccessObjectResponse">getPortAccessObjectResponse</a></b></td>
+            <td>(Not Used).<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#AccessObject">AccessObject</a></b></td>
+            <td>(Internal Use).<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#GeneralConfig">GeneralConfig</a></b></td>
+            <td>General SNMP configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SNMPStats">SNMPStats</a></b></td>
+            <td>SNMP statistics.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SnmpCommunityEntry">SnmpCommunityEntry</a></b></td>
+            <td>
+               			SNMP v1/v2c community configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SnmpTargetAddrEntry">SnmpTargetAddrEntry</a></b></td>
+            <td>
+               			Transport address for SNMP operations.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SnmpV1V2CTrapReceiver">SnmpV1V2CTrapReceiver</a></b></td>
+            <td>
+               			SNMP v1/v2c trap receiver.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#UsmUserEntry">UsmUserEntry</a></b></td>
+            <td>
+               			SNMP v3 user configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#VacmAccessEntry">VacmAccessEntry</a></b></td>
+            <td>
+               			Access rights configuration for SNMP content.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#VacmSecurityToGroupEntry">VacmSecurityToGroupEntry</a></b></td>
+            <td>
+               			Mapping os security model and name to a group.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#VacmViewTreeFamilyEntry">VacmViewTreeFamilyEntry</a></b></td>
+            <td>
+               			MIB view name.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#objectList">objectList</a></b></td>
+            <td>(Internal Use).<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#ContextMatches">ContextMatches</a></b></td>
+            <td>Enumeration of context matches.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#Modes">Modes</a></b></td>
+            <td>Enumeration of modes.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#PrivacyProtocols">PrivacyProtocols</a></b></td>
+            <td>Enumeration of privacy protocols.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SecurityLevels">SecurityLevels</a></b></td>
+            <td>Enumeration of security levels.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SecurityModels">SecurityModels</a></b></td>
+            <td>Enumeration of security models.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#authProtocols">authProtocols</a></b></td>
+            <td>Enumeration of authentication protocols.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><a name="getPortAccessObjectRequest">
+         <h3>getPortAccessObjectRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>(Not Used).</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccessObject</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getPortAccessObjectRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">AccessObject</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getPortAccessObjectResponse">
+         <h3>getPortAccessObjectResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>(Not Used).</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccessObject</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getPortAccessObjectResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">AccessObject</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><a name="AccessObject">
+         <h3>AccessObject</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>(Internal Use).</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">GeneralConfig</a></font></td>
+            <td><b>generalConfig</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SNMPStats</a></font></td>
+            <td><b>sNMPStats</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">VacmViewTreeFamilyEntry</a></font></td>
+            <td><b>vacmViewTreeFamilyEntry</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SnmpCommunityEntry</a></font></td>
+            <td><b>snmpCommunityEntry</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SnmpTargetAddrEntry</a></font></td>
+            <td><b>snmpTargetAddrEntry</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">VacmSecurityToGroupEntry</a></font></td>
+            <td><b>vacmSecurityToGroupEntry</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">VacmAccessEntry</a></font></td>
+            <td><b>vacmAccessEntry</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">UsmUserEntry</a></font></td>
+            <td><b>usmUserEntry</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">AccessObject</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:choice</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">generalConfig</span>" <span class="scTag">type</span>="<span class="scContent">GeneralConfig</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sNMPStats</span>" <span class="scTag">type</span>="<span class="scContent">SNMPStats</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmViewTreeFamilyEntry</span>" <span class="scTag">type</span>="<span class="scContent">VacmViewTreeFamilyEntry</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunityEntry</span>" <span class="scTag">type</span>="<span class="scContent">SnmpCommunityEntry</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrEntry</span>" <span class="scTag">type</span>="<span class="scContent">SnmpTargetAddrEntry</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmSecurityToGroupEntry</span>" <span class="scTag">type</span>="<span class="scContent">VacmSecurityToGroupEntry</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessEntry</span>" <span class="scTag">type</span>="<span class="scContent">VacmAccessEntry</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserEntry</span>" <span class="scTag">type</span>="<span class="scContent">UsmUserEntry</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:choice</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="GeneralConfig">
+         <h3>GeneralConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>General SNMP configuration.; Version : EXOS 12.0, Access : READ</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>snmpEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether SNMP is enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#SSHStates ">common:SSHStates</a></font></td>
+            <td><b>sshAccess</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>SSH state.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TelnetStates ">common:TelnetStates</a></font></td>
+            <td><b>telnetAccess</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Telnet state.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>rmonEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether RMON is enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>engineId</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>SNMP engine id.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>engineBoots</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The number of times that the SNMP engine has (re-)initialized itself since its initial configuration.; Version : EXOS 12.0,
+                        Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>engineTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The number of seconds since the SNMP engine has (re-)initialized itself.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>engineMaxMsgSize</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The maximum length in octets of an SNMP message which this SNMP engine can send or receive and process, determined as the
+                        minimum of the maximum message size values supported among all of the transports available to and supported by the engine.;
+                        Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>snmpV1V2CEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether SNMP v1/v2c is enabled.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>snmpTrapsEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether SNMP traps are enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>authTrapsEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether authrorization traps are enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>systemType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>System type.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>systemName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>System name.; Version : EXOS 12.0, Access : READ, WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>systemLocation</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>System location.; Version : EXOS 12.0, Access : READ, WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>systemUpTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The time since the network management portion of the system was last re-initialized.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>systemDescription</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>System description.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>systemContact</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Contact person for the system.; Version : EXOS 12.0, Access : READ, WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">GeneralConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sshAccess</span>" <span class="scTag">type</span>="<span class="scContent">common:SSHStates</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">telnetAccess</span>" <span class="scTag">type</span>="<span class="scContent">common:TelnetStates</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">rmonEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">engineId</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">engineBoots</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">engineTime</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">engineMaxMsgSize</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpV1V2CEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTrapsEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">authTrapsEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemType</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemLocation</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemUpTime</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemDescription</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemContact</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SNMPStats">
+         <h3>SNMPStats</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>SNMP statistics.; Version : EXOS 12.0, Access :  READ</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>getRequest</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of GET requests processed.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>setRequest</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of SET requests processed.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>getNextRequest</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of GET-NEXT requests processed.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>sentPackets</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets sent.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>sentTraps</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of traps sent.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>receivedRequest</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of requests received.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>authorizationError</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of authorization errors.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>generalError</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because of  some of the reasons e.g. bad packet
+                        etc; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>unknownSecurityModels</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they referenced a securityModel that was
+                        not known to or supported by the SNMP engine.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>InvalidMessages</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because there were invalid or inconsistent components
+                        in the SNMP message.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>unknownPDUHandlers</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because the PDU contained in the packet could not
+                        be passed to an application responsible for handling the pduType, e.g. no SNMP application had registered for the proper combination
+                        of the contextEngineID and the pduType.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>usmStatsUnsupportedSecLevels</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they requested a securityLevel that was
+                        unknown to the SNMP engine or otherwise unavailable.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>usmStatsNotInTimeWindows</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they appeared outside of the authoritative
+                        SNMP engine's window.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>usmStatsUnknownUserNames</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they referenced a user that was not known
+                        to the SNMP engine.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>usmStatsUnknownEngineIDs</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they referenced an snmpEngineID that was
+                        not known to the SNMP engine.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>usmStatsWrongDigests</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they didn't contain the expected digest
+                        value.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>usmStatsDecryptionErrors</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The total number of packets received by the SNMP engine which were dropped because they could not be decrypted.; Version :
+                        EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">SNMPStats</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getRequest</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">setRequest</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getNextRequest</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sentPackets</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sentTraps</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">receivedRequest</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">authorizationError</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">generalError</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">unknownSecurityModels</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">InvalidMessages</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">unknownPDUHandlers</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmStatsUnsupportedSecLevels</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmStatsNotInTimeWindows</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmStatsUnknownUserNames</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmStatsUnknownEngineIDs</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmStatsWrongDigests</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmStatsDecryptionErrors</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SnmpCommunityEntry">
+         <h3>SnmpCommunityEntry</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			SNMP v1/v2c community configuration.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp"></br>
+               			NOTE: This is modelled similar to snmpCommunityEntry defined in 
+               			SNMP-COMMUNITY-MIB (RFC 2576). Please refer to the RFC for a detailed
+               			description of the attributes.
+               			; Version : EXOS 12.0, Access : READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpCommunityIndex</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Unique index.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen1K ">common:StringLen1K</a></font></td>
+            <td><b>snmpCommunityName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Community string.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpCommunitySecurityName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Security name.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpCommunityContextEngineID</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Context engine id.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpCommunityContextName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Context name.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpCommunityTransportTag</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Transport tag.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">SnmpCommunityEntry</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunityIndex</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunityName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen1K</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunitySecurityName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunityContextEngineID</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunityContextName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpCommunityTransportTag</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SnmpTargetAddrEntry">
+         <h3>SnmpTargetAddrEntry</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Transport address for SNMP operations.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp"></br>
+               			NOTE: This is modelled similar to snmpTargetAddrEntry defined in 
+               			SNMP-TARGET-MIB (RFC 2573). Please refer to the RFC for a detailed
+               			description of the attributes.
+               			; Version : EXOS 12.0, Access :  READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>snmpTargetAddrName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Target address name.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen1K ">common:StringLen1K</a></font></td>
+            <td><b>snmpTargetAddrTDomain</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Transport type of the address.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpTargetAddrTAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Transport address. The format of this address depends on the transport type.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>snmpTargetAddrTimeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Timeout when communicating with the transport address.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>snmpTargetAddrRetryCount</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of times to retry when response is not received.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpTargetAddrTagList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Tag values which are used to select target addresses for a particular operation.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">Modes</a></font></td>
+            <td><b>mode</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Modes.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>snmpTargetAddrTMask</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Target address mask.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">SnmpTargetAddrEntry</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrTDomain</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen1K</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrTAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrTimeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrRetryCount</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrTagList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">mode</span>" <span class="scTag">type</span>="<span class="scContent">Modes</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpTargetAddrTMask</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SnmpV1V2CTrapReceiver">
+         <h3>SnmpV1V2CTrapReceiver</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			SNMP v1/v2c trap receiver.
+               			; Version : EXOS 12.0, Access :  READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>ipaddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>community</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Trap community string.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>port</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Port number at the receiver.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>sourceIpAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The source IP address of the traps- defaults to the switch IP address.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">Modes</a></font></td>
+            <td><b>standardMode</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Mode.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">SnmpV1V2CTrapReceiver</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipaddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">community</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">port</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sourceIpAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">standardMode</span>" <span class="scTag">type</span>="<span class="scContent">Modes</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="UsmUserEntry">
+         <h3>UsmUserEntry</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			SNMP v3 user configuration.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp"></br>
+               			NOTE: This is modelled similar to usmUserEntry defined in 
+               			SNMP-USER-BASED-SM-MIB (RFC 2574). Please refer to the RFC for a detailed
+               			description of the attributes.
+               			; Version : EXOS 12.0, Access :  READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>usmUserEngineID</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>SNMP enginer id.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>usmUserName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>User name.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>usmUserSecurityName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Security name.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">authProtocols</a></font></td>
+            <td><b>usmUserAuthProtocol</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Authentication protocol.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">PrivacyProtocols</a></font></td>
+            <td><b>usmUserPrivProtocol</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Privacy (encryption) protocol.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">PrivacyProtocols</a></font></td>
+            <td><b>usmUserPublic</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Publicly key to modify the user's secret authentication and private key.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">UsmUserEntry</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserEngineID</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserSecurityName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserAuthProtocol</span>" <span class="scTag">type</span>="<span class="scContent">authProtocols</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserPrivProtocol</span>" <span class="scTag">type</span>="<span class="scContent">PrivacyProtocols</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">usmUserPublic</span>" <span class="scTag">type</span>="<span class="scContent">PrivacyProtocols</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="VacmAccessEntry">
+         <h3>VacmAccessEntry</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Access rights configuration for SNMP content.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp"></br>
+               			NOTE: This is modelled similar to vacmAccessEntry defined in 
+               			SNMP-VIEW-BASED-ACM-MIB (RFC 2575). Please refer to the RFC for a detailed
+               			description of the attributes.
+               			; Version : EXOS 12.0, Access : READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>vacmGroupName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Group name.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">ContextMatches</a></font></td>
+            <td><b>vacmAccessContextMatch</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Context match indicating whether match is exact or for prefix.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmAccessContextPrefix</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Context prefix.; Version : EXOS 12.0, Access : READ,INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SecurityModels</a></font></td>
+            <td><b>vacmAccessSecurityModel</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Security model.; Version : EXOS 12.0, Access : READ,INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SecurityLevels</a></font></td>
+            <td><b>vacmAccessSecurityLevel</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Minimum security level required to gain access rights.; Version : EXOS 12.0, Access : READ,INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmAccessWriteViewName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>MIB view name that defines scope of write access.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmAccessReadViewName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>MIB view name that defines scope of read access.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmAccessNotifyViewName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>MIB view name that defines scope of notification access.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">VacmAccessEntry</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmGroupName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessContextMatch</span>" <span class="scTag">type</span>="<span class="scContent">ContextMatches</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessContextPrefix</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessSecurityModel</span>" <span class="scTag">type</span>="<span class="scContent">SecurityModels</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessSecurityLevel</span>" <span class="scTag">type</span>="<span class="scContent">SecurityLevels</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessWriteViewName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessReadViewName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmAccessNotifyViewName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="VacmSecurityToGroupEntry">
+         <h3>VacmSecurityToGroupEntry</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Mapping os security model and name to a group.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp"></br>
+               			NOTE: This is modelled similar to vacmSecurityToGroupEntry defined in 
+               			SNMP-COMMUNITY-MIB (RFC 2575). Please refer to the RFC for a detailed
+               			description of the attributes.
+               			; Version : EXOS 12.0, Access : READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SecurityModels</a></font></td>
+            <td><b>vacmSecurityModel</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Security model.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmSecurityName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Security name.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmGroupName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Group name.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">VacmSecurityToGroupEntry</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmSecurityModel</span>" <span class="scTag">type</span>="<span class="scContent">SecurityModels</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmSecurityName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmGroupName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="VacmViewTreeFamilyEntry">
+         <h3>VacmViewTreeFamilyEntry</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			MIB view name.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp"></br>
+               			NOTE: This is modelled similar to vacmViewTreeFamilyEntry defined in 
+               			SNMP-VIEW-BASED-ACM-MIB (RFC 2575). Please refer to the RFC for a detailed
+               			description of the attributes.
+               			; Version : EXOS 12.0, Access : READ
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmViewTreeFamilyViewName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>View name.; Version : EXOS 12.0, Access : READ, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen1K ">common:StringLen1K</a></font></td>
+            <td><b>vacmViewTreeFamilySubtree</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The MIB subtree which when combined with the corresponding instance of vacmViewTreeFamilyMask defines a family of view subtrees.;
+                        Version : EXOS 12.0, Access : READ, INDEX
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>vacmViewTreeFamilyMask</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The bit mask which, in combination with the corresponding instance of vacmViewTreeFamilySubtree, defines a family of view
+                        subtrees.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IncludeExcludes ">common:IncludeExcludes</a></font></td>
+            <td><b>vacmViewTreeFamilyType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Indicates whether the corresponding instances of vacmViewTreeFamilySubtree and vacmViewTreeFamilyMask define a family of
+                        view subtrees which is included in or excluded from the MIB view.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">VacmViewTreeFamilyEntry</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmViewTreeFamilyViewName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmViewTreeFamilySubtree</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen1K</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmViewTreeFamilyMask</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vacmViewTreeFamilyType</span>" <span class="scTag">type</span>="<span class="scContent">common:IncludeExcludes</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="objectList">
+         <h3>objectList</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>(Internal Use).</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccessObject</a></font></td>
+            <td><b>moduleObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">objectList</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">moduleObject</span>" <span class="scTag">type</span>="<span class="scContent">AccessObject</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table><a name="ContextMatches">
+         <h3>ContextMatches</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of context matches.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">ContextMatches</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">exact</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">prefix</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="Modes">
+         <h3>Modes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of modes.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">Modes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">standard</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">enhanced</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="PrivacyProtocols">
+         <h3>PrivacyProtocols</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of privacy protocols.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">PrivacyProtocols</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">DES</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">3DES</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">AES128</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">AES192</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">AES256</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">noPrivacy</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SecurityLevels">
+         <h3>SecurityLevels</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of security levels.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">SecurityLevels</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">noAuthNoPriv</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">authNoPriv</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">authPriv</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SecurityModels">
+         <h3>SecurityModels</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of security models.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">SecurityModels</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">any</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">SNMPv1</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">SNMPv2c</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">USM</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="authProtocols">
+         <h3>authProtocols</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of authentication protocols.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">authProtocols</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">noAuthentication</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">HMAC_MD5</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">HMAC_SHA</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr>
+   </body><br xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><hr xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><center xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+</html>

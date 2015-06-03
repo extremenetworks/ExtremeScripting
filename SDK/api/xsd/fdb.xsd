@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--THE INFORMATION AND SPECIFICATIONS IN THIS MANUAL REGARDING EXTREME NETWORKS DEVELOPER 
+KIT ARE SUBJECT TO CHANGE WITHOUT NOTICE.  ALL STATEMENTS, INFORMATION, AND RECOMMENDATIONS IN THIS MANUAL
+ARE PRESENTED WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.  YOU TAKE FULL RESPONSIBILITY FOR YOUR USE
+OF THE DEVELOPER KIT AND THE INFORMATION IN THIS MANUAL.
+                
+THE DEVELOPER KIT IS LICENSED TO YOU UNDER THE THEN-CURRENT LICENSE TERMS FOR THE  DEVELOPER KIT IN EFFECT AT 
+THE TIME THE DEVELOPER KIT IS PROVIDED TO YOU BY EXTREME NETWORKS. PLEASE CONTACT EXTREME NETWORKS IF YOU DO
+NOT HAVE A COPY OF THE LICENSE TERMS.  USE OF THE DEVELOPER KIT AND THIS MANUAL CONSTITUTES YOUR ACCEPTANCE 
+OF THE DEVELOPER KIT LICENSE TERMS.-->
+
+<!--
+*
+*  Copyright (c) Extreme Networks Inc.  2009
+*  All rights reserved 
+*
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.extremenetworks.com/XMLSchema/xos/fdb" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb" targetNamespace="http://www.extremenetworks.com/XMLSchema/xos/fdb" version="A.B.C.D">
+	<xsd:import namespace="http://www.extremenetworks.com/XMLSchema/xos/common" schemaLocation="./common.xsd"/>
+
+	<xsd:complexType name="MacTrackingEntry">
+		<xsd:annotation>
+			<xsd:documentation>
+                MAC tracking entry configuration. This object is used to configure the fdb MAC tracking table on the switch.
+
+                NOTE: There can be hundreds of entries configured on a switch. In these cases it is recommended that the 
+                      paging mechanism available with <code>getRequest</code> be used when fetching all the entries from 
+                      the switch. 
+            ; Version : EXOS 12.3, Access : READ, CREATE, DELETE</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="common:ExosBase">
+				<xsd:sequence>
+					<xsd:element name="macAddress" type="common:StringLen32" minOccurs="0" >
+						<xsd:annotation>
+							<xsd:documentation>MAC address in the table; Version : EXOS 12.3, Access : READ,CREATE,DELETE,INDEX</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="extension" type="common:ExtensionType" minOccurs="0"/>
+					<xsd:any namespace="##other" processContents="lax" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute ref="common:operation"/>
+				<xsd:anyAttribute namespace="##any" processContents="lax"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+    <xsd:complexType name="objectList">
+		<xsd:annotation>
+			<xsd:documentation>(Internal Use)</xsd:documentation>
+		</xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="moduleObject" type="AccessObject" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="AccessObject">
+		<xsd:annotation>
+			<xsd:documentation>(Internal Use)</xsd:documentation>
+		</xsd:annotation>
+        <xsd:choice>
+            <xsd:element name="macTrackingEntry" type="MacTrackingEntry"/>
+        </xsd:choice>
+    </xsd:complexType>
+
+</xsd:schema>

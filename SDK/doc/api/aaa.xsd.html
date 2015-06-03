@@ -1,0 +1,1912 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/aaa</span><br></h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#IPAddress">IPAddress</a></b></td>
+            <td><br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getPortAccessObjectRequest">getPortAccessObjectRequest</a></b></td>
+            <td>
+               			(Not Used)
+               			<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getPortAccessObjectResponse">getPortAccessObjectResponse</a></b></td>
+            <td>
+               			(Not Used)
+               			<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#AccessObject">AccessObject</a></b></td>
+            <td>
+               			(Internal Use)
+               			<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#AccountServerConfig">AccountServerConfig</a></b></td>
+            <td>
+               			Basic AAA accounting server configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#AuthorizationServerConfig">AuthorizationServerConfig</a></b></td>
+            <td>
+               			Basic AAA authentication server configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#BasicServerConfig">BasicServerConfig</a></b></td>
+            <td>
+               			Basic AAA server configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#MgmtAccountServerConfig">MgmtAccountServerConfig</a></b></td>
+            <td>Management AAA accounting server configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#MgmtAuthServerConfig">MgmtAuthServerConfig</a></b></td>
+            <td>Management AAA authentication server configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#PasswordPolicy">PasswordPolicy</a></b></td>
+            <td>
+               			Represents the default password policy applied to new user accounts.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#RadiusConfig">RadiusConfig</a></b></td>
+            <td>RADIUS configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#Session">Session</a></b></td>
+            <td>CLI or XML session active on the switch.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SessionHistory">SessionHistory</a></b></td>
+            <td>Session history.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#TACACSConfig">TACACSConfig</a></b></td>
+            <td>TACACS configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#UserAccount">UserAccount</a></b></td>
+            <td>User account configuration.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#objectList">objectList</a></b></td>
+            <td>
+               			(Not Used)
+               			<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#AuthorizationType">AuthorizationType</a></b></td>
+            <td>Enumeration of autherization types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#MgmtTypes">MgmtTypes</a></b></td>
+            <td>Enumeration of management server types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#ServerRoles">ServerRoles</a></b></td>
+            <td>Enumeration of server roles.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#ServerTypes">ServerTypes</a></b></td>
+            <td>Enumeration of server types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#SessionType">SessionType</a></b></td>
+            <td>Enumeration of session types.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><a name="IPAddress">
+         <h3>IPAddress</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">IPAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>"/&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getPortAccessObjectRequest">
+         <h3>getPortAccessObjectRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Not Used)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccessObject</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getPortAccessObjectRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">AccessObject</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getPortAccessObjectResponse">
+         <h3>getPortAccessObjectResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Not Used)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">objectList</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getPortAccessObjectResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">objectList</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><a name="AccessObject">
+         <h3>AccessObject</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Internal Use)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#TACACSConfig ">aaa:TACACSConfig</a></font></td>
+            <td><b>tACACSConfig</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#RadiusConfig ">aaa:RadiusConfig</a></font></td>
+            <td><b>radiusConfig</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#PasswordPolicy ">aaa:PasswordPolicy</a></font></td>
+            <td><b>passwordPolicy</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#UserAccount ">aaa:UserAccount</a></font></td>
+            <td><b>userAccount</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#Session ">aaa:Session</a></font></td>
+            <td><b>session</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#SessionHistory ">aaa:SessionHistory</a></font></td>
+            <td><b>sessionHistory</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">AccessObject</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:choice</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">tACACSConfig</span>" <span class="scTag">type</span>="<span class="scContent">aaa:TACACSConfig</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">radiusConfig</span>" <span class="scTag">type</span>="<span class="scContent">aaa:RadiusConfig</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">passwordPolicy</span>" <span class="scTag">type</span>="<span class="scContent">aaa:PasswordPolicy</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">userAccount</span>" <span class="scTag">type</span>="<span class="scContent">aaa:UserAccount</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">session</span>" <span class="scTag">type</span>="<span class="scContent">aaa:Session</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sessionHistory</span>" <span class="scTag">type</span>="<span class="scContent">aaa:SessionHistory</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:choice</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="AccountServerConfig">
+         <h3>AccountServerConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="#">BasicServerConfig</a> <img src="right-arrow.gif"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Basic AAA accounting server configuration. Defines the basic settings for AAA accounting configuration.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa"></br>
+               			NOTE: Though this object extends from <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">ExosBase</code>, it cannot be used in messages such as <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">getRequest</code>, 
+               			<code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">setRequest</code>, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">createRequest</code>, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">deleteRequest</code>.
+               			; Version : EXOS 12.0, Access : READ,WRITE
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accountRequests</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of accounting requests.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accountResponses</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of accounting responses.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accountRetransmits</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of accounting retransmits.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>timeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Client timeout in seconds.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">AccountServerConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">BasicServerConfig</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountRequests</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountResponses</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountRetransmits</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">timeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="AuthorizationServerConfig">
+         <h3>AuthorizationServerConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="#">BasicServerConfig</a> <img src="right-arrow.gif"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Basic AAA authentication server configuration. Defines the basic settings for AAA authentication configuration.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa"></br>
+               			NOTE: Though this object extends from <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">ExosBase</code>, it cannot be used in messages such as <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">getRequest</code>, 
+               			<code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">setRequest</code>, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">createRequest</code>, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">deleteRequest</code>.
+               			; Version : EXOS 12.0, Access : READ,WRITE
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accessRequests</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of access requests.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accessAccepts</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of access requests that were accepted.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accessRejects</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of access requests that were rejected.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accessChallenges</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of access requests that were challenged.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>accessRetransmits</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of requests retransmitted</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>timeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Client timeout in seconds.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>badAuthenticators</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of requests rejected because of bad authentication</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>unknownTypes</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of unknown types request</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>roundTripTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Last round trip timeout between client and server</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">AuthorizationServerConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">BasicServerConfig</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accessRequests</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accessAccepts</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accessRejects</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accessChallenges</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accessRetransmits</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">timeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">badAuthenticators</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">unknownTypes</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">roundTripTime</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="BasicServerConfig">
+         <h3>BasicServerConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Basic AAA server configuration. Defines the basic settings for AAA configuration.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa"></br>
+               			NOTE: Though this object extends from <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">ExosBase</code>, it cannot be used in messages such as <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">getRequest</code>, 
+               			<code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">setRequest</code>, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">createRequest</code>, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">deleteRequest</code>.
+               			; Version : EXOS 12.0, Access : READ,WRITE
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>ipAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Server IP address.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>name</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Server host name.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint16_t ">common:uint16_t</a></font></td>
+            <td><b>portNumber</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Port number.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>clientIpAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Client IP address used by the switch to identify itself when communicating with the server.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen8 ">common:StringLen8</a></font></td>
+            <td><b>vr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>VR on which the client IP address is located.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen8 ">common:StringLen8</a></font></td>
+            <td><b>sharedSecret</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Shared secret used by the switch to authenticate itself with the server.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">ServerRoles</a></font></td>
+            <td><b>serverRole</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Specifies whether this configuration is for the primary or secondary server.</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">BasicServerConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">name</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">portNumber</span>" <span class="scTag">type</span>="<span class="scContent">common:uint16_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">clientIpAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vr</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen8</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sharedSecret</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen8</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">serverRole</span>" <span class="scTag">type</span>="<span class="scContent">ServerRoles</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="MgmtAccountServerConfig">
+         <h3>MgmtAccountServerConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Management AAA accounting server configuration.; Version : EXOS 12.0, Access : READ</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>serverEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether this server configuration is enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>serverTimeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Timeout in seconds.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccountServerConfig</a></font></td>
+            <td><b>mgmtAccountServer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					Accounting server configuration. There can be 2 occurances- one for the primary server and the other for the secondary
+                        server.
+                        					; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">MgmtAccountServerConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">serverEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">serverTimeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">mgmtAccountServer</span>" <span class="scTag">type</span>="<span class="scContent">AccountServerConfig</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">2</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="MgmtAuthServerConfig">
+         <h3>MgmtAuthServerConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Management AAA authentication server configuration.; Version : EXOS 12.0, Access : READ,WRITE</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>serverEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether this server configuration is enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>serverTimeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Timeout in seconds.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AuthorizationServerConfig</a></font></td>
+            <td><b>mgmtAuthServer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					Authentication server configuration. There can be 2 occurances- one for the primary server and the other for the secondary
+                        server.
+                        					; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">MgmtAuthServerConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">serverEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">serverTimeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">mgmtAuthServer</span>" <span class="scTag">type</span>="<span class="scContent">AuthorizationServerConfig</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">2</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="PasswordPolicy">
+         <h3>PasswordPolicy</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Represents the default password policy applied to new user accounts.
+               			; Version : EXOS 12.0, Access : READ,WRITE
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint16_t ">common:uint16_t</a></font></td>
+            <td><b>maxAge</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The maximum number of days for a password to remain valid.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint8_t ">common:uint8_t</a></font></td>
+            <td><b>length</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The maximum number of characters in a password.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint8_t ">common:uint8_t</a></font></td>
+            <td><b>historyLimit</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The number of previous passwords that the switch scans prior to validating a new password.; Version : EXOS 12.0, Access :
+                        READ,WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>lockOnLoginFailureEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        							Indicates whether lockout on login failures in enabled. 
+                        							If enabled, the system locks out users after 3 failed login attempts.
+                        							; Version : EXOS 12.0, Access : READ,WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>charValidationEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        							Indicates whether characters in the password are validated. If set to true,
+                        							it enforces specific formats for the password. 
+                        							<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa"></br>
+                        							Please refer to <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">configure account password-policy char-validation</code> in the 
+                        							"EXOS Concepts Guide" for a detailed description of this validation.
+                        							; Version : EXOS 12.0, Access : READ,WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">PasswordPolicy</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">maxAge</span>" <span class="scTag">type</span>="<span class="scContent">common:uint16_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">length</span>" <span class="scTag">type</span>="<span class="scContent">common:uint8_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">historyLimit</span>" <span class="scTag">type</span>="<span class="scContent">common:uint8_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">lockOnLoginFailureEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">charValidationEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="RadiusConfig">
+         <h3>RadiusConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>RADIUS configuration.; Version : EXOS 12.0, Access : READ, WRITE</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">MgmtAuthServerConfig</a></font></td>
+            <td><b>mgmtAuthServerConfig</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Management authentication server configuration.; Version : EXOS 12.0, Access : READ, WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">MgmtAccountServerConfig</a></font></td>
+            <td><b>mgmtAccountServerConfig</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Management accounting server configuration.; Version : EXOS 12.0, Access : READ, WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">RadiusConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">mgmtAuthServerConfig</span>" <span class="scTag">type</span>="<span class="scContent">MgmtAuthServerConfig</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">mgmtAccountServerConfig</span>" <span class="scTag">type</span>="<span class="scContent">MgmtAccountServerConfig</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="Session">
+         <h3>Session</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>CLI or XML session active on the switch. This is used to query all the sessions active on a switch.; Version : EXOS 12.0,
+               Access : READ, DELETE 
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>Id</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Session ID.; Version : EXOS 12.0, Access : READ,DELETE, INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>loginTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Login time of the session.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>userName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>User logged in for the session.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">SessionType</a></font></td>
+            <td><b>sessionType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Type of session.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AuthorizationType</a></font></td>
+            <td><b>authorizationType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates how the user is logged in.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>opAuthEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether authorization for CLI commands is enabled.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>clientIpAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>IP address of the user's machine.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>idleTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Idle time of client.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>currSessionStatus</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicate the current session; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">Session</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">Id</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">loginTime</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">userName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">sessionType</span>" <span class="scTag">type</span>="<span class="scContent">SessionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">authorizationType</span>" <span class="scTag">type</span>="<span class="scContent">AuthorizationType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">opAuthEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">clientIpAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">idleTime</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">currSessionStatus</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SessionHistory">
+         <h3>SessionHistory</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Session history. This can be used to get a historical record of all sessions that were opened.; Version : EXOS 12.0, Access
+               : READ 
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint16_t ">common:uint16_t</a></font></td>
+            <td><b>lineNumber</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>History record number; Version : EXOS 12.0, Access : READ,INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>detail</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Session details. Returned as a formatted string with all details from <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa">Session</code>.; Version : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">SessionHistory</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">lineNumber</span>" <span class="scTag">type</span>="<span class="scContent">common:uint16_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">detail</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="TACACSConfig">
+         <h3>TACACSConfig</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>TACACS configuration.; Version : EXOS 12.0, Access : READ, WRITE </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>cliAuthEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether authorization for CLI commands is enabled.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>authServerEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether authentication server configuration is enabled.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>authServerTimeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Timeout in seconds.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">BasicServerConfig</a></font></td>
+            <td><b>authServer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        							Authentication server configuration. There can be 2 occurances- one for the primary server and the other for the secondary
+                        server.
+                        							; Version : EXOS 12.0, Access : READ,WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>accountServerEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Indicates whether accounting server configuration is enabled.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint8_t ">common:uint8_t</a></font></td>
+            <td><b>accountServerTimeout</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Timeout in seconds.; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">BasicServerConfig</a></font></td>
+            <td><b>accountServer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        							Accounting server configuration. There can be 2 occurances- one for the primary server and the other for the secondary
+                        server.
+                        							; Version : EXOS 12.0, Access : READ,WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">TACACSConfig</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">cliAuthEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">authServerEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">authServerTimeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">authServer</span>" <span class="scTag">type</span>="<span class="scContent">BasicServerConfig</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">2</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountServerEnabled</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountServerTimeout</span>" <span class="scTag">type</span>="<span class="scContent">common:uint8_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountServer</span>" <span class="scTag">type</span>="<span class="scContent">BasicServerConfig</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">2</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="UserAccount">
+         <h3>UserAccount</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>User account configuration. This object is used to configure local user accounts on the switch.; Version : EXOS 12.0, Access
+               : READ, WRITE, CREATE, DELETE
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>userName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Name of the user.; Version : EXOS 12.0, Access : READ,CREATE,INDEX</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>password</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>User's password.; Version : EXOS 12.0, Access : CREATE,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#AccessRight ">common:AccessRight</a></font></td>
+            <td><b>access</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Access rights for the user.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>noOfLoginSuccess</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of successful logins using this user account.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>noOfLoginFailures</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Number of failed logins using this user account.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#string ">xsd:string</a></font></td>
+            <td><b>expiryDate</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Password expiry date.; Version : EXOS 12.0, Access : READ</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">PasswordPolicy</a></font></td>
+            <td><b>passwordPolicy</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Password policy for this user account. This is used to set a password policy that is different than the default policy.; Version
+                        : EXOS 12.0, Access : READ
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#YesNo ">common:YesNo</a></font></td>
+            <td><b>accountLockedOut</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Lock or Unlock account; Version : EXOS 12.0, Access : READ,WRITE</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">UserAccount</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">userName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">password</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">access</span>" <span class="scTag">type</span>="<span class="scContent">common:AccessRight</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">noOfLoginSuccess</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">noOfLoginFailures</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">expiryDate</span>" <span class="scTag">type</span>="<span class="scContent">xsd:string</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">passwordPolicy</span>" <span class="scTag">type</span>="<span class="scContent">PasswordPolicy</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">accountLockedOut</span>" <span class="scTag">type</span>="<span class="scContent">common:YesNo</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="objectList">
+         <h3>objectList</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Not Used)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccessObject</a></font></td>
+            <td><b>moduleObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">objectList</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">moduleObject</span>" <span class="scTag">type</span>="<span class="scContent">AccessObject</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table><a name="AuthorizationType">
+         <h3>AuthorizationType</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of autherization types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">AuthorizationType</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">none</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">local</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">radius</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">tacacs</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="MgmtTypes">
+         <h3>MgmtTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of management server types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">MgmtTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">mgmt</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">netlogin</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="ServerRoles">
+         <h3>ServerRoles</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of server roles.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">ServerRoles</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">primary</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">secondary</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="ServerTypes">
+         <h3>ServerTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of server types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">ServerTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">authentication</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">accounting</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="SessionType">
+         <h3>SessionType</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of session types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">SessionType</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">console_local</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">console_remote</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">telnet</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">ssh2</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">xml</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr>
+   </body><br xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><hr xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><center xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+</html>

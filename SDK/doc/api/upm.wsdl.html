@@ -1,0 +1,1273 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/upm</span><br>upm
+      </h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="upm.xsd.html">upm.xsd</a></dd>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Services Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top"><a href="#upm">upm</a></td>
+            <td><br>
+               
+               							Binding:
+               							<a href="#Binding_upmBinding">upmBinding</a><br>
+               
+               							Port Type:
+               							<a href="#PortType_UpmPortType">UpmPortType</a></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Operations Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#bindProfileRequest">tns:bindProfileRequest</a><br><a href="upm.xsd.html#bindProfileReply">tns:bindProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#bindProfile">bindProfile</a></b><br>
+               				Operation used to bind the profile to ports.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#closeSessionRequest">tns:closeSessionRequest</a><br><a href="upm.xsd.html#closeSessionReply">tns:closeSessionReply</a></td>
+            <td valign="top" width="70%"><b><a href="#closeSession">closeSession</a></b><br>
+               				Operation used to end a webservices session with the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#createProfileRequest">tns:createProfileRequest</a><br><a href="upm.xsd.html#createProfileReply">tns:createProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#createProfile">createProfile</a></b><br>
+               			    Operation used to create a new profile.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#createTimerRequest">tns:createTimerRequest</a><br><a href="upm.xsd.html#createTimerReply">tns:createTimerReply</a></td>
+            <td valign="top" width="70%"><b><a href="#createTimer">createTimer</a></b><br>
+               				Operation used to create a new timer on the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#deleteProfileRequest">tns:deleteProfileRequest</a><br><a href="upm.xsd.html#deleteProfileReply">tns:deleteProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#deleteProfile">deleteProfile</a></b><br>
+               			    Operation used to delete an existing profile.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#deleteTimerRequest">tns:deleteTimerRequest</a><br><a href="upm.xsd.html#deleteTimerReply">tns:deleteTimerReply</a></td>
+            <td valign="top" width="70%"><b><a href="#deleteTimer">deleteTimer</a></b><br>
+               				Operation used to delete an existing timer from the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#editProfileRequest">tns:editProfileRequest</a><br><a href="upm.xsd.html#editProfileReply">tns:editProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#editProfile">editProfile</a></b><br>
+               					Operation used to modify an existing profile.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#getAllProfileRequest">tns:getAllProfileRequest</a><br><a href="upm.xsd.html#getAllProfileReply">tns:getAllProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#getAllProfile">getAllProfile</a></b><br>
+               				Operation used to get all the profiles from the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#getAllTimersRequest">tns:getAllTimersRequest</a><br><a href="upm.xsd.html#getAllTimersReply">tns:getAllTimersReply</a></td>
+            <td valign="top" width="70%"><b><a href="#getAllTimers">getAllTimers</a></b><br>
+               				Operation used to get all the timers from the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#getExecutionResultRequest">tns:getExecutionResultRequest</a><br><a href="upm.xsd.html#getExecutionResultReply">tns:getExecutionResultReply</a></td>
+            <td valign="top" width="70%"><b><a href="#getExecutionResult">getExecutionResult</a></b><br>
+               					Get execution result.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#getProfileRequest">tns:getProfileRequest</a><br><a href="upm.xsd.html#getProfileReply">tns:getProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#getProfile">getProfile</a></b><br>
+               			    Operation used to get the details of an existing profile.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#keepAliveRequest">tns:keepAliveRequest</a><br><a href="upm.xsd.html#keepAliveReply">tns:keepAliveReply</a></td>
+            <td valign="top" width="70%"><b><a href="#keepAlive">keepAlive</a></b><br>
+               				Operation used to keep the webservices session open during periods of inactivity.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#openSessionRequest">tns:openSessionRequest</a><br><a href="upm.xsd.html#openSessionReply">tns:openSessionReply</a></td>
+            <td valign="top" width="70%"><b><a href="#openSession">openSession</a></b><br>
+               			Operation used to start a webservices session with the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#runScriptRequest">tns:runScriptRequest</a><br><a href="upm.xsd.html#runScriptReply">tns:runScriptReply</a></td>
+            <td valign="top" width="70%"><b><a href="#runScript">runScript</a></b><br>
+               				Operation used to run a script when an event occurs on the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#saveConfigRequest">tns:saveConfigRequest</a><br><a href="upm.xsd.html#saveConfigReply">tns:saveConfigReply</a></td>
+            <td valign="top" width="70%"><b><a href="#saveConfig">saveConfig</a></b><br>
+               			    Operation used to save the switch configuration from memory to file.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="upm.xsd.html#unbindProfileRequest">tns:unbindProfileRequest</a><br><a href="upm.xsd.html#unbindProfileReply">tns:unbindProfileReply</a></td>
+            <td valign="top" width="70%"><b><a href="#unbindProfile">unbindProfile</a></b><br>
+               				Operation used to remove the binding of a  profile from ports.
+            </td>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Operations Detail</b></font></th>
+         </tr>
+      </table><a name="bindProfile">
+         <h3>bindProfile</h3></a><dl>
+         <dd>
+            				Operation used to bind the profile to ports. The profile, the list of ports and
+            				events are specified as part of the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">bindProfileRequest</code> message.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#bindProfileRequest">tns:bindProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#bindProfileReply">tns:bindProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="closeSession">
+         <h3>closeSession</h3></a><dl>
+         <dd>
+            				Operation used to end a webservices session with the switch.
+            				The session details obtained from a <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">openSession</code> operation are used to 
+            				populate the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">closeSessionRequest</code> message.
+            				<br xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common"></br>
+            				NOTE: This is used only when client has used the openSession operation to start a 
+            				webservices session with the switch.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#closeSessionRequest">tns:closeSessionRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#closeSessionReply">tns:closeSessionReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="createProfile">
+         <h3>createProfile</h3></a><dl>
+         <dd>
+            			    Operation used to create a new profile.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#createProfileRequest">tns:createProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#createProfileReply">tns:createProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="createTimer">
+         <h3>createTimer</h3></a><dl>
+         <dd>
+            				Operation used to create a new timer on the switch.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#createTimerRequest">tns:createTimerRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#createTimerReply">tns:createTimerReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="deleteProfile">
+         <h3>deleteProfile</h3></a><dl>
+         <dd>
+            			    Operation used to delete an existing profile.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#deleteProfileRequest">tns:deleteProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#deleteProfileReply">tns:deleteProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="deleteTimer">
+         <h3>deleteTimer</h3></a><dl>
+         <dd>
+            				Operation used to delete an existing timer from the switch.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#deleteTimerRequest">tns:deleteTimerRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#deleteTimerReply">tns:deleteTimerReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="editProfile">
+         <h3>editProfile</h3></a><dl>
+         <dd>
+            					Operation used to modify an existing profile.
+            					<br xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common"></br>
+            					NOTE: This is used to enable or disable the profile. Other attributes of the profile
+            					cannot be modified.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#editProfileRequest">tns:editProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#editProfileReply">tns:editProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="getAllProfile">
+         <h3>getAllProfile</h3></a><dl>
+         <dd>
+            				Operation used to get all the profiles from the switch. The <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">getAllProfileRequest</code>
+            				message has an option to specify whether the complete script details should be returned.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#getAllProfileRequest">tns:getAllProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#getAllProfileReply">tns:getAllProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="getAllTimers">
+         <h3>getAllTimers</h3></a><dl>
+         <dd>
+            				Operation used to get all the timers from the switch.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#getAllTimersRequest">tns:getAllTimersRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#getAllTimersReply">tns:getAllTimersReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="getExecutionResult">
+         <h3>getExecutionResult</h3></a><dl>
+         <dd>
+            					Get execution result. This is used to get the results from a <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">runScript</code> operation.
+            					The id returned from the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">runScript</code> operation is specified as part of
+            					<code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">getExecutionResultRequest</code>.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#getExecutionResultRequest">tns:getExecutionResultRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#getExecutionResultReply">tns:getExecutionResultReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="getProfile">
+         <h3>getProfile</h3></a><dl>
+         <dd>
+            			    Operation used to get the details of an existing profile.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#getProfileRequest">tns:getProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#getProfileReply">tns:getProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="keepAlive">
+         <h3>keepAlive</h3></a><dl>
+         <dd>
+            				Operation used to keep the webservices session open during periods of inactivity.
+            				<br xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common"></br>
+            				The switch can terminate webservices that are idle for long periods of time. The 
+            				client can specify the idle timeout value as part of the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">openSession</code> 
+            				operation. But if there are periods of inactivity that are longer than this timeout, 
+            				the client can keep the session by sending this <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">keepAliveRequest</code> message. 
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#keepAliveRequest">tns:keepAliveRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#keepAliveReply">tns:keepAliveReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="openSession">
+         <h3>openSession</h3></a><dl>
+         <dd>
+            			Operation used to start a webservices session with the switch. The 
+            			credentials of the client and other session-related paramaters are specified 
+            			as part of the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">openSessionRequest</code> message. The session details 
+            			are returned in the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">openSessionReply</code> message.
+            			<br xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common"></br>
+            			NOTE: This is used only when client is connecting using HTTP or HTTPS. This is not 
+            			needed for clients that are connecting to the switch using telnet or ssh.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#openSessionRequest">tns:openSessionRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#openSessionReply">tns:openSessionReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="runScript">
+         <h3>runScript</h3></a><dl>
+         <dd>
+            				Operation used to run a script when an event occurs on the switch. The script to run and
+            				details of the event are specified as part of the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">runScriptRequest</code> message.
+            				<br xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common"></br>
+            				The operation returns an id as part of <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">runScriptReply</code>. This id is used in
+            				<code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">getExecutionResult</code> to get the results from the script.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#runScriptRequest">tns:runScriptRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#runScriptReply">tns:runScriptReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="saveConfig">
+         <h3>saveConfig</h3></a><dl>
+         <dd>
+            			    Operation used to save the switch configuration from memory to file.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#saveConfigRequest">tns:saveConfigRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#saveConfigReply">tns:saveConfigReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="unbindProfile">
+         <h3>unbindProfile</h3></a><dl>
+         <dd>
+            				Operation used to remove the binding of a  profile from ports. The profile, the 
+            				list of ports and events are specified as part of the <code xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common">bindProfileRequest</code> message.
+            			
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="upm.xsd.html#unbindProfileRequest">tns:unbindProfileRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="upm.xsd.html#unbindProfileReply">tns:unbindProfileReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Messages Detail</b></font></th>
+         </tr>
+      </table><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="bindProfileReply">
+         <h3>bindProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#bindProfileResponse ">tns:bindProfileResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="bindProfileRequest">
+         <h3>bindProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#bindProfileRequest ">tns:bindProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="closeSessionReply">
+         <h3>closeSessionReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#closeSessionReply ">common:closeSessionReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="closeSessionRequest">
+         <h3>closeSessionRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#closeSessionRequest ">common:closeSessionRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createProfileReply">
+         <h3>createProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#createProfileResponse ">tns:createProfileResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createProfileRequest">
+         <h3>createProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#createProfileRequest ">tns:createProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createTimerReply">
+         <h3>createTimerReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#createTimerResponse ">tns:createTimerResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createTimerRequest">
+         <h3>createTimerRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#createTimerRequest ">tns:createTimerRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteProfileReply">
+         <h3>deleteProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#deleteProfileResponse ">tns:deleteProfileResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteProfileRequest">
+         <h3>deleteProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#deleteProfileRequest ">tns:deleteProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteTimerReply">
+         <h3>deleteTimerReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#deleteTimerResponse ">tns:deleteTimerResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteTimerRequest">
+         <h3>deleteTimerRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#deleteTimerRequest ">tns:deleteTimerRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="editProfileReply">
+         <h3>editProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#editProfileResponse ">tns:editProfileResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="editProfileRequest">
+         <h3>editProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#editProfileRequest ">tns:editProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getAllProfileReply">
+         <h3>getAllProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getAllProfileReply ">tns:getAllProfileReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getAllProfileRequest">
+         <h3>getAllProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getAllProfileRequest ">tns:getAllProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getAllTimersReply">
+         <h3>getAllTimersReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#getAllTimersResponse ">tns:getAllTimersResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getAllTimersRequest">
+         <h3>getAllTimersRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getAllTimersRequest ">tns:getAllTimersRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getExecutionResultReply">
+         <h3>getExecutionResultReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getExecutionResultReply ">tns:getExecutionResultReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getExecutionResultRequest">
+         <h3>getExecutionResultRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getExecutionResultRequest ">tns:getExecutionResultRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getProfileReply">
+         <h3>getProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getProfileReply ">tns:getProfileReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getProfileRequest">
+         <h3>getProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#getProfileRequest ">tns:getProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="keepAliveReply">
+         <h3>keepAliveReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#keepAliveReply ">common:keepAliveReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="keepAliveRequest">
+         <h3>keepAliveRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#keepAliveRequest ">common:keepAliveRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="openSessionReply">
+         <h3>openSessionReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#openSessionReply ">common:openSessionReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="openSessionRequest">
+         <h3>openSessionRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#openSessionRequest ">common:openSessionRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="runScriptReply">
+         <h3>runScriptReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#runScriptReply ">tns:runScriptReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="runScriptRequest">
+         <h3>runScriptRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#runScriptRequest ">tns:runScriptRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="saveConfigReply">
+         <h3>saveConfigReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#saveConfigResponse ">tns:saveConfigResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="saveConfigRequest">
+         <h3>saveConfigRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#saveConfigRequest ">tns:saveConfigRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="unbindProfileReply">
+         <h3>unbindProfileReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#unbindProfileResponse ">tns:unbindProfileResponse</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="unbindProfileRequest">
+         <h3>unbindProfileRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="upm.xsd.html#unbindProfileRequest ">tns:unbindProfileRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Bindings Detail</b></font></th>
+         </tr>
+      </table><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="bindProfile">
+         <h3>bindProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="closeSession">
+         <h3>closeSession</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createProfile">
+         <h3>createProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createTimer">
+         <h3>createTimer</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteProfile">
+         <h3>deleteProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteTimer">
+         <h3>deleteTimer</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="editProfile">
+         <h3>editProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getAllProfile">
+         <h3>getAllProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getAllTimers">
+         <h3>getAllTimers</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getExecutionResult">
+         <h3>getExecutionResult</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getProfile">
+         <h3>getProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="keepAlive">
+         <h3>keepAlive</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="openSession">
+         <h3>openSession</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="runScript">
+         <h3>runScript</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="saveConfig">
+         <h3>saveConfig</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="unbindProfile">
+         <h3>unbindProfile</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><center xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+   </body>
+</html>

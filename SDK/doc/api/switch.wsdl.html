@@ -1,0 +1,644 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/switch</span><br>switch
+      </h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="switch.xsd.html">switch.xsd</a></dd>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Services Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top"><a href="#switch">switch</a></td>
+            <td><br>
+               
+               							Binding:
+               							<a href="#Binding_switchBinding">switchBinding</a><br>
+               
+               							Port Type:
+               							<a href="#PortType_switchPortType">switchPortType</a></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Operations Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#closeSessionRequest">tns:closeSessionRequest</a><br><a href="switch.xsd.html#closeSessionReply">tns:closeSessionReply</a></td>
+            <td valign="top" width="70%"><b><a href="#closeSession">closeSession</a></b><br>
+               				Operation used to end a webservices session with the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#createRequest">tns:createRequest</a><br><a href="switch.xsd.html#createResponse">tns:createResponse</a></td>
+            <td valign="top" width="70%"><b><a href="#create">create</a></b><br>
+               				Operation used to create an object on the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#deleteRequest">tns:deleteRequest</a><br><a href="switch.xsd.html#deleteResponse">tns:deleteResponse</a></td>
+            <td valign="top" width="70%"><b><a href="#delete">delete</a></b><br>
+               				Operation used to delete an object from the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#getRequest">tns:getRequest</a><br><a href="switch.xsd.html#getResponse">tns:getResponse</a></td>
+            <td valign="top" width="70%"><b><a href="#get">get</a></b><br>
+               					Operation used to get data for objects from the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#keepAliveRequest">tns:keepAliveRequest</a><br><a href="switch.xsd.html#keepAliveReply">tns:keepAliveReply</a></td>
+            <td valign="top" width="70%"><b><a href="#keepAlive">keepAlive</a></b><br>
+               				Operation used to keep the webservices session open during periods of inactivity.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#openSessionRequest">tns:openSessionRequest</a><br><a href="switch.xsd.html#openSessionReply">tns:openSessionReply</a></td>
+            <td valign="top" width="70%"><b><a href="#openSession">openSession</a></b><br>
+               					Operation used to start a webservices session with the switch.
+            </td>
+         </tr>
+         <tr>
+            <td align="right" valign="top" width="1%"><a href="switch.xsd.html#setRequest">tns:setRequest</a><br><a href="switch.xsd.html#setResponse">tns:setResponse</a></td>
+            <td valign="top" width="70%"><b><a href="#set">set</a></b><br>
+               				Operation used to set data for an object on the switch.
+            </td>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Operations Detail</b></font></th>
+         </tr>
+      </table><a name="closeSession">
+         <h3>closeSession</h3></a><dl>
+         <dd>
+            				Operation used to end a webservices session with the switch.
+            				The session details obtained from a <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">openSession</code> operation are used to 
+            				populate the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">closeSessionRequest</code> message.
+            				<br xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch"></br>
+            				NOTE: This operation is used only when the client has used the openSession operation to start a 
+            				webservices session with the switch.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#closeSessionRequest">tns:closeSessionRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#closeSessionReply">tns:closeSessionReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="create">
+         <h3>create</h3></a><dl>
+         <dd>
+            				Operation used to create an object on the switch. 
+            				The type of objects and its values are specified as part of the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">createRequest</code> message.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#createRequest">tns:createRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#createResponse">tns:createResponse</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="delete">
+         <h3>delete</h3></a><dl>
+         <dd>
+            				Operation used to delete an object from the switch. 
+            				The object to delete is specified as part of the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">deleteRequest</code> message.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#deleteRequest">tns:deleteRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#deleteResponse">tns:deleteResponse</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="get">
+         <h3>get</h3></a><dl>
+         <dd>
+            					Operation used to get data for objects from the switch. The type of 
+            					object to get and other options for the get operation are specified as part 
+            					of the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">getRequest</code> message. This operation can be used to 
+            					get either a specific object or a set of objects of a type.
+            				<br xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch"></br>
+            				The data returned by this operation is contained in the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">getResponse</code> message.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#getRequest">tns:getRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#getResponse">tns:getResponse</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="keepAlive">
+         <h3>keepAlive</h3></a><dl>
+         <dd>
+            				Operation used to keep the webservices session open during periods of inactivity.
+            				<br xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch"></br>
+            				The switch can terminate webservices that are idle for long periods of time. The 
+            				client can specify the idle timeout value as part of the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">openSession</code> 
+            				operation. But if there are periods of inactivity that are longer than this timeout, 
+            				the client can keep the session by sending this <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">keepAliveRequest</code> message. 
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#keepAliveRequest">tns:keepAliveRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#keepAliveReply">tns:keepAliveReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="openSession">
+         <h3>openSession</h3></a><dl>
+         <dd>
+            					Operation used to start a webservices session with the switch. The 
+            					credentials of the client and other session-related paramaters are specified 
+            					as part of the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">openSessionRequest</code> message. The session details 
+            					are returned in the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">openSessionReply</code> message.
+            				<br xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch"></br>
+            				NOTE: This operation is used only when the client is connecting using HTTP or HTTPS. This is not 
+            				needed for clients that are connecting to the switch using telnet or ssh.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#openSessionRequest">tns:openSessionRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#openSessionReply">tns:openSessionReply</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><a name="set">
+         <h3>set</h3></a><dl>
+         <dd>
+            				Operation used to set data for an object on the switch. 
+            				The type of object and values to set are specified as part of the <code xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch">setRequest</code> message.
+            
+         </dd><br><dd>
+            <dl>
+               <dt><b>Input:</b><dd><a href="switch.xsd.html#setRequest">tns:setRequest</a></dd>
+               </dt>
+               <dt><b>Output:</b><dd><a href="switch.xsd.html#setResponse">tns:setResponse</a></dd>
+               </dt>
+               <dt><b>Fault:</b></dt>
+            </dl>
+         </dd>
+      </dl>
+      <hr><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Messages Detail</b></font></th>
+         </tr>
+      </table><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="closeSessionReply">
+         <h3>closeSessionReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#closeSessionReply ">common:closeSessionReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="closeSessionRequest">
+         <h3>closeSessionRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#closeSessionRequest ">common:closeSessionRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createRequest">
+         <h3>createRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#createRequest ">switch:createRequest</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="createResponse">
+         <h3>createResponse</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#createResponse ">switch:createResponse</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteRequest">
+         <h3>deleteRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#deleteRequest ">switch:deleteRequest</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="deleteResponse">
+         <h3>deleteResponse</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#deleteResponse ">switch:deleteResponse</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getRequest">
+         <h3>getRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#getRequest ">switch:getRequest</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="getResponse">
+         <h3>getResponse</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#getResponse ">switch:getResponse</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="keepAliveReply">
+         <h3>keepAliveReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#keepAliveReply ">common:keepAliveReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="keepAliveRequest">
+         <h3>keepAliveRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#keepAliveRequest ">common:keepAliveRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="openSessionReply">
+         <h3>openSessionReply</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#openSessionReply ">common:openSessionReply</a></font></td>
+            <td><b>out</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="openSessionRequest">
+         <h3>openSessionRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#openSessionRequest ">common:openSessionRequest</a></font></td>
+            <td><b>in</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="setRequest">
+         <h3>setRequest</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#setRequest ">switch:setRequest</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="setResponse">
+         <h3>setResponse</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Parts</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#hdr ">common:hdr</a></font></td>
+            <td><b>hdr</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#setResponse ">switch:setResponse</a></font></td>
+            <td><b>body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Bindings Detail</b></font></th>
+         </tr>
+      </table><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="closeSession">
+         <h3>closeSession</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="create">
+         <h3>create</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#createRequest">hdr (tns:createRequest)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#createRequest">body (tns:createRequest)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#createResponse">hdr (tns:createResponse)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#createResponse">body (tns:createResponse)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="delete">
+         <h3>delete</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#deleteRequest">hdr (tns:deleteRequest)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#deleteRequest">body (tns:deleteRequest)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#deleteResponse">hdr (tns:deleteResponse)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#deleteResponse">body (tns:deleteResponse)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="get">
+         <h3>get</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#getRequest">hdr (tns:getRequest)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#getRequest">body (tns:getRequest)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#getResponse">hdr (tns:getResponse)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#getResponse">body (tns:getResponse)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="keepAlive">
+         <h3>keepAlive</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="openSession">
+         <h3>openSession</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><a xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="set">
+         <h3>set</h3></a><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Input</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#setRequest">hdr (tns:setRequest)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#setRequest">body (tns:setRequest)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Output</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#setResponse">hdr (tns:setResponse)</a></td>
+            <td><b>soap:header</b></td>
+         </tr>
+         <tr>
+            <td align="right" width="10%"><a href="switch.xsd.html#setResponse">body (tns:setResponse)</a></td>
+            <td><b>soap:body</b></td>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><br><table xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><hr xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><br xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File"><center xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+   </body>
+</html>

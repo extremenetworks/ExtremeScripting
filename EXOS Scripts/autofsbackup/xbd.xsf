@@ -1,0 +1,187 @@
+# @METADATASTART
+#@DetailDescriptionStart
+#############################################################################
+#
+# Script        	: Automatic Backup Script 
+# Revision      	: 2.0
+# EXOS Version(s)  	: 12.3.x and Newer
+# Last Updated  	: 2 Feb 2012
+#
+# Purpose: 
+# Run automated back up on all scripts, including configuration, policies, and scripts. Benefits 
+# include simple rollback and configuration history.
+#
+# Note: The lack of whitespace in UPM is due to 5000 character limit in Dynamic scripts
+#
+# Author			: Extreme Extensibility Team
+# Contact			: https://community.extremenetworks.com/extreme
+###############################################################################
+#  Change Log
+#
+# 	18 March 2009: Script Created
+#	19 April 2010: Added Change Log
+#	21 April 2010: Updated to include default config load for Interactive Recovery
+#	2 February 2012: Total Re-write to use SNMP Get at CLI and fix issues
+###############################################################################
+#@DetailDescriptionEnd
+
+enable cli scripting
+
+# Creating the Backup UPM
+create upm profile loginbackup
+#####
+# Caveats: No checking for tftp upload file length
+#####
+
+# Work Around entry for loop protection
+disable clip
+enable cli scripting
+#enable cli scripting output
+
+#####
+# Configurable Variables for use
+#####
+set var tftp 172.16.254.78
+
+set var vrtr vr-mgmt
+
+#####
+# Start Functions
+#####
+
+set var cli.out 0
+ls
+set var lslist $tcl(split ${cli.out} "\n")
+set var lslistlen $tcl(llength $lslist)
+
+#####
+# Getting some Information out of SNMP: SysName
+#####
+
+set var cli.out 0
+show snmp get 1.3.6.1.2.1.1.5.0
+set var snmpnameraw $tcl(split ${cli.out} " ")
+set var snmpsearch $tcl(regexp -nocase {=} $snmpnameraw)
+set var snmpsearch ($snmpsearch + 1)
+set var sysname $tcl(lindex $snmpnameraw $snmpsearch)
+
+#####
+# Done
+#####
+
+#####
+# Gettng some Information out of SNMP: Switch Serial
+#####
+
+set var cli.out 0
+show snmp get 1.3.6.1.2.1.47.1.1.1.1.11.1
+set var snmpnameraw $tcl(split ${cli.out} " ")
+set var snmpsearch $tcl(regexp -nocase {=} $snmpnameraw)
+set var snmpsearch ($snmpsearch + 1)
+set var syssn $tcl(lindex $snmpnameraw $snmpsearch)
+
+#####
+# Done
+#####
+
+#####
+# Getting your selected config for individual backup
+#####
+
+set var cli.out 0
+show switch
+set var slist $tcl(split ${cli.out} "\n")
+set var slistsearch $tcl(lsearch -regexp $slist {Config Selected:})
+set var slist $tcl(lindex $slist $slistsearch)
+set var slist $tcl(split $slist " ")
+set var slistsearch $tcl(lsearch -regexp $slist {.cfg})
+set var slist $tcl(lindex $slist $slistsearch)
+
+#####
+# Getting System Time
+#####
+
+set var baseSystemTime $TCL(clock seconds)
+set var systemTime $TCL(clock format $baseSystemTime -format {%y%m%H%M})
+
+#####
+# Doing some string manipulation and formatting
+#####
+
+set var syssnlen $tcl(string bytelength $syssn)
+set var sysnamelen $tcl(string bytelength $sysname)
+set var sysnamelen ($sysnamelen - 1)
+set var systimelen $tcl(string bytelength $systemTime)
+set var systimelen ($systimelen - 1)
+set var current c$(syssn)$(systemtime)
+set var currnet $tcl(join $current)
+set var current $tcl(string replace $current $syssnlen $syssnlen {})
+set var currentlen $tcl(string bytelength $current)
+set var currentlen ($currentlen - 1)
+set var upload $(current)
+set var current $(current).cfg
+
+#####
+# Uploading current config
+#####
+
+tftp put $tftp vr $vrtr $slist $current
+create log entry "Current configuration loaded as $(current)"
+
+#####
+# Starting the loop to upload all files
+#####
+
+set var count 0
+	while ($count < $lslistlen) do
+		set var curr $tcl(lindex $lslist $count)
+		set var curr $tcl(split $curr " ")
+		set var currlen $tcl(llength $curr)
+		set var currlen ($currlen - 1)
+		set var curr $tcl(lindex $curr $currlen)
+####
+# Getting all policies
+####
+		set var tmpcfg $tcl(regexp -all {.pol} $curr)
+			if ($tmpcfg) then
+			set var ul $(upload)$(curr)
+			set var ul $tcl(join ul)
+			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			tftp put $tftp vr $vrtr $curr $ul
+			endif
+####
+# Getting all configs
+####
+		set var tmpcfg $tcl(regexp -all {.cfg} $curr)
+			if ($tmpcfg) then
+			set var ul $(upload)$(curr)
+			set var ul $tcl(join ul)
+			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			tftp put $tftp vr $vrtr $curr $ul
+			endif
+####
+# Getting all scripts
+####
+		set var tmpcfg $tcl(regexp -all {.xsf} $curr)
+			if ($tmpcfg) then
+			set var ul $(upload)$(curr)
+			set var ul $tcl(join ul)
+			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			tftp put $tftp vr $vrtr $curr $ul
+			endif
+		set var count ($count + 1)
+	endwhile
+del var "cli.out"
+create log entry "Automated Backup Ran"
+.
+
+# Here we configure the UPM to have a liberal execution time.
+configure upm profile loginbackup maximum execution-time 1000
+create log target upm loginbackup
+create log filter autologfilter
+# This will trigger on any AuthPass. If you have Epicenter Modify this to match strings
+configure log filter autologfilter add event AAA.AuthPass
+configure log target upm loginbackup filter autologfilter
+enable log target upm loginbackup
+enable upm profile loginbackup
+create log entry "UPM loginbackup successfully created"

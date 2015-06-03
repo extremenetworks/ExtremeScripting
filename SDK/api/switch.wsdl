@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:switch="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" targetNamespace="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/switch" name="switch">
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import namespace="http://www.extremenetworks.com/XMLSchema/xos/switch" schemaLocation="./xsd/switch.xsd"/>
+			<xsd:import namespace="http://www.extremenetworks.com/XMLSchema/xos/common" schemaLocation="./xsd/common.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<message name="getRequest">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:getRequest"/>
+	</message>
+	<message name="getResponse">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:getResponse"/>
+	</message>
+	<message name="setRequest">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:setRequest"/>
+	</message>
+	<message name="setResponse">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:setResponse"/>
+	</message>
+	<message name="createRequest">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:createRequest"/>
+	</message>
+	<message name="createResponse">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:createResponse"/>
+	</message>
+	<message name="deleteRequest">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:deleteRequest"/>
+	</message>
+	<message name="deleteResponse">
+		<part name="hdr" element="common:hdr"/>
+		<part name="body" element="switch:deleteResponse"/>
+	</message>
+	<message name="openSessionRequest">
+		<part name="in" element="common:openSessionRequest"/>
+	</message>
+	<message name="openSessionReply">
+		<part name="out" element="common:openSessionReply"/>
+	</message>
+	<message name="closeSessionRequest">
+		<part name="in" element="common:closeSessionRequest"/>
+	</message>
+	<message name="closeSessionReply">
+		<part name="out" element="common:closeSessionReply"/>
+	</message>
+	<message name="keepAliveRequest">
+		<part name="in" element="common:keepAliveRequest"/>
+	</message>
+	<message name="keepAliveReply">
+		<part name="out" element="common:keepAliveReply"/>
+	</message>
+	<portType name="switchPortType">
+		<operation name="get">
+			<documentation>
+					Operation used to get data for objects from the switch. The type of 
+					object to get and other options for the get operation are specified as part 
+					of the <code>getRequest</code> message. This operation can be used to 
+					get either a specific object or a set of objects of a type.
+				<br/>
+				The data returned by this operation is contained in the <code>getResponse</code> message.
+            </documentation>
+			<input message="tns:getRequest"/>
+			<output message="tns:getResponse"/>
+		</operation>
+		<operation name="set">
+			<documentation>
+				Operation used to set data for an object on the switch. 
+				The type of object and values to set are specified as part of the <code>setRequest</code> message.
+                        </documentation>
+			<input message="tns:setRequest"/>
+			<output message="tns:setResponse"/>
+		</operation>
+		<operation name="create">
+			<documentation>
+				Operation used to create an object on the switch. 
+				The type of objects and its values are specified as part of the <code>createRequest</code> message.
+                        </documentation>
+			<input message="tns:createRequest"/>
+			<output message="tns:createResponse"/>
+		</operation>
+		<operation name="delete">
+			<documentation>
+				Operation used to delete an object from the switch. 
+				The object to delete is specified as part of the <code>deleteRequest</code> message.
+                        </documentation>
+			<input message="tns:deleteRequest"/>
+			<output message="tns:deleteResponse"/>
+		</operation>
+		<operation name="openSession">
+			<documentation>
+					Operation used to start a webservices session with the switch. The 
+					credentials of the client and other session-related paramaters are specified 
+					as part of the <code>openSessionRequest</code> message. The session details 
+					are returned in the <code>openSessionReply</code> message.
+				<br/>
+				NOTE: This operation is used only when the client is connecting using HTTP or HTTPS. This is not 
+				needed for clients that are connecting to the switch using telnet or ssh.
+                        </documentation>
+			<input message="tns:openSessionRequest"/>
+			<output message="tns:openSessionReply"/>
+		</operation>
+		<operation name="closeSession">
+			<documentation>
+				Operation used to end a webservices session with the switch.
+				The session details obtained from a <code>openSession</code> operation are used to 
+				populate the <code>closeSessionRequest</code> message.
+				<br/>
+				NOTE: This operation is used only when the client has used the openSession operation to start a 
+				webservices session with the switch.
+                        </documentation>
+			<input message="tns:closeSessionRequest"/>
+			<output message="tns:closeSessionReply"/>
+		</operation>
+		<operation name="keepAlive">
+			<documentation>
+				Operation used to keep the webservices session open during periods of inactivity.
+				<br/>
+				The switch can terminate webservices that are idle for long periods of time. The 
+				client can specify the idle timeout value as part of the <code>openSession</code> 
+				operation. But if there are periods of inactivity that are longer than this timeout, 
+				the client can keep the session by sending this <code>keepAliveRequest</code> message. 
+                        </documentation>
+			<input message="tns:keepAliveRequest"/>
+			<output message="tns:keepAliveReply"/>
+		</operation>
+	</portType>
+	<binding name="switchBinding" type="tns:switchPortType">
+		<SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="get">
+			<documentation>
+                            This API returns the complete switch object.
+                        </documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:header message="tns:getRequest" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</input>
+			<output>
+				<SOAP:header message="tns:getResponse" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</output>
+		</operation>
+		<operation name="set">
+			<documentation>
+                            This API returns the complete switch object.
+                        </documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:header message="tns:setRequest" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</input>
+			<output>
+				<SOAP:header message="tns:setResponse" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</output>
+		</operation>
+		<operation name="create">
+			<documentation>
+                            This API creates a switch object.
+                        </documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:header message="tns:createRequest" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</input>
+			<output>
+				<SOAP:header message="tns:createResponse" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</output>
+		</operation>
+		<operation name="delete">
+			<documentation>
+                            This API deletes a switch object.
+                        </documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:header message="tns:deleteRequest" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</input>
+			<output>
+				<SOAP:header message="tns:deleteResponse" part="hdr" use="literal"/>
+				<SOAP:body parts="body" use="literal"/>
+			</output>
+		</operation>
+		<operation name="openSession">
+			<documentation>
+			    Hello message.
+			</documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="closeSession">
+			<documentation>
+			    Hello message.
+			</documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="keepAlive">
+			<documentation>
+			    Keep Alive to keep the session alive.
+			</documentation>
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		
+	</binding>
+	<service name="switch">
+		<port name="switchPort" binding="tns:switchBinding">
+			<SOAP:address location="http://localhost/xapi"/>
+		</port>
+	</service>
+</wsdl:definitions>

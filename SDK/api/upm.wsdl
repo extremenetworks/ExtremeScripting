@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" targetNamespace="http://www.extremenetworks.com/XMLSchema/xos/upm" name="upm">
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import namespace="http://www.extremenetworks.com/XMLSchema/xos/upm" schemaLocation="./xsd/upm.xsd"/>
+			<xsd:import namespace="http://www.extremenetworks.com/XMLSchema/xos/common" schemaLocation="./xsd/common.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<message name="runScriptRequest">
+		<part name="in" element="tns:runScriptRequest"/>
+	</message>
+	<message name="runScriptReply">
+		<part name="out" element="tns:runScriptReply"/>
+	</message>
+	
+	<message name="keepAliveRequest">
+		<part name="in" element="common:keepAliveRequest"/>
+	</message>
+	<message name="keepAliveReply">
+		<part name="out" element="common:keepAliveReply"/>
+	</message>
+	
+	<message name="getExecutionResultRequest">
+		<part name="in" element="tns:getExecutionResultRequest"/>
+	</message>
+	<message name="getExecutionResultReply">
+		<part name="out" element="tns:getExecutionResultReply"/>
+	</message>
+	
+	<message name="openSessionRequest">
+		<part name="in" element="common:openSessionRequest"/>
+	</message>
+	<message name="openSessionReply">
+		<part name="out" element="common:openSessionReply"/>
+	</message>
+	
+	
+	<message name="closeSessionRequest">
+		<part name="in" element="common:closeSessionRequest"/>
+	</message>
+	<message name="closeSessionReply">
+		<part name="out" element="common:closeSessionReply"/>
+	</message>
+	<message name="getAllProfileRequest">
+		<part name="in" element="tns:getAllProfileRequest"/>
+	</message>
+	<message name="getAllProfileReply">
+		<part name="out" element="tns:getAllProfileReply"/>
+	</message>
+	<message name="getProfileRequest">
+		<part name="in" element="tns:getProfileRequest"/>
+	</message>
+	<message name="getProfileReply">
+		<part name="out" element="tns:getProfileReply"/>
+	</message>
+	<message name="saveConfigRequest">
+		<part name="in" element="tns:saveConfigRequest"/>
+	</message>
+	<message name="saveConfigReply">
+		<part name="out" element="tns:saveConfigResponse"/>
+	</message>
+	<message name="editProfileRequest">
+		<part name="in" element="tns:editProfileRequest"/>
+	</message>
+	<message name="editProfileReply">
+		<part name="out" element="tns:editProfileResponse"/>
+	</message>
+	<message name="createProfileRequest">
+		<part name="in" element="tns:createProfileRequest"/>
+	</message>
+	<message name="createProfileReply">
+		<part name="out" element="tns:createProfileResponse"/>
+	</message>
+	<message name="createTimerRequest">
+		<part name="in" element="tns:createTimerRequest"/>
+	</message>
+	<message name="createTimerReply">
+		<part name="out" element="tns:createTimerResponse"/>
+	</message>
+	<message name="deleteTimerRequest">
+		<part name="in" element="tns:deleteTimerRequest"/>
+	</message>
+	<message name="deleteTimerReply">
+		<part name="out" element="tns:deleteTimerResponse"/>
+	</message>
+	<message name="getAllTimersRequest">
+		<part name="in" element="tns:getAllTimersRequest"/>
+	</message>
+	<message name="getAllTimersReply">
+		<part name="out" element="tns:getAllTimersResponse"/>
+	</message>
+	<message name="deleteProfileRequest">
+		<part name="in" element="tns:deleteProfileRequest"/>
+	</message>
+	<message name="deleteProfileReply">
+		<part name="out" element="tns:deleteProfileResponse"/>
+	</message>
+	<message name="bindProfileRequest">
+		<part name="in" element="tns:bindProfileRequest"/>
+	</message>
+	<message name="bindProfileReply">
+			<part name="out" element="tns:bindProfileResponse"/>
+    </message>
+	<message name="unbindProfileRequest">
+		<part name="in" element="tns:unbindProfileRequest"/>
+	</message>
+	<message name="unbindProfileReply">
+		<part name="out" element="tns:unbindProfileResponse"/>
+	</message>
+
+		
+
+	<portType name="UpmPortType">
+		<operation name="openSession">
+			<documentation>
+			Operation used to start a webservices session with the switch. The 
+			credentials of the client and other session-related paramaters are specified 
+			as part of the <code>openSessionRequest</code> message. The session details 
+			are returned in the <code>openSessionReply</code> message.
+			<br/>
+			NOTE: This is used only when client is connecting using HTTP or HTTPS. This is not 
+			needed for clients that are connecting to the switch using telnet or ssh.
+                        </documentation>
+			<input message="tns:openSessionRequest"/>
+			<output message="tns:openSessionReply"/>
+		</operation>
+		<operation name="runScript">
+			<documentation>
+				Operation used to run a script when an event occurs on the switch. The script to run and
+				details of the event are specified as part of the <code>runScriptRequest</code> message.
+				<br/>
+				The operation returns an id as part of <code>runScriptReply</code>. This id is used in
+				<code>getExecutionResult</code> to get the results from the script.
+			</documentation>
+			<input message="tns:runScriptRequest"/>
+			<output message="tns:runScriptReply"/>
+		</operation>
+		<operation name="getExecutionResult">
+			<documentation>
+					Get execution result. This is used to get the results from a <code>runScript</code> operation.
+					The id returned from the <code>runScript</code> operation is specified as part of
+					<code>getExecutionResultRequest</code>.
+			</documentation>
+			<input message="tns:getExecutionResultRequest"/>
+			<output message="tns:getExecutionResultReply"/>
+		</operation>
+		
+		<operation name="keepAlive">
+			<documentation>
+				Operation used to keep the webservices session open during periods of inactivity.
+				<br/>
+				The switch can terminate webservices that are idle for long periods of time. The 
+				client can specify the idle timeout value as part of the <code>openSession</code> 
+				operation. But if there are periods of inactivity that are longer than this timeout, 
+				the client can keep the session by sending this <code>keepAliveRequest</code> message. 
+                        </documentation>
+			<input message="tns:keepAliveRequest"/>
+			<output message="tns:keepAliveReply"/>
+		</operation>
+		
+	
+		<operation name="closeSession">
+			<documentation>
+				Operation used to end a webservices session with the switch.
+				The session details obtained from a <code>openSession</code> operation are used to 
+				populate the <code>closeSessionRequest</code> message.
+				<br/>
+				NOTE: This is used only when client has used the openSession operation to start a 
+				webservices session with the switch.
+                        </documentation>
+			<input message="tns:closeSessionRequest"/>
+			<output message="tns:closeSessionReply"/>
+		</operation>
+		<operation name="saveConfig">
+			<documentation>
+			    Operation used to save the switch configuration from memory to file.
+			</documentation>
+			<input message="tns:saveConfigRequest"/>
+			<output message="tns:saveConfigReply"/>
+		</operation>
+		<operation name="editProfile">
+			<documentation>
+					Operation used to modify an existing profile.
+					<br/>
+					NOTE: This is used to enable or disable the profile. Other attributes of the profile
+					cannot be modified.
+			</documentation>
+			<input message="tns:editProfileRequest"/>
+			<output message="tns:editProfileReply"/>
+		</operation>
+		<operation name="createProfile">
+			<documentation>
+			    Operation used to create a new profile.
+			</documentation>
+			<input message="tns:createProfileRequest"/>
+			<output message="tns:createProfileReply"/>
+		</operation>
+		<operation name="getProfile">
+			<documentation>
+			    Operation used to get the details of an existing profile.
+			</documentation>
+			<input message="tns:getProfileRequest"/>
+			<output message="tns:getProfileReply"/>
+		</operation>
+		<operation name="deleteProfile">
+			<documentation>
+			    Operation used to delete an existing profile.
+			</documentation>
+			<input message="tns:deleteProfileRequest"/>
+			<output message="tns:deleteProfileReply"/>
+		</operation>
+		<operation name="bindProfile">
+			<documentation>
+				Operation used to bind the profile to ports. The profile, the list of ports and
+				events are specified as part of the <code>bindProfileRequest</code> message.
+			</documentation>
+			<input message="tns:bindProfileRequest"/>
+			<output message="tns:bindProfileReply"/>
+		</operation>
+		<operation name="unbindProfile">
+			<documentation>
+				Operation used to remove the binding of a  profile from ports. The profile, the 
+				list of ports and events are specified as part of the <code>bindProfileRequest</code> message.
+			</documentation>
+			<input message="tns:unbindProfileRequest"/>
+			<output message="tns:unbindProfileReply"/>
+		</operation>
+		<operation name="getAllProfile">
+			<documentation>
+				Operation used to get all the profiles from the switch. The <code>getAllProfileRequest</code>
+				message has an option to specify whether the complete script details should be returned.
+			</documentation>
+			<input message="tns:getAllProfileRequest"/>
+			<output message="tns:getAllProfileReply"/>
+		</operation>
+		<operation name="getAllTimers">
+			<documentation>
+				Operation used to get all the timers from the switch.
+			</documentation>
+			<input message="tns:getAllTimersRequest"/>
+			<output message="tns:getAllTimersReply"/>
+		</operation>
+		<operation name="createTimer">
+			<documentation>
+				Operation used to create a new timer on the switch.
+			</documentation>
+			<input message="tns:createTimerRequest"/>
+			<output message="tns:createTimerReply"/>
+		</operation>
+		<operation name="deleteTimer">
+			<documentation>
+				Operation used to delete an existing timer from the switch.
+			</documentation>
+			<input message="tns:deleteTimerRequest"/>
+			<output message="tns:deleteTimerReply"/>
+		</operation>
+	</portType>
+	<binding name="upmBinding" type="tns:UpmPortType">
+		<SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="createProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="getProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="deleteProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="bindProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="unbindProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="getAllProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="getAllTimers">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="createTimer">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="deleteTimer">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="openSession">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="closeSession">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+			<operation name="runScript">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="getExecutionResult">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="keepAlive">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="editProfile">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="saveConfig">
+			<SOAP:operation/>
+			<input>
+				<SOAP:body use="literal"/>
+			</input>
+			<output>
+				<SOAP:body use="literal"/>
+			</output>
+		</operation>
+		
+	</binding>
+	<service name="upm">
+		<port name="upmPort" binding="tns:upmBinding">
+			<SOAP:address location="http://localhost/xapi"/>
+		</port>
+	</service>
+	<!-- Endpoint for XOS XML APIs. -->
+</wsdl:definitions>

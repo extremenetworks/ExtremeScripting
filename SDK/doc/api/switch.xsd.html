@@ -1,0 +1,1011 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/switch</span><br></h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+         <dd><a href="vlan.xsd.html">vlan.xsd</a></dd>
+         <dd><a href="idmgr.xsd.html">idmgr.xsd</a></dd>
+         <dd><a href="ipfix.xsd.html">ipfix.xsd</a></dd>
+         <dd><a href="port.xsd.html">port.xsd</a></dd>
+         <dd><a href="aaa.xsd.html">aaa.xsd</a></dd>
+         <dd><a href="snmp.xsd.html">snmp.xsd</a></dd>
+         <dd><a href="system.xsd.html">system.xsd</a></dd>
+         <dd><a href="fdb.xsd.html">fdb.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#createRequest">createRequest</a></b></td>
+            <td>
+               			Defines the message used for create operations.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#createResponse">createResponse</a></b></td>
+            <td><br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#deleteRequest">deleteRequest</a></b></td>
+            <td>
+               			Defines the message used for delete operations.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#deleteResponse">deleteResponse</a></b></td>
+            <td><br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getRequest">getRequest</a></b></td>
+            <td>
+               Defines the message used for get operations.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getResponse">getResponse</a></b></td>
+            <td>
+               Defines the response from a get operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#request">request</a></b></td>
+            <td>
+               			(Not Used)
+               			<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#response">response</a></b></td>
+            <td>
+               			(Not Used)
+               			<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#setRequest">setRequest</a></b></td>
+            <td>
+               			Defines the message used for set operations.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#setResponse">setResponse</a></b></td>
+            <td>
+               			Defines the response from a set a operation.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#Objects">Objects</a></b></td>
+            <td>
+               			Container for a set of objects of the type ExosBase.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#objectList">objectList</a></b></td>
+            <td>
+               			(Not Used)
+               			<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#switchAccessObject">switchAccessObject</a></b></td>
+            <td>
+               			This is a list of the objects that are accessible using the XML APIs provided in the switch WSDL file.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><a name="createRequest">
+         <h3>createRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Defines the message used for create operations.
+               			The filter is used to specify the object and values to create.
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExosBase ">common:ExosBase</a></font></td>
+            <td><b>filter</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					The filter used to specify object and values to create.
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					(Optional) The hdr can be used to pass session related values such as the session id obtained from an openSession operation.
+                        This is an optional element as the session data can also be passed as part of the SOAP:Header which is the recommended way
+                        to send session details.
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#anyType ">xsd:anyType</a></font></td>
+            <td><b>switchObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					(Deprecated) This is an alternate way to specify the filter. 
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">createRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">filter</span>" <span class="scTag">type</span>="<span class="scContent">common:ExosBase</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">switchObject</span>" <span class="scTag">type</span>="<span class="scContent">xsd:anyType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="createResponse">
+         <h3>createResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">createResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="deleteRequest">
+         <h3>deleteRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Defines the message used for delete operations.
+               			The filter is used to specify the object to delete.
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExosBase ">common:ExosBase</a></font></td>
+            <td><b>filter</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					The filter used to specify the object to delete.
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					(Optional) The hdr can be used to pass session related values such as the session id obtained from an openSession operation.
+                        This is an optional element as the session data can also be passed as part of the SOAP:Header which is the recommended way
+                        to send session details.
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#anyType ">xsd:anyType</a></font></td>
+            <td><b>switchObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					(Deprecated) This is an alternate way to specify the filter. 
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">deleteRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">filter</span>" <span class="scTag">type</span>="<span class="scContent">common:ExosBase</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">switchObject</span>" <span class="scTag">type</span>="<span class="scContent">xsd:anyType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="deleteResponse">
+         <h3>deleteResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td></td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">deleteResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getRequest">
+         <h3>getRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               Defines the message used for get operations.
+               				  <br xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb"></br>
+               				  The <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">filter</code> is used to specify the set of objects to be 
+               				returned by the operation. The <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">filter</code> is set by creating a 
+               				concrete instance of the <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">ExosBase</code> abstract element. A <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code> 
+               				with a <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">filter</code> instance with no values set will return all the objects that 
+               				match the instance type. Setting one or more values on the <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">filter</code> and using 
+               				it in a <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code> will only return objects that match these values.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb"></br>
+               			For example, <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">PortConfig</code> is a concrete instance of <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">ExosBase</code>. This 
+               			represents port configuration on the switch. Creating an instance of <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">PortConfig</code> 
+               			and using it in a <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code> will return all the ports configured on the switch. 
+               			Setting a value on one of the elements of <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">PortConfig</code>, say <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">portList</code> 
+               			to 1:1, and using it in a <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code> will return port 1:1.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb"></br>
+               			In some cases the number of objects returned can be large. The load on the switch and network
+               			traffic can be reduced by using the paging capabilities of <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code>. This can 
+               			be done specifying a <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">maxSize</code> and setting the <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">action</code> attribute to "next".
+               			After a page of data is returned, send the next <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code> using the index from the
+               			last object in the page. This is repeated till the response contains 0 rows.
+               			<br xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb"></br>
+               			For example, to query for all the VLANs configured on a switch 100 rows at a time the first 
+               			<code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">getRequest</code> will use instance of <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">VlanConfig</code> as <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">filter</code>
+               			and set <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">maxSize</code> to 100 and <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">action</code> to "next". The response to this
+               			will contain the first 100 VLANs. Since the <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">name</code> is the index for a VLAN, this will
+               			be set in the <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">filter</code> which, in this case, is an instance of <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">VlanConfig</code>
+               			for the second request. The response will contain the next 100 VLANs. This procedure is repeated
+               			till a response is returned that contains 0 rows.
+               
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExosBase ">common:ExosBase</a></font></td>
+            <td><b>filter</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        The filter used to specify set of objects to be returned.
+                        
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        (Optional) The hdr can be used to pass session related values such as the session id obtained from an openSession operation.
+                        This is an optional element as the session data can also be passed as part of the SOAP:Header which is the recommended way
+                        to send session details.
+                        
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#anyType ">xsd:anyType</a></font></td>
+            <td><b>switchObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        (Deprecated) This is an alternate way to specify the filter.
+                        
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">filter</span>" <span class="scTag">type</span>="<span class="scContent">common:ExosBase</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">switchObject</span>" <span class="scTag">type</span>="<span class="scContent">xsd:anyType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">name</span>="<span class="scContent">action</span>" <span class="scTag">type</span>="<span class="scContent">xsd:string</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">name</span>="<span class="scContent">maxSize</span>" <span class="scTag">type</span>="<span class="scContent">xsd:int</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getResponse">
+         <h3>getResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               Defines the response from a get operation. The response is a set of one or more objects.
+               
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">Objects</a></font></td>
+            <td><b>objects</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        The set of objects returned from the get operation. If there are no matching objects, this is an empty set.
+                        
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">getResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">objects</span>" <span class="scTag">type</span>="<span class="scContent">Objects</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="request">
+         <h3>request</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Not Used)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExosBase ">common:ExosBase</a></font></td>
+            <td><b>object</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">request</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">object</span>" <span class="scTag">type</span>="<span class="scContent">common:ExosBase</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">name</span>="<span class="scContent">action</span>" <span class="scTag">type</span>="<span class="scContent">xsd:string</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">name</span>="<span class="scContent">maxSize</span>" <span class="scTag">type</span>="<span class="scContent">xsd:int</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="response">
+         <h3>response</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Not Used)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">Objects</a></font></td>
+            <td><b>objects</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">response</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">objects</span>" <span class="scTag">type</span>="<span class="scContent">Objects</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="setRequest">
+         <h3>setRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Defines the message used for set operations.
+               			The filter is used to specify the object and values to set.
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExosBase ">common:ExosBase</a></font></td>
+            <td><b>filter</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					The filter used to specify the object and values to set.
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					(Optional) The hdr can be used to pass session related values such as the session id obtained from an openSession operation.
+                        This is an optional element as the session data can also be passed as part of the SOAP:Header which is the recommended way
+                        to send session details.
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#anyType ">xsd:anyType</a></font></td>
+            <td><b>switchObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        					(Deprecated) This is an alternate way to specify the filter. 
+                        					
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">setRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">filter</span>" <span class="scTag">type</span>="<span class="scContent">common:ExosBase</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">switchObject</span>" <span class="scTag">type</span>="<span class="scContent">xsd:anyType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="setResponse">
+         <h3>setResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Defines the response from a set a operation.
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">setResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><a name="Objects">
+         <h3>Objects</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			Container for a set of objects of the type <code xmlns="http://www.extremenetworks.com/XMLSchema/xos/switch" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:vlan="http://www.extremenetworks.com/XMLSchema/xos/vlan" xmlns:port="http://www.extremenetworks.com/XMLSchema/xos/port" xmlns:idmgr="http://www.extremenetworks.com/XMLSchema/xos/idmgr" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:aaa="http://www.extremenetworks.com/XMLSchema/xos/aaa" xmlns:snmp="http://www.extremenetworks.com/XMLSchema/xos/snmp" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" xmlns:fdb="http://www.extremenetworks.com/XMLSchema/xos/fdb">ExosBase</code>.
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExosBase ">common:ExosBase</a></font></td>
+            <td><b>object</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">Objects</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">object</span>" <span class="scTag">type</span>="<span class="scContent">common:ExosBase</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="objectList">
+         <h3>objectList</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			(Not Used)
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">switchAccessObject</a></font></td>
+            <td><b>switchObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">objectList</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">switchObject</span>" <span class="scTag">type</span>="<span class="scContent">switchAccessObject</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="switchAccessObject">
+         <h3>switchAccessObject</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               			This is a list of the objects that are accessible using the XML APIs provided in the switch WSDL file.
+               			
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="vlan.xsd.html#objectList ">vlan:objectList</a></font></td>
+            <td><b>vlanObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="port.xsd.html#objectList ">port:objectList</a></font></td>
+            <td><b>portObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="aaa.xsd.html#objectList ">aaa:objectList</a></font></td>
+            <td><b>aaaObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="snmp.xsd.html#objectList ">snmp:objectList</a></font></td>
+            <td><b>snmpObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="system.xsd.html#objectList ">system:objectList</a></font></td>
+            <td><b>systemObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="fdb.xsd.html#objectList ">fdb:objectList</a></font></td>
+            <td><b>fdbObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="idmgr.xsd.html#objectList ">idmgr:objectList</a></font></td>
+            <td><b>idmgrObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="ipfix.xsd.html#objectList ">ipfix:objectList</a></font></td>
+            <td><b>ipfixObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">switchAccessObject</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:choice</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">vlanObject</span>" <span class="scTag">type</span>="<span class="scContent">vlan:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">portObject</span>" <span class="scTag">type</span>="<span class="scContent">port:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">aaaObject</span>" <span class="scTag">type</span>="<span class="scContent">aaa:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">snmpObject</span>" <span class="scTag">type</span>="<span class="scContent">snmp:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">systemObject</span>" <span class="scTag">type</span>="<span class="scContent">system:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">fdbObject</span>" <span class="scTag">type</span>="<span class="scContent">fdb:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">idmgrObject</span>" <span class="scTag">type</span>="<span class="scContent">idmgr:objectList</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixObject</span>" <span class="scTag">type</span>="<span class="scContent">ipfix:objectList</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:choice</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table>
+   </body><br xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><hr xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><center xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+</html>

@@ -1,0 +1,43 @@
+@description "Auto iSCSI Example"
+#############################################################################
+#
+# Policy        	: Automatic iSCSI Provisioning 
+# Revision      	: 1.1
+# EXOS Version(s)  	: 15.1.x and Newer
+# Last Updated  	: April 17, 2012
+#
+# Purpose: 
+# This simple script uses CLEAR-Flow to identify iSCSI traffic (port 3260) ,  assign it the right 
+# Quality of Service, and enable jumbo frames. This pre-provisioned settings in a network allows 
+# iSCSI traffic to be protected in a higher priority queue.
+#
+# Contact			: https://community.extremenetworks.com/extreme
+###############################################################################
+#  Change Log
+#
+# 	19 April 2010: Change Log Created
+#   17 April 2012: Verified on 15.1.1.6
+################################################################################
+
+
+entry iscsi_count {
+ if {
+     protocol tcp;
+     destination-port 3260;
+ } then {
+     permit;
+     count iscsi_count;
+ }
+}
+entry iscsi_configure {
+ if match all {
+     count iscsi_count >= 100; period 5; hysteresis 50;
+ } then {
+ 		# Configure your QP as needed
+     qosprofile iscsi_count qp5;
+     	# Automatically Enables Jumbo frames, uncomment as needed
+   		# cli "enable jumbo-frame ports all";
+ } else {
+     permit iscsi_count;
+ }
+}

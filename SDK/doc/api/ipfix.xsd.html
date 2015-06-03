@@ -1,0 +1,1201 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/ipfix</span><br></h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#AccessObject">AccessObject</a></b></td>
+            <td>
+               (Internal Use)
+               <br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#IpfixGlobalData">IpfixGlobalData</a></b></td>
+            <td>
+               The Global IPFIX parameters.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#IpfixPortData">IpfixPortData</a></b></td>
+            <td>
+               The IPFIX Port parameters.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#objectList">objectList</a></b></td>
+            <td>
+               (Internal Use)
+               <br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#CollectorSocketStatusTypes">CollectorSocketStatusTypes</a></b></td>
+            <td>The status of the socket connection to the Collector.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#FeatureStatusTypes">FeatureStatusTypes</a></b></td>
+            <td>Enumeration of feature status.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#FlowDirectionTypes">FlowDirectionTypes</a></b></td>
+            <td>Enumeration of IPFIX flow direction types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#FlowTypes">FlowTypes</a></b></td>
+            <td>Enumeration of IPFIX flow types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#IpfixIPv4FlowKeyType">IpfixIPv4FlowKeyType</a></b></td>
+            <td>Enumeration of IPFIX flow key types for IPv4 flows.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#IpfixIPv6FlowKeyTypes">IpfixIPv6FlowKeyTypes</a></b></td>
+            <td>Enumeration of IPFIX flow key types for IPv6 flows.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#IpfixNonIPFlowKeyTypes">IpfixNonIPFlowKeyTypes</a></b></td>
+            <td>Enumeration of IPFIX flow key types for Non-IP (L2-only) flows.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#RecordTypes">RecordTypes</a></b></td>
+            <td>Enumeration of IPFIX flow recording types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#TransportTypes">TransportTypes</a></b></td>
+            <td>Transport Layer protocol used to communicate to the IPFIX Collector.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><a name="AccessObject">
+         <h3>AccessObject</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               (Internal Use)
+               
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">IpfixGlobalData</a></font></td>
+            <td><b>ipfixGlobalData</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">IpfixPortData</a></font></td>
+            <td><b>ipfixPortData</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">AccessObject</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:choice</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixGlobalData</span>" <span class="scTag">type</span>="<span class="scContent">IpfixGlobalData</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixPortData</span>" <span class="scTag">type</span>="<span class="scContent">IpfixPortData</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:choice</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="IpfixGlobalData">
+         <h3>IpfixGlobalData</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               The Global IPFIX parameters. This includes the global state the Domain ID, and all information associated with the Collector.
+               
+               <br xmlns="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix"></br>
+               ; Version : EXOS 12.5, Access : READ, WRITE 
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">FeatureStatusTypes</a></font></td>
+            <td><b>ipfixEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Global IPFIX State for the Switch. This must be specified.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>domainID</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>Domain ID of the Switch. Each Switch can have its own IPFIX Domain ID that the Collector can use however it wishes. Default
+                        is 0.; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>agentIPAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The optional Source IP Address for this IPFIX Agent. This can be used to override the default of using the Switch Management
+                        IP Address.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>collectorIPAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The IP Address of the IPFIX Collector that we are sending packets to. Note that it is possible to use IPFIX headless without
+                        a collector and use the EMS messages to monitor flows.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>collectorVirtualRouter</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>The optional Virtual Router to use to communicate to the IPFIX Collector. This can be used to override the default of using
+                        the Management VR.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">TransportTypes</a></font></td>
+            <td><b>collectorTransport</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Transport used to connect to the Collector. Default is UDP, but can be TCP or SCTP.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint16_t ">common:uint16_t</a></font></td>
+            <td><b>collectorLayer4Port</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Layer 4 Port used to connect to the Collector. Default is 4739.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv4SourceAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Source IP Address field in the IPv4 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv4DestinationAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Destination IP Address field in the IPv4 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv4SourcePort</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Source Port field in the IPv4 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv4DestinationPort</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Destination Port field in the IPv4 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv4Layer4Protocol</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Layer 4 Protocol field in the IPv4 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv4TypeOfService</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Type of Service field in the IPv4 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6SourceAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Source IP Address field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6DestinationAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Destination IP Address field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6SourcePort</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Source Port field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6DestinationPort</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Destination Port field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6NextHeader</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Next Header field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6TypeOfService</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Type of Service field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyIPv6FlowLabel</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Flow Label field in the IPv6 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyNonIpSourceMACAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Source MAC Address field in the L2 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyNonIpDestinationMACAddress</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Destination MAC Address field in the L2 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyNonIpVlanId</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the VLAN ID Port field in the L2 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyNonIpEtherType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Ethertype field in the L2 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyNonIpPriority</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Priority Protocol field in the L2 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#TrueFalse ">common:TrueFalse</a></font></td>
+            <td><b>flowKeyNonIpTagged</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Controls whether or not the Tagged field in the L2 header is one of the Flow Keys for IPFIX 
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">IpfixGlobalData</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixEnabled</span>" <span class="scTag">type</span>="<span class="scContent">FeatureStatusTypes</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">domainID</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">agentIPAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">collectorIPAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">collectorVirtualRouter</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">collectorTransport</span>" <span class="scTag">type</span>="<span class="scContent">TransportTypes</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">collectorLayer4Port</span>" <span class="scTag">type</span>="<span class="scContent">common:uint16_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv4SourceAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv4DestinationAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv4SourcePort</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv4DestinationPort</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv4Layer4Protocol</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv4TypeOfService</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6SourceAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6DestinationAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6SourcePort</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6DestinationPort</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6NextHeader</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6TypeOfService</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyIPv6FlowLabel</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyNonIpSourceMACAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyNonIpDestinationMACAddress</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyNonIpVlanId</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyNonIpEtherType</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyNonIpPriority</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">flowKeyNonIpTagged</span>" <span class="scTag">type</span>="<span class="scContent">common:TrueFalse</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="IpfixPortData">
+         <h3>IpfixPortData</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"> <a href="common.xsd.html#ExosBase">common:ExosBase</a> 
+            </td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               The IPFIX Port parameters. 
+               ; Version : EXOS 12.5, Access : READ, WRITE, CREATE 
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen8 ">common:StringLen8</a></font></td>
+            <td><b>portList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        Port number. When referring to a single port
+                        the value is just that port number.
+                        <br xmlns="http://www.extremenetworks.com/XMLSchema/xos/ipfix" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:ipfix="http://www.extremenetworks.com/XMLSchema/xos/ipfix"></br>
+                        This is also used to specify a set of ports when setting the same configuration for 
+                        multiple ports. In this case, the value is a comma separated list of ports or port ranges.
+                        For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3.
+                        ; Version : EXOS 12.5, Access : READ, WRITE, INDEX
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">FeatureStatusTypes</a></font></td>
+            <td><b>ipfixPortEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>IPFIX State for the Port (or list). This must be specified.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">FlowDirectionTypes</a></font></td>
+            <td><b>ipfixFlowDirection</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Flow Direction to Meter. This can be Ingress, Egress or Ingress-and-Egress. Default is Ingress only.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">FlowTypes</a></font></td>
+            <td><b>ipfixFlowType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Flow Type to Meter. IPv4, IPv6, NonIP (L2) or All. By default, all traffic types are metered.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">RecordTypes</a></font></td>
+            <td><b>ipfixRecordType</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> Dropped, Non-dropped, or Both. By default, all traffic is metered.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>ipfixFlowKeyIPv4SourceAddressMask</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> When the IPv4 Source Address is used as a Flow Key, this mask can control which bits are significant. This can be used to
+                        aggregate flows. For instance, you might use the subnet mask as the flow key mask to aggregate by subnet.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>ipfixFlowKeyIPv4DestinationAddressMask</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> When the IPv4 Destination Address is used as a Flow Key, this mask can control which bits are significant. This can be used
+                        to aggregate flows. For instance, you might use the subnet mask as the flow key mask to aggregate by subnet.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>ipfixFlowKeyIPv6SourceAddressMask</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> When the IPv6 Source Address is used as a Flow Key, this mask can control which bits are significant. This can be used to
+                        aggregate flows. For instance, you might use the subnet mask as the flow key mask to aggregate by subnet.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#IPAddress ">common:IPAddress</a></font></td>
+            <td><b>ipfixFlowKeyIPv6DestinationAddressMask</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td> When the IPv6 Destination Address is used as a Flow Key, this mask can control which bits are significant. This can be used
+                        to aggregate flows. For instance, you might use the subnet mask as the flow key mask to aggregate by subnet.
+                        ; Version : EXOS 12.5, Access : READ, WRITE
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">IpfixPortData</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:complexContent</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:extension</span> <span class="scTag">base</span>="<span class="scContent">common:ExosBase</span>"&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">portList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen8</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixPortEnabled</span>" <span class="scTag">type</span>="<span class="scContent">FeatureStatusTypes</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixFlowDirection</span>" <span class="scTag">type</span>="<span class="scContent">FlowDirectionTypes</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixFlowType</span>" <span class="scTag">type</span>="<span class="scContent">FlowTypes</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixRecordType</span>" <span class="scTag">type</span>="<span class="scContent">RecordTypes</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixFlowKeyIPv4SourceAddressMask</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixFlowKeyIPv4DestinationAddressMask</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixFlowKeyIPv6SourceAddressMask</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">ipfixFlowKeyIPv6DestinationAddressMask</span>" <span class="scTag">type</span>="<span class="scContent">common:IPAddress</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                        </div>&lt;/<span class="scTag">xsd:extension</span>&gt;
+                     </div>&lt;/<span class="scTag">xsd:complexContent</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="objectList">
+         <h3>objectList</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               (Internal Use)
+               
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="# ">AccessObject</a></font></td>
+            <td><b>moduleObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:complexType</span> <span class="scTag">name</span>="<span class="scContent">objectList</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:element</span> <span class="scTag">name</span>="<span class="scContent">moduleObject</span>" <span class="scTag">type</span>="<span class="scContent">AccessObject</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table><a name="CollectorSocketStatusTypes">
+         <h3>CollectorSocketStatusTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>The status of the socket connection to the Collector. For UDP, this is N/A. For TCP or SCTP, this is Connected or Disconnected.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">CollectorSocketStatusTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">disconnected</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">connected</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="FeatureStatusTypes">
+         <h3>FeatureStatusTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of feature status.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">FeatureStatusTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">enabled</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">disabled</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="FlowDirectionTypes">
+         <h3>FlowDirectionTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of IPFIX flow direction types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">FlowDirectionTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">ingress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">egress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">ingress-and-egress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="FlowTypes">
+         <h3>FlowTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of IPFIX flow types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">FlowTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">IPv4</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">IPv6</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">NonIP</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">All</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="IpfixIPv4FlowKeyType">
+         <h3>IpfixIPv4FlowKeyType</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of IPFIX flow key types for IPv4 flows.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">IpfixIPv4FlowKeyType</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">source-ipaddress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">source-port</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">dest-ipaddress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">dest-port</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">protocol</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">typeOfService</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="IpfixIPv6FlowKeyTypes">
+         <h3>IpfixIPv6FlowKeyTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of IPFIX flow key types for IPv6 flows.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">IpfixIPv6FlowKeyTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">source-ipaddress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">source-port</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">dest-ipaddress</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">dest-port</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">nextHeader</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">typeOfService</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">label</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="IpfixNonIPFlowKeyTypes">
+         <h3>IpfixNonIPFlowKeyTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of IPFIX flow key types for Non-IP (L2-only) flows.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">IpfixNonIPFlowKeyTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">source-MAC-address</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">dest-MAC-address</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">vlanID</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">ethertype</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">priority</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">tagged</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="RecordTypes">
+         <h3>RecordTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of IPFIX flow recording types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">RecordTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">dropped-only</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">non-dropped-only</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">both</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="TransportTypes">
+         <h3>TransportTypes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Transport Layer protocol used to communicate to the IPFIX Collector.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">xsd:simpleType</span> <span class="scTag">name</span>="<span class="scContent">TransportTypes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">UDP</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">TCP</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">SCTP</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">xsd:enumeration</span> <span class="scTag">value</span>="<span class="scContent">na</span>"/&gt;
+                     </div>&lt;/<span class="scTag">xsd:restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">xsd:simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr>
+   </body><br xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><hr xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><center xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+</html>

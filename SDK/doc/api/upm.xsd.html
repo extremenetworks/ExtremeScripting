@@ -1,0 +1,2684 @@
+<html xmlns:ppp="http://titanium.dstc.edu.au/xml/xs3p" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:du="http://www.extremenetworks.com/2007/du" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <head xmlns:File="java:java.io.File">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+      <title>{$windowTitle}</title>
+      <table>
+         <tr>
+            <td><img src="extremelogo.gif"></td>
+            <td align="right" width="100%"><span class="small">ExtremeXOS InSite 15.7.1.4</span></td>
+         </tr>
+      </table>
+      <hr><br></head>
+   <body>
+      <h2><span class="small">http://www.extremenetworks.com/XMLSchema/xos/upm</span><br></h2><br><dl>
+         <dt><b>Imported Schemas:</b></dt>
+         <dd><a href="common.xsd.html">common.xsd</a></dd>
+         <dd><a href="system.xsd.html">system.xsd</a></dd>
+      </dl>
+      <hr>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Element Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#bindProfileRequest">bindProfileRequest</a></b></td>
+            <td>
+               				Defines the message for bindProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#bindProfileResponse">bindProfileResponse</a></b></td>
+            <td>
+               				Defines the reply message for bindProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#createProfileRequest">createProfileRequest</a></b></td>
+            <td>
+               				Defines the message for createProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#createProfileResponse">createProfileResponse</a></b></td>
+            <td>
+               				Defines the response message for createProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#createTimerRequest">createTimerRequest</a></b></td>
+            <td>
+               				Defines the message for createTimer operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#createTimerResponse">createTimerResponse</a></b></td>
+            <td>
+               				Defines the reply message for createTimer operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#deleteProfileRequest">deleteProfileRequest</a></b></td>
+            <td>
+               				Defines the message for deleteProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#deleteProfileResponse">deleteProfileResponse</a></b></td>
+            <td>
+               				Defines the response message for deleteProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#deleteTimerRequest">deleteTimerRequest</a></b></td>
+            <td>
+               				Defines the message for deleteTimer operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#deleteTimerResponse">deleteTimerResponse</a></b></td>
+            <td>
+               				Defines the reply message for deleteTimer operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#editProfileRequest">editProfileRequest</a></b></td>
+            <td>
+               				Defines the message for editProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#editProfileResponse">editProfileResponse</a></b></td>
+            <td>
+               				Defines the response message for editProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getAllProfileReply">getAllProfileReply</a></b></td>
+            <td>
+               				Defines the reply message for getAllProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getAllProfileRequest">getAllProfileRequest</a></b></td>
+            <td>
+               				Defines the message for getAllProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getAllTimersRequest">getAllTimersRequest</a></b></td>
+            <td>
+               				Defines the message for getAllTimers operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getAllTimersResponse">getAllTimersResponse</a></b></td>
+            <td>
+               				Defines the reply message for getAllTimers operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getExecutionResultReply">getExecutionResultReply</a></b></td>
+            <td>
+               				Defines the reply message for getExecutionResult operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getExecutionResultRequest">getExecutionResultRequest</a></b></td>
+            <td>
+               				Defines the message for getExecutionResult operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getProfileReply">getProfileReply</a></b></td>
+            <td>
+               				Defines the reply message for getProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#getProfileRequest">getProfileRequest</a></b></td>
+            <td>
+               				Defines the message for getProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#runScriptReply">runScriptReply</a></b></td>
+            <td>
+               				Defines the reply message for runScript operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#runScriptRequest">runScriptRequest</a></b></td>
+            <td>
+               				Defines the message for runScript operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#saveConfigRequest">saveConfigRequest</a></b></td>
+            <td>
+               				Defines the message for saveConfig operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#saveConfigResponse">saveConfigResponse</a></b></td>
+            <td>
+               				Defines the response message for saveConfig operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#unbindProfileRequest">unbindProfileRequest</a></b></td>
+            <td>
+               				Defines the message for unbindProfile operation.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#unbindProfileResponse">unbindProfileResponse</a></b></td>
+            <td>
+               				Defines the reply message for unbindProfile operation.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Complex Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#bindObjectList">bindObjectList</a></b></td>
+            <td>
+               				Set of bindings for a profile.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#bindingObject">bindingObject</a></b></td>
+            <td>
+               				Defines the binding details for a profile.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#eventObject">eventObject</a></b></td>
+            <td>
+               				Set of events that trigger the execution of a profile.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#eventStruct">eventStruct</a></b></td>
+            <td>
+               				Defines the event that triggers execution of a profile.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#executionResult">executionResult</a></b></td>
+            <td>
+               				The results from the execution of a script.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#profileDetail">profileDetail</a></b></td>
+            <td>
+               				Details of a profile.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#timer">timer</a></b></td>
+            <td>
+               				The timer object is used to specify a specific time or periodic intervals at which a profile
+               				should be executed.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="2" align="left"><FONT SIZE="+2"><B>Simple Type Summary</B></FONT></th>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#errorFlag">errorFlag</a></b></td>
+            <td>Enumeration of error flags.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#eventEnums">eventEnums</a></b></td>
+            <td>Enumeration of event types.<br></td>
+         </tr>
+         <tr>
+            <td valign="top" width="1%"><b><a href="#profileExecutionStatusCodes">profileExecutionStatusCodes</a></b></td>
+            <td>Enumeration of execution status codes.<br></td>
+         </tr>
+      </table><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Elements Detail</b></font></th>
+         </tr>
+      </table><a name="bindProfileRequest">
+         <h3>bindProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">bindProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>profileName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Name of the profile.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>portList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Ports to bind the profile. This can be used to specify a single port or a set of ports.
+                        										<br xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system"></br>
+                        										Multiple ports can be specified as a comma separated list of ports or port ranges. 
+                        										For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3. 
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventStruct ">tns:eventStruct</a></font></td>
+            <td><b>eventObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The event that triggers the profile.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">bindProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profileName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">portList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">eventObject</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventStruct</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="bindProfileResponse">
+         <h3>bindProfileResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">bindProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">bindProfileResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="createProfileRequest">
+         <h3>createProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">createProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#profileDetail ">tns:profileDetail</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The profile to create.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">createProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">tns:profileDetail</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="createProfileResponse">
+         <h3>createProfileResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the response message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">createProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">createProfileResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="createTimerRequest">
+         <h3>createTimerRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">createTimer</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#timer ">tns:timer</a></font></td>
+            <td><b>timer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Details of the timer.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">createTimerRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">timer</span>" <span class="scTag">type</span>="<span class="scContent">tns:timer</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="createTimerResponse">
+         <h3>createTimerResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">createTimer</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">createTimerResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="deleteProfileRequest">
+         <h3>deleteProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">deleteProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The name of the profile to delete.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">deleteProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="deleteProfileResponse">
+         <h3>deleteProfileResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the response message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">deleteProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">deleteProfileResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="deleteTimerRequest">
+         <h3>deleteTimerRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">deleteTimer</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>timer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Name of the timer.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">deleteTimerRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">timer</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="deleteTimerResponse">
+         <h3>deleteTimerResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">deleteTimer</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">deleteTimerResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="editProfileRequest">
+         <h3>editProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">editProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#profileDetail ">tns:profileDetail</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The profile to create.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">editProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">tns:profileDetail</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="editProfileResponse">
+         <h3>editProfileResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the response message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">editProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">editProfileResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getAllProfileReply">
+         <h3>getAllProfileReply</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getAllProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#profileDetail ">tns:profileDetail</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Set of profiles.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getAllProfileReply</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">tns:profileDetail</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getAllProfileRequest">
+         <h3>getAllProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getAllProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#boolean ">xsd:boolean</a></font></td>
+            <td><b>contentRequired</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Setting this will return the contents of the script as part of the response.
+                        										If this is not set the script data is not returned in the response.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getAllProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">contentRequired</span>" <span class="scTag">type</span>="<span class="scContent">xsd:boolean</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getAllTimersRequest">
+         <h3>getAllTimersRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getAllTimers</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getAllTimersRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getAllTimersResponse">
+         <h3>getAllTimersResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getAllTimers</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#timer ">tns:timer</a></font></td>
+            <td><b>timer</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Set of timer details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getAllTimersResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">timer</span>" <span class="scTag">type</span>="<span class="scContent">tns:timer</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">256</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getExecutionResultReply">
+         <h3>getExecutionResultReply</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getExecutionResult</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#executionResult ">tns:executionResult</a></font></td>
+            <td><b>executionResults</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Execution results.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getExecutionResultReply</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">executionResults</span>" <span class="scTag">type</span>="<span class="scContent">tns:executionResult</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">256</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getExecutionResultRequest">
+         <h3>getExecutionResultRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getExecutionResult</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>executionId</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The reference id for the execution of the script. This is the id
+                        										obtained from a <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">runScript</code> operation.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>numberOfRecords</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getExecutionResultRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">choice</span>&gt;
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">executionId</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>
+                           <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">numberOfRecords</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                           </div>&lt;/<span class="scTag">choice</span>&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getProfileReply">
+         <h3>getProfileReply</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#profileDetail ">tns:profileDetail</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Profile details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getProfileReply</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">tns:profileDetail</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="getProfileRequest">
+         <h3>getProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>profile</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Name of the profile to get.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">getProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profile</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="runScriptReply">
+         <h3>runScriptReply</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">runScript</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>executionId</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The reference id for the execution of the script. This can be used in a 
+                        										<code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">getExecutionResult</code> operation to get the results of the execution.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">runScriptReply</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">executionId</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">1</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="runScriptRequest">
+         <h3>runScriptRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">runScript</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>profileName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Name of the profile.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventEnums ">tns:eventEnums</a></font></td>
+            <td><b>event</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Event type that should be set to "static".
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>portList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Ports to unbind the profile. This can be used to specify a single port or a set of ports.
+                        										<br xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system"></br>
+                        										Multiple ports can be specified as a comma separated list of ports or port ranges. 
+                        										For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3. 
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen4K ">common:StringLen4K</a></font></td>
+            <td><b>parameters</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Parameters for the script.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">runScriptRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profileName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">1</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">event</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventEnums</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">portList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">parameters</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen4K</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="saveConfigRequest">
+         <h3>saveConfigRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">saveConfig</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">saveConfigRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="saveConfigResponse">
+         <h3>saveConfigResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the response message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">saveConfig</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">saveConfigResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="unbindProfileRequest">
+         <h3>unbindProfileRequest</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">unbindProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>profileName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Name of the profile.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>portList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										Ports to unbind the profile. This can be used to specify a single port or a set of ports.
+                        										<br xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system"></br>
+                        										Multiple ports can be specified as a comma separated list of ports or port ranges. 
+                        										For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3. 
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventStruct ">tns:eventStruct</a></font></td>
+            <td><b>eventObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										The event that triggers the profile.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        										(Optional) The hdr can be used to pass session related values such 
+                        										as the session id obtained from an <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">openSession</code> operation. 
+                        										This is an optional element as the session data can also be passed as 
+                        										part of the SOAP:Header, which is the recommended way to send session details.
+                        										
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">unbindProfileRequest</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profileName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">portList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">eventObject</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventStruct</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                        </div>
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="unbindProfileResponse">
+         <h3>unbindProfileResponse</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the reply message for <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">unbindProfile</code> operation.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ClientHeader ">common:ClientHeader</a></font></td>
+            <td><b>hdr</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">unbindProfileResponse</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">complexType</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                        <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">hdr</span>" <span class="scTag">type</span>="<span class="scContent">common:ClientHeader</span>"/&gt;
+                        </div>&lt;/<span class="scTag">sequence</span>&gt;
+                     </div>&lt;/<span class="scTag">complexType</span>&gt;
+                  </div>&lt;/<span class="scTag">element</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Complex Type Detail</b></font></th>
+         </tr>
+      </table><a name="bindObjectList">
+         <h3>bindObjectList</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Set of bindings for a profile. The individual binding details are specified as part of 
+               				<code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">bindObject</code>.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#bindingObject ">tns:bindingObject</a></font></td>
+            <td><b>bindObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The binding details.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">bindObjectList</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">bindObject</span>" <span class="scTag">type</span>="<span class="scContent">tns:bindingObject</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">unbounded</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="bindingObject">
+         <h3>bindingObject</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the binding details for a profile.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventStruct ">tns:eventStruct</a></font></td>
+            <td><b>eventObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Event trigger for the binding.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>portList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								List of ports to bind to.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">bindingObject</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">eventObject</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventStruct</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">portList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="eventObject">
+         <h3>eventObject</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Set of events that trigger the execution of a profile. There can be a maximum of 256
+               				triggering events for a profile. The individual event details are specified as part of 
+               				<code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">eventObject</code>.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventStruct ">tns:eventStruct</a></font></td>
+            <td><b>eventObject</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Event details.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">eventObject</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">eventObject</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventStruct</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>" <span class="scTag">maxOccurs</span>="<span class="scContent">256</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="eventStruct">
+         <h3>eventStruct</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Defines the event that triggers execution of a profile.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventEnums ">tns:eventEnums</a></font></td>
+            <td><b>event</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Type of event.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>timerName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Name of the timer.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>filter</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Name of the timer.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">eventStruct</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">event</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventEnums</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">timerName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">filter</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="executionResult">
+         <h3>executionResult</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				The results from the execution of a script.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>executionId</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Execution id for the script. This id is returned by the switch whenever a profile
+                        								is executed using <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">runScript</code>.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>executionTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The execution time for this profile.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#eventEnums ">tns:eventEnums</a></font></td>
+            <td><b>eventName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The event that triggered this profile.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>profileName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Name of the profile.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen32 ">common:StringLen32</a></font></td>
+            <td><b>timerName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Name of the the timer (if any).
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>portList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The ports on which this profile was executed.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#profileExecutionStatusCodes ">tns:profileExecutionStatusCodes</a></font></td>
+            <td><b>status</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Status of the execution.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen8K ">common:StringLen8K</a></font></td>
+            <td><b>data</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Contents of the profile script.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">executionResult</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">executionId</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">executionTime</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">eventName</span>" <span class="scTag">type</span>="<span class="scContent">tns:eventEnums</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profileName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">timerName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen32</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">portList</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">status</span>" <span class="scTag">type</span>="<span class="scContent">tns:profileExecutionStatusCodes</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">data</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen8K</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="profileDetail">
+         <h3>profileDetail</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				Details of a profile. This has information that defines the profile and also details of
+               				which ports it is bound to.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>name</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Name of the profile.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen8K ">common:StringLen8K</a></font></td>
+            <td><b>data</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The profile script.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#boolean ">xsd:boolean</a></font></td>
+            <td><b>profileEnabled</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								Indicates whether the profile is enabled.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#dateTime ">xsd:dateTime</a></font></td>
+            <td><b>lastBindingTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The last date and time the profile was bound to a port.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#dateTime ">xsd:dateTime</a></font></td>
+            <td><b>lastChangeTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The last date and time the profile was edited.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#dateTime ">xsd:dateTime</a></font></td>
+            <td><b>creationTime</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The date and time when the profile was created.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>checksum</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The checksum for the profile script contained in <code xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system">data</code>. This
+                        								checksum is generated by the switch and can be used by client applications
+                        								to quickly check if there have been any changes to the script.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#bindObjectList ">tns:bindObjectList</a></font></td>
+            <td><b>bindingObjectList</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								The bindings for the profile.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">profileDetail</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">name</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">data</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen8K</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">profileEnabled</span>" <span class="scTag">type</span>="<span class="scContent">xsd:boolean</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">lastBindingTime</span>" <span class="scTag">type</span>="<span class="scContent">xsd:dateTime</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">lastChangeTime</span>" <span class="scTag">type</span>="<span class="scContent">xsd:dateTime</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">creationTime</span>" <span class="scTag">type</span>="<span class="scContent">xsd:dateTime</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">checksum</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">bindingObjectList</span>" <span class="scTag">type</span>="<span class="scContent">tns:bindObjectList</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="timer">
+         <h3>timer</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>
+               				The timer object is used to specify a specific time or periodic intervals at which a profile
+               				should be executed.
+               				
+            </td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#StringLen256 ">common:StringLen256</a></font></td>
+            <td><b>timerName</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								A name for the timer.
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="#dateTime ">xsd:dateTime</a></font></td>
+            <td><b>at</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td>
+                        								
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#uint32_t ">common:uint32_t</a></font></td>
+            <td><b>every</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+         <tr>
+            <td align="right" width="1%"><font size="-1"><a href="common.xsd.html#ExtensionType ">common:ExtensionType</a></font></td>
+            <td><b>extension</b></td>
+            <td>
+               <table xmlns:File="java:java.io.File" class="doc">
+                  <tr>
+                     <td></td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">complexType</span> <span class="scTag">name</span>="<span class="scContent">timer</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">sequence</span>&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">timerName</span>" <span class="scTag">type</span>="<span class="scContent">common:StringLen256</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">at</span>" <span class="scTag">type</span>="<span class="scContent">xsd:dateTime</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">every</span>" <span class="scTag">type</span>="<span class="scContent">common:uint32_t</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">element</span> <span class="scTag">name</span>="<span class="scContent">extension</span>" <span class="scTag">type</span>="<span class="scContent">common:ExtensionType</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">any</span> <span class="scTag">namespace</span>="<span class="scContent">##other</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>" <span class="scTag">minOccurs</span>="<span class="scContent">0</span>"/&gt;
+                     </div>&lt;/<span class="scTag">sequence</span>&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">attribute</span> <span class="scTag">ref</span>="<span class="scContent">common:operation</span>"/&gt;
+                  </div>
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">anyAttribute</span> <span class="scTag">namespace</span>="<span class="scContent">##any</span>" <span class="scTag">processContents</span>="<span class="scContent">lax</span>"/&gt;
+                  </div>&lt;/<span class="scTag">complexType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><br><table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr bgcolor="#ccccff">
+            <th align="left" colspan="1"><font size="+2"><b>Simple Type Detail</b></font></th>
+         </tr>
+      </table><a name="errorFlag">
+         <h3>errorFlag</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of error flags.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">simpleType</span> <span class="scTag">name</span>="<span class="scContent">errorFlag</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">abort-on-error</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">ignore-error</span>"/&gt;
+                     </div>&lt;/<span class="scTag">restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="eventEnums">
+         <h3>eventEnums</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of event types.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">simpleType</span> <span class="scTag">name</span>="<span class="scContent">eventEnums</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">device-detect</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">device-remove</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">user-authenticate</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">user-unauthenticate</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">timer</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">static</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">log-message</span>"/&gt;
+                     </div>&lt;/<span class="scTag">restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr><a name="profileExecutionStatusCodes">
+         <h3>profileExecutionStatusCodes</h3></a><table>
+         <tr>
+            <td><span class="small">SuperTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+         <tr>
+            <td valign="top"><span class="small">SubTypes</span></td>
+            <td colspan="3"></td>
+         </tr>
+      </table>
+      <table xmlns:File="java:java.io.File" class="doc">
+         <tr>
+            <td>Enumeration of execution status codes.</td>
+         </tr>
+      </table>
+      <table class="properties" width="100%" border="1" cellspacing="0" cellpadding="3">
+         <tr>
+            <th colspan="3" align="left" class="tableSubHeading"><B>Elements</B></th>
+         </tr>
+      </table><br><div xmlns="http://www.w3.org/1999/xhtml" class="schemaComponent box"><span class="caption">
+            <div class="contents">
+               <div style="margin-left: 0em">&lt;<span class="scTag">simpleType</span> <span class="scTag">name</span>="<span class="scContent">profileExecutionStatusCodes</span>"&gt;
+                  <div style="margin-left: 1.5em">&lt;<span class="scTag">restriction</span> <span class="scTag">base</span>="<span class="scContent">xsd:string</span>"&gt;
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">unknown</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">notExecuted</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">timeout</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">success</span>"/&gt;
+                     </div>
+                     <div style="margin-left: 1.5em">&lt;<span class="scTag">enumeration</span> <span class="scTag">value</span>="<span class="scContent">failure</span>"/&gt;
+                     </div>&lt;/<span class="scTag">restriction</span>&gt;
+                  </div>&lt;/<span class="scTag">simpleType</span>&gt;
+               </div>
+            </div></span></div>
+      <hr>
+   </body><br xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><hr xmlns:File="java:java.io.File"><br xmlns:File="java:java.io.File"><center xmlns:File="java:java.io.File">Copyright 2007-2008 Extreme Networks. All rights reserved.</center>
+</html>

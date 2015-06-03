@@ -1,0 +1,171 @@
+Developer Kit License Agreement
+
+PLEASE READ THIS LICENSE AGREEMENT ("LICENSE") CAREFULLY BEFORE 
+USING ANY OF THE DOCUMENTATION OR SOFTWARE PROVIDED TO 
+("YOU").  YOU ARE AGREEING TO BE BOUND BY THE TERMS AND 
+CONDITIONS OF THIS LICENSE.  IF YOU DO NOT AGREE TO THE TERMS OF 
+THIS LICENSE, YOU MAY RETURN THE DOCUMENTATION AND SOFTWARE 
+PROVIDED TO EXTREME NETWORKS, INC.  
+
+1.	General. The software, tools, utilities, sample code, documentation, and other materials 
+accompanying this License, whether on disc, print or electronic documentation, in read 
+only memory or other media constitute the kit specified on Exhibit A ("Developer Kit").  
+The Developer Kit is licensed, not sold to you by Extreme Networks, Inc. ("Extreme 
+Networks") and/or Extreme Networks licensors.  The rights granted herein are limited 
+to Extreme Networks and/or Extreme Networks' licensor respective intellectual 
+property rights in the Developer Kit and do not include any other patents or intellectual 
+property rights.  You own the media on which the Developer Kit is recorded.  Extreme 
+Networks or its licensors retain ownership of their respective portions of the Developer 
+Kit itself.  The terms of this license will govern any updates provided by Extreme 
+Networks that replace and/or supplement the original Developer Kit, unless the upgrade 
+is accompanied by a separate license in which case the terms of that license will govern. 
+
+2.	Permitted License Uses and Restrictions.  The Developer Kit contains, at 
+minimum, a human perceivable portion ("Source Code").  It may also contain a 
+machine readable portion ("Object Code").  
+2.1.	You may use the Developer Kit to (i) test the Developer Kit and (ii) develop 
+application software, which interfaces only with Extreme Networks products 
+("Application").  You may make as many internal use copies of the Developer Kit 
+as reasonably necessary to use the Developer Kit as permitted under this License 
+and distribute such copies to your employees whose job duties require them to use 
+the Developer Kit, provided that you reproduce on each copy of the Developer Kit 
+or any portion thereof, all copyright and other proprietary notices contained on the 
+original. 
+2.2.	Certain portions of the Source Code  consist of sample code provided by Extreme 
+Networks ("Sample Code").  You are granted a personal, non-exclusive, 
+revocable, non-transferable license to use, modify, copy and compile the Sample 
+Code solely for the purposed of enabling You to create the Application.     
+2.3.	You are granted a personal, non-exclusive, revocable, non-transferable license to 
+use, copy and distribute the Object Code only as part of an Application developed 
+through the use of the Developer Kit.  Except to the extent Extreme Networks may, 
+in certain jurisdictions, be required by law to permit reverse engineering and 
+provided that the provisions of such law may not be waived or conditioned on 
+prior request for information regarding interoperability, You shall not disassemble, 
+decompile or otherwise reverse engineer the Object Code nor permit any third 
+party to do so.
+2.4.	You may not otherwise redistribute, create derivative works of, or sublicense, or 
+otherwise redistribute the Developer Kit.  
+2.5.	Extreme Networks reserves the right to change the Developer Kit at any time 
+without notice and future versions may not be compatible with prior versions.  All 
+rights not expressly granted herein are reserved by Extreme Networks. 
+
+3.	Termination. This license is effective until terminated.  Your rights under this License 
+will terminate automatically without notice from Extreme Networks if you fail to 
+comply with any term(s) of this License.  Upon termination of this License, You shall 
+cease use of all the Developer Kit and destroy all copies of the Developer Kit. 
+
+4.	Limited Warranty and Disclaimer. 
+4.1 Extreme Networks warrants that for sixty (60) days from the date of original 
+shipment the media (e.g., CD ROM), if any, on which the Developer Kit is 
+contained will be free from defects in materials and workmanship.  The entire 
+liability of Extreme Networks and its licensors and Your exclusive remedy for any 
+breach of the foregoing warranty shall be replacement of the defective media in 
+which the Developer Kit is contained.  You must return the defective media to 
+Extreme Networks at Your expense.  This limited warranty is void if the defect has 
+resulted from accident, abuse, or misapplication.  Any replacement media will be 
+warranted for the remainder of the original warranty period.  Outside the United 
+States, this remedy is not available to the extent Extreme Networks is subject to 
+restrictions under United States export control laws and regulations, or prohibited 
+by other laws and regulations.
+4.2 Software Warranty and Disclaimer.  Except for the limited warranty set forth 
+therein, THE DEVELOPER KIT IS PROVIDED "AS IS" AND EXTREME 
+NETWORKS MAKES NO WARRANTY AS TO USE OR PERFORMANCE.  
+EXCEPT TO THE EXTENT SUCH EXCLUSIONS OR LIMITATIONS ARE 
+PROHIBITED BY APPLICABLE LAW.  EXTREME NETWORKS AND ITS 
+LICENSORS MAKE NO WARRANTY, CONDITION, REPRESENTATION, 
+OR TERM (EXPRESS OR IMPLIED, WHETHER BY STATUTE, COMMOM 
+LAW, CUSTOM, USAGE OR OTHERWISE) AS TO ANY MATTER 
+INCLUDING, WITHOUT LIMITATION, NONINFRINGEMENT OF THIRD 
+PARTY RIGHTS, MERCHANTABILITY, SATISFACTORY QUALITY, 
+INTEGRATION, OR FITNESS FOR A PARTICULAR PURPOSE.  You 
+assume responsibility for selecting the Developer Kit to achieve your intended 
+results, and for your use thereof. WITHOUT LIMITING THE FOREGOING 
+PROVISIONS, EXTREME NETWORKS MAKES NO WARRANTY THAT 
+THE DEVELOPER KIT WILL BE ERROR-FREE OR FREE FROM 
+INTERRUPTIONS OR OTHER FAILURES, OR THAT THE SOFTWARE 
+WILL MEET YOUR REQUIREMENTS. 
+
+5.	Limitation of Liability. UNDER NO CIRCUMSTANCES AND UNDER NO 
+LEGAL THEORY, WHETHER IN TORT, CONTRACT, OR OTHERWISE, 
+SHALL EXTREME NETWORKS OR ITS LICENSORS BE LIABLE TO YOU OR 
+TO ANY OTHER PERSON FOR LOSS OF PROFITS, LOSS OF GOODWILL OR 
+ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+OR DAMAGES FOR GROSS NEGLIGENCE OF ANY CHARACTER 
+INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF 
+GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION, 
+OR FOR ANY OTHER DAMAGE OR LOSS, EVEN IF EXTREME NETWORKS 
+OR ITS LICENSORS SHALL HAVE BEEN ADVISED OF THE POSSIBILITY 
+OF SUCH DAMAGES.  IN NO EVENT SHALL EXTREME NETWORKS OR ITS 
+LICENSORS BE LIABLE FOR ANY DAMAGE IN EXCESS FIFTY DOLLARS 
+($50.00) RELATED TO THE DEVELOPER KIT OR YOUR USE OF THE 
+DEVELOER KIT. This limitation shall not apply to liability for death or personal injury 
+to the extent that applicable law prohibits such limitation. 
+
+6. Notice to United States Government End Users. The Developer Kit including the 
+documentation are "Commercial Items" as that term is defined in 48 C.F.R. Section 2.101, 
+consisting of  "commercial computer software" and "commercial computer software 
+documentation," respectively, pursuant to DFAR Section 227.7202 and FAR Section 
+12.212, as applicable. Any use, modification, reproduction, release, performance, display or 
+disclosure of the Developer Kit including the documentation by the United States 
+Government shall be governed solely by the terms of this Agreement and shall be 
+prohibited except to the extent expressly permitted by the terms of this Agreement.
+
+7. Export Controls. You are advised that the Developer Kit is of United States origin and 
+subject to United States Export Administration Regulations; diversion contrary to United 
+States law and regulation is prohibited.  You agree not to directly or indirectly export, 
+import or transmit the Developer Kit to any country, end user or for any use that is 
+prohibited by applicable United States regulation or statute (including but not limited to 
+those countries embargoed from time to time by the United States government); or contrary 
+to the laws or regulations of any other governmental entity that has jurisdiction over such 
+export, import, transmission or use.   
+
+8. High Risk Activities. The Developer Kit is not fault-tolerant and is not designed or 
+intended for use in hazardous environments requiring fail-safe performance, including 
+without limitation, in the operation of nuclear facilities, aircraft navigation or 
+communication systems, air traffic control, weapons systems, direct life-support machines, 
+or any other application in which the failure of the Software could lead directly to death, 
+personal injury, or severe physical or property damage (collectively, "High Risk 
+Activities").  EXTREME NETWORKS EXPRESSLY DISCLAIMS ANY EXPRESS 
+OR IMPLIED WARRANTY OF FITNESS FOR HIGH RISK ACTIVITIES.
+
+9. Governing Law. This Agreement will be governed by and construed in accordance with 
+the substantive laws of the State of California.  This Agreement will not be governed by the 
+conflict of laws rules of any jurisdiction or the United Nations Convention on Contracts for 
+the International Sale of Goods, the application of which is expressly excluded.  The state 
+and federal courts sitting in Santa Clara County, California shall have exclusive jurisdiction 
+over all disputes relating to this Agreement.  
+
+10. Miscellaneous.  This License sets forth all rights for the user of the Developer Kit and 
+is the entire License between the parties.  This License supersedes any other 
+communications, representations or advertising relating to the Developer Kit.  This License 
+may not be modified except by a written addendum issued by a duly authorized 
+representative of Extreme Networks.  No provision hereof shall be deemed waived unless 
+such waiver shall be in writing and signed by Extreme Networks.  If any provision of this 
+License is held invalid, the remainder of this License shall continue in full force and effect.  
+The parties confirm that they have requested this license and all related documents to be 
+drafted in English. 
+
+11. Open Source Software. This Developer Kit includes or may include some software 
+programs that are licensed (or sublicensed) to You under certain Open Source Software 
+licenses ("OSS Licenses"). If any portion of the Developer Kit is subject to an OSS 
+License, and such OSS License requires that Extreme Networks provide rights that are 
+broader than the rights granted in this Agreement, then the rights to that portion of the 
+software shall be governed by the broader rights required by such OSS License. 
+
+
+
+
+
+EXHIBIT A
+
+DEVELOPER KIT
+
+
+
+ExtremeXOS InSite
+ 
+ 
+ 
+ 
+ v 11-30-07
+Extreme Networks, Inc. Confidential and Proprietary

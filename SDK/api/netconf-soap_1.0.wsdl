@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+     xmlns:tns="urn:ietf:params:xml:ns:netconf:soap:1.0"
+     xmlns:netb="urn:ietf:params:xml:ns:netconf:base:1.0"
+     targetNamespace="urn:ietf:params:xml:ns:netconf:soap:1.0"
+     name="netconf-soap_1.0.wsdl">
+
+     <import namespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+             location="xsd/netconf-base_1.0.xsd"/>
+
+     <message name="helloRequest">
+       <part name="in" element="netb:hello"/>
+     </message>
+     <message name="helloResponse">
+       <part name="out" element="netb:hello"/>
+     </message>
+
+     <message name="rpcRequest">
+       <part name="in" element="netb:rpc"/>
+     </message>
+     <message name="rpcResponse">
+       <part name="out" element="netb:rpc-reply"/>
+     </message>
+
+     <portType name="netconfPortType">
+       <operation name="rpc">
+         <input message="tns:rpcRequest"/>
+         <output message="tns:rpcResponse"/>
+       </operation>
+       <operation name="hello">
+         <input message="tns:helloRequest"/>
+         <output message="tns:helloResponse"/>
+       </operation>
+     </portType>
+
+
+ <binding name="netconfBinding" type="tns:netconfPortType">
+       <SOAP:binding style="document"
+            transport="http://schemas.xmlsoap.org/soap/http"/>
+       <operation name="hello">
+         <SOAP:operation/>
+         <input>
+           <SOAP:body use="literal"
+                namespace="urn:ietf:params:xml:ns:netconf:soap:1.0"/>
+         </input>
+         <output>
+           <SOAP:body use="literal"
+                namespace="urn:ietf:params:xml:ns:netconf:soap:1.0"/>
+  </output>
+       </operation>
+       <operation name="rpc">
+         <SOAP:operation/>
+         <input>
+           <SOAP:body use="literal"
+                namespace="urn:ietf:params:xml:ns:netconf:base:1.0"/>
+         </input>
+         <output>
+           <SOAP:body use="literal"
+                namespace="urn:ietf:params:xml:ns:netconf:base:1.0"/>
+         </output>
+       </operation>
+     </binding>
+
+   </definitions>

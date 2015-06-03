@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:event="http://www.extremenetworks.com/XMLSchema/xos/event" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://www.extremenetworks.com/XMLSchema/xos/event" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/event" name="event">
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import namespace="http://www.extremenetworks.com/XMLSchema/xos/event" schemaLocation="./xsd/event.xsd"/>
+		        <!--<element name="header" type="event:EventHeader"/> -->
+		</xsd:schema>
+	</wsdl:types>
+	<message name="post">
+                <part name="hdr" element="event:eventHeader"/>
+                <part name="body" element="event:post"/>
+	</message>
+	<message name="postResponse">
+                <part name="hdr" element="event:eventHeader"/>
+		<part name="body" element="event:postResponse"/>
+	</message>
+	<portType name="eventPortType">
+		<operation name="post">
+			<input message="event:post"/>
+			<output message="event:postResponse"/>
+		</operation>
+	</portType>
+	<binding name="eventBinding" type="tns:eventPortType">
+		<SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="post">
+			<documentation>
+                                This operation used to post event data.
+                                The type of object and values are specified as part of the <code>post</code> message.
+                        </documentation>
+			<SOAP:operation/>
+                        <input>
+                                <SOAP:header message="tns:post" part="hdr" use="literal"/>
+                                <SOAP:body parts="body" use="literal"/>
+                        </input>
+                        <output>
+                                <SOAP:header message="tns:postResponse" part="hdr" use="literal"/>
+                                <SOAP:body parts="body" use="literal"/>
+                        </output>
+		</operation>
+	</binding>
+	<service name="event">
+		<port name="eventPort" binding="tns:eventBinding">
+			<SOAP:address location="http://localhost/xapi"/>
+		</port>
+	</service>
+</wsdl:definitions>

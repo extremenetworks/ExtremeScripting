@@ -1,0 +1,82 @@
+#@DetailDescriptionStart
+###############################################################################
+# Extreme Networks(R) Universal Port Profile Library
+#
+# Script        	: Chassis_Hibernation
+# Revision      	: 1.3
+# Last Updated  	: 9 May 2012
+# 
+# Purpose: The Chassis Hibernation script file toggles the state of the 
+# I/O modules effectively shutting them off or turning them on.
+#
+# Chassis Support: This version currently supports 8800 series switches only.
+#
+# This version avoids a potential problem with successive manual loading of 
+# the profile. The EXOS version was also changed to reflect the DUT.
+#
+# Usage Notes:
+# This script will change the state of each slot on timed execution. That
+# means if a slot is disabled when the enable slot execution is run it will
+# enable said slot.
+#
+# Author			: Extreme Automation Core Team
+# Contact			: https://community.extremenetworks.com/extreme
+#
+###############################################################################
+# TODO:
+# - Update to support BDX
+# - Add logic to test for enabled disabled in change routine
+# 
+###############################################################################
+#  Change Log
+#
+# 	13 May 2009 : Script Created
+#	21 April 2010: Updated Header to standard header
+#	9 May 2012: Updated to include usage instructions and caveats
+###############################################################################
+#@DetailDescriptionEnd
+
+create upm profile chassis_hibernation
+
+disable clipaging
+set var swslot 0
+set var CLI.OUT 0
+show switch
+set var shsw $TCL(split ${CLI.OUT} "\n")
+delete var CLI.OUT
+set var swtypeln $TCL(lsearch -glob $shsw *Type*)
+set var swtype $TCL(lindex $shsw $swtypeln)
+set var sw8810 $TCL(regexp -nocase {8810} $swtype)
+set var sw8806 $TCL(regexp -nocase {8806} $swtype)
+if ($sw8810 == 1) then
+   set var swslot 10
+endif
+if ($sw8806 == 1) then
+   set var swslot 6
+endif
+while ($swslot > 0) do
+   set var CLI.OUT 0
+   show slot $swslot
+   set var shslot $TCL(split ${CLI.OUT} "\n")
+   delete var CLI.OUT
+   set var slotstateln $TCL(lsearch -glob $shslot *State:*)
+   set var slotstate $TCL(lindex $shslot $slotstateln)
+   set var slottoggle $TCL(regexp -nocase {Operational} $slotstate)
+   if ($slottoggle == 1) then
+       disable slot $swslot
+       set var slottoggle 0
+   endif 
+   set var slottoggle $TCL(regexp -nocase {Down} $slotstate)
+   if ($slottoggle == 1) then
+       enable slot $swslot
+       set var slottoggle 0
+   endif
+   set var slotdown $TCL(regexp -nocase {Empty} $slotstate)
+   if ($slottoggle == 1) then
+       disable slot $swslot
+       set var slottoggle 0
+   endif   
+   set var swslot ($swslot - 1)
+endwhile                       
+enable clipaging
+.

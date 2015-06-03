@@ -1,0 +1,32 @@
+#@DetailDescriptionStart
+###############################################################################
+# Extreme Networks(R) CLI Profile Library
+#
+# Script        	: CFMMEPExpPortShutdown
+# Revision      	: 1.1
+# Last Updated  	: 21 April 2010
+# 
+# Purpose: Shutdown port based on CFM.MEPExp Message
+# 
+# Notes: This is a deployment script
+#
+# Author			: Extreme Extensibility Team
+# Contact			: https://community.extremenetworks.com/extreme
+###############################################################################
+#  Change Log
+#
+# 	21 January 2010: Script Created
+#	19 April 2010: Updated Header for Syntax and Standard
+###############################################################################
+#@DetailDescriptionEnd
+
+create upm profile cfmportshutdown
+disable port $EVENT.LOG_PARAM_5
+create log entry "UPM cfmportshutdown disabled ports"
+.
+
+create log target upm cfmportshutdown
+create log filter cfmlogfilter
+configure log filter cfmportshutdown add event CFM.MEPExp
+configure log target cfmportshutdown filter cfmlogfilter
+enable log target upm cfmportshutdown

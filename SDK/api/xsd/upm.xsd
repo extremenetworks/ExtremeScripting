@@ -1,0 +1,926 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:common="http://www.extremenetworks.com/XMLSchema/xos/common" xmlns:tns="http://www.extremenetworks.com/XMLSchema/xos/upm" xmlns:system="http://www.extremenetworks.com/XMLSchema/xos/system" targetNamespace="http://www.extremenetworks.com/XMLSchema/xos/upm" elementFormDefault="qualified">
+
+        <import namespace="http://www.extremenetworks.com/XMLSchema/xos/common" schemaLocation="common.xsd"/>
+        <import namespace="http://www.extremenetworks.com/XMLSchema/xos/system" schemaLocation="system.xsd"/>
+        <simpleType name="errorFlag">
+				<xsd:annotation>
+					<xsd:documentation>Enumeration of error flags.</xsd:documentation>
+				</xsd:annotation>
+                <restriction base="xsd:string">
+                        <enumeration value="abort-on-error"/>
+                        <enumeration value="ignore-error"/>
+                </restriction>
+        </simpleType>
+        <simpleType name="eventEnums">
+				<xsd:annotation>
+					<xsd:documentation>Enumeration of event types.</xsd:documentation>
+				</xsd:annotation>
+                <restriction base="xsd:string">
+                        <enumeration value="unknown"/>
+                        <enumeration value="device-detect"/>
+                        <enumeration value="device-remove"/>
+                        <enumeration value="user-authenticate"/>
+                        <enumeration value="user-unauthenticate"/>
+                        <enumeration value="timer"/>
+                        <enumeration value="static"/>
+                        <enumeration value="log-message"/>
+                </restriction>
+        </simpleType>
+        
+
+        <simpleType name="profileExecutionStatusCodes">
+				<xsd:annotation>
+					<xsd:documentation>Enumeration of execution status codes.</xsd:documentation>
+				</xsd:annotation>
+                <restriction base="xsd:string">
+                        <enumeration value="unknown"/>
+                        <enumeration value="notExecuted"/>
+                        <enumeration value="timeout"/>
+                        <enumeration value="success"/>
+                        <enumeration value="failure"/>
+                </restriction>
+        </simpleType>
+        
+        <complexType name="timer">
+			<xsd:annotation>
+				<xsd:documentation>
+				The timer object is used to specify a specific time or periodic intervals at which a profile
+				should be executed.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="timerName" type="common:StringLen256" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								A name for the timer.
+								</xsd:documentation>
+							</xsd:annotation>
+						
+						</element>
+                        <element name="at" type="xsd:dateTime" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="every" type="common:uint32_t" minOccurs="0"/>
+                        <element name="extension" type="common:ExtensionType" minOccurs="0"/>
+                        <any namespace="##other" processContents="lax" minOccurs="0"/>
+                </sequence>
+                <attribute ref="common:operation"/>
+                <anyAttribute namespace="##any" processContents="lax"/>
+        </complexType>
+
+        <complexType name="executionResult">
+			<xsd:annotation>
+				<xsd:documentation>
+				The results from the execution of a script.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="executionId" type="common:uint32_t" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Execution id for the script. This id is returned by the switch whenever a profile
+								is executed using <code>runScript</code>.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="executionTime"  type="common:uint32_t" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The execution time for this profile.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="eventName"  type="tns:eventEnums" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The event that triggered this profile.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="profileName"  type="common:StringLen32" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Name of the profile.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="timerName"  type="common:StringLen32" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Name of the the timer (if any).
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="portList" type="common:StringLen256" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The ports on which this profile was executed.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="status" type="tns:profileExecutionStatusCodes" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Status of the execution.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="data" type="common:StringLen8K" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Contents of the profile script.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="extension" type="common:ExtensionType" minOccurs="0"/>
+                        <any namespace="##other" processContents="lax" minOccurs="0"/>
+                </sequence>
+                <attribute ref="common:operation"/>
+                <anyAttribute namespace="##any" processContents="lax"/>
+        </complexType>
+        
+        <complexType name="eventStruct">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the event that triggers execution of a profile.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="event" type="tns:eventEnums" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Type of event.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="timerName" type="common:StringLen256" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Name of the timer.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="filter"  type="common:StringLen32" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Name of the timer.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="extension" type="common:ExtensionType" minOccurs="0"/>
+                        <any namespace="##other" processContents="lax" minOccurs="0"/>
+                </sequence>
+                <attribute ref="common:operation"/>
+                <anyAttribute namespace="##any" processContents="lax"/>
+        </complexType>
+        <complexType name="eventObject">
+			<xsd:annotation>
+				<xsd:documentation>
+				Set of events that trigger the execution of a profile. There can be a maximum of 256
+				triggering events for a profile. The individual event details are specified as part of 
+				<code>eventObject</code>.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="eventObject" type="tns:eventStruct" minOccurs="0" maxOccurs="256">
+							<xsd:annotation>
+								<xsd:documentation>
+								Event details.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                </sequence>
+        </complexType>
+
+        <complexType name="profileDetail">
+			<xsd:annotation>
+				<xsd:documentation>
+				Details of a profile. This has information that defines the profile and also details of
+				which ports it is bound to.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="name" type="common:StringLen256" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Name of the profile.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="data" type="common:StringLen8K" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The profile script.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="profileEnabled" type="xsd:boolean" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Indicates whether the profile is enabled.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="lastBindingTime" type="xsd:dateTime" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The last date and time the profile was bound to a port.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="lastChangeTime" type="xsd:dateTime" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The last date and time the profile was edited.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="creationTime" type="xsd:dateTime" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The date and time when the profile was created.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="checksum" type="common:uint32_t" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The checksum for the profile script contained in <code>data</code>. This
+								checksum is generated by the switch and can be used by client applications
+								to quickly check if there have been any changes to the script.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="bindingObjectList" type="tns:bindObjectList" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								The bindings for the profile.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="extension" type="common:ExtensionType" minOccurs="0"/>
+                        <any namespace="##other" processContents="lax" minOccurs="0"/>
+                </sequence>
+                <attribute ref="common:operation"/>
+                <anyAttribute namespace="##any" processContents="lax"/>
+        </complexType>
+        <complexType name="bindObjectList">
+			<xsd:annotation>
+				<xsd:documentation>
+				Set of bindings for a profile. The individual binding details are specified as part of 
+				<code>bindObject</code>.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="bindObject" type="tns:bindingObject" minOccurs="0" maxOccurs="unbounded">
+							<xsd:annotation>
+								<xsd:documentation>
+								The binding details.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                </sequence>
+        </complexType>
+        <complexType name="bindingObject">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the binding details for a profile.
+				</xsd:documentation>
+			</xsd:annotation>
+                <sequence>
+                        <element name="eventObject" type="tns:eventStruct" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								Event trigger for the binding.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                        <element name="portList" type="common:StringLen256" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>
+								List of ports to bind to.
+								</xsd:documentation>
+							</xsd:annotation>
+						</element>
+                </sequence>
+        </complexType>
+        <element name="createProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>createProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profile" type="tns:profileDetail">
+									<xsd:annotation>
+										<xsd:documentation>
+										The profile to create.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="createProfileResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the response message for <code>createProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="saveConfigRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>saveConfig</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="saveConfigResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the response message for <code>saveConfig</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="editProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>editProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profile" type="tns:profileDetail">
+									<xsd:annotation>
+										<xsd:documentation>
+										The profile to create.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="editProfileResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the response message for <code>editProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="getAllProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>getAllProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="contentRequired" type="xsd:boolean" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Setting this will return the contents of the script as part of the response.
+										If this is not set the script data is not returned in the response.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="getAllProfileReply">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>getAllProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profile" type="tns:profileDetail" minOccurs="0" maxOccurs="unbounded">
+									<xsd:annotation>
+										<xsd:documentation>
+										Set of profiles.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="getProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>getProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profile" type="common:StringLen256">
+									<xsd:annotation>
+										<xsd:documentation>
+										Name of the profile to get.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="getProfileReply">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>getProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profile" type="tns:profileDetail">
+									<xsd:annotation>
+										<xsd:documentation>
+										Profile details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="deleteProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>deleteProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profile" type="common:StringLen256">
+									<xsd:annotation>
+										<xsd:documentation>
+										The name of the profile to delete.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="deleteProfileResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the response message for <code>deleteProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="bindProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>bindProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profileName" type="common:StringLen256">
+									<xsd:annotation>
+										<xsd:documentation>
+										Name of the profile.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="portList" type="common:StringLen256" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Ports to bind the profile. This can be used to specify a single port or a set of ports.
+										<br/>
+										Multiple ports can be specified as a comma separated list of ports or port ranges. 
+										For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3. 
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="eventObject" type="tns:eventStruct" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										The event that triggers the profile.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="bindProfileResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>bindProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="unbindProfileRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>unbindProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profileName" type="common:StringLen256">
+									<xsd:annotation>
+										<xsd:documentation>
+										Name of the profile.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="portList" type="common:StringLen256" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Ports to unbind the profile. This can be used to specify a single port or a set of ports.
+										<br/>
+										Multiple ports can be specified as a comma separated list of ports or port ranges. 
+										For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3. 
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="eventObject" type="tns:eventStruct" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										The event that triggers the profile.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="unbindProfileResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>unbindProfile</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="createTimerResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>createTimer</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="createTimerRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>createTimer</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="timer" type="tns:timer" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Details of the timer.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="deleteTimerResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>deleteTimer</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="deleteTimerRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>deleteTimer</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="timer" type="common:StringLen256" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Name of the timer.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="getAllTimersRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>getAllTimers</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        <element name="getAllTimersResponse">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>getAllTimers</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="timer" type="tns:timer" minOccurs="0" maxOccurs="256">
+									<xsd:annotation>
+										<xsd:documentation>
+										Set of timer details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="hdr" type="common:ClientHeader">
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        
+
+        <element name="runScriptRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>runScript</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="profileName" type="common:StringLen32" minOccurs="1">
+									<xsd:annotation>
+										<xsd:documentation>
+										Name of the profile.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="event" type="tns:eventEnums" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Event type that should be set to "static".
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="portList" type="common:StringLen256" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Ports to unbind the profile. This can be used to specify a single port or a set of ports.
+										<br/>
+										Multiple ports can be specified as a comma separated list of ports or port ranges. 
+										For example, "1:1, 1:3, 2:1-2:3" means ports 1:1, 1:3, 2:1,2:2,2:3. 
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="parameters" type="common:StringLen4K" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										Parameters for the script.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                 <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        
+        <element name="runScriptReply">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>runScript</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="executionId" type="common:uint32_t" minOccurs="1">
+									<xsd:annotation>
+										<xsd:documentation>
+										The reference id for the execution of the script. This can be used in a 
+										<code>getExecutionResult</code> operation to get the results of the execution.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                 <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+
+
+        <element name="getExecutionResultRequest">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the message for <code>getExecutionResult</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                        <choice>
+                                <element name="executionId" type="common:uint32_t" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>
+										The reference id for the execution of the script. This is the id
+										obtained from a <code>runScript</code> operation.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                <element name="numberOfRecords" type="common:uint32_t" minOccurs="0"/>
+                        </choice>
+                                 <element name="hdr" type="common:ClientHeader">
+									<xsd:annotation>
+										<xsd:documentation>
+										(Optional) The hdr can be used to pass session related values such 
+										as the session id obtained from an <code>openSession</code> operation. 
+										This is an optional element as the session data can also be passed as 
+										part of the SOAP:Header, which is the recommended way to send session details.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                        </sequence>
+                </complexType>
+        </element>
+        
+        <element name="getExecutionResultReply">
+			<xsd:annotation>
+				<xsd:documentation>
+				Defines the reply message for <code>getExecutionResult</code> operation.
+				</xsd:documentation>
+			</xsd:annotation>
+                <complexType>
+                        <sequence>
+                                <element name="executionResults" type="tns:executionResult" minOccurs="0"  maxOccurs="256">
+									<xsd:annotation>
+										<xsd:documentation>
+										Execution results.
+										</xsd:documentation>
+									</xsd:annotation>
+								</element>
+                                 <element name="hdr" type="common:ClientHeader" />
+                        </sequence>
+                </complexType>
+        </element>
+
+
+</schema>

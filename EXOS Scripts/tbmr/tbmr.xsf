@@ -1,0 +1,103 @@
+enable cli scripting
+# @METADATASTART
+#@DetailDescriptionStart
+#############################################################################
+#
+# Script        	: Time-Based MAC Restrictions 
+# Revision      	: 1.0	
+# EXOS Version(s)  	: 12.3.x and Newer
+# Last Updated  	: April 19, 2010
+#
+# Purpose: 
+# Based on time, restricts network usage to preconfigured MAC addresses
+#
+# Author			: Extreme Automation Core Team
+# Contact			: https://community.extremenetworks.com/extreme
+###############################################################################
+#  Change Log
+#
+# 	16 April 2010: Script Created
+###############################################################################
+#@DetailDescriptionEnd
+
+#######################
+# CREATE FDB MAC-TRACKING ENTRIES FOR THE RESTRICTED USERS.
+# update for your restricted mac addresses
+
+ create fdb mac-tracking entry 00:00:00:00:00:00
+ create fdb mac-tracking entry 00:00:00:00:00:01
+ create fdb mac-tracking entry 00:00:00:00:00:02
+ create fdb mac-tracking entry 00:00:00:00:00:03
+ create fdb mac-tracking entry 00:00:00:00:00:04
+
+#######################
+# THIS UPM WILL BE USED TO BLACKHOLE THE MAC-ADDRESS WHEN THE MAC-TRACKING IS FOUND
+#
+ create upm profile macAdd
+ create fdbentry $(EVENT.LOG_PARAM_0) vlan $(EVENT.LOG_PARAM_1) blackhole
+.
+
+#######################################
+# UPM Start Restricted Access
+ create upm profile startRestrictedAccessUPM
+ set var CLI.OUT " "
+ show fdb mac-tracking configuration
+ set var inputA $TCL(list ${CLI.OUT})
+ set var listA $TCL(split $inputA "\n")
+ set var countA $TCL(llength $listA)
+ set var icount 3
+ while ($icount < $countA) do
+ set var findIt $TCL(lindex $listA $icount)
+ set var foundMAC $TCL(regexp {([0-9a-fA-F][0-9a-fA-F]:)+[0-9a-fA-F]{2}} $findIt)
+ if ($foundMAC == 1) then
+ set var getMAC $TCL(regexp -inline {([0-9a-fA-F][0-9a-fA-F]:)+[0-9a-fA-F]{2}} $findIt)
+ set var value0 $TCL(lindex $getMAC 0)
+ # CLEAR FDB TABLE FOR THE RESTRICTED MAC LIST
+ clear fdb $(value0)
+ endif
+ set var icount ($icount + 1)
+ endwhile
+ set var wait $TCL(after 3000)
+ create log filter "macAddFilter"
+ configure log filter "macAddFilter" add events "FDB.MACTracking.macAdd"
+ create log target upm "macAdd"
+ configure log target upm "macAdd" filter "macAddFilter"
+ enable log target upm "macAdd"
+.
+
+ #######################################
+ # UPM Stop Restricted Access
+ create upm profile stopRestrictedAccessUPM
+ disable log target upm "macAdd"
+ delete log target upm "macAdd"
+ delete log filter "macAddFilter"
+ set var wait $TCL(after 3000)
+ set var CLI.OUT " "
+ show fdb blackhole
+ set var inputA $TCL(list ${CLI.OUT})
+ set var listA $TCL(split $inputA "\n")
+ set var countA $TCL(llength $listA)
+ set var icount 2
+ while ($icount < $countA) do
+ set var findIt $TCL(lindex $listA $icount)
+ set var foundMAC $TCL(regexp {([0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+)\s+([_\-0-9a-zA-Z]+)} $findIt)
+ if ($foundMAC == 1) then
+ set var getMAC $TCL(regexp -inline {([0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+)\s+([_\-0-9a-zA-Z]+)} $findIt)
+ set var value0 $TCL(lindex $getMAC 1)
+ set var value1 $TCL(lindex $getMAC 2)
+ # DELETE FDB BLACKHOLE ENTRY
+ delete fdbentry $(value0) vlan $(value1)
+ endif
+ set var icount ($icount + 1)
+ endwhile
+.
+
+ #######################################
+ # UPM Timers
+ create upm timer startRestrictedAccess
+ configure upm timer startRestrictedAccess profile startRestrictedAccessUPM
+ configure upm timer startRestrictedAccess at 4 19 2010 18 0 0 every 86400
+
+ create upm timer stopRestrictedAccess
+ configure upm timer stopRestrictedAccess at 4 20 2010 6 0 0 every 86400
+ configure upm timer stopRestrictedAccess profile stopRestrictedAccessUPM

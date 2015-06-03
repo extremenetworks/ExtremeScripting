@@ -1,0 +1,53 @@
+enable cli scripting
+# @METADATASTART
+#@DetailDescriptionStart
+#############################################################################
+#
+# Script        	: Firmware Version Check
+# Revision      	: 1.0
+# EXOS Version(s)  	: 12.3.x and Newer
+# Last Updated  	: April 21, 2010
+#
+# Purpose: 
+# Allows for automatic firmware version validation at bootup. When a switch boots, this script 
+# matches the configured-firmware-version with the correct-firmware setting. If the 
+# configured-firmware setting is off, it is corrected with the switch boot-up.
+#
+# Note: This script must be copied into either a default.xsf or autoexec.xsf to correct upon
+# boot.
+#
+# Author			: Extreme Extensibility Team
+# Contact			: https://community.extremenetworks.com/extreme
+###############################################################################
+#  Change Log
+#
+#  19 April 2010 : Change Log Created
+#  21 April 2010 : Added in script instructions for deployment.
+###############################################################################
+#@DetailDescriptionEnd
+
+enable cli scripting
+set var version_stable "summitX-12.4.1.7.xos"
+set var server "10.45.202.191"
+set var CLI.OUT " "
+show switch
+set var input $TCL(split ${CLI.OUT} "\n")
+set var temp1 $TCL(lsearch -glob $input *Image\ \Booted:*)
+set var line $TCL(lindex $input $temp1)
+set var result $TCL(regexp -nocase {primary} $line)
+	if ($result == 1) then
+        set var flag "secondary"
+        set var CLI.OUT " "
+        sh version images primary
+	else
+        set var flag "primary"
+        set var CLI.OUT " "
+        sh version images secondary
+	endif
+		set var result $TCL(regexp -nocase ${version_stable} ${CLI.OUT})
+	if ($result != 1) then
+        download image $(server) $(version_stable) "VR-Mgmt" $(flag)
+		use image $(flag)
+		# Uncomment if you want script to reboot switch after version download.
+		#reboot
+endif

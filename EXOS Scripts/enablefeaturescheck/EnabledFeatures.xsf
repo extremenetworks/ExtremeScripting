@@ -1,0 +1,484 @@
+enable cli scripting
+# @MetaDataStart
+#@DetailDescriptionStart
+###############################################################################
+# Extreme Networks(R) CLI Profile Library
+#
+# Script        : EnabledFeatures
+# Revision      : 1.0
+# Last Updated  : May 27, 2008
+#
+# Purpose:  This script identifies the features enabled on a switch.  The list
+# of features is discovered by a series of if/then else statements and includes 
+# most of the common features that may be enabled by a swtich.  This list does
+# not include all possible features of a switch and may be modified to 
+# include the unique features running on your network.
+
+#    Note:  This widget requires ExtremeXOS 12.1.  The commands within the  
+#           script body can be issued manually to accomplish the same result 
+#           on earlier versions of ExtremeXOS prior to 12.1.
+#
+###############################################################################
+#@DetailDescriptionEnd
+
+###########"aaa"
+set var CLI.OUT " "
+show configuration aaa detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable radius} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "RADIUS is enabled"
+        show var x1
+else
+        set var x1 "RADIUS is disabled"
+        show var x1
+endif
+set var x4 $TCL(regexp -nocase {enable tacacs} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "TACACS is enabled"
+        show var x1
+else
+        set var x1 "TACACS is disabled"
+        show var x1
+endif
+
+#########"acl" 
+set var CLI.OUT " "
+show access-list
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {No entry found} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "No Access List configured"
+        show var x1
+else
+        set var x1 "Access List(s) configured"
+        show var x1
+endif
+############"bgp" 
+set var CLI.OUT " "
+show configuration bgp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable bgp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "BGP is enabled"
+        show var x1
+else
+        set var x1 "BGP is disabled"
+        show var x1
+endif
+########"cfgmgr"
+set var CLI.OUT " "
+show configuration cfgmgr detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable cli-config-logging} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Configuration logging is enabled"
+        show var x1
+else
+        set var x1 "Configuration logging is disabled"
+        show var x1
+endif
+set var x4 $TCL(regexp -nocase {enable cli scripting} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "CLI scripting is enabled"
+        show var x1
+else
+        set var x1 "CLI scripting is disabled"
+        show var x1
+endif
+
+
+#########"eaps"
+set var CLI.OUT " "
+show configuration eaps detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable eaps} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "EAPS is enabled"
+        show var x1
+else
+        set var x1 "EAPS is disabled"
+        show var x1
+endif
+#########"edp"
+set var CLI.OUT " "
+show configuration edp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable edp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "EDP is enabled on port(s)"
+        show var x1
+else
+        set var x1 "EDP is disabled"
+        show var x1
+endif
+#########"elrp" - 
+set var CLI.OUT " "
+show configuration elrp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable elrp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "ELRP is enabled"
+        show var x1
+else
+        set var x1 "ELRP is disabled"
+        show var x1
+endif
+#########"elsm" 
+set var CLI.OUT " "
+show configuration elsm detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable elsm} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "ELSM is enabled"
+        show var x1
+else
+        set var x1 "ELSM is disabled"
+        show var x1
+endif
+##########"ems" 
+set var CLI.OUT " "
+show configuration ems detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable log debug-mode} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Debug Mode is enabled"
+        show var x1
+else
+        set var x1 "Debug Mode is disabled"
+        show var x1
+endif
+
+###########"esrp" 
+set var CLI.OUT " "
+show configuration esrp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable esrp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "ESRP is enabled"
+        show var x1
+else
+        set var x1 "ESRP is disabled"
+        show var x1
+endif
+
+
+###### "fdb" ######
+set var CLI.OUT " "
+show configuration fdb detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable iparp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "IPARP is enabled"
+        show var x1
+else
+        set var x1 "IPARP is disabled"
+        show var x1
+endif
+
+########"lldp" - search enable statement and output sh lldp  
+set var CLI.OUT " "
+show configuration lldp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable lldp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "LLDP is enabled"
+        show var x1
+else
+        set var x1 "LLDP is disabled"
+        show var x1
+endif
+##########"mcmgr" - search for enable statement and output sh igmp and sh mld
+set var CLI.OUT " "
+show configuration mcmgr detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable igmp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "IGMP Snooping is enabled"
+        show var x1
+else
+        set var x1 "IGMP Snooping is disabled"
+        show var x1
+endif
+set var x4 $TCL(regexp -nocase {enable mld} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "MLD is enabled"
+        show var x1
+else
+        set var x1 "MLD is disabled"
+        show var x1
+endif
+set var x4 $TCL(regexp -nocase {enable MVR} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "MVR is enabled"
+        show var x1
+else
+        set var x1 "MVR is disabled"
+        show var x1
+endif
+#########"msdp"  - search for enable statement with vr and output the sh msdp command.
+set var CLI.OUT " "
+show configuration msdp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable msdp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "MSDP is enabled"
+        show var x1
+else
+        set var x1 "MSDP is disabled"
+        show var x1
+endif
+#######"netlogin" - search for enable statement with dot1x,mac,ports, or web based
+set var CLI.OUT " "
+show configuration netlogin detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable netlogin port} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "NetLogin is enabled on port(s)"
+        show var x1
+else
+        set var x1 "NetLogin is disabled"
+        show var x1
+endif
+###########"nettools" - search for enable statement and output sh sntp command
+set var CLI.OUT " "
+show configuration nettools detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable sntp-client} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "SNTP is enabled"
+        show var x1
+else
+        set var x1 "SNTP is disabled"
+        show var x1
+endif
+
+#########"ospf" - search for enable statement and output sh ospf command
+set var CLI.OUT " "
+show configuration ospf detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable iparp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "OSPF is enabled"
+        show var x1
+else
+        set var x1 "OSPF is disabled"
+        show var x1
+endif
+#########"ospfv3" - search for enable statement and output sh ospfv3 command
+set var CLI.OUT " "
+show configuration ospfv3 detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable ospfv3} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "OSPFv3 is enabled"
+        show var x1
+else
+        set var x1 "OSPFv3 is disabled"
+        show var x1
+endif
+#########"pim" - search for enable statement and output sh pim command
+set var CLI.OUT " "
+show configuration pim detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable pim} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "PIM is enabled"
+        show var x1
+else
+        set var x1 "PIM is disabled"
+        show var x1
+endif
+########"rip"  - search for enable statement and output sh rip command
+set var CLI.OUT " "
+show configuration rip detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable rip\n} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "RIP is enabled"
+        show var x1
+else
+        set var x1 "RIP is disabled"
+        show var x1
+endif
+#########"ripng" - search for enable statement and output sh ripng command
+set var CLI.OUT " "
+show configuration ripng detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable ripng} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "RIPNG is enabled"
+        show var x1
+else
+        set var x1 "RIPMG is disabled"
+        show var x1
+endif
+########"rtmgr" - search for enable statement and output sh 
+set var CLI.OUT " "
+show configuration rtmgr detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable iproute} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "IP route sharing is enabled"
+        show var x1
+else
+        set var x1 "IP route sharing is disabled"
+        show var x1
+endif
+#######"snmp" - search for enable statement and output sh snmp command
+set var CLI.OUT " "
+show configuration snmp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable snmp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "SNMP is enabled"
+        show var x1
+else
+        set var x1 "SNMP is disabled"
+        show var x1
+endif
+#######"stp" - search for enable statement and output sh stpd command
+set var CLI.OUT " "
+show configuration stp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable stp\n} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Spanning Tree is enabled"
+        show var x1
+else
+        set var x1 "Spanning Tree is disabled"
+        show var x1
+endif
+#########"telnetd"
+set var CLI.OUT " "
+show configuration telnetd detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable telnet} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Telnet is enabled"
+        show var x1
+else
+        set var x1 "Telnet is disabled"
+        show var x1
+endif
+
+#######"thttpd" - search for enable statement
+set var CLI.OUT " "
+show configuration thttpd detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable web http} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Web mode HTTP is enabled"
+        show var x1
+else
+        set var x1 "Web mode HTTP is disabled"
+        show var x1
+endif
+set var x4 $TCL(regexp -nocase {enable web https} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Web mode HTTPS is enabled"
+        show var x1
+else
+        set var x1 "Web mode HTTPS is disabled"
+        show var x1
+endif
+#######"vlan" - search for create statement and output sh vlan command
+set var CLI.OUT " "
+show configuration vlan detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {create vlan} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "VLAN(s) created"
+        show var x1
+else
+        set var x1 "VLAN(s) not created other than default and mgmt"
+        show var x1
+endif
+set var x4 $TCL(regexp -nocase {create vman} ${CLI.OUT})              
+if ($x4 == 1) then                                       
+        set var x1 "VMAN(s) created"                    
+        show var x1                                     
+else                                                    
+        set var x1 "VMAN(s) not created"
+        show var x1                                                 
+endif    
+######## vrrp" -  search for enable statement
+set var CLI.OUT " "
+show configuration vrrp detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable vrrp} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "VRRP is enabled"
+        show var x1
+else
+        set var x1 "VRRP is disabled"
+        show var x1
+endif
+
+######## vmt" -  search for enable statement
+set var CLI.OUT " "
+show configuration vmt detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable vm-tracking} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Virtual Machine Tracking is enabled"
+        show var x1
+else
+        set var x1 "Virtual Machine Tracking is disabled"
+        show var x1
+endif
+
+######## clear-flow" -  search for enable statement
+set var CLI.OUT " "
+show configuration acl detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable clear-flow} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "CLEAR-Flow is enabled"
+        show var x1
+else
+        set var x1 "CLEAR-Flow is disabled"
+        show var x1
+endif
+
+######## IDM" -  search for enable statement
+set var CLI.OUT " "
+show configuration idmgr detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable identity-management} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "Identity-Management is enabled"
+        show var x1
+else
+        set var x1 "Identity-Management is disabled"
+        show var x1
+endif
+
+######## EMS UPM LOG targets" -  search for enable statement
+set var CLI.OUT " "
+show configuration ems detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable log target upm} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "UPM has Log Targets enabled in EMS"
+        show var x1
+else
+        set var x1 "There are no log targets present in EMS"
+        show var x1
+endif
+
+######## EMS UPM LOG targets" -  search for enable statement
+set var CLI.OUT " "
+show configuration vsm detail
+set var y1 $TCL(split ${CLI.OUT} "\n")
+set var x4 $TCL(regexp -nocase {enable mlag} ${CLI.OUT})
+if ($x4 == 1) then
+        set var x1 "There are MLAGs Present"
+        show var x1
+else
+        set var x1 "There are no MLAGs Present"
+        show var x1
+endif
+
+
+
