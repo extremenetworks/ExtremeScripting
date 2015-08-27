@@ -5,6 +5,7 @@ Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 * [EXOS SDK](SDK/README.md)
 * [EXOS Scripts](EXOS Scripts/README.md)
 * [EXOS Policy](EXOS Policy/README.md)
+* [EXOS Images](EXOS Images/README.md)
 * [Python Scripts](Python/README.md)
 * [Perl Scripts](Perl/README.md)
 
