@@ -172,7 +172,7 @@ configure access-list add Flow_track first ports 2 ingress
 
 Example 3:
 
-X460G2-24p-G4.6 # run script flowtrack.py -dm 11-11-11-11-11-11 -sm 22:22:22:22:22:22 -i 2 -p ip
+X460G2-24p-G4.6 # run script flowtrack.py -dm 11-11-11-11-11-11 -sm 22:22:22:22:22:22 -i 2
 
 
 +--------------------------------------------------+
