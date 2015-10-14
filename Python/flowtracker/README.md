@@ -7,7 +7,6 @@ This script can only be executed on EXOS switches running 15.6 and newer.
 It allows you to easily create dynamic ACL counters that count traffic that the user has selected to match on.
 If the Flow_track ACL already exists, then the script will remove it for easy ACL changing.
 
-
 ### Files
 * [flowtrack.py](flowtrack.py)
 * [README.md](README.md)
@@ -15,7 +14,7 @@ If the Flow_track ACL already exists, then the script will remove it for easy AC
 ### Requirements
 ExtremeXOS 15.6+
 
-## Features
+### Features
 * Source and/or Destination MAC address matching 48 mask only
 * Source and/or Destination IP address matching 32 mask only
 * Ingress and Egress ACL counter direction
@@ -26,8 +25,7 @@ ExtremeXOS 15.6+
 * Only support static ACL and counter called "Flow_track"
 * If the Flow_track ACL already exist then the script will remove it for easy ACL changing.
 
-### Example Commands
-
+## Example Commands
 ```
 run script flowtrack.py -sm 11:11:11:11:11:11 -dm 11-11-11-11-11-11  -p icmp -i 22
 run script flowtrack.py -dm 11-11-11-11-11-11 -i 22
@@ -171,7 +169,6 @@ configure access-list add Flow_track first ports 2 ingress
 ```
 
 ##### Example 3:
-
 ```
 X460G2-24p-G4.6 # run script flowtrack.py -dm 11-11-11-11-11-11 -sm 22:22:22:22:22:22 -i 2
 
@@ -221,7 +218,7 @@ configure access-list add Flow_track first ports 2 ingress
 ```
 
 ## License
-Copyright (c) 2015, Extreme Networks
+Copyright© 2015, Extreme Networks
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -246,9 +243,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Support
-The software is provided as is and Extreme has no obligation to provide
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
+Any support provided by Extreme Networks is at its sole discretion.
 
 Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
