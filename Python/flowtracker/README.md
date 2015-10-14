@@ -15,15 +15,15 @@ If the Flow_track ACL already exists, then the script will remove it for easy AC
 ExtremeXOS 15.6+
 
 ### Features
-* Source and/or Destination MAC address matching 48 mask only
-* Source and/or Destination IP address matching 32 mask only
+* Source and/or Destination MAC address matching 48-bit mask only
+* Source and/or Destination IP address matching 32-bit mask only
 * Ingress and Egress ACL counter direction
 * Apply ACL counter to a port group
 * protocol icmp matching with `-p icmp` option
 * ACL removal with `-r` option
 * Allows for '-' or ':' delimited MAC addresses.
-* Only support static ACL and counter called "Flow_track"
-* If the Flow_track ACL already exist then the script will remove it for easy ACL changing.
+* Only supports static ACL and counter called "Flow_track"
+* If the Flow_track ACL already exists,  the script will remove it for easy ACL changing.
 
 ## Example Commands
 ```
