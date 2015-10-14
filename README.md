@@ -2,7 +2,7 @@
 Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 
 # Categories
-* [Virtual EXOS](Virtual EXOS/README.md)
+* [Virtual EXOS](Virtual_EXOS/README.md)
 * [EXOS Policy](EXOS Policy/README.md)
 * [EXOS Scripts](EXOS Scripts/README.md)
 * [EXOS SDK](SDK/README.md)
