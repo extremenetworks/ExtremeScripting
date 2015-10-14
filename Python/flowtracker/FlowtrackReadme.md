@@ -1,4 +1,4 @@
-######Easy tool to apply ACL counters to troubleshoot packet loss and identify flows
+#####Easy tool to apply ACL counters to troubleshoot packet loss and identify flows
 *****************************
 
 **Files:**
@@ -6,7 +6,7 @@
 flowtrack.py 	-  The Core Python Script
 FlowtrackReadme.txt	-  This Readme
 
-Infrastructure Requirements:
+**Infrastructure Requirements:**
 *******************************
 Firmware: ExtremeXOS(TM) 15.6
 
