@@ -3,8 +3,8 @@
 
 **Files:**
 *****************************
-flowtrack.py 	-  The Core Python Script
-FlowtrackReadme.txt	-  This Readme
+* [flowtrack.py](https://github.com/extremenetworks/xkit/blob/master/Python/flowtracker/flowtrack.py) 	-  The Core Python Script
+* FlowtrackReadme.txt	-  This Readme
 
 **Infrastructure Requirements:**
 *******************************
