@@ -31,6 +31,7 @@ Features:
 
 Example Commands:
 *****************************
+```
 run script flowtrack.py -sm 11:11:11:11:11:11 -dm 11-11-11-11-11-11  -p icmp -i 22
 run script flowtrack.py -dm 11-11-11-11-11-11 -i 22
 run script flowtrack.py -dm 11-11-11-11-11-11 -i 22 -e
@@ -40,10 +41,11 @@ run script flowtrack.py -dip 4.4.4.4 -p icmp -i 1-10,15
 run script flowtrack.py -dip 4.4.4.4 -p icmp -i 1-10,15 -e
 run script flowtrack.py -r
 run script flowtrack.py -h
-
+```
 
 Command Help:
 *****************************
+```
 X450G2-48p-10G4.55 # run script flowtrack.py -h
 
 usage: flowtrack.py [-h] [-r] [-p [PROTOCOL]] [-sm [SOURCE_MAC]]
@@ -71,10 +73,11 @@ optional arguments:
   -i [INTERFACE], --interface [INTERFACE]
                         Switch Port number to apply the ACL counter
   -e, --egress          Make egress ACL (default: ingress)
-
+```
   
 Example 1:
 
+```
 X460G2-24p-G4.43 # run script flowtrack.py -sip 1.1.1.1 -i 2 -p icmp
 
 +--------------------------------------------------+
@@ -119,9 +122,11 @@ Commands used to apply ACL:
 create access-list Flow_track "protocol icmp;source-address 1.1.1.1/32" "permit;count Flow_track"
 configure access-list add Flow_track first ports 2 ingress
 
+```
 
 Example 2:
 
+```
 X460G2-24p-G4.5 # run script flowtrack.py -sip 1.1.1.1 -dip 2.2.2.2 -i 2
 
 
@@ -169,9 +174,11 @@ Commands used to apply ACL:
 create access-list Flow_track "protocol icmp;source-address 1.1.1.1/32;destination-address 2.2.2.2/32" "permit;count Flow_track"
 configure access-list add Flow_track first ports 2 ingress
 
+```
 
 Example 3:
 
+```
 X460G2-24p-G4.6 # run script flowtrack.py -dm 11-11-11-11-11-11 -sm 22:22:22:22:22:22 -i 2
 
 
@@ -217,6 +224,7 @@ _____________________________________
 Commands used to apply ACL:
 create access-list Flow_track "ethernet-source-address 22:22:22:22:22:22;ethernet-destination-address 11:11:11:11:11:11" "permit;count Flow_track"
 configure access-list add Flow_track first ports 2 ingress
+```
 
 License:
 *******************************
