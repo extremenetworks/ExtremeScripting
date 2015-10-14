@@ -1,36 +1,33 @@
-#####Easy tool to apply ACL counters to troubleshoot packet loss and identify flows
-*****************************
+# Flowtracker
+Flowtracker is an easy-to-use tool for applying ACL counters to troubleshoot packet loss and identify flows
 
-**Files:**
-*****************************
-* [flowtrack.py](https://github.com/extremenetworks/xkit/blob/master/Python/flowtracker/flowtrack.py) 	-  The Core Python Script
-* FlowtrackReadme.txt	-  This Readme
+## Description
+Flowtracker was created to help with troubleshooting packet loss on Extreme Networks switches.
+This script can only be executed on EXOS switches running 15.6 and newer.
+It allows you to easily create dynamic ACL counters that count traffic that the user has selected to match on.
+If the Flow_track ACL already exists, then the script will remove it for easy ACL changing.
 
-**Infrastructure Requirements:**
-*******************************
-Firmware: ExtremeXOS(TM) 15.6
 
-**Description:**
-*****************************
-Flowtrack was created to help in troubleshooting packet loss on Extreme Networks Switches.
-This script can only be ran on EXOS switches running 15.6 and newer.
-It easily creates dynamic ACL counters that count traffic that the user has select to match on.
-If the Flow_track ACL already exist then the script will remove it for easy ACL changing.
+### Files
+* [flowtrack.py](flowtrack.py)
+* [README.md](README.md)
 
-**Features:**
-*****************************
+### Requirements
+ExtremeXOS 15.6+
+
+## Features
 * Source and/or Destination MAC address matching 48 mask only
 * Source and/or Destination IP address matching 32 mask only
 * Ingress and Egress ACL counter direction
 * Apply ACL counter to a port group
-* protocol icmp matching with "-p icmp" option
-* ACL removal with -r option
+* protocol icmp matching with `-p icmp` option
+* ACL removal with `-r` option
 * Allows for '-' or ':' delimited MAC addresses.
 * Only support static ACL and counter called "Flow_track"
 * If the Flow_track ACL already exist then the script will remove it for easy ACL changing.
 
-**Example Commands:**
-*****************************
+### Example Commands
+
 ```
 run script flowtrack.py -sm 11:11:11:11:11:11 -dm 11-11-11-11-11-11  -p icmp -i 22
 run script flowtrack.py -dm 11-11-11-11-11-11 -i 22
@@ -43,8 +40,7 @@ run script flowtrack.py -r
 run script flowtrack.py -h
 ```
 
-**Command Help:**
-*****************************
+##### Command Help
 ```
 X450G2-48p-10G4.55 # run script flowtrack.py -h
 
@@ -75,8 +71,7 @@ optional arguments:
   -e, --egress          Make egress ACL (default: ingress)
 ```
   
-**Example 1:**
-
+##### Example 1:
 ```
 X460G2-24p-G4.43 # run script flowtrack.py -sip 1.1.1.1 -i 2 -p icmp
 
@@ -90,9 +85,9 @@ X460G2-24p-G4.43 # run script flowtrack.py -sip 1.1.1.1 -i 2 -p icmp
 
 
      L3 ACL applied correctly
-_____________________________________
++-----------------------------------+
 |               ACL                 |
-_____________________________________
++-----------------------------------+
 
 entry Flow_track {
 if match all {
@@ -106,9 +101,9 @@ if match all {
 
 
 
-_____________________________________
++-----------------------------------+
 |         ACL COUNTER               |
-_____________________________________
++-----------------------------------+
 
  Vlan Name        Port   Direction
     Counter Name                   Packet Count         Byte Count
@@ -124,8 +119,7 @@ configure access-list add Flow_track first ports 2 ingress
 
 ```
 
-**Example 2:**
-
+##### Example 2:
 ```
 X460G2-24p-G4.5 # run script flowtrack.py -sip 1.1.1.1 -dip 2.2.2.2 -i 2
 
@@ -141,9 +135,9 @@ X460G2-24p-G4.5 # run script flowtrack.py -sip 1.1.1.1 -dip 2.2.2.2 -i 2
 
 
      L3 ACL applied correctly
-_____________________________________
++-----------------------------------+
 |               ACL                 |
-_____________________________________
++-----------------------------------+
 
 entry Flow_track {
 if match all {
@@ -158,9 +152,9 @@ if match all {
 
 
 
-_____________________________________
++-----------------------------------+
 |         ACL COUNTER               |
-_____________________________________
++-----------------------------------+
 
  Vlan Name        Port   Direction
     Counter Name                   Packet Count         Byte Count
@@ -176,7 +170,7 @@ configure access-list add Flow_track first ports 2 ingress
 
 ```
 
-**Example 3:**
+##### Example 3:
 
 ```
 X460G2-24p-G4.6 # run script flowtrack.py -dm 11-11-11-11-11-11 -sm 22:22:22:22:22:22 -i 2
@@ -193,9 +187,9 @@ X460G2-24p-G4.6 # run script flowtrack.py -dm 11-11-11-11-11-11 -sm 22:22:22:22:
 
 
       L2 ACL applied correctly
-_____________________________________
++-----------------------------------+
 |               ACL                 |
-_____________________________________
++-----------------------------------+
 
 entry Flow_track {
 if match all {
@@ -209,9 +203,9 @@ if match all {
 
 
 
-_____________________________________
++-----------------------------------+
 |         ACL COUNTER               |
-_____________________________________
++-----------------------------------+
 
  Vlan Name        Port   Direction
     Counter Name                   Packet Count         Byte Count
@@ -226,8 +220,7 @@ create access-list Flow_track "ethernet-source-address 22:22:22:22:22:22;etherne
 configure access-list add Flow_track first ports 2 ingress
 ```
 
-**License:**
-*******************************
+## License
 Copyright (c) 2015, Extreme Networks
 All rights reserved.
 
@@ -252,13 +245,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-**Support**
-******************************
+## Support
 The software is provided as is and Extreme has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
 Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme
