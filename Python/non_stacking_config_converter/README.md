@@ -2,8 +2,7 @@
 This tool converts a non stacking "show configuration" output to a stacking configuration for slot 1.
 
 ### Description
-This script will convert non stacking configurations to stacking configurations for slot 1.
-**Every situation possible has not been tested**, but it workeds on the configurations tested in the example.
+This script will convert non stacking configurations to stacking configurations for slot 1.  Every situation possible has not been tested, but it worked on the configurations tested in the example.
 
 **Please review the configuration before loading the configuration on a switch**
 
@@ -30,7 +29,7 @@ This script was tested on 16.1 and older.
 * Check over the new configuration file to make sure it's right.
 
 ## EXOS run example:
-'''
+```
 Switch.2 # save configuration as-script nonstack
 Do you want to save configuration to script nonstack.xsf? (y/N) Yes
 Saving configuration to script nonstack.xsf on master .... done!
@@ -51,10 +50,10 @@ Switch.4# ls
 -rw-rw-rw-    1 root     root       304838 Sep 20 19:13 primary.cfg
 -rw-r--r--    1 admin    admin        5838 Sep 21 11:17 stack_nonstack.xsf
 drwxr-xr-x    2 root     root            0 Sep  5 07:03 vmt
-'''
+```
 
 ## Windows run example
-'''
+```
 C:\Users\xxxxx\xxxxx\stacking_change>python non_stacking_config_convert.py
 
 Note: please only use the show configuration output for this script.
@@ -73,7 +72,7 @@ C:\Users\xxxxx\xxxxx\stacking_change>dir
 09/21/2015  10:54 AM            27,595 config.txt
 09/21/2015  11:12 AM             3,812 non_stacking_config_convert.py
 09/21/2015  11:22 AM            28,549 stack_config.txt
-'''
+```
 
 ## License
 Copyright© 2015, Extreme Networks
