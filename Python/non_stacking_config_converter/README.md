@@ -13,7 +13,7 @@ This script will convert non stacking configurations to stacking configurations 
 * [Example output stacking configuration] (stack_example.txt)
 
 ### Requirements
-Firmware: ExtremeXOS(TM) 16.1
+Firmware: ExtremeXOS(TM)
 This script was tested on 16.1 and older.
 
 ### Features
