@@ -35,7 +35,6 @@ def change_port(port):
     if port == '' or port == 'all' or port[-0] == '"': # no change on blank or all or port groups
         return port
     if ',' in port: # check for , for port list
-        print port
         ports = []
         port = port.split(',') # split to table based on ,
         for index in port: # changes each port index by index
@@ -57,7 +56,6 @@ If file is not there the Script will quit
 def line_change(stackport, port, sline):
         f = open(("%s" % newstack), 'a') # opens the file
         sline[port] = stackport
-        print sline
         line = " ".join(sline) # removing the table so it looks like a command
         f.write("%s\n" % line) # writing the line to the new config file
 
