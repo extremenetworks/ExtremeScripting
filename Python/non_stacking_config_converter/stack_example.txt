@@ -1,0 +1,112 @@
+this value is at the end of the line port
+configure stpd s0 ports edge-safeguard enable 1:10 recovery-timeout 60
+configure stpd s0 ports bpdu-restrict enable 1:10 recovery-timeout 6
+configure vlan default delete ports 1:1-42
+configure vlan default delete ports 1:1
+configure vlan default delete ports 1:1-2,1:3,1:4,1:5,1:10-15
+configure vlan default delete ports all
+configure vlan test add ports 1:14 tagged
+disable stpd s0 rapid-root-failover
+configure stpd s0 default-encapsulation dot1d
+enable stpd s0 auto-bind vlan Default
+configure stpd s0 ports mode dot1d 1:1
+configure stpd s0 ports cost auto 1:1
+configure stpd s0 ports priority 16 1:1
+configure stpd s0 ports link-type broadcast 1:1
+disable lldp ports 1:13
+enable sharing 1:1 grouping 1:1-2 algorithm address-based L2
+enable port 1:1
+disable port 1:1-10
+enable sharing 1:5 grouping 1:1-10
+enable sharing 1:5 grouping 1:1-10 algorithm address-based L2 health-check
+enable mirror to port-list 1:1-10 loopback-port 1:5 remote-tag <rtag>
+create mirror <mirror_name_li> to port-list 1:1-10 loopback-port 1:5 remote-tag <rtag> description <mirror-desc>
+configure netlogin dynamic-vlan uplink-ports 1:1-10
+create mirror <mirror_name_li> to port-list 1:1-10 loopback-port 1:5
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> tcp-port <tcpport> frequency <freq> miss <misses>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> tcp-port <tcpport> frequency <freq>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> tcp-port <tcpport> miss <misses>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> tcp-port <tcpport>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> frequency <freq> miss <misses>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> frequency <freq>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress> miss <misses>
+configure sharing health-check member-port 1:5 add track-tcp <ipaddress>
+configure sharing health-check member-port 1:5 delete track-tcp
+configure sharing health-check member-port 1:5 frequency <freq>
+configure sharing health-check member-port 1:5 miss <misses>
+configure sharing health-check member-port 1:5 disable track-tcp
+configure sharing health-check member-port 1:5 enable track-tcp
+configure sharing 1:5 lacp activity-mode active
+configure sharing 1:5 lacp activity-mode passive
+configure sharing 1:5 lacp defaulted-state-action add
+configure sharing 1:5 lacp defaulted-state-action delete
+configure sharing 1:5 lacp system-priority <system_priority>
+configure sharing 1:5 lacp timeout long
+configure sharing 1:5 lacp timeout short
+configure sharing 1:5 minimum-active 4
+configure port 1:1 display-string "happy Day"
+configure policy rule <profile_index> port 1:5 port-string 1:1-10 drop
+configure policy rule <profile_index> port 1:5 mask <mask> port-string 1:1-10 drop
+configure policy rule admin-profile port 1:5 admin-pid <admin_pid>
+configure policy rule admin-profile port 1:5
+configure policy rule admin-profile port 1:5 port-string 1:1-10 admin-pid <admin_pid>
+configure policy rule admin-profile port 1:5 port-string 1:1-10
+configure policy rule admin-profile port 1:5 mask <mask>
+configure policy rule admin-profile port 1:5 mask <mask> port-string 1:1-10 storage-type volatile
+configure eaps shared-port 1:5 mode controller
+configure eaps shared-port 1:5 mode partner
+configure bootprelay dhcp-agent information circuit-id port-information <port_info> port 1:4
+configure eaps shared-port 1:4 common-path-timers health-interval <seconds>
+configure eaps shared-port 1:4 common-path-timers timeout <seconds>
+configure eaps shared-port 1:4 link-id <id>
+configure eaps shared-port 1:4 mode controller
+configure eaps shared-port 1:4 mode partner
+configure eaps shared-port 1:4 segment-timeout expiry-action segment-down
+configure eaps shared-port 1:4 segment-timeout expiry-action send-alert
+configure eaps shared-port 1:4 segment-timers expiry-action segment-down
+configure eaps shared-port 1:4 segment-timers expiry-action send-alert
+configure eaps shared-port 1:4 segment-timers health-interval <seconds>
+configure eaps shared-port 1:4 segment-timers timeout <seconds>
+configure ip-security dhcp-snooping information circuit-id port-information <port_info> port 1:4
+configure lacp member-port 1:4 priority <port_priority>
+configure cfm domain <domain_name> association <association_name> ports 1:1 end-point down mepid <mepid>
+configure cfm domain <domain_name> association <association_name> ports 1:1 end-point up mepid <mepid>
+configure cfm domain <domain_name> association <association_name> ports 1:1 end-point down sender-id-ipaddress disable
+configure cfm domain <domain_name> association <association_name> ports 1:1 end-point down sender-id-ipaddress enable <ip-address>
+configure cfm domain <domain_name> association <association_name> ports 1:1 end-point up sender-id-ipaddress disable
+configure cfm domain <domain_name> association <association_name> ports 1:1 end-point up sender-id-ipaddress enable <ip-address>
+configure cfm domain <domain_name> association <association_name> ports 1:1 add end-point up <mepid> group <group_name>
+configure fdb mac-tracking add ports 1:1
+configure fdb mac-tracking delete ports 1:1
+configure fdb mac-tracking ports 1:1
+configure identity-management detection off all ports 1:1
+configure identity-management detection off fdb ports 1:1
+configure identity-management detection off iparp ports 1:1
+configure identity-management detection off ipsecurity ports 1:1
+configure identity-management detection off kerberos ports 1:1
+configure identity-management detection off lldp ports 1:1
+configure identity-management detection off netlogin ports 1:1
+configure identity-management detection on all ports 1:1
+configure identity-management detection on fdb ports 1:1
+configure identity-management detection on iparp ports 1:1
+configure identity-management detection on ipsecurity ports 1:1
+configure identity-management detection on kerberos ports 1:1
+configure identity-management detection on lldp ports 1:1
+configure identity-management detection on netlogin ports 1:1
+configure identity-management role-based-vlan add ports 1:1
+configure identity-management role-based-vlan delete ports 1:1
+configure identity-management add ports 1:1
+configure identity-management delete ports 1:1
+configure identity-management ports 1:1
+configure ip-fix ports 1:1 flow-key ipv4 mask destination ipaddress <value>
+configure ip-fix ports 1:1 flow-key ipv4 mask source ipaddress <value>
+configure ip-fix ports 1:1 flow-key ipv6 mask destination ipaddress <value>
+configure ip-fix ports 1:1 flow-key ipv6 mask source ipaddress <value>
+configure ip-fix ports 1:1 record all
+configure ip-fix ports 1:1 record dropped-only
+configure ip-fix ports 1:1 record non-dropped
+configure ip-fix ports 1:1 egress
+configure ip-fix ports 1:1 ingress
+configure ip-fix ports 1:1 ingress-and-egress
+configure ipmcforwarding to-cpu auto ports 1:1
+configure ipmcforwarding to-cpu off ports 1:1
