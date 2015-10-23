@@ -145,7 +145,7 @@ def main():
                     f.write("%s\n" % line) # writing the line to the new config file
                 pass
 
-            # Not sure if we need this one
+            # If port-list is seen in the line.
             elif 'port-list' in sline:
                 port =  sline.index('port-list') + 1 #finding index where the ports are
                 stackport =  change_port(sline[port]) #calling function to change ports
