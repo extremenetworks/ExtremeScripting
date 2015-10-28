@@ -1,39 +1,40 @@
-*****************************
-FDB OUI
-https://marketplace.extremenetworks.com/#details/Automated_FS_Backup_Py
-*****************************
+# FDB OUI
 
-
-Files:
-*****************************
-fdb_oui.py              -  The Core Script
-fdb_ouiReadme.txt       -  This Readme
-
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 15.5.2 and Newer
-Platform(s): Any ExtremeXOS switch.
-
-
-Description:
-*****************************
+## Description
 This Python script scans the FDB table and reports the vendor of the device
 connected based on known MAC OUI values
 
+### Files
+* [fdb_oui.py](fdb_oui.py)
+* [README.md](README.md)
 
-Example:
-****************************
+### Requirements
+* Firmware: ExtremeXOS(TM) 15.6+
+* Platform(s): Any ExtremeXOS switch
 
+Example
+```
+# run script fdb_oui.py
 
-Notes:
-*******************************
+Extreme Networks device with MAC address 00:01:30:10:3b:1c on port 1
+Extreme Networks device with MAC address 00:04:96:1d:93:a4 on port 3
+Unknown device with MAC address 00:09:9b:01:8d:75 on port 6
+VMWare device with MAC address 00:0c:29:18:a9:43 on port 7
+Unknown device with MAC address 00:10:18:d4:af:24 on port 8
+Enterasys Networks device with MAC address 00:11:88:f1:a2:10 on port 11
+Unknown device with MAC address 00:c0:dd:1b:60:5c on port 19
+Unknown device with MAC address 78:2b:cb:46:55:dd on port 22
+Dell device with MAC address 84:2b:2b:5f:e6:e1 on port 18
+Dell device with MAC address 84:2b:2b:5f:e6:e9 on port 18
+Dell device with MAC address 84:2b:2b:61:73:e0 on port 8
 
+```
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## Notes
+The "known" OUI List is not intended to be comprehensive.
+
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -56,14 +57,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
-
+>Be Extreme
