@@ -1,8 +1,8 @@
-# xkit
+# ExtremeScripting
 Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 
 # Categories
-* [Virtual EXOS](Virtual_EXOS/README.md)
+* [Virtual EXOS](https://github.com/extremenetworks/Virtual_EXOS)
 * [EXOS Policy](EXOS Policy/README.md)
 * [EXOS Scripts](EXOS Scripts/README.md)
 * [EXOS SDK](SDK/README.md)
