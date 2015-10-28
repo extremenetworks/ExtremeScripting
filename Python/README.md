@@ -1,12 +1,11 @@
 # Python Scripts
-* autofsbackuppy
-* cleanswitch
-* enablefeaturescheckpy
-* fdb_oui
-* flowtracker - creates a dynamic ACL to count packets.
-* qosconfigpy
-* radiusmgmtconfigpy
-* radiusnetloginconfigpy
-* snmpv1v2configpy
-* sntpconfigpy
-* xKitPython
+* [autofsbackuppy](autofsbackuppy)
+* [cleanswitch](cleanswitch)
+* [enablefeaturescheckpy](enablefeaturescheckpy)
+* [fdb_oui](fdb_oui)
+* [flowtracker](flowtracker) - creates a dynamic ACL to count packets.
+* [qosconfigpy](qosconfigpy)
+* [radiusmgmtconfigpy](radiusmgmtconfigpy)
+* [radiusnetloginconfigpy](radiusnetloginconfigpy)
+* [snmpv1v2configpy](snmpv1v2configpy)
+* [sntpconfigpy](sntpconfigpy)
