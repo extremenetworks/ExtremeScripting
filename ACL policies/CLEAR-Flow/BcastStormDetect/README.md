@@ -33,7 +33,7 @@ actions automatically.
 * This requires a CLEAR-Flow enabled switch
 
 ### Versions
-1.0 - (1 April 2010) First Version of the script
+* 1.0 - (1 April 2010) First Version of the script
 
 
 ## License
