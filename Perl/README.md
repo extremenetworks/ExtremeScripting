@@ -1,4 +1,4 @@
 # Perl Scripts
 
-* IOStoEXOSACL
-* getfdsql
+* [IOStoEXOSACL](IOStoEXOSACL)  - Convert IOS ACLs to EXOS ACLs
+* [getfdsql](getfdsql)  - This script uses the XML API to get all FDB entries on a switch.
