@@ -1,52 +1,45 @@
-*****************************
-iSCSI Auto-provisioning
-https://marketplace.extremenetworks.com/#details/iSCSI_Auto_provisioning
-*****************************
+# iSCSI Auto-provisioning
 
-
-Files:
-*****************************
-iscsi.pol 		-  The Example policy file
-iscsi-Readme.txt	-  This Readme
-
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 11.6.x and Newer for iscsi.pol standard
-Platform(s): Summit Series; BlackDiamond 8800, 8900-series, 8900-XL series,
-             BlackDiamond BDX
-
-
-Description:
-*****************************
+## Description
 This simple script uses CLEAR-Flow to identify iSCSI traffic (port 3260),
 assign it the right Quality of Service, and enable jumbo frames.
 This pre-provisioned settings in a network allows iSCSI traffic to be
 protected in a higher priority queue.
 
 
-Example:
-****************************
+### Files
+* [iscsi.pol](iscsi.pol)	-  The Example policy file
+* [README.md](README.md)	-  This Readme
+
+
+### Requirements
+* 11.6.x and Newer for iscsi.pol standard
+* Platform(s): Summit Series; BlackDiamond 8800, 8900-series, 8900-XL series, BlackDiamond BDX
+
+
+### Example
+In the below example the rule becomes true and CLEAR-Flow executes its actions
+automatically.
+
+```
 <X650 Running CLEAR-FLow policy> (Rule becomes true)
 <X650 Running CLEAR-FLow policy> (CLEAR-Flow takes configured actions
                                   (e.g. QoS Provision))
+```
 
 
-In the above example the rule becomes true and CLEAR-Flow executes its actions
-automatically.
+### Notes
+
+* This requires a CLEAR-Flow enabled switch
 
 
-Notes:
-*******************************
-- This requires a CLEAR-Flow enabled switch
-
-1.0 - (1 April 2010) First Version of the script
-1.1 - (17 April 2012) Version tested for xKit
+### Versions
+* 1.0 - (1 April 2010) First Version of the script
+* 1.1 - (17 April 2012) Version tested for xKit
 
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
+## License
+Copyright© 2015, Extreme Networks
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -70,13 +63,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme
