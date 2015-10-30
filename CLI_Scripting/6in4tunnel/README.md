@@ -15,6 +15,7 @@ across an IPV4 region on an ExtremeXOS(TM) switch.
 
 
 ### Example
+```
 In this example, Router A is assumed to have an interface to an IPv4 region
 with the address 192.168.1.1 (for this example we are using private IPv4
 addresses, but to tunnel across the Internet, you would use a public address).
@@ -56,7 +57,7 @@ The following functions are performed in this example:
 3. IPV6 VLAN creation, configuration and enabling
 
 4. IPV6 address configuration and enabling
-
+```
 
 ## License
 Copyright© 2015, Extreme Networks.  All rights reserved.
