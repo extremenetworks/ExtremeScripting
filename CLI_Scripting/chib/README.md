@@ -1,39 +1,33 @@
-*****************************
-Chassis Hibernation
-https://marketplace.extremenetworks.com/#details/Chassis_Hibernation
-*****************************
+#Chassis Hibernation
 
-Files:
-*****************************
-chassishibernate.xsf 	-  The Core Script
-ch-Readme.txt		-  This Readme
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 11.6.x and Newer for chassishibernation.xsf standard
-Platform(s): BD8806/8810 (Not blade dependent)
-
-Description:
-*****************************
+##Description
 Administrators can use the chassis hibernation script to save energy by setting up a profile that defines when they would like the system to place specified blades into a standby state.  The administrator must specify when and which blades are enabled for this power saving.
 
-Example:
-****************************
+###Files
+* [chassishibernate.xsf](chassishibernate.xsf) 	-  The Core Script
+* [README.md](README.md)		-  This Readme
+
+### Requirements
+
+* Firmware: ExtremeXOS(TM) 11.6.x and Newer for chassishibernation.xsf standard
+* Platform(s): BD8806/8810 (Not blade dependent)
+
+
+### Example
+In the below example the UPM, based on configured time of day, will disable  and enable BD8806 Blades for power conservation.
+```
 <BD8806 Running UPM> (6AM Timer Triggers and Enables Blades)
 <BD8806 Running UPM> (10PM Timer Triggers and Disables Blades)
+```
 
-In the above example the UPM, based on configured time of day, will disable  and enable BD8806 Blades for power conservation.
+### Notes
+* Configuring time of day is required
 
-Notes:
-*******************************
-- Configuring time of day is required
+### Updates
+* 1.0 - (19 April 2010) First Version of the script
 
-1.0 - (19 April 2010) First Version of the script
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -56,13 +50,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

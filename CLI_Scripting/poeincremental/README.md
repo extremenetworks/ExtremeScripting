@@ -1,24 +1,6 @@
-*****************************
-PoE Incremental Boot
-https://marketplace.extremenetworks.com/#details/PoE_Incremental_Boot
-*****************************
+# PoE Incremental Boot
 
-Files:
-*****************************
-autoexec-dist.xsf   - Auto exec script.  Must be renamed to autoexec.xsf
-poe_README.txt      - This readme file
-poe_scripts.xsf     - poe script
-poe_vars.xsf        - Configuration variables to be edited
-
-
-Infrastructure Requirements
-*******************************
-Firmware: XOS Version 12.4.1 or greater
-Platform(s): Any ExtremeXOS switch.
-
-
-Description:
-*****************************
+## Description
 This script allows powering up PDs Incrementally
 
 In some cases a network POE switch will require an additional power supply to
@@ -41,9 +23,21 @@ We have two options here:
 1) Add an additional power injector
 2) Use scripting to control the number of POE ports powered on boot.
 
+### Files
+[autoexec-dist.xsf](autoexec-dist.xsf)   - Auto exec script.  Must be renamed to autoexec.xsf
+[README.md](README.md)      - This readme file
+[poe_scripts.xsf](poe_scripts.xsf)     - poe script
+[poe_vars.xsf](poe_vars.xsf)        - Configuration variables to be edited
 
-Example:
-****************************
+
+### Requirements
+* Firmware: XOS Version 12.4.1 or greater
+* Platform(s): Any ExtremeXOS switch.
+
+
+
+### Example
+
 Install:
 1) Modify: poe_vars.xsf
    Determine the time it takes for a Power Devices (PD) to reach idle watts
@@ -83,22 +77,15 @@ Install:
 
 
 
-Notes:
-*******************************
+### Notes
 * This script expects all inline-power ports to be disabled.
-* This script will only run "enable inline-power ports <port>"
-  If there are any other prerequisites required for poe, then
-  they will need to be configured and saved prior.
-* This script will run in non-persistent mode. This will require all PD to
-  rely on the autoexec.xsf script on bootup for power.
+* This script will only run "enable inline-power ports <port>".  If there are any other prerequisites required for poe, then they will need to be configured and saved prior.
+* This script will run in non-persistent mode. This will require all PD to rely on the autoexec.xsf script on bootup for power.
 * Save your config.
 
 
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -121,13 +108,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

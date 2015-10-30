@@ -1,38 +1,33 @@
-*****************************
-Time Based MAC Restrict
-https://marketplace.extremenetworks.com/#details/Time_Based_MAC_Restrict
-*****************************
+# SNTP Configuration
 
-Files:
-*****************************
-tbmr.xsf 		-  The Core Script
-tbmr-Readme.txt	-  This Readme
+## Description
+This script provides an example for Simple Network Time
+Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.
 
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.3.x and Newer for tbmr.xsf standard
-Platform(s): Any ExtremeXOS switch. 
+This script configures Simple Netowrk Time Protocol (SNTP) for a
+switch to obtain time information from a remote Network Time Protocol
+(NTP) server.
 
-Description: 
-*****************************
-Based on time, restricts network usage to preconfigured MAC addresses
+Specifically, this example performs the following functions:
 
-Example: 
-****************************
-<x250e running script> (timed event triggers lockout)
-<x250e running script> (MAC Detected and blackholed)
+1. Configures the SNTP client for the switch
+
+2. Sets up the timezone for the switch
+
+3. Enables the SNTP client
 
 
-Notes:
-*******************************
- - This script requires pre-configuration and editing of restricted MAC addresses in the .xsf
+### Files
+[README.md](README.md)    - This readme file
+[SNTPConfig.xsf](SNTPConfig.xsf)          - Script file
 
-1.0 - (16 April 2010) First Version of the script
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+### Requirements
+* Firmware: ExtremeXOS(TM) 12.0
+* Platform(s): Any ExtremeXOS switch.
+
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -55,13 +50,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

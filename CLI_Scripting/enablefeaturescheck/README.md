@@ -1,52 +1,25 @@
-*****************************
-SNTP Configuration
-https://marketplace.extremenetworks.com/#details/SNTP_Configuration
-*****************************
+# List Enabled Features
 
-Files:
-*****************************
-SNTPConfigReadme.txt    - This readme file
-SNTPConfig.xsf          - Script file
+## Description
+This script identifies the features enabled on a switch.  The list
+of features is discovered by a series of if/then else statements and includes
+most of the common features that may be enabled by a switch.  This list does
+not include all possible features of a switch and may be modified to
+include the unique features running on your network.
+
+### Files
+* [EnabledFeatures.xsf](EnabledFeatures.xsf) 	-  The Core Script
+* [README.md](README.md)	-  This Readme
 
 
-Infrastructure Requirements
+### Requirements
 *******************************
-Firmware: ExtremeXOS(TM) 12.0
+Firmware: ExtremeXOS(TM) 12.1 and Newer
 Platform(s): Any ExtremeXOS switch.
 
 
-Description:
-*****************************
-This script provides an example for Simple Network Time
-Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.
-
-This script configures Simple Netowrk Time Protocol (SNTP) for a
-switch to obtain time information from a remote Network Time Protocol
-(NTP) server.
-
-Specifically, this example performs the following functions:
-
-1. Configures the SNTP client for the switch
-
-2. Sets up the timezone for the switch
-
-3. Enables the SNTP client
-
-
-Example:
-****************************
-
-
-
-Notes:
-*******************************
-
-
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -69,13 +42,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

@@ -1,21 +1,6 @@
-*****************************
-QoS Configuration
-https://marketplace.extremenetworks.com/#details/QoS_Configuration
-*****************************
+# QoS Configuration
 
-
-Files:
-*****************************
-QoSConfig.xsf 	-  The Core Script
-qos-Readme.txt	-  This Readme
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.0.x and Newer for QoSConfig.xsf standard
-Platform(s): BD8800, SummitX 
-
-Description: 
-*****************************
+## Description
 For a set of ports, advanced QoS settings can be easily provisioned.
 The settings include scheduling algorithm (priority or WRR),
 weights for different traffic classes, as well as 802.1p/DSCP examination
@@ -62,24 +47,32 @@ Specifically, this example performs the following functions:
 
   5. Optionally enables diffserv examination and/or diffserv replacement
 
-Example: 
-****************************
+
+### Files
+* [QoSConfig.xsf](QoSConfig.xsf) 	-  The Core Script
+* [README.md](README.md)	-  This Readme
+
+### Requirements
+* Firmware: ExtremeXOS(TM) 12.0.x and Newer for QoSConfig.xsf standard
+* Platform(s): BD8800, SummitX 
+
+
+### Example
+```
 <x250e running script>	 (Script Interactively using $read asks operator a series of questions)
 <x250e running script>	(Script auto-provisions QoS based on Questions)
+```
 
-Notes:
-*******************************
- - This script not intended to be run on BlackDiamond 10K,12K,20K
+### Notes
 
-1.0 - (20 June 2008) First Version of the script
-1.1 - (21 April 2010) Corrected Inconsistency in running both ExtremeXOS(™)
-                      and Epicenter(™) scripting syntax.
+* This script not intended to be run on BlackDiamond 10K,12K,20K
 
+### Updates
+* 1.0 - (20 June 2008) First Version of the script
+* 1.1 - (21 April 2010) Corrected Inconsistency in running both ExtremeXOS(™) and Epicenter(™) scripting syntax.
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -102,13 +95,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

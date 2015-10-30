@@ -1,53 +1,46 @@
-*****************************
-Auto-VLAN Provision EDP
-https://marketplace.extremenetworks.com/#details/Auto_VLAN_Provision_EDP
-*****************************
+# Auto-VLAN Provision EDP
 
-Files:
-*****************************
-avp.xsf         - The Core Script
-avp-Readme.txt	- This Readme
-avpdefault.xsf	- Auto-VLAN Provision Deployed as a default.xsf script and
-                  using UPM from a Script
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.3.x and Newer for avp.xsf standard
-Firmware: ExtremeXOS 12.4.x and Newer for avpdefault.xsf expanded
-Platform(s): Any ExtremeXOS switch. 
-
-Description: 
-*****************************
+## Description
 This script will auto-configure an edge switch based on the ports seen on the
 uplink port. The script will initially show EDP to find the VLAN, VLAN ID and
 port that will be connected to the uplink.  The script will then create a VLAN,
 configure it with VLAN ID and add the port tagged or untagged as necessary.
 
-Example: 
-****************************
+### Files
+
+* [avp.xsf](avp.xsf)         - The Core Script
+* [README.md](README.md)	- This Readme
+* [avpdefault.xsf](avpdefault.xsf)	- Auto-VLAN Provision Deployed as a default.xsf script and using UPM from a Script
+
+### Requirements
+
+* Firmware: ExtremeXOS(TM) 12.3.x and Newer for avp.xsf standard
+* Firmware: ExtremeXOS 12.4.x and Newer for avpdefault.xsf expanded
+* Platform(s): Any ExtremeXOS switch. 
+
+
+### Example
+In the below example the x250e running the applet would automatically configure
+its upliknk with VLAN: EDP_TEST with a tag of 2010.
+```
 <x250e running script>	 (sends edp query) ----> <x450a with VLAN: EDP_TEST TAG 2010>
 <x450a with VLAN: EDP_TEST TAG 2010> (replies with EDP PDU) ---> <x250e running script>
 <x250e running script> (Parses EDP output and configures switch)
-
-In the above example the x250e running the applet would automatically configure
-its upliknk with VLAN: EDP_TEST with a tag of 2010.
+```
 
 
-Notes:
-*******************************
- - This requires a unique VLAN on the EDP uplink port that a switch running
-   this script can see.
- - This version will only provision the first VLAN. Multiple VLANs are ignored.
- - The avpdefault.xsf will need to be renamed to default.xsf for ExtremeXOS
-   to to use it when a configuration file is not selected. For more information
-   please see the ExtremeXOS Concepts guide.
 
-1.0 - (19 April 2010) First Version of the script
+### Notes
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+* This requires a unique VLAN on the EDP uplink port that a switch running this script can see.
+* This version will only provision the first VLAN. Multiple VLANs are ignored.
+* The avpdefault.xsf will need to be renamed to default.xsf for ExtremeXOS to to use it when a configuration file is not selected. For more information please see the ExtremeXOS Concepts guide.
+
+### Updates
+* 1.0 - (19 April 2010) First Version of the script
+
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -70,13 +63,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

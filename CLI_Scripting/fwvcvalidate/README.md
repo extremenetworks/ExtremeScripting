@@ -1,51 +1,43 @@
-*****************************
-Firmware Version Check
-https://marketplace.extremenetworks.com/#details/Firmware_Version_Check
-*****************************
+# Firmware Version Check
 
-Files:
-*****************************
-fwvc.xsf 	-  The Core Script
-fwvc-Readme.txt	-  This Readme
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.3.x and Newer for fwvc.xsf standard
-Platform(s): Any ExtremeXOS switch.
-TFTP Server
-
-Description:
-*****************************
+## Description
 Allows for automatic firmware version validation at bootup. When a switch boots,
 this script matches the configured-firmware-version with the correct-firmware
 setting.  If the configured-firmware setting is off, it is corrected with the
 switch boot-up.
 
-Example:
-****************************
+### Files
+* [fwvc.xsf](fwvc.xsf) 	-  The Core Script
+[README.md](README.md)	-  This Readme
+
+### Requirements
+* Firmware: ExtremeXOS(TM) 12.3.x and Newer for fwvc.xsf standard
+* Platform(s): Any ExtremeXOS switch.
+* TFTP Server
+
+###Example
+In the below example the x650 switch would check its firmware version against
+a pre-set supported version. If the incorrect version was detected upon boot,
+this would be corrected and switch (if selected) would reboot itself.
+```
 <x650 loaded with autoexec.xsf> (switch examines correct firmware)
 <x650 loaded with autoexec.xsf> (If incorrect downloads correct image)
 <x650 loaded with autoexec.xsf> (Option to reboot switch)
+```
 
 
-In the above example the x650 switch would check its firmware version against
-a pre-set supported version. If the incorrect version was detected upon boot,
-this would be corrected and switch (if selected) would reboot itself.
 
+### Notes
 
-Notes:
-*******************************
-- This requires a TFTP server
-- This requires pre-setting correct firmware version in the script
-- For automation the script should be copied into a default.xsf and or an autoexec.xsf
+* This requires a TFTP server
+* This requires pre-setting correct firmware version in the script
+* For automation the script should be copied into a default.xsf and or an autoexec.xsf
 
-1.0 - (7 Feb 2010) First Version of the script
+### Updates
+* 1.0 - (7 Feb 2010) First Version of the script
 
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -68,13 +60,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

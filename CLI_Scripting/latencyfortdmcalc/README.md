@@ -1,40 +1,27 @@
-*****************************
-Latency XLS for TDM
-https://marketplace.extremenetworks.com/#details/Latency_XLS_for_TDM
-*****************************
+#Latency XLS for TDM
 
-Files:
-*****************************
-Readme.txt                      - This readme file
-JitterBufferBudget-c0.4.xlsm    - Excel template for calculation
-
-
-Infrastructure Requirements
-*******************************
-Platform(s): Extreme Networks Mobile Backhaul E4G-200 or E4G-400
-
-
-Description:
-*****************************
+## Description
 This tool calculates the estimate of PSN bandwidth and the end-to-end latency
 incurred in encapsulating given TDM payload. The calculations are applicable to
 the encapsulation formats specified in RFC5086 (CESoP) and RFC4553 (SAToP).
 
-Example:
-****************************
-Launch the tool with Excel and fill in the fields
+### Files
+[README.md](README.md)                      - This readme file
+[JitterBufferBudget-c0.4.xlsm](JitterBufferBudget-c0.4.xlsm)    - Excel template for calculation
 
 
-Notes:
-*******************************
+### Requirements
+
+* Platform(s): Extreme Networks Mobile Backhaul E4G-200 or E4G-400
+
+
+### Notes
 You must allow Excel macros to run in order for the spreadsheet to calculate
 correctly.
 
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -57,13 +44,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

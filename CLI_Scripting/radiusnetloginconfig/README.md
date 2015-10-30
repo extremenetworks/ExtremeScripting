@@ -1,56 +1,40 @@
-*****************************
-RADIUS Mgmt Config
-https://marketplace.extremenetworks.com/#details/RADIUS_Mgmt_Config
-*****************************
+# RADIUS Netlogin Config
 
-Files:
-*****************************
-RADIUSMgmtConfigReadme.txt  - This readme file
-RADIUSMgmtConfig.xsf        - The Script
-
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.0
-Platform(s): Any ExtremeXOS switch.
-
-
-Description:
-*****************************
+## Description
 This script provides an example for configuring an
-ExtremeXOS(TM) switch with RADIUS management information.
+ExtremeXOS(TM) switch for RADIUS netlogin.
 
 Remote Authentication Dial IN User Service (RADIUS) is a mechanism
 for authenticating and centrally administrating access to network
 nodes.  The ExtremeXOS RADIUS client information allows authentication
 for access to a switch.  In order for ExtremeXOS to provide this
 access, RADIUS must be appropriately configured on the switch.  This
-example shows how RADIUS management information is applied to an
+example shows how RADIUS netlogin information is applied to an
 ExtremeXOS switch.
 
 Specifically, this example performs the following functions:
 
-1. Configures the switch with RADIUS server and client IP addresses
+1. Configures the switch with RADIUS netlogin information
 
-2. Sets the RADIUS server password and encryption mechanism
-specification
+2. Creates and configures a guest VLAN for the RADIUS server
 
-3. Enables RADIUS server management access for the switch
+3. Enables RADIUS netlogin for the switch
+
+### Files
+[README.md](README.md)  - This readme file
+[RADIUSNetloginConfig.xsf](RADIUSNetloginConfig.xsf)        - The script
 
 
-Example:
-****************************
+### Requirements
+* Firmware: ExtremeXOS(TM) 12.0
+* Platform(s): Any ExtremeXOS switch.
 
-
-Notes:
-*******************************
+### Notes
 The RADIUS Client IP address must be configured in specified virtual router
 name (vr-default) for this script to execute properly.
 
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -73,13 +57,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

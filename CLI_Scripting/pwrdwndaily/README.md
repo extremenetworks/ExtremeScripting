@@ -1,23 +1,6 @@
-*****************************
-PoE Power Down Daily
-https://marketplace.extremenetworks.com/#details/PoE_Power_Down_Daily
-*****************************
+# PoE Power Down Daily
 
-Files:
-*****************************
-PowerDownDailyProfileReadme.txt - This readme file
-PowerDownDailyProfile.xsf       - The script
-
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.0 or greater with an Edge License
-Platform(s): EPICenter 6.0 SP1 or greater
-Extreme Networks ExtremeXOS-based advanced edge switches
-
-
-Description:
-*****************************
+##Description
 This profile turns power off at a specific time of day to a list of
 Power-over-Ethernet enabled ports.
 
@@ -36,8 +19,18 @@ Power-over-Ethernet enabled ports.  The profile is intended for deployment
 with Extreme Networks EPICenter management platform Universal Port applet.
 
 
-Example:
-****************************
+### Files
+* [README.md](README.md) - This readme file
+* [PowerDownDailyProfile.xsf](PowerDownDailyProfile.xsf)       - The script
+
+
+### Requirements
+* Firmware: ExtremeXOS(TM) 12.0 or greater with an Edge License
+* Platform(s): EPICenter 6.0 SP1 or greater
+* Extreme Networks ExtremeXOS-based advanced edge switches
+
+
+### Example
 In order to properly deploy this profile, the following actions must be
 performed:
 
@@ -50,14 +43,8 @@ performed:
 3.  Configure Universal Port timer in EPICenter
 
 
-Notes:
-*******************************
-
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -80,13 +67,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

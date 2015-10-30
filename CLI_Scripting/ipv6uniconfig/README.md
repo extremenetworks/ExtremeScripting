@@ -1,28 +1,21 @@
-*****************************
-IPv6 Unicast Config
-https://marketplace.extremenetworks.com/#details/IPv6_Unicast_Config
-*****************************
+# IPv6 Unicast Config
 
-Files:
-*****************************
-IPv6UnicaseConfigReadme.txt
-IPv6UnicaseConfig.xsf - Script file
-
-
-Infrastructure Requirements
-*******************************
-ExtremeXOS(TM) 12.1 or greater
-ExtremeXOS based Extreme Networks switches
-
-
-Description:
-*****************************
+## Description
 This script provides an example of IPv6 unicast routing in
 ExtremeXOS(TM).
 
+### Files
+* [README.md](README.md) -  This Readme
+* [IPv6UnicaseConfig.xsf](IPv6UnicaseConfig.xsf) - Script file
 
-Example:
-****************************
+
+### Requirements
+* ExtremeXOS(TM) 12.1 or greater
+* ExtremeXOS based Extreme Networks switches
+
+
+
+### Example
 In this example, assume there are three VLANS to be configured on
 a BlackDiamond(TM) switch - a protocol-sensitive VLAN using IPv6
 addressing ("vlan1"), a protocol-sensistive VLAN using IPv6 addressing
@@ -61,14 +54,8 @@ The following functions are performed in this example:
 7. Enable ripng
 
 
-Notes:
-*******************************
-
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -91,13 +78,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme

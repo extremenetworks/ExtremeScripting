@@ -1,28 +1,20 @@
-*****************************
-IPv6 in IPv4 Tunnel
-https://marketplace.extremenetworks.com/#details/IPv6_in_IPv4_Tunnel
-*****************************
+# IPv6 in IPv4 Tunnel
 
-Files:
-*****************************
-IPv6-6in4-TunnelReadme.txt  - This readme file
-IPv6-6in4-Tunnel.xsf        - The script
-
-
-Infrastructure Requirements
-*******************************
-Firmware: ExtremeXOS(TM) 12.0 and Newer for xbd.xsf standard
-Platform(s): ExtremeXOS based Extreme Networks switches
-
-
-Description:
-*****************************
+## Description
 Configure an IPv6 6-in-4 tunnel between two IPv6 regions bridging
 across an IPV4 region on an ExtremeXOS(TM) switch.
 
+###Files
+* [README.md](README.md)  - This readme file
+* [IPv6-6in4-Tunnel.xsf](IPv6-6in4-Tunnel.xsf)        - The script
 
-Example:
-****************************
+
+### Requirements
+* Firmware: ExtremeXOS(TM) 12.0 and Newer for xbd.xsf standard
+* Platform(s): ExtremeXOS based Extreme Networks switches
+
+
+### Example
 In this example, Router A is assumed to have an interface to an IPv4 region
 with the address 192.168.1.1 (for this example we are using private IPv4
 addresses, but to tunnel across the Internet, you would use a public address).
@@ -66,15 +58,8 @@ The following functions are performed in this example:
 4. IPV6 address configuration and enabling
 
 
-Notes:
-*******************************
-
-
-
-License:
-*******************************
-Copyright (c) 2015, Extreme Networks
-All rights reserved.
+## License
+Copyright© 2015, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -97,13 +82,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Support
-******************************
-The software is provided as is and Extreme has no obligation to provide
+## Support
+The software is provided as is and Extreme Networks has no obligation to provide
 maintenance, support, updates, enhancements or modifications.
-Any support provided by Extreme is at its sole discretion.
-Issues and/or bug fixes may be reported in the Hub:
+Any support provided by Extreme Networks is at its sole discretion.
 
-https://community.extremenetworks.com/extreme
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
-Be Extreme,
+>Be Extreme
