@@ -9,3 +9,4 @@
 * [radiusnetloginconfigpy](radiusnetloginconfigpy)
 * [snmpv1v2configpy](snmpv1v2configpy)
 * [sntpconfigpy](sntpconfigpy)
+* [Snippets_of_Python_in_EXOS.pdf](Snippets_of_Python_in_EXOS.pdf)
