@@ -10,4 +10,4 @@ _The software is provided as-is and [Extreme Networks](http://www.extremenetwork
 
 Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 
->Be Extreme
+>Be Extreme!
