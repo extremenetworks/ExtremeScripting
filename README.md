@@ -2,7 +2,7 @@
 Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 
 # Platforms
-* [EXOS Switces](https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/README.md)
+* [EXOS Switches](https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/README.md)
 
 
 # Support
