@@ -1,3 +1,9 @@
+#disablefaultedpoe.xsf
+#
+# This script will iterate through all ports on an ExtremeXOS(TM) switch and check if the port is in a PoE fault state.
+# If the port is in the faulted state, this script will disable inline-power on the port.
+
+
 enable cli scripting
 set var CLI.OUT " "
 
