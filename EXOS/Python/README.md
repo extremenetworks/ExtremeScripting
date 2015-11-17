@@ -6,6 +6,7 @@
 | [enablefeaturescheckpy](enablefeaturescheckpy) | Identifies the features enabled on a switch      |
 | [fdb_oui](fdb_oui)      | Scans the FDB table and reports the vendor of the device connected.      |
 | [flowtracker](flowtracker) | Creates a dynamic ACL to count packets.      |
+| [mlag_config_check](mlag_config_check) | Checks the to ensure that all VLANs on MLAG ports are also present on the ISC.	|
 | [non_stacking_config_converter](non_stacking_config_converter)      | Converts a non stacking configuration to a stacking configuration.      |
 | [qosconfigpy](qosconfigpy) | Wizard to aid in creating QoS profiles      |
 | [radiusmgmtconfigpy](radiusmgmtconfigpy)      | Wizard for configuring an ExtremeXOS(TM) switch with RADIUS management information.      |
