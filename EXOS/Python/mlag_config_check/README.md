@@ -6,7 +6,7 @@ This Python script checks the to ensure that all VLANs on MLAG ports are also pr
 If any VLANs are missing from the ISC, the script will output the VLAN name and the MLAG port that is added to the VLAN.
 
 ### Files
-* [mlag_check.py](mlag_check.py)
+* [mlag_config_check.py](mlag_config_check.py)
 * [README.md](README.md)
 
 ### Requirements
@@ -17,13 +17,13 @@ If any VLANs are missing from the ISC, the script will output the VLAN name and 
 
 Correct MLAG configuration:
 ```
-mlag1.3 # run script mlag.py
+mlag1.3 # run script mlag_config_check.py
 MLAG config check completed.
 ```
 
 Incorrect MLAG configuration:
 ```
-mlag1.7 # run script mlag.py
+mlag1.7 # run script mlag_config_check.py
 Vlan problem is not added to the ISC port (1), and is found on MLAG port 3. Please correct.
 MLAG config check completed.
 ```
