@@ -1,7 +1,7 @@
 # MLAG Config Check
 
 ## Description
-This Python script checks the to ensure that all VLANs on MLAG ports are also present on the ISC.
+This Python script checks to ensure that all VLANs on MLAG ports are also present on the ISC.
 
 If any VLANs are missing from the ISC, the script will output the VLAN name and the MLAG port that is added to the VLAN.
 
