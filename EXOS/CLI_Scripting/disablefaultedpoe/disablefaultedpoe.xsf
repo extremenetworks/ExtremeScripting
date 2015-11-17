@@ -1,0 +1,98 @@
+#disablefaultedpoe.xsf
+#
+# This script will iterate through all ports on an ExtremeXOS(TM) switch and check if the port is in a PoE fault state.
+# If the port is in the faulted state, this script will disable inline-power on the port.
+
+
+enable cli scripting
+set var CLI.OUT " "
+
+#Check if this is a stack
+show switch
+set var output $TCL(lrange ${CLI.OUT} 15 15)
+
+IF ( $MATCH($output,"(Stack)") == 0 ) THEN
+	set var stack (1)
+ELSE
+	set var stack (0)
+ENDIF
+
+#If this is a stack
+IF ($stack == 1) THEN
+	set var i 0
+	WHILE ($i < 8) DO
+		set var slot ($i + 1)
+		sh slot $slot
+		set var state $TCL(lrange ${CLI.OUT} 3 3)
+		IF ( $MATCH($state,"Operational") == 0 ) THEN
+			show slot $slot
+			set var num_ports $TCL(lrange ${CLI.OUT} 31 31)
+			set var j 1
+			WHILE ( $j <= $num_ports ) DO 
+				set var port $TCL(format "%d:%d" $slot $j)
+				show inline-power info port $port
+				set var port_state $TCL(lrange ${CLI.OUT} 10 10)
+				IF ( $MATCH($port_state,"faulted") == 0 ) THEN
+					disable inline-power port $port
+				ENDIF
+				set var j ($j + 1)
+			ENDWHILE
+		ENDIF
+		set var i ($i + 1)
+	ENDWHILE
+
+	# Clean up variables used here
+	delete var i
+	delete var slot
+	delete var state
+	delete var num_ports
+	delete var j
+	delete var port_state
+
+# if it is a standalone switch	
+ELSE
+	show switch
+	set var output $TCL(lrange ${CLI.OUT} 14 14)
+	set var num_ports 0
+
+	# Detect the number of ports the switch has
+	IF ( $TCL(string match -nocase "*-48*" $output) ) THEN
+		set var num_ports 48
+	ELSE 
+		IF ( $TCL(string match -nocase "*-24*" $output) ) THEN
+			set var num_ports 24
+		ELSE
+			IF ( $TCL(string match -nocase "*-8*" $output) ) THEN
+				set var num_ports 8
+			ENDIF
+		ENDIF
+	ENDIF
+
+	set var i 1
+	WHILE ($i <= $num_ports) DO
+		
+		# get port inline-power state
+		
+		show inline-power info port $i
+		set var port_state $TCL(lrange ${CLI.OUT} 10 10)
+		
+		# if faulted, disable inline-power
+		IF ( $MATCH($port_state,"faulted") == 0 ) THEN 
+			disable inline-power port $i
+		ENDIF
+		
+		set var i ($i + 1)
+	ENDWHILE
+	
+	# Clean up variables used here
+	delete var num_ports
+	delete var port_state
+	delete var i
+	
+ENDIF
+
+# Clean up
+delete var output
+delete var stack
+
+disable cli scripting

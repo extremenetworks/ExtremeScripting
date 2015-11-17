@@ -1,0 +1,36 @@
+# poe_upm.xsf
+# 
+# This script sets up two UPM profiles. The first monitors the log for a PoE port entering the faulted state.
+# When this occurs, the UPM profile disables inline-power to this port.
+#
+# The second UPM profile monitors the log for link down events. When one occurs, the UPM profile re-enables inline-power on the port.
+
+create upm profile poe_fault_disable
+disable inline-power port $EVENT.LOG_PARAM_0
+.
+
+create log filter poe_fault_filter
+configure log filter poe_fault_filter add events POE.port_fault
+
+create log target upm poe_fault_disable
+configure log target upm poe_fault_disable filter poe_fault_filter
+configure log target upm poe_fault_disable match any
+
+enable log target upm poe_fault_disable
+
+
+
+# Re-enable PoE on link down
+
+create upm profile poe_linkdown_enable
+enable inline-power port $EVENT.LOG_PARAM_0
+.
+
+create log filter poe_linkdown
+configure log filter poe_linkdown add events vlan.msgs.portLinkStateDown
+
+create log target upm poe_linkdown_enable 
+configure log target upm poe_linkdown_enable filter poe_linkdown
+configure log target upm poe_linkdown_enable match any
+
+enable log target upm poe_linkdown_enable
