@@ -32,7 +32,7 @@ def main():
 		print 'No ports are added to the ISC vlan (' + isc_vlan + '). Please correct.'
 		return
 
-	# At this port, we can assume that there is one port added to the ISC vlan,
+	# At this point, we can assume that there is one port added to the ISC vlan,
 	# and continue checking the MLAG configuration.
 
 	# Determine what the port number of the ISC is
