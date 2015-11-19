@@ -1,77 +1,35 @@
-# Non-Stacking Configuration Converter
-This tool converts a non stacking "show configuration" output to a stacking configuration for slot 1.
+# Vlan copy port script
+This tool needs to be run on an EXOS switch and will copy all vlans and vmans from one port to another.
 
 ### Description
-This script will convert non stacking configurations to stacking configurations for slot 1.  Every situation possible has not been tested, but it worked on the configurations tested in the example.
+This script will take the exact vlan config of 1 port and copy that to another port. After that it asks if the port where the vlans are copied from need to be cleaned (move)
 
 **Please review the configuration before loading the configuration on a switch**
 
 ### Files
-* [The Core Python Script - non_stacking_config_convert.py](non_stacking_config_convert.py)
+* [The Core Python Script - vlan_copy_port.py](vlan_copy_port.py)
 * [README.md](README.md)
-* [Example input configuration] (example.txt)
-* [Example output stacking configuration] (stack_example.txt)
+
 
 ### Requirements
 Firmware: ExtremeXOS(TM)
-This script was tested on 16.1 and older.
+This script was tested on 15.7 and 16.1.
 
 ### Features
-* This Script can be run on EXOS or on a PC with python 2.7 installed. 
+* This Script can be run on EXOS.
  
 
 ### How to use
-* The script was made on python 2.7.  Make sure it's installed.
-* Place the switch show configuration output into a file.
-* place the configuration file in the same directory as the python script.
-* The script will ask you for the configuration file name. (enter it)
-* the script will create a new file with "stack_" in front of the original file name that has the new stacking configuration.
-* Check over the new configuration file to make sure it's right.
+* Copy the script to the switch
+* run the script with options -s (source port) and -d (destination port)
 
 ## EXOS run example:
 ```
-Switch.2 # save configuration as-script nonstack
-Do you want to save configuration to script nonstack.xsf? (y/N) Yes
-Saving configuration to script nonstack.xsf on master .... done!
+* X460-48t.4 # run script vlan_copy_port -s 5 -d 6
+Do you want to delete all vlans from port 5 (y/N) ? y
+Deleting vlans from port 5.
+* X460-48t.5 #
 
-Switch.3 # run script non_stacking_config_convert.py
-
-Note: please only use the show configuration output for this script.
-      Make sure the starting non stack configuration file is in the same folder as the python script
-
-what is the non stacking configuration file name? nonstack.xsf
-
-The new stacking configuration will be saved as /usr/local/cfg/stack_nonstack.xsf?
-
-Switch.4# ls
--rw-r--r--    1 admin    admin        3716 Sep 21 11:12 non_stacking_config_convert.py
--rw-r--r--    1 admin    admin         869 Nov 10  2014 default.xsf
--rw-rw-rw-    1 root     root         5736 Sep 21 11:13 nonstack.xsf
--rw-rw-rw-    1 root     root       304838 Sep 20 19:13 primary.cfg
--rw-r--r--    1 admin    admin        5838 Sep 21 11:17 stack_nonstack.xsf
-drwxr-xr-x    2 root     root            0 Sep  5 07:03 vmt
-```
-
-## Windows run example
-```
-C:\Users\xxxxx\xxxxx\stacking_change>python non_stacking_config_convert.py
-
-Note: please only use the show configuration output for this script.
-      Make sure the starting non stack configuration file is in the same folder as the python script
-
-what is the non stacking configuration file name? config.txt
-
-The new stacking configuration will be saved as stack_config.txt?
-
-C:\Users\xxxxx\xxxxx\stacking_change>dir
-
- Directory of C:\Users\xxxxx\xxxxx\stacking_change
-
-09/21/2015  11:22 AM    <DIR>          .
-09/21/2015  11:22 AM    <DIR>          ..
-09/21/2015  10:54 AM            27,595 config.txt
-09/21/2015  11:12 AM             3,812 non_stacking_config_convert.py
-09/21/2015  11:22 AM            28,549 stack_config.txt
 ```
 
 ## License
