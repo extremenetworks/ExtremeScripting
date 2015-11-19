@@ -32,7 +32,7 @@ def main():
     sourceport = args.sourceport
     destport = args.destport
 
-    if chk_port(sourceport) and chk_port(sourceport):
+    if chk_port(sourceport) and chk_port(destport):
         exsh.clicmd("disable clipaging",capture=False)
         vlans = getvlans(sourceport)
         for vlan in vlans:
