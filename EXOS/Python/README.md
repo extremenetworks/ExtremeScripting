@@ -5,7 +5,7 @@
 | [cleanswitch](cleanswitch)      | Provides a method of deleting all configuration parameters and files from an EXOS switch.      |
 | [edp_and_port_vlan_check](edp_and_port_vlan_check)| This Script uses EDP to check if the local and remote port have the same vlans added to the ports.|
 | [enablefeaturescheckpy](enablefeaturescheckpy) | Identifies the features enabled on a switch      |
-| [email_event](email_event) | This EXOS script will send an email when an event is logged  |
+| [Email_event](Email_event) | This EXOS script will send an email when an event is logged  |
 | [fdb_oui](fdb_oui)      | Scans the FDB table and reports the vendor of the device connected.      |
 | [flowtracker](flowtracker) | Creates a dynamic ACL to count packets.      |
 | [mlag_config_check](mlag_config_check) | Checks to ensure that all VLANs on MLAG ports are also present on the ISC.	|
