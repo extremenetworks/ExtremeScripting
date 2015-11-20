@@ -28,7 +28,7 @@ This script was tested on 16.1.
     smtp = 'Your SMTP server IP/DNS'
 * Setup UPM together with EMS to start the script for an event.
 * Create a log filter that matches your event log events you want to email.
-* In this example it acts on link Up/Down events.
+* In this example it acts on link Up/Down events
 ```create log filter PortUpDown
 configure log filter PortUpDown add events vlan.msgs.portLinkStateUp 
 configure log filter PortUpDown add events vlan.msgs.portLinkStateDown 
