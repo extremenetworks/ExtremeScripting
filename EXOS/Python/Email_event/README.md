@@ -29,25 +29,33 @@ This script was tested on 16.1.
 * Setup UPM together with EMS to start the script for an event.
 * Create a log filter that matches your event log events you want to email.
 * In this example it acts on link Up/Down events
+
 ```create log filter PortUpDown
 configure log filter PortUpDown add events vlan.msgs.portLinkStateUp 
 configure log filter PortUpDown add events vlan.msgs.portLinkStateDown 
 ```
+
 * Create the UPM profile that launches the python script with correct arguments
+
 ````create upm profile EmailProfile
 enable cli scripting
 run script email $EVENT.LOG_PARAM_0 $EVENT.LOG_PARAM_1
 ```
+
 * Create the log target for UPM and bind it to the logfilter
+
 ```
 create log target upm EmailProfile
 enable log target upm EmailProfile
 configure log target upm EmailProfile filter PortUpDown severity Info
 ```
+
 * Enable DNS by adding a name server.
+
 ```
 configure dns-client add name-server <DNS IP> vr <Correct VR to reach DNS server>
 ```
+
 * After that the switch will mail you when a link status change happens.
 
 
