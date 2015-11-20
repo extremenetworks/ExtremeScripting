@@ -1,5 +1,5 @@
 # Email event script
-This tools will send an email when a log event is logged. It runs on the switch.
+This tool will send an email when a log event is logged. It runs on the switch.
 
 ### Description
 This script works together with UPM. UPM will start the script once it reacts on an event log entry. That log entry can be any event.
