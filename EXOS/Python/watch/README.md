@@ -1,5 +1,5 @@
 # Watch
-Flowtracker is a simple script that repeats a CLI command every *n* seconds
+Watch is a simple script that repeats a CLI command every *n* seconds
 
 ## Description
 This will repeat a CLI command every *n* seconds, so that its output can be watched without having to constantly run the command
