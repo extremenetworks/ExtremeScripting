@@ -3,6 +3,7 @@
 | ------------- |:-------------:|
 | [autofsbackuppy](autofsbackuppy)      |  Runs automated back up on all scripts, including configuration, policy and scripts. |
 | [cleanswitch](cleanswitch)      | Provides a method of deleting all configuration parameters and files from an EXOS switch.      |
+| [command watch](watch) | Simple script that repeats a CLI command every *n* seconds|
 | [eaps_checker](eaps_checker) | This script will check eaps config and status from a PC/Server. |
 | [edp_and_port_vlan_check](edp_and_port_vlan_check)| This Script uses EDP to check if the local and remote port have the same vlans added to the ports.|
 | [enablefeaturescheckpy](enablefeaturescheckpy) | Identifies the features enabled on a switch      |
