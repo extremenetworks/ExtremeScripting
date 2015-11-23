@@ -133,6 +133,7 @@ def eapsCheck(data,vlanports):
                         #print vport, m3.group(1), vlanports.get(m3.group(2),[]), "<br>"
                         problems += " - Protected vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
                         problems += " port "+vport+"\n"
+
         m3 = re.search(r'configure eaps (\S+) add control \S+\s(\S+)',line)
         if m3 and "enable" in eapsports[m3.group(1)]:
             if m3.group(1) not in eapsvlans.keys():
@@ -240,6 +241,7 @@ def main():
             sys.stdout.flush()
             MySess = ExosClass(switch,args.user,args.password)
             if MySess.isConnected():
+                vlanports.clear()
                 shswitch = MySess.cmd("show switch")
                 switch = switchData(shswitch)
                 print switch['Name'], switch['Type']
