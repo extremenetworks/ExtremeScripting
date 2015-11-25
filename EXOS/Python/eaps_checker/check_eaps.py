@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This script connect to the switch and checks the eaps config
 
-__version__ = '1.0'
+__version__ = '1.01'
 
 import telnetlib
 import re
@@ -351,7 +351,7 @@ def main():
                 if args.vpifcheck:
                     #Check vpif state on master secondary port
                     if len(masterdomains) == 0:
-                        print "\n[+] vpif check, no Master domains found, no vpif check needed."
+                        print "[+] vpif check, no Master domains found, no vpif check needed."
                     for domain in masterdomains:
                         vpifcheck(eapsports[domain][1],eapsvlans[domain],MySess,domain,eapsports)
 
