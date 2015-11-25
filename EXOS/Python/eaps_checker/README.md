@@ -2,9 +2,10 @@
 This script runs from a server/PC with python installed and check the eaps config and status of one or more switches
 
 ### Description
-This script will telnet to every switch IP given in the file when used with -f or checks only 1 switch when used with -s.
+This script will connect to every switch IP given in the file when used with -f or checks only 1 switch when used with -s.
 It will check the eaps config if all vlans are added correctly to the ring ports and will also check if there are vlans added 
 to the ring ports that are not protected by eaps that could possibly cause loops.
+If the option --vpif is used it will check the vpif state for every Eaps master domain on the secondary port for domain vlans.
 
 ### Files
 * [The Core Python Script - check_eaps.py](check_eaps.py)
@@ -18,10 +19,13 @@ Following pyhton libraries are needed (most standard included in python):
   import re
   import argparse
   import sys
+  import paramiko
+  
+  Paramiko is for SSH connection to the switch. This only works with the latest version of paramiko, please update this to the latest.
+  Using PIP the command would be pip install --upgrade paramiko
 
 ### Features
 * This Script runs from a remote server/PC, tested with python 2.7.
-* Only telnet support 
 
 ### How to use
 * Copy the script to your server/PC 
@@ -30,16 +34,55 @@ Following pyhton libraries are needed (most standard included in python):
 
 ## run example:
 ```
-okoot@okoot-ubuntu:~/work/check_eaps$ ./check_eaps.py -f switches -u extreme -p extreme
-Checking switch 10.116.1.1 Login failed
-Checking switch 10.116.1.2 SW-TAC-15 X450a-48t
-Checking config Eaps Check start.. Vlan check..
+okoot@okoot-ubuntu:~/work/check_eaps$ ./check_eaps.py -h
+usage: check_eaps.py [-h] [-s SWITCH] [-u USER] [-p PASSWORD] [-f FILE]
+                     [--ssh] [--vpif]
+
+Connect to switch and check Eaps config
+
+optional arguments:
+  -h, --help   show this help message and exit
+  -s SWITCH    Switch IP
+  -u USER      Username
+  -p PASSWORD  Password, leave out for none
+  -f FILE      File containing switch IP addresses
+  --ssh        Use SSH to access switches
+  --vpif  Check VPIF state on sec port master
+  
+[Eaps checker version 0.98]
+
+
+[+] Checking switch: 10.116.3.91 -SysName: X460-48t -HW Type: X460-48t
+Checking config.. Eaps Check start.. Vlan check..
+
 [+] No Eaps config problems detected
 [+] Eaps status for all 1 domains OK
-Checking switch 10.116.3.170 atbetebd1 BD-8806
-Checking config Eaps Check start.. Vlan check..
+
+[+] Checking vpif state for eaps domain e1 blocked port 3
+    This can take some time on large vlan/eaps configs.
+ -  All vpif states are correct on port 3 for domain e1
+
+[-] Closing connection
+
+######################
+
+
+[+] Checking switch: 10.116.3.194 -SysName: X460-48t -HW Type: X460-48t
+Checking config.. Eaps Check start.. Vlan check..
+
 [-] Eaps config problems found : 
-    Vlan test added to ringports of eaps domain test-38 but not protected by it.
+ - Protected vlan v2 ports not added to EAPS e1 port 1
+ - Protected vlan v2 ports not added to EAPS e1 port 3
+ - Vlan Default added to ringports of eaps domain e1 but not protected by it.
+
+[+] Eaps status for all 1 domains OK
+
+[+] vpif check, no Master domains found, no vpif check needed.
+
+[-] Closing connection
+
+######################
+
 ```
 
 ## License
