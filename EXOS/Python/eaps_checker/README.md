@@ -30,7 +30,11 @@ Following pyhton libraries are needed (most standard included in python):
 ### How to use
 * Copy the script to your server/PC 
 * run the script with options -s <switch IP> or -f <file>. The file should contain an IP address per line.
-* Other options -u <username> and -p <password> to login on the switches.
+* Other options:
+ -u <username> 
+ -p <password>
+ --ssh (Use SSH)
+ --vpif (Check vpif state on Eaps master secondary port)
 
 ## run example:
 ```
@@ -48,8 +52,10 @@ optional arguments:
   -f FILE      File containing switch IP addresses
   --ssh        Use SSH to access switches
   --vpif  Check VPIF state on sec port master
+
+someone@ubuntu:~/work/check_eaps$ ./check_eaps.py -f test --vpif
   
-[Eaps checker version 0.98]
+[Eaps checker version 1.01]
 
 
 [+] Checking switch: 10.116.3.91 -SysName: X460-48t -HW Type: X460-48t
