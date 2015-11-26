@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # This script connect to the switch and checks the eaps config
 
+__version__ = '1.01'
+
 import telnetlib
 import re
 import argparse
 import sys
+import paramiko
+import time
+
 
 class ExosClass:
     def __init__(self, host, user='admin',password=''):
@@ -44,19 +49,65 @@ class ExosClass:
         else:
             return False
 
-    def cmd(self,cmd):
+    def cmd(self,cmd,timeout=30):
         self._tn.write(cmd + "\n")
-        s=self._tn.expect([self.prompt])[2].lstrip(cmd).lstrip('\n\r')
+        s=self._tn.expect([self.prompt],timeout)[2].lstrip(cmd).lstrip('\n\r')
         if s.count('\n')>1:
             return s[:s.rfind('\n')]
         else:
             return "OK"
 
+    def cmdFast(self,cmd,timeout=30):
+        self._tn.write(cmd+"\n")
+        output=""
+        go = True
+        while go:
+            time.sleep(0.5)
+            newoutput = self._tn.read_very_eager()
+            if len(newoutput) == 0:
+                lastline = output.splitlines()[-1]
+                if re.search(self.prompt,lastline):
+                    go = False
+            else:
+                output += newoutput
+        return output
+
+class SSH2EXOS:
+    def __init__(self, switch, user='admin',password=''):
+        self.connected = True
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.client.connect(switch,username=user,password=password)
+        stdin, stdout, stderr = self.client.exec_command("disable clipaging")
+        stdin.close()
+
+    def cmdFast(self,cmd,timeout=30):
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        stdin.close()
+        return stdout.read()
+
+    def cmd(self,cmd,timeout=30):
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        stdin.close()
+        return stdout.read()
+
+    def exit(self):
+        self.client.close()
+        self.connected = False
+
+    def isConnected(self):
+        if self.connected:
+            return True
+        else:
+            return False
+
+
 def checkIP(address):
-    if re.search('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}',address):
-        return True
+    m = re.search('(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})',address)
+    if m:
+        return m.group(1)
     else:
-        return False
+        return None
 
 def insert_vport(vlanports, vlan, port):
     if vlan not in vlanports.keys():
@@ -103,22 +154,28 @@ def checkconfig(config,vlanports):
 def eapsCheck(data,vlanports):
     print "Eaps Check start..",
     sys.stdout.flush()
+    # eapsport[domain][primary,secondary,enable/disable]
     eapsports = {}
     eapsvlans = {}
     problems = ""
     for line in data.splitlines():
         m = re.search(r'create eaps (\S+).*',line)
         if m and m.group(1)!="shared-port":
-            eapsports[m.group(1)] = []
-        m1 = re.search(r'configure\seaps\s(\S+)\ssecondary\sport\s(\S+)',line)
-        if m1 and m1.group(1)!="shared-port":
-            eapsports[m1.group(1)].append(m1.group(2))
-        m2 = re.search(r'configure\seaps\s(\S+)\sprimary\sport\s(\S+)',line)
-        if m2  and m2.group(1)!="shared-port":
-            eapsports[m2.group(1)].append(m2.group(2))
-        m2 = re.search(r'(enable|disable)\seaps\s(\S+)',line)
-        if m2  and m2.group(2)!="shared-port":
-            eapsports[m2.group(2)].append(m2.group(1))
+            eapsports[m.group(1)] = ["","","","",""]
+        m = re.search(r'configure\seaps\s(\S+)\ssecondary\sport\s(\S+)',line)
+        if m and m.group(1)!="shared-port":
+            eapsports[m.group(1)][1] = (m.group(2))
+        m = re.search(r'configure\seaps\s(\S+)\sprimary\sport\s(\S+)',line)
+        if m  and m.group(1)!="shared-port":
+            eapsports[m.group(1)][0] = (m.group(2))
+        m = re.search(r'(enable|disable)\seaps\s(\S+)',line)
+        if m  and m.group(2)!="shared-port":
+            eapsports[m.group(2)][2] = (m.group(1))
+
+        m = re.search(r'configure\seaps\s(\S+)\smode\s(transit|master)',line)
+        if m:
+            eapsports[m.group(1)][3] = (m.group(2))
+
         # assuming pri/sec ports are always defined before the add of protected eaps vlans we start immediately
         # for search of control/protected vlans
         m3 = re.search(r'configure eaps (\S+) add protected \S+\s(\S+)',line)
@@ -127,24 +184,28 @@ def eapsCheck(data,vlanports):
                 eapsvlans[m3.group(1)]=[]
             eapsvlans[m3.group(1)].append(m3.group(2))
             # Check if primary and secondary port are added to the vlan
-            for vport in eapsports[m3.group(1)]:
-                if vport !=  "enable" and vport != "disable":
-                    if vport not in vlanports.get(m3.group(2),[]):
-                        #print vport, m3.group(1), vlanports.get(m3.group(2),[]), "<br>"
-                        problems += " - Protected vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
-                        problems += " port "+vport+"\n"
+            if eapsports[m3.group(1)][0] not in vlanports.get(m3.group(2),[]):
+                problems += " - Protected vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
+                problems += " port "+eapsports[m3.group(1)][0]+"\n"
+            if eapsports[m3.group(1)][1] not in vlanports.get(m3.group(2),[]):
+                problems += " - Protected vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
+                problems += " port "+eapsports[m3.group(1)][1]+"\n"
 
         m3 = re.search(r'configure eaps (\S+) add control \S+\s(\S+)',line)
         if m3 and "enable" in eapsports[m3.group(1)]:
+            eapsports[m3.group(1)][4] = m3.group(2)
             if m3.group(1) not in eapsvlans.keys():
                 eapsvlans[m3.group(1)]=[]
             eapsvlans[m3.group(1)].append(m3.group(2))
 
             # Check if primary and secondary port are added to the vlan
-            for vport in eapsports[m3.group(1)]:
-                if vport !=  "enable" and vport != "disable" and vport not in vlanports.get(m3.group(2),[]):
-                    problems += " - Control vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
-                    problems += " port "+vport+"\n"
+            if eapsports[m3.group(1)][0] not in vlanports.get(m3.group(2),[]):
+                problems += " - Control vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
+                problems += " port "+eapsports[m3.group(1)][0]+"\n"
+            if eapsports[m3.group(1)][1] not in vlanports.get(m3.group(2),[]):
+                problems += " - Control vlan "+m3.group(2)+" ports not added to EAPS "+m3.group(1)
+                problems += " port "+eapsports[m3.group(1)][1]+"\n"
+
 
     print "Vlan check.."
     sys.stdout.flush()
@@ -156,10 +217,11 @@ def eapsCheck(data,vlanports):
                     problems += " - Vlan "+vlan+" added to ringports of eaps domain "+domain+" but not protected by it.\n"
 
     if len(problems) == 0:
-        print "[+] No Eaps config problems detected"
+        print "\n[+] No Eaps config problems detected"
     else:
-        print "[-] Eaps config problems found : "
+        print "\n[-] Eaps config problems found : "
         print problems
+    return eapsports,eapsvlans
 
 def switchData(data):
     switch = {}
@@ -175,12 +237,14 @@ def switchData(data):
 def eapsStatus(data):
     problems = ""
     domains = 0
+    masterdomains = []
     for line in data.splitlines():
         m = re.search(r'(\S+)\s+(\S+)\s+(T|M|-)\s+(Y|N).*',line)
         if m:
             domains += 1
             if m.group(3) == "M":
                 if m.group(2) == "Complete":
+                    masterdomains.append(m.group(1))
                     continue
                 elif m.group(4) == "N":
                     problems += " - "+m.group(1)+" domain not enabled.\n"
@@ -198,7 +262,29 @@ def eapsStatus(data):
         print problems
     else:
         print "[+] Eaps status for all "+str(domains)+" domains OK"
+    if domains == 0:
+        print "[-] No Eaps domains found"
+    return masterdomains
 
+def vpifcheck(port,vlans,MySess,domain,eapsports):
+    print "\n[+] Checking vpif state for eaps domain "+domain+" blocked port "+port
+    print "    This can take some time on large vlan/eaps configs."
+    problem = False
+    for vlan in vlans:
+        if vlan != eapsports[domain][4]:
+            cmd = "debug vlan show vpif "+vlan+" "+port
+            vpifoutput = MySess.cmd(cmd)
+            for line in vpifoutput.splitlines():
+                m = re.search(r'\s*Ingress:(0x\d+),\s*Egress:\s*(0x\d+).*',line)
+                if m:
+                    if m.group(1) != "0x22":
+                        problem = True
+                        print " - Vlan "+vlan+" vpif Ingress state is not Blocking (0x2) on port "+port
+                    if m.group(2) != "0x2":
+                        problem = True
+                        print " - Vlan "+vlan+" vpif Egress state is not Blocking (0x22) on port "+port
+    if not problem:
+        print " -  All vpif states are correct on port "+port+" for domain "+domain
 
 def main():
     parser = argparse.ArgumentParser(description='Connect to switch and check Eaps config')
@@ -206,6 +292,8 @@ def main():
     parser.add_argument("-u", dest="user", default="admin", help="Username")
     parser.add_argument("-p", dest="password", default="", help="Password, leave out for none")
     parser.add_argument("-f", dest="file", default=None, help="File containing switch IP addresses")
+    parser.add_argument("--ssh", dest="SSH", action='store_true', help="Use SSH to access switches instead of telnet")
+    parser.add_argument("--vpif", dest="vpifcheck", action='store_true', help="Check VPIF state on sec port master")
 
     args = parser.parse_args()
 
@@ -213,6 +301,7 @@ def main():
     vlanports = {}
     validInput = True
 
+    print "\n[Eaps checker version "+__version__+"]\n"
     if args.switch:
         if checkIP(args.switch):
             switches.append(args.switch)
@@ -223,8 +312,7 @@ def main():
         try:
             f = open(args.file,'r')
             for line in f.read().splitlines():
-                if checkIP(line):
-                    switches.append(line)
+                switches.append(checkIP(line))
             f.close()
         except IOError as e:
             print "I/O error({0}): {1}".format(e.errno, e.strerror)
@@ -237,24 +325,38 @@ def main():
 
     if validInput:
         for switch in switches:
-            print "Checking switch "+switch,
+            print "\n[+] Checking switch: "+switch,
             sys.stdout.flush()
-            MySess = ExosClass(switch,args.user,args.password)
+            if args.SSH:
+                MySess = SSH2EXOS(switch,args.user,args.password)
+            else:
+                MySess = ExosClass(switch,args.user,args.password)
+
             if MySess.isConnected():
                 vlanports.clear()
-                shswitch = MySess.cmd("show switch")
+                shswitch = MySess.cmdFast("show switch")
                 switch = switchData(shswitch)
-                print switch['Name'], switch['Type']
+                print "-SysName: "+switch['Name'], "-HW Type: "+switch['Type']
 
-                vlconf = MySess.cmd("show config vlan")
+                vlconf = MySess.cmdFast("show config vlan",60)
                 checkconfig(vlconf,vlanports)
 
-                eapsconf = MySess.cmd("show config eaps")
-                eapsCheck(eapsconf,vlanports)
+                eapsconf = MySess.cmdFast("show config eaps",60)
+                eapsports,eapsvlans = eapsCheck(eapsconf,vlanports)
 
-                sheaps = MySess.cmd("show eaps")
-                eapsStatus(sheaps)
 
+                sheaps = MySess.cmdFast("show eaps")
+                masterdomains = eapsStatus(sheaps)
+
+                if args.vpifcheck:
+                    #Check vpif state on master secondary port
+                    if len(masterdomains) == 0:
+                        print "[+] vpif check, no Master domains found, no vpif check needed."
+                    for domain in masterdomains:
+                        vpifcheck(eapsports[domain][1],eapsvlans[domain],MySess,domain,eapsports)
+
+                print "\n[-] Closing connection"
+                print "\n######################\n"
                 MySess.exit()
 
 
