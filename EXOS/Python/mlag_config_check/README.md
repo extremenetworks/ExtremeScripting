@@ -5,6 +5,8 @@ This Python script checks to ensure that all VLANs on MLAG ports are also presen
 
 If any VLANs are missing from the ISC, the script will output the VLAN name and the MLAG port that is added to the VLAN.
 
+This also checks the FDB checksum for both MLAG peers, and will indicate if there is a mismatch detected.
+
 ### Files
 * [mlag_config_check.py](mlag_config_check.py)
 * [README.md](README.md)
