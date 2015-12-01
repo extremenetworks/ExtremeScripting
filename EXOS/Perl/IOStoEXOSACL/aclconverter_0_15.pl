@@ -296,9 +296,6 @@ while ($line = <ACLFILE>) {
          $name = $oldname."_RST";
          $conmod = "TCP-flags RST \;";
          printentry();
-         $name = $oldname."_FIN";
-         $conmod = "TCP-flags FIN \;";
-         printentry();
          $name = $oldname."_FIN_ACK";
          $conmod = "TCP-flags 0x11 \;";
          printentry();
