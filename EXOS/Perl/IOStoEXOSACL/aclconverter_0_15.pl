@@ -287,6 +287,12 @@ while ($line = <ACLFILE>) {
       }
       if ( $conmod =~ m/^EST$/ ) {
          my $oldname = $name;
+         $name = $oldname."_RST";
+         $conmod = "TCP-flags RST \;";
+         printentry();
+         $name = $oldname."_RST_ACK";
+         $conmod = "TCP-flags 0x14 \;";
+         printentry();
          $name = $oldname."_SYN_ACK";
          $conmod = "TCP-flags SYN_ACK \;";
          printentry();
@@ -295,12 +301,6 @@ while ($line = <ACLFILE>) {
          printentry();
          $name = $oldname."_PSH_ACK";
          $conmod = "TCP-flags 0x18 \;";
-         printentry();
-         $name = $oldname."_RST";
-         $conmod = "TCP-flags RST \;";
-         printentry();
-         $name = $oldname."_RST_ACK";
-         $conmod = "TCP-flags 0x14 \;";
          printentry();
          $name = $oldname."_FIN_ACK";
          $conmod = "TCP-flags 0x11 \;";
