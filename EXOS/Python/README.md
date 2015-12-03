@@ -15,6 +15,7 @@
 | [qosconfigpy](qosconfigpy)			| Wizard to aid in creating QoS profiles      |
 | [radiusmgmtconfigpy](radiusmgmtconfigpy)      | Wizard for configuring an ExtremeXOS(TM) switch with RADIUS management information.      |
 | [radiusnetloginconfigpy](radiusnetloginconfigpy) | Wizard for configuring an ExtremeXOS(TM) switch for RADIUS netlogin.      |
+| [show_config_clean](show_config_clean) | Hides unused config sections from the output of "show configuration"      |
 | [snmpv1v2configpy](snmpv1v2configpy)	| Wizard for SNMP V1/V2 configuration for an ExtremeXOS(TM) switch.      |
 | [sntpconfigpy](sntpconfigpy) 			| Example for Simple Network Time Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.      |
 | [vlanPortInfo](vlanportinfo) 			| This script displays the VLAN assignment and tagging configuration for all ports on the switch.      |
