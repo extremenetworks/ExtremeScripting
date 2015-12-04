@@ -302,6 +302,12 @@ while ($line = <ACLFILE>) {
          $name = $oldname."_PSH_ACK";
          $conmod = "TCP-flags 0x18 \;";
          printentry();
+         $name = $oldname."_URG_ACK";
+         $conmod = "TCP-flags 0x30 \;";
+         printentry();
+         $name = $oldname."_PSH_URG_ACK";
+         $conmod = "TCP-flags 0x38 \;";
+         printentry();
          $name = $oldname."_FIN_ACK";
          $conmod = "TCP-flags 0x11 \;";
          printentry();
