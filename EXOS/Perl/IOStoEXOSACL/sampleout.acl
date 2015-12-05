@@ -2,16 +2,17 @@ entry JFRoutes_1 {  if { protocol tcp ; destination-port eq 5544 ;  } then { den
 entry JFRoutes_2 {  if { protocol tcp ; source-port eq 5554 ;  } then { deny ;  } }
 entry JFRoutes_3 {  if { protocol tcp ; destination-port 9995-9997 ;  } then { deny ;  } }
 entry JFRoutes_4 {  if { protocol tcp ; source-port 9995-9997 ;  } then { deny ;  } }
-entry JFRoutes_RST_5 {  if { protocol tcp ; TCP-flags RST ;
- } then { permit ;  } }
-entry JFRoutes_ACK_5 {  if { protocol tcp ; TCP-flags ACK ;
- } then { permit ;  } }
-entry JFRoutes_6 {  if { protocol igmp ; IGMP-msg-type 14 ; 
- } then { permit ;  } }
-entry JFRoutes_7 {  if { protocol icmp ; ICMP-type 3 ; ICMP-code 1 ; 
- } then { permit ;  } }
-entry JFRoutes_8 {  if { protocol icmp ; source-address 10.18.27.248 mask 255.255.255.254 ; destination-address 10.1.101.226/32 ; ICMP-type 0 ; 
- } then { permit ;  } }
+entry JFRoutes_RST_5 {  if { protocol tcp ; TCP-flags RST ; } then { permit ;  } }
+entry JFRoutes_RST_ACK_5 {  if { protocol tcp ; TCP-flags 0x14 ; } then { permit ;  } }
+entry JFRoutes_SYN_ACK_5 {  if { protocol tcp ; TCP-flags SYN_ACK ; } then { permit ;  } }
+entry JFRoutes_ACK_5 {  if { protocol tcp ; TCP-flags ACK ; } then { permit ;  } }
+entry JFRoutes_PSH_ACK_5 {  if { protocol tcp ; TCP-flags 0x18 ; } then { permit ;  } }
+entry JFRoutes_URG_ACK_5 {  if { protocol tcp ; TCP-flags 0x30 ; } then { permit ;  } }
+entry JFRoutes_PSH_URG_ACK_5 {  if { protocol tcp ; TCP-flags 0x38 ; } then { permit ;  } }
+entry JFRoutes_FIN_ACK_5 {  if { protocol tcp ; TCP-flags 0x11 ; } then { permit ;  } }
+entry JFRoutes_6 {  if { protocol igmp ; IGMP-msg-type 14 ;  } then { permit ;  } }
+entry JFRoutes_7 {  if { protocol icmp ; ICMP-type 3 ; ICMP-code 1 ;  } then { permit ;  } }
+entry JFRoutes_8 {  if { protocol icmp ; source-address 10.18.27.248 mask 255.255.255.254 ; destination-address 10.1.101.226/32 ; ICMP-type 0 ;  } then { permit ;  } }
 entry JFRoutes_9 {  if { protocol udp ; source-address 10.18.27.248 mask 255.255.255.254 ; destination-address 10.1.101.226/32 ; destination-port eq 137 ;  } then { permit ;  } }
 entry JFRoutes_10 {  if { source-address 10.18.27.128 mask 255.255.255.128 ; destination-address 10.18.27.128 mask 255.255.255.128 ;  } then { permit ;  } }
 entry JFRoutes_11 {  if { source-address 10.18.27.232/32 ; destination-address 10.19.208.32/32 ;  } then { permit ;  } }
@@ -20,8 +21,7 @@ entry JFRoutes_13 {  if { source-address 10.18.27.130 mask 255.255.255.254 ; sou
 entry JFRoutes_14 {  if { protocol tcp ; source-address 10.18.27.233/32 ; destination-address 10.18.17.132/32 ; destination-port eq 22 ;  } then { permit ;  } }
 entry JFRoutes_15 {  if { protocol tcp ; source-address 10.18.27.233/32 ; destination-address 10.18.17.132/32 ; destination-port eq 80 ;  } then { permit ;  } }
 entry JFRoutes_16 {  if { protocol tcp ; source-address 10.18.27.233/32 ; destination-address 10.18.17.132/32 ; destination-port neq 443 ;  } then { permit ;  } }
-entry JFRoutes_17 {  if { protocol tcp ; source-address 10.18.27.233/32 ; destination-address 10.18.17.132/32 ; destination-port eq 2162 ; IP-TOS 46 ; 
- } then { permit ;  } }
+entry JFRoutes_17 {  if { protocol tcp ; source-address 10.18.27.233/32 ; destination-address 10.18.17.132/32 ; destination-port eq 2162 ; IP-TOS 46 ;  } then { permit ;  } }
 entry JFRoutes_18 {  if { protocol tcp ; destination-address 10.18.17.132/32 ; destination-port eq 2163 ;  } then { permit ;  } }
 entry JFRoutes_19 {  if { protocol tcp ; source-address 10.18.27.128 mask 255.255.255.128 ; source-port gt 1000 ; destination-address 10.18.28.133/32 ; destination-port gt 1025 ;  } then { permit ;  } }
 entry JFRoutes_20 {  if { protocol tcp ; source-address 10.18.27.128 mask 255.255.255.128 ; destination-address 10.18.28.134/32 ; destination-port eq 1025 ;  } then { permit ;  } }
