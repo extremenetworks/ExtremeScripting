@@ -1,3 +1,8 @@
+# Documentation
+* [Snippets of Python in EXOS](Snippets_of_Python_in_EXOS.pdf?raw=true)
+* [Python Getting Started Guide](http://www.extremenetworks.com/wp-content/uploads/2015/02/Python_Getting_Started_Guide.pdf)
+* [The EXOS Python API](http://documentation.extremenetworks.com/python/)
+
 # Python Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
@@ -21,6 +26,3 @@
 | [vlanPortInfo](vlanportinfo) 			| This script displays the VLAN assignment and tagging configuration for all ports on the switch.      |
 | [vlan_elrp_check](vlan_elrp_check)	| This script will run ELRP on all VLANS on an EXOS switch.|
 | [vlan_copy_port](vlan_copy_port)		| This EXOS script will copy/move vlans from one port to another |
-
-# Documentation
-* [Snippets_of_Python_in_EXOS.pdf](Snippets_of_Python_in_EXOS.pdf)
