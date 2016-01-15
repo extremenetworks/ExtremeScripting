@@ -5,7 +5,8 @@
 | [autofsbackup](autofsbackup)      | Runs automated back up on all scripts, including configuration, policy and scripts. |
 | [cfmmepport](cfmmepport)      | If there is a CFM event, this Universal Port script dynamically disables the port. |
 | [chib](chib)      | Save energy by placeing specified blades into a standby state. |
-| [disablefaultedpoe](disablefaultedpoe) | This script will iterate through all ports on an ExtremeXOS(TM) switch and check if the port is in a PoE fault state.|
+| [disablefaultedpoe](disablefaultedpoe) | This script will iterate through all ports on an ExtremeXOS(TM) switch and check if the port is in a PoE fault state. |
+| [disableonlinkdown](disableonlinkdown)	| This will set up a UPM profile to automatically disable a port if the link goes down. |
 | [edpavp](edpavp)      | This script will auto-configure an edge switch based on the ports seen on the uplink port using EDP. |
 | [enablefeaturescheck](enablefeaturescheck)      | This script identifies the features enabled on a switch. |
 | [fwvcvalidate](fwvcvalidate)      | When a switch boots, this script matches the configured-firmware-version with the correct-firmware setting. |

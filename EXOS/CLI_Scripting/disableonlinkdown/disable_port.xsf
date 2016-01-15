@@ -1,0 +1,25 @@
+#disable_port.xsf
+#
+# This script will set up a UPM profile to watch the logs for a link down event, then administratively disable the port.
+# This will prevent anything from linking up again in the same port, until the port is re-enabled.
+
+
+# First, create the UPM profile
+
+create upm profile port_linkdown_disable
+disable port $EVENT.LOG_PARAM_0
+create log message “Port $(EVENT.LOG_PARAM_0) disabled by UPM script”
+.
+ 
+# Then, create a log filter including only the link down event
+ 
+create log filter port_linkdown
+configure log filter port_linkdown add events vlan.msgs.portLinkStateDown
+
+# Finally create a log target, assign it to UPM, and enable it
+ 
+create log target port_linkdown_disable
+configure log target port_linkdown_disable filter port_linkdown
+configure log target upm port_linkdown_disable match any
+ 
+enable log target upm port_linkdown_disable
