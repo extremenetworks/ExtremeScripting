@@ -1,4 +1,4 @@
-#disablonlinkdown.xsf
+#disable_port.xsf
 #
 # This script will set up a UPM profile to watch the logs for a link down event, then administratively disable the port.
 # This will prevent anything from linking up again in the same port, until the port is re-enabled.
