@@ -136,21 +136,22 @@ def main():
 			else :
 				vlan_on_next_iteration = False
 
-    ## Check local and remote checksums to determine if FDB and VLANs match
-    
-	checksums = exsh.clicmd('debug fdb show globals | include LclCkhsum:', True)
+	## Check local and remote checksums to determine if FDB and VLANs match
+	for count in range(0,3):
+		checksums = exsh.clicmd('debug fdb show globals | include LclCkhsum:', True)
 
-	checksums = checksums.split()
+		checksums = checksums.split()
     
-	local = checksums[2]
-	remote = checksums[4]
+		local = checksums[2]
+		remote = checksums[4]
 
-	print local
-	print remote
+		#print local
+		#print remote
     
-	if local is remote:
-		print 'Local and remote FDB checksums match.'
-	else:
+		if local == remote:
+			print ('Local and remote FDB checksums match.')
+			break
+	if local != remote:
 		print 'Local and remote FDB checksums do not match. Please check config on the other MLAG peer.'
 		print exsh.clicmd('debug fdb show globals', True)
     
