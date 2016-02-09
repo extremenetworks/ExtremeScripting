@@ -7,8 +7,8 @@
 
 def main():
 	# Find which vlan is the ISC vlan
-	cli_output = exsh.clicmd('show mlag peer', True).split()
-	isc_vlan = cli_output[10]
+	cli_output = exsh.clicmd('debug vsm show peer | inc "vrId      : 2"', True).split()
+	isc_vlan = cli_output[5]
 
 	# Check the number of ports added to the ISC vlan, and get the port number of the ISC link
 	cli_output = exsh.clicmd('show vlan ' + isc_vlan, True).split()
