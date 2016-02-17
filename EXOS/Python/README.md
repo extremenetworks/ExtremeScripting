@@ -1,5 +1,4 @@
 # Documentation
-* [Snippets of Python in EXOS](Snippets_of_Python_in_EXOS.pdf?raw=true)
 * [Python Getting Started Guide](http://www.extremenetworks.com/wp-content/uploads/2015/02/Python_Getting_Started_Guide.pdf)
 * [The EXOS Python API](http://documentation.extremenetworks.com/python/)
 
