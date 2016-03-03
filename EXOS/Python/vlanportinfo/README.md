@@ -17,13 +17,14 @@ run script vlanportinfo.py <port(s)>
 
 
 ### Example 1
-# run script vlanportinfo.py 1-3,6
+```
+#run script vlanportinfo.py 1-3,6
 Port     untagged:tagged
 1        untagged:1
 2        untagged:1
 3        untagged:1
 6        none:
-
+```
 ### Example 2
 ```
 # run script vlanportinfo.py
