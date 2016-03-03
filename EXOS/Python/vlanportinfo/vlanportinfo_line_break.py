@@ -33,6 +33,7 @@ if port_check(ports) == True:
     cmd2 = 'debug cfgmgr show next vlan.show_ports_info portList={0} port=None'.format(ports)
     portRslt = exsh.clicmd(cmd2, capture=True)
     portDict = json.loads(portRslt)
+    port_output = []
     for row in portDict['data']:
         port = row['port']
         vlanRslt = json.loads(exsh.clicmd(
@@ -47,12 +48,27 @@ if port_check(ports) == True:
                 else:
                     untaggedVlan.append(vid)
         if len(untaggedVlan) == 0 and len(taggedVlan) == 0:
-            print FORMAT.format(prt=port, vlanType='none', tagged='')
+            cap1 = FORMAT.format(prt=port, vlanType='none', tagged='')
+            port_output.append(cap1)
             continue
         if len(untaggedVlan):
-            print FORMAT.format(prt=port, vlanType='untagged', tagged=', '.join(untaggedVlan))
+            cap2 = FORMAT.format(prt=port, vlanType='untagged', tagged=', '.join(untaggedVlan))
+            port_output.append(cap2)
             port = ''
         if len(taggedVlan):
-            print FORMAT.format(prt=port, vlanType='tagged', tagged=', '.join(taggedVlan))
+            cap3 = FORMAT.format(prt=port, vlanType='tagged', tagged=', '.join(taggedVlan))
+            port_output.append(cap3)
+    num_lines=25
+    index=0
+    for x in port_output:
+        index = (index + 1)
+        if (index % num_lines) == 0:
+            input=raw_input("Hit return key to continue press q then return to quit: ")
+            if input.lower() == 'q':
+                break
+            else:
+                print x
+        else:
+            print x
 else:
     print ("Wrong port format or port not on Switch.  Use 1,2,3,4 or 1-5,6,8 or 1:1-5,2:3")

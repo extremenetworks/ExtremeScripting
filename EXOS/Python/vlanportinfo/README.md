@@ -1,10 +1,11 @@
 # VLAN Port Info
 
 ## Description
-This script displays the VLAN assignment and tagging configuration for all ports on the switch.
+This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.
 
 ### Files
 * [vlanportinfo.py](vlanportinfo.py)
+* [vlanportinfo_line_break.py](vlanportinfo_line_break.py)  Added line break after 25 lines.
 * [README.md](README.md)
 
 ### Requirements
@@ -12,8 +13,18 @@ ExtremeXOS 15.6+
 
 ### Usage
 run script vlanportinfo.py
+run script vlanportinfo.py <port(s)>
 
-### Example
+
+### Example 1
+# run script vlanportinfo.py 1-3,6
+Port     untagged:tagged
+1        untagged:1
+2        untagged:1
+3        untagged:1
+6        none:
+
+### Example 2
 ```
 # run script vlanportinfo.py
 Port     untagged:tagged
