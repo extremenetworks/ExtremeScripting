@@ -6,6 +6,7 @@
 import exsh
 import json
 import sys
+num_lines = 25 #change this number to change the lines before page breaks
 ports = '*'
 if(len(sys.argv) == 2):
 	ports = sys.argv[1]
@@ -33,7 +34,9 @@ if port_check(ports) == True:
     cmd2 = 'debug cfgmgr show next vlan.show_ports_info portList={0} port=None'.format(ports)
     portRslt = exsh.clicmd(cmd2, capture=True)
     portDict = json.loads(portRslt)
+    index = -1
     for row in portDict['data']:
+        index = (index + 1)
         port = row['port']
         vlanRslt = json.loads(exsh.clicmd(
             'debug cfgmgr show next vlan.show_ports_info_detail_vlans formatted port={0} vlanIfInstance=None'.format(port), True))
@@ -46,6 +49,10 @@ if port_check(ports) == True:
                     taggedVlan.append(vid)
                 else:
                     untaggedVlan.append(vid)
+        if index != 0 and (index % num_lines) == 0:
+            input=raw_input("Hit return key to continue press q then return to quit: ")
+            if input.lower() == 'q':
+                break
         if len(untaggedVlan) == 0 and len(taggedVlan) == 0:
             print FORMAT.format(prt=port, vlanType='none', tagged='')
             continue
