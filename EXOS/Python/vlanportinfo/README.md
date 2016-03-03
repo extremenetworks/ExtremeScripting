@@ -1,7 +1,7 @@
 # VLAN Port Info
 
 ## Description
-This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.
+This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.  CLI pageing has also been enabled for this script 
 
 ### Files
 * [vlanportinfo.py](vlanportinfo.py)
@@ -54,6 +54,7 @@ Port     untagged:tagged
          tagged:30
 24       tagged:2001
 25       none:
+Hit return key to continue press q then return to quit:
 26       none:
 27       none:
 28       none:
