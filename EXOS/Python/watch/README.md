@@ -1,8 +1,12 @@
 # Watch
-Watch is a simple script that repeats a CLI command every *n* seconds
+Watch is a simple script that repeats a CLI command so that its output can be watched without having to constantly run the command
 
 ## Description
-This will repeat a CLI command every *n* seconds, so that its output can be watched without having to constantly run the command
+This will repeat a CLI command for a user defined number of times (-c) with a user defined interval between the commands (-i) seconds. 
+Default Count: 3
+Default Interval: 5 seconds
+
+Optionally you can enable a diff of numerical values (-d) which will replace numerical values that have changed between command iterations with a "+" followed by the difference between the two values.
 
 ### Files
 * [watch.py](watch.py)
@@ -12,11 +16,11 @@ This will repeat a CLI command every *n* seconds, so that its output can be watc
 ExtremeXOS 15.6+
 
 ### Usage
-run script watch.py <seconds> <cli_cmd>
+run script watch.py [-h] [-c COUNT] [-i INTERVAL] [-d] command
 
 ### Example
 ```
-run script watch.py 5 "show ospf neighbor"
+run script watch.py -i 5 "show ospf neighbor"
 ```
 
 ### Notes
