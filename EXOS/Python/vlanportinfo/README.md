@@ -5,6 +5,7 @@ This script displays the VLAN assignment and tagging configuration for all or se
 
 ### Files
 * [vlanportinfo.py](vlanportinfo.py)
+* [vlanportinfotest.py](vlanportinfotest.py)
 * [README.md](README.md)
 
 ### Requirements
