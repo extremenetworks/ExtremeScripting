@@ -6,7 +6,7 @@ Script to convert IOS ACL into ExtremeXOS Policy files
 ### Files
 *****************************
 [README.md](README.md)            -  This readme file
-[aclconverter_0_15.pl](aclconverter_0_15.pl)  - The perl converter
+[aclconverter.pl](aclconverter.pl)  - The perl converter
 [sample.acl](sample.acl)            - Sample input IOS ACL file
 [sampleout.acl](sampleout.acl)         - Sample converted ExtremeXOS policy file
 
