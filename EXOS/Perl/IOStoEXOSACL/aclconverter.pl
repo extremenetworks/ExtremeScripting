@@ -1,53 +1,29 @@
 #!/usr/bin/perl
-# ACL to EXOS POLICY CONVERTER version 0.15
-# License:
-# *******************************
-# Copyright (c) 2015, Extreme Networks
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without modification,
-# are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this
-# list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-# this list of conditions and the following disclaimer in the documentation
-# and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Support
-# ******************************
-# The software is provided as is and Extreme has no obligation to provide
-# maintenance, support, updates, enhancements or modifications.
-# Any support provided by Extreme is at its sole discretion.
-# Issues and/or bug fixes may be reported in the Hub:
-#
-# https://community.extremenetworks.com/extreme
-#
+# ACL to EXOS POLICY CONVERTER version 0.19
+# THIS SCRIPT AND ASSOCIATED FILES ARE OPEN SOURCE
+######
+#THE INFORMATION AND SPECIFICATIONS IN THIS SCRIPT ARE SUBJECT TO CHANGE WITHOUT
+#NOTICE. ALL INFORMATION AND SPECIFICATIONS IN THIS SCRIPT ARE PRESENTED WITHOUT
+#WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. YOU TAKE FULL RESPONSIBILITY FOR YOUR
+#USE OF THIS SCRIPT. USE THIS SCRIPT AT YOUR OWN RISK.
+# PLEASE REPORT ERRORS TO mhelm@extremenetworks.com KNOWING THAT THERE IS NO
+# PROMISE, EXPRESS OR IMPLIED, THAT ERRORS WILL BE FIXED
 ###
 ##
-##  perl -w aclconverter.pl {aclfilename} [-c] [> outputfile]
+##  perl -w aclconverter.pl {aclfilename} [-c | -d ] [> outputfile]
 ##
 ##  where the [-c] option means "compressed"
+##  or where the [-d] option means "dynamic"
 ##
 ##  Example:
 ##  perl -w aclconverter.pl sample.acl -c >  sampleacl.pol
 ##
 ##  The above example results in a compressed policy file (no indents, one \n)
 ##
-## This version adds support for remark line conversion.
+## This version adds better support for translation of the "established" match condition,
+## and inserts a remark on where to place the line dealing with that condition.
 ######
+
 sub portarray;
 sub typearray;
 sub codearray;
@@ -58,8 +34,10 @@ sub printentry;
 use strict;
 die "No Filename!" unless defined (my $filename = $ARGV[0]);
 my $comp = 0;
+my $dyn = 0;
 if (defined $ARGV[1]) {
 $comp = ($ARGV[1] =~ m/\-c/);
+$dyn = ($ARGV[1] =~ m/\-d/);
 }
 my $nextln = "\n";
 my $smspacer = "   ";
@@ -68,6 +46,9 @@ if ($comp == 1) {
    $nextln = " ";
    $spacer = "";
    $smspacer = " ";
+}
+if ($dyn == 1) {
+   $nextln = "";
 }
 my @ports;
 my @types;
@@ -155,7 +136,6 @@ while ($line = <ACLFILE>) {
          if ($line =~ s/tcp\s//) {
             $proto = "tcp";
             if ($line =~ s/established//){
-#            $conmod = $conmod."TCP-flags RST \;".$nextln.$spacer."TCP-flags ACK \;".$nextln;
                $conmod = "EST";
             }
          }
@@ -190,7 +170,7 @@ while ($line = <ACLFILE>) {
          }
          $line =~ s/([0-9]+\.)([0-9]+\.)([0-9]+\.)([0-9]+\s)([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)/$1.$2.$3.$4."mask_".(255-$5)."\.".(255-$6)."\.".(255-$7)."\.".(255-$8)/eg;
          if ($line =~ s/log//){
-            $actmod = $actmod."log \;".$nextln;
+            $actmod = $actmod."log\;".$nextln;
          }
          if ($line =~ s/fragments//){
             $conmod = $conmod."fragments \;".$nextln;
@@ -286,31 +266,16 @@ while ($line = <ACLFILE>) {
          }
       }
       if ( $conmod =~ m/^EST$/ ) {
+         $conmod = "TCP-flags SYN \;$nextln";
          my $oldname = $name;
-         $name = $oldname."_RST";
-         $conmod = "TCP-flags RST \;";
+         $name = $name."_TCPEST";
+         $action = "deny";
          printentry();
-         $name = $oldname."_RST_ACK";
-         $conmod = "TCP-flags 0x14 \;";
-         printentry();
-         $name = $oldname."_SYN_ACK";
-         $conmod = "TCP-flags SYN_ACK \;";
-         printentry();
-         $name = $oldname."_ACK";
-         $conmod = "TCP-flags ACK \;";
-         printentry();
-         $name = $oldname."_PSH_ACK";
-         $conmod = "TCP-flags 0x18 \;";
-         printentry();
-         $name = $oldname."_URG_ACK";
-         $conmod = "TCP-flags 0x30 \;";
-         printentry();
-         $name = $oldname."_PSH_URG_ACK";
-         $conmod = "TCP-flags 0x38 \;";
-         printentry();
-         $name = $oldname."_FIN_ACK";
-         $conmod = "TCP-flags 0x11 \;";
-         printentry();
+ #        $name = $oldname."_TCPproto";
+ #        $conmod = "";
+ #        $action = "permit";
+ #        printentry();
+         print "# The entry above should be penultimate to a final deny all/any entry #\n" ;
          $name = $oldname;
       } else {
          printentry();
@@ -336,6 +301,7 @@ exit 0;
 
 sub printentry {
 
+if ( $dyn == 0) {
    print "entry $name\_$lineno {$nextln";
    print $smspacer."if {$nextln";
    if ($proto ne "") {
@@ -373,6 +339,57 @@ sub printentry {
    }
    print $smspacer."}$nextln";
    print "}\n";
+} else {
+   print "create access-list $name\_$lineno \"";
+   $spacer = "";
+   if ($proto ne "") {
+      print "protocol $proto\;";
+      $spacer = " ";
+   }
+   if ($sa ne "") {
+      print $spacer."source-address $sa";
+      if ($sm ne "") {
+         print " mask $sm";
+      }
+      print "\;";
+      $spacer = " ";
+   }
+   if ($sp ne "") {
+      print $spacer."source-port $sp\;";
+      $spacer = " ";
+   }
+   if ($da ne "") {
+      print $spacer."destination-address $da";
+      if ($dm ne "") {
+         print " mask $dm";
+      }
+      print "\;";
+      $spacer = " ";
+   }
+   if ($dp ne "") {
+      print $spacer."destination-port $dp\;";
+      $spacer = " ";
+   }
+   if ($conmod ne "") {
+      print $spacer."$conmod";
+   }
+
+   if ($spacer eq "") {
+      print " ";
+   }
+   print "\" \"";
+   if ($action ne "") {
+      print "$action\;";
+      $spacer = " ";
+   }
+   if ($actmod ne "") {
+      print $spacer."$actmod";
+   }
+   print "\"\n";
+
+}
+
+
 }
 
 sub portarray {
