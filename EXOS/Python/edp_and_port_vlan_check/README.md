@@ -6,7 +6,7 @@ This Script uses EDP to check if the local and remote port have the same vlans a
 
 ## Files
 
-* [edp_and_port_vlan_check.py](edp_and_port_vlan_check.py) -  The Core Python Script
+* [edp_and_port_vlan_check.py](edp_and_port_vlan_check.py)
 * [README.md](README.md)
 
 
