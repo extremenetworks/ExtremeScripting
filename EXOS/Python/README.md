@@ -21,7 +21,7 @@
 |[radiusnetloginconfig](radiusnetloginconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch for RADIUS netlogin.|
 |[show_config_clean](show_config_clean)|Hides unused config sections from the output of "show configuration"|
 |[snmpv1v2config](snmpv1v2configpy)|Wizard for SNMP V1/V2 configuration for an ExtremeXOS(TM) switch.|
-|[sntpconfig](sntpconfigpy) |Example for Simple Network Time Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.|
+|[sntpconfig](sntpconfigpy)|Example for Simple Network Time Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.|
 |[vlanPortInfo](vlanportinfo)|This script displays the VLAN assignment and tagging configuration for all ports on the switch.|
 |[vlan_elrp_check](vlan_elrp_check)|This script will run ELRP on all VLANS on an EXOS switch.|
 |[vlan_copy_port](vlan_copy_port)|This EXOS script will copy/move vlans from one port to another.|
