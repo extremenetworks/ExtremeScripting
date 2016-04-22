@@ -5,7 +5,7 @@
 # Python Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
-| [GitHub script Downloader](git_download)| Downloads scripts located on this page directly from your switch.|
+| [GitHub script Downloader](git_download)| Downloads scripts located on this page directly to your switch.|
 |[autofsbackup](autofsbackuppy)|Runs automated back up on all scripts, including configuration, policy and scripts.|
 |[cleanswitch](cleanswitch)|Provides a method of deleting all configuration parameters and files from an EXOS switch.|
 |[command watch](watch)|Simple script that repeats a CLI command every *n* seconds|
