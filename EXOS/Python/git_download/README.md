@@ -1,9 +1,9 @@
-# Github Python downloader
+# GitHub Python Script Downloader
 
 ## Description
-This tool runs on a EXOS switch running 21.1 and above and displays all python scripts on GitHub, and allows you to download the scripts directly to your switch.  git_download.py will only access the Internet through VR-Default and VR-Mgmt.
+This tool runs on a EXOS switch running 21.1+ and displays all python scripts on GitHub and allows you to download the scripts directly to your switch.  git_download.py will only access the Internet through VR-Default and VR-Mgmt right now.
   
-Note: Make sure your switch has DNS configured and has Internet access before using.
+Note: Make sure your switch has DNS configured, and has Internet access before using.
 
 ### Files
 * [git_download.py](git_download.py)
