@@ -49,7 +49,7 @@ Script:                             Description:
 What script would you like to download? 20
 
 By downloading this file you agree to the License
-noted in the readme file located in the URL below
+Terms in the readme, available at the URL below.
 
 https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/Python/vlan_copy_port/README.md
 
