@@ -87,7 +87,7 @@ def main():
 
     else:
         for i in range(count):
-            try_cli(cmd)
+            print try_cli(cmd)
             sleep(interval)
 
 
