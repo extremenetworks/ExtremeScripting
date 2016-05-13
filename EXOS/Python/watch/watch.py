@@ -21,16 +21,35 @@
 
 
 import argparse
+import shlex
 from exsh import clicmd
 from time import sleep
 import sys
 import re
+import subprocess
 
 def try_cli(command):
     """Try CLI command and exit if invalid"""
+
     try:
         return clicmd(command, True)
     except:
+        print 'Script Error: Check Command Syntax'
+        exit()
+
+def test_auto_refresh(command):
+
+    exsh_cmd = "/exos/bin/exsh -n 0 -c '{0}'".format(command)
+    try:
+        p = subprocess.Popen(shlex.split(exsh_cmd), bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             stdin=subprocess.PIPE)
+        for line in iter(p.stdout.readline, ''):
+            if 'ESC->exit' in line:
+                p.kill()
+                print 'This command is an auto-refreshing command.  Please use the no-refresh variety'
+                exit()
+    except:
+        print 'Script Error: Check Command Syntax'
         exit()
 
 
@@ -60,9 +79,12 @@ def main():
     interval = args.interval
     stat_diff = args.diff
 
+    test_auto_refresh(cmd)
+
     if stat_diff:
         prev_output = try_cli(cmd)
         print prev_output
+        count -=1
         prev_output = prev_output.split('\n')
 
         while count != 0:
@@ -98,5 +120,4 @@ if __name__ == '__main__':
     except SystemExit:
         # catch SystemExit to prevent EXOS shell from exiting to the login prompt
         pass
-
 
