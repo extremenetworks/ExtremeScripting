@@ -2,6 +2,11 @@
 * [Python Getting Started Guide](http://www.extremenetworks.com/wp-content/uploads/2015/02/Python_Getting_Started_Guide.pdf)
 * [The EXOS Python API](http://documentation.extremenetworks.com/python/)
 
+<!---
+To allow git_download.py to find the scripts you need
+to add the script to this list with no spaces for the table like autofsbackup does.
+-->
+
 # Python Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
