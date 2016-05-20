@@ -1,8 +1,8 @@
 # EXOS CLI Scripting
-|Script Name|Description|
 
 Did you know that you can use the [ExtremeXOS Notepad ++ XSF style template](npp_style_template/README.md) to help writing .xsf scripts?
 
+|Script Name|Description|
 |------------- |:-------------:|
 | [6in4tunnel](6in4tunnel)      | Configures an IPv6 6-in-4 tunnel between two IPv6 regions bridging across an IPV4 region on an ExtremeXOS switch. |
 | [autofsbackup](autofsbackup)      | Runs automated back up on all scripts, including configuration, policy and scripts. |
