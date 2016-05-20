@@ -2,7 +2,7 @@
 This tool converts a non stacking "show configuration" output to a stacking configuration for slot 1.
 
 ### Description
-This script will convert non stacking configurations to stacking configurations for slot 1.  Every situation possible has not been tested, but it worked on the configurations tested in the example.
+This script will convert non stacking configurations to stacking configurations for slot 1.  Every situation possible has **NOT** been tested, but it worked on the configurations tested in the example.
 
 **Please review the configuration before loading the configuration on a switch**
 
