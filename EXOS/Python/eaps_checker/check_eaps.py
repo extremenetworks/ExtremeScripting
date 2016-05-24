@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # This script connect to the switch and checks the eaps config
+# Update 1.02 Added look_for_keys=false for paramiko
 
-__version__ = '1.01'
+__version__ = '1.02'
 
 import telnetlib
 import re
@@ -77,7 +78,7 @@ class SSH2EXOS:
         self.connected = True
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.client.connect(switch,username=user,password=password)
+        self.client.connect(switch,username=user,password=password,look_for_keys=False)
         stdin, stdout, stderr = self.client.exec_command("disable clipaging")
         stdin.close()
 

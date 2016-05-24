@@ -55,7 +55,7 @@ optional arguments:
 
 someone@ubuntu:~/work/check_eaps$ ./check_eaps.py -f test --vpif
   
-[Eaps checker version 1.01]
+[Eaps checker version 1.02]
 
 
 [+] Checking switch: 10.116.3.91 -SysName: X460-48t -HW Type: X460-48t
