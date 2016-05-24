@@ -8,7 +8,7 @@ This script is a substitute to the "show vlan" command for users that like to se
 * [README.md](README.md)
 
 ### Requirements
-ExtremeXOS 16.1+
+ExtremeXOS 15.6.2 and later
 
 ### Usage
 run script showvid.py

@@ -1,70 +1,88 @@
 # VLAN Port Info
 
 ## Description
-This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.  CLI pageing has also been enabled for this script 
+This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.  You can also see vlan descriptions.
 
 ### Files
-* [vlanportinfo.py](vlanportinfo.py)
+* [showportvid.py](showportvid.py)
 * [README.md](README.md)
 
 ### Requirements
-ExtremeXOS 15.6+
+ExtremeXOS 15.6.2 and later
 
 ### Usage
-run script vlanportinfo.py
-run script vlanportinfo.py <port(s)>
+```
+Switch#run script showportvid.py -h
+usage: showportvid [-h] [-p PORTS] [-P] [-n] [-d]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PORTS, --ports PORTS
+                        Ports to display. Default is all ports
+  -P, --port_numbers    Only show port numbers. Default: show port display
+                        string
+  -n, --names           VLANs are displayed in name order. Default: VID order
+  -d, --description     Show VLAN description 
+```
 
 
 ### Example 1
 ```
-#run script vlanportinfo.py 1-3,6
-Port     untagged:tagged
-1        untagged:1
-2        untagged:1
-3        untagged:1
-6        none:
+Switch# run script showportvid.py -d -p 1-5
+         Untagged
+Port     /Tagged   VID VLAN Name            VLAN Description
+-------- -------- ---- -------------------- ------------------------------------
+LongDisplayStringFor
+         Untagged    1 Default
+         Tagged     30 VLAN_0030            Finance
+                    31 VLAN_0031
+                    32 VLAN_0032            Engineering II
+                    33 VLAN_0033            Here is an example of a very long
+                                            VLAN description. The usr can
+                    34 VLAN_0034
+                    40 VLAN_0040
+                    41 VLAN_0041            Carries heavy traffic between
+                                            Building 17 and Building 2
+                    42 VLAN_0042            123456789012345678901234567890123456
+                                            7890123456789012345678901234
+                    43 VLAN_0043
+                    44 VLAN_0044
+                    45 VLAN_0045
+                  1000 BigData
+2        None          None
+12345678901234567890
+         Untagged    1 Default
+         Tagged     30 VLAN_0030            Finance
+                    31 VLAN_0031
+                    32 VLAN_0032            Engineering II
+                    33 VLAN_0033            Here is an example of a very long
+                                            VLAN description. The usr can
+                    34 VLAN_0034
+                    40 VLAN_0040
+                    41 VLAN_0041            Carries heavy traffic between
+                                            Building 17 and Building 2
+                    42 VLAN_0042            123456789012345678901234567890123456
+                                            7890123456789012345678901234
+                    43 VLAN_0043
+                    44 VLAN_0044
+                    45 VLAN_0045
+                  1000 BigData
+4        Untagged    1 Default
+         Tagged     30 VLAN_0030            Finance
+                    31 VLAN_0031
+                    32 VLAN_0032            Engineering II
+                    33 VLAN_0033            Here is an example of a very long
+                                            VLAN description. The usr can
+                    34 VLAN_0034
+5        Untagged      None
+         Tagged     30 VLAN_0030            Finance
+                    31 VLAN_0031
+                    32 VLAN_0032            Engineering II
+                    33 VLAN_0033            Here is an example of a very long
+                                            VLAN description. The usr can
+                    34 VLAN_0034
 ```
-### Example 2
-```
-# run script vlanportinfo.py
-Port     untagged:tagged
-1        none:
-2        tagged:30
-3        tagged:10
-4        tagged:1500
-5        none:
-6        none:
-7        none:
-8        none:
-9        none:
-10       none:
-11       none:
-12       none:
-13       none:
-14       none:
-15       none:
-16       none:
-17       none:
-18       tagged:2001
-19       none:
-20       none:
-21       none:
-22       none:
-23       untagged:10
-         tagged:30
-24       tagged:2001
-25       none:
-Hit return key to continue press q then return to quit:
-26       none:
-27       none:
-28       none:
-29       none:
-30       none:
-31       none:
-32       none:
-33       tagged:2001
-34       none:
-```
+
 
 ## License
 Copyright© 2015, Extreme Networks

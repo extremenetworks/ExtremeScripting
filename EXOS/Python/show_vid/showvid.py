@@ -73,24 +73,41 @@ class ExosDb(object):
 
     def get_vlan_map(self):
         self.vlan_map = collections.OrderedDict()
+        vnames = []
 
         # extract the entire vlan map
         cmd = 'debug cfgmgr show next vlan.vlanMap vlanList=1-4094'
         json_data = self.get_exos_json_data(cmd)
-
-        vnames = []
-        # walk the list and extract the fields to form the map
-        for vmap in json_data:
-            status = vmap.get('status')
-            if status == 'ERROR':
-                break
-            vid = vmap.get('vlanId')
-            if vid is None:
-                continue
-            vname = vmap.get('vlanName')
-            vtype = int(vmap.get('vlanType'))
-            self.vlan_map[vid] = (vname, vtype)
-            vnames.append(vname)
+        if len(json_data) == 0:
+            # the length tells us that the vlanMap is not available
+            # use the older slower way of building a vlan maps
+            cmd = 'debug cfgmgr show next vlan.vlan'
+            json_data = self.get_exos_json_data(cmd)
+            vmap = {}
+            for vlan in json_data:
+                vid = int(vlan.get('tag'))
+                vname = vlan.get('name')
+                vtype = int(vlan.get('type'))
+                vmap[vid] = (vname, vtype)
+                vnames.append(vname)
+            for vid in sorted(vmap.keys()):
+                self.vlan_map[vid] = vmap[vid]
+        else:
+            # walk the list and extract the fields to form the map
+            for vmap in json_data:
+                status = vmap.get('status')
+                if status == 'ERROR':
+                    break
+                try:
+                    vid = int(vmap.get('vlanId'))
+                except:
+                    pass
+                if vid is None:
+                    continue
+                vname = vmap.get('vlanName')
+                vtype = int(vmap.get('vlanType'))
+                self.vlan_map[vid] = (vname, vtype)
+                vnames.append(vname)
         vnames.append('Mgmt')
         self.vlan_map[4095] = ('Mgmt', 2)
 
@@ -256,7 +273,10 @@ class ShowVid(object):
         else:
             addr_string = '-' * self.C.PL.ADDR_LEN
 
-        vdesc_string = v['name1'] if len(v['description']) == 0 else v['description']
+        vdesc_string = v.get('description')
+        if vdesc_string is None or len(vdesc_string) == 0:
+            vdesc_string = v['name1']
+
         if len(vdesc_string) > self.C.PL.NAME_LEN:
             # split line into 2 parts
             self.output_fmt1(vid=v['tag'], name=vdesc_string)
