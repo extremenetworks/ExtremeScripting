@@ -1,4 +1,4 @@
-# VLAN Port Info
+# Show Port VID
 
 ## Description
 This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.  You can also see vlan descriptions.

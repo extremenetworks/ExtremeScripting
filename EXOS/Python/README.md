@@ -29,6 +29,6 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[Show vlanID](show_vid)|Shows EXOS VLANs in VID order|
 |[snmpv1v2config](snmpv1v2configpy)|Wizard for SNMP V1/V2 configuration for an ExtremeXOS(TM) switch.|
 |[sntpconfig](sntpconfigpy)|Example for Simple Network Time Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.|
-|[vlanPortInfo](vlanportinfo)|This script displays the VLAN assignment and tagging configuration for all ports on the switch.|
+|[Show port vid](show_port_vid)|This script displays the VLAN assignment and tagging configuration for all ports on the switch.|
 |[vlan_elrp_check](vlan_elrp_check)|This script will run ELRP on all VLANS on an EXOS switch.|
 |[vlan_copy_port](vlan_copy_port)|This EXOS script will copy/move vlans from one port to another.|
