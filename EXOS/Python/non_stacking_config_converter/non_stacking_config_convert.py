@@ -83,7 +83,7 @@ def main():
     except:
         pass
     print
-    print ("The new stacking configuration will be saved as %s?") % newstack
+    print ("The new stacking configuration will be saved as %s.") % newstack
     '''
     This loop is used to check the configuration file one line at a time and
     replace the ports with stacking ports 1:* into a new config file.
