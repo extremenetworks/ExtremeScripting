@@ -1,4 +1,4 @@
-# Email event script
+# IOS to EXOS policy convertor script
 This tool will take the access-list part of a cisco config and convert that to EXOS policy files.
 
 ### Description
