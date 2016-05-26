@@ -14,6 +14,16 @@ It will save every accesslist to a seperate policy file.
 
 ### Requirements
 Python
+cisco extended ACL as in below example.
+```
+ip access-list extended test1
+ permit tcp host 192.0.2.1  198.51.100.0 0.0.0.255 range 138 139
+ deny tcp host 192.0.2.2  198.51.100.0 0.0.0.255 range 138 139
+ permit tcp host 192.0.2.1  198.51.100.0 0.0.0.255 eq 23
+ permit tcp 198.51.100.0 0.0.0.255 eq 23 host 192.0.2.1
+ deny tcp any  198.51.100.0 0.0.0.255 eq 25
+ deny ip any any
+```
 
 ### Features
 * This Script runs on any PC with python installed.
