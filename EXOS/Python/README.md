@@ -14,13 +14,13 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[autofsbackup](autofsbackuppy)|Runs automated back up on all scripts, including configuration, policy and scripts.|
 |[cleanswitch](cleanswitch)|Provides a method of deleting all configuration parameters and files from an EXOS switch.|
 |[command watch](watch)|Simple script that repeats a CLI command every *n* seconds|
-|[eaps_checker](eaps_checker)|This script will check eaps config and status from a PC/Server.|
+| [eaps_checker](eaps_checker)|This script will check eaps config and status from a PC/Server.|
 |[edp_and_port_vlan_check](edp_and_port_vlan_check)|This Script uses EDP to check if the local and remote port have the same vlans added to the ports.|
 |[enablefeaturescheck](enablefeaturescheckpy)|Identifies the features enabled on a switch|
 |[Email_event](Email_event)|This EXOS script will send an email when an event is logged|
 |[fdb_oui](fdb_oui)|Scans the FDB table and reports the vendor of the device connected.|
 |[flowtracker](flowtracker)|Creates a dynamic ACL to count packets.|
-|[IOStoPolicy](IOStoPolicy)|IOS ACL to EXOS policy convertor.|
+| [IOStoPolicy](IOStoPolicy)|IOS ACL to EXOS policy convertor.|
 |[mlag_config_check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
 |[non_stacking_config_converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[qosconfig](qosconfigpy)|Wizard to aid in creating QoS profiles|
