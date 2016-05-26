@@ -20,6 +20,7 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[Email_event](Email_event)|This EXOS script will send an email when an event is logged|
 |[fdb_oui](fdb_oui)|Scans the FDB table and reports the vendor of the device connected.|
 |[flowtracker](flowtracker)|Creates a dynamic ACL to count packets.|
+|[IOStoPolicy](IOStoPolicy)|IOS ACl to EXOS policy convertor.|
 |[mlag_config_check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
 |[non_stacking_config_converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[qosconfig](qosconfigpy)|Wizard to aid in creating QoS profiles|
