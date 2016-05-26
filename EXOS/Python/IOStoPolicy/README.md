@@ -13,8 +13,8 @@ It will save every accesslist to a seperate policy file.
 
 
 ### Requirements
-Python
-cisco extended ACL as in below example.
+* Python
+* cisco extended ACL as in below example.
 ```
 ip access-list extended test1
  permit tcp host 192.0.2.1  198.51.100.0 0.0.0.255 range 138 139
@@ -35,6 +35,14 @@ ip access-list extended test1
 ```
 IOStoEXOS$ ./IOStoPolicy.py test1.acl 
 ACL is saved to test1.pol
+
+IOStoEXOS$ cat test1.pol 
+entry test1_permit1 { if { protocol tcp; source-address 192.0.2.1/32; destination-address 198.51.100.0/24; destination-port 138 139;} then { permit;}}
+entry test1_deny2 { if { protocol tcp; source-address 192.0.2.2/32; destination-address 198.51.100.0/24; destination-port 138 139;} then { deny;}}
+entry test1_permit3 { if { protocol tcp; source-address 192.0.2.1/32; destination-address 198.51.100.0/24; destination-port 23;} then { permit;}}
+entry test1_permit4 { if { protocol tcp; source-address 198.51.100.0/24; source-port 23; destination-address 192.0.2.1/32;} then { permit;}}
+entry test1_deny5 { if { protocol tcp; source-address 0.0.0.0/0; destination-address 198.51.100.0/24; destination-port 25;} then { deny;}}
+entry test1_deny6 { if { source-address 0.0.0.0/0; destination-address 0.0.0.0/0;} then { deny;}}
 ```
 
 
