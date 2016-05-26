@@ -85,7 +85,7 @@ def main():
                     print "ACL is saved to "+ACLname+".pol\n"
                 ACLname = m.group(1)
                 out = ""
-            elif parts[0] == "remark":
+            elif len(parts) > 0 and parts[0] == "remark":
                 out += "@"
                 for prt in parts:
                     out += prt
