@@ -22,10 +22,10 @@ Python
 ### How to use
 * Copy the script
 * run the script 
-
+```
 IOStoEXOS$ ./IOStoPolicy.py test1.acl 
 ACL is saved to test1.pol
-
+```
 
 
 ## License
