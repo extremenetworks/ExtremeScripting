@@ -2,7 +2,7 @@
 This tool converts a non stacking "show configuration" output to a stacking configuration for slot 1.
 
 ### Description
-This script will convert non stacking configurations to stacking configurations for slot 1.  Every situation possible has not been tested, but it worked on the configurations tested in the example.
+This script will convert non stacking configurations to stacking configurations for slot 1.  Every situation possible has **NOT** been tested, but it worked on the configurations tested in the example.
 
 **Please review the configuration before loading the configuration on a switch**
 
@@ -27,6 +27,9 @@ This script was tested on 16.1 and older.
 * The script will ask you for the configuration file name. (enter it)
 * the script will create a new file with "stack_" in front of the original file name that has the new stacking configuration.
 * Check over the new configuration file to make sure it's right.
+* Create the stack
+* When stack is created use the command "load script <script_name>" to load the configuration.
+* Check for any errors when running the .xsf
 
 ## EXOS run example:
 ```

@@ -6,7 +6,7 @@ This Script will run ELRP on all VLANS on an EXOS switch.  If ELRP is disabled t
 
 ### Files
 
-* [vlan_elrp_check.py](vlan_elrp_check.py) 	-  The Core Python Script
+* [vlan_elrp_check.py](vlan_elrp_check.py)
 * [README.md](README.md)
 
 

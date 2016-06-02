@@ -13,6 +13,7 @@ configure stpd s0 ports mode dot1d 1:1
 configure stpd s0 ports cost auto 1:1
 configure stpd s0 ports priority 16 1:1
 configure stpd s0 ports link-type broadcast 1:1
+configure stpd s0 add vlan vlanname ports 1:5 dot1d
 disable lldp ports 1:13
 enable sharing 1:1 grouping 1:1-2 algorithm address-based L2
 enable port 1:1

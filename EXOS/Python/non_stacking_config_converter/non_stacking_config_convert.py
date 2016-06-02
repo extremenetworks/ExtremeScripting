@@ -83,7 +83,7 @@ def main():
     except:
         pass
     print
-    print ("The new stacking configuration will be saved as %s?") % newstack
+    print ("The new stacking configuration will be saved as %s.") % newstack
     '''
     This loop is used to check the configuration file one line at a time and
     replace the ports with stacking ports 1:* into a new config file.
@@ -100,6 +100,12 @@ def main():
                 line_change(stackport, port, sline)
                 pass
 
+            #configure stpd s0 add vlan <VLAN> ports 57 dot1d
+            elif 'stpd' in sline and 'ports' in sline and 'add' in sline:
+                port = sline.index(sline[-2])
+                stackport =  change_port(sline[-2])
+                line_change(stackport, port, sline)
+                pass
             #configure stpd s0 ports mode dot1d 1
             elif 'stpd' in sline and 'ports' in sline:
                 port = sline.index(sline[-1])
