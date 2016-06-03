@@ -14,7 +14,7 @@ to add the script to this list with no spaces for the table like autofsbackup do
 | [GitHub Script Downloader](git_download)| Downloads python scripts located on this page directly to your switch.|
 |[Automatic Backup](autofsbackuppy)|Runs automated back up on all scripts, including configuration, policy and scripts.|
 |[Clean Switch](cleanswitch)|Provides a method of deleting all configuration parameters and files from an EXOS switch.|
-|[Watch Command](watch)|Simple script that repeats a CLI command every *n* seconds|
+|[Config Diff](conf_diff)|Script to compare the current running config with the last saved configuration|
 | [EAPS Checker](eaps_checker)|This script will check eaps config and status from a PC/Server.|
 |[EDP and port VLAN Dif](edp_and_port_vlan_check)|This Script uses EDP to check if the local and remote port have the same vlans added to the ports.|
 |[Enable Features Check](enablefeaturescheckpy)|Identifies the features enabled on a switch|
@@ -34,3 +34,4 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[Show port vid](show_port_vid)|This script displays the VLAN assignment and tagging configuration for all ports on the switch.|
 |[VLAN ELRP Check](vlan_elrp_check)|This script will run ELRP on all VLANS on an EXOS switch.|
 |[VLAN Copy Port](vlan_copy_port)|This EXOS script will copy/move vlans from one port to another.|
+|[Watch Command](watch)|Simple script that repeats a CLI command every *n* seconds|
