@@ -1,11 +1,15 @@
 # MLAG Config Check
 
 ## Description
-This Python script checks to ensure that all VLANs on MLAG ports are also present on the ISC.
+This script will check a switch's MLAG config to ensure that there is only one port in the ISC
+vlan, all vlans added to MLAG port also exist on the ISC port, and that all MLAG and ISC ports 
+are active (and added to the aggregator if in a LAG).  
 
-If any VLANs are missing from the ISC, the script will output the VLAN name and the MLAG port that is added to the VLAN.
+If a VLAN is not present on the ISC an option to auto-correct the configuration is provided
 
-This also checks the FDB checksum for both MLAG peers, and will indicate if there is a mismatch detected.
+The tool also now supports multi-peer MLAG
+
+This does not ensure that the tagging on vlans matches across MLAG peers.
 
 ### Files
 * [mlag_config_check.py](mlag_config_check.py)
@@ -19,19 +23,40 @@ This also checks the FDB checksum for both MLAG peers, and will indicate if ther
 
 Correct MLAG configuration:
 ```
-mlag1.3 # run script mlag_config_check.py
-MLAG config check completed.
+ PEER_2.152 # run script mlag_config_check.py
+
+>> Checking MLAG Configuration and Status...
+
+>> Checking MLAG Peer "PEER_1"...
+No problems found on peer "PEER_1"
+
+>> Checking MLAG Peer "PEER_3"...
+No problems found on peer "PEER_3"
+
+>> MLAG config check completed.
 ```
 
 Incorrect MLAG configuration:
 ```
-mlag1.7 # run script mlag_config_check.py
-Vlan problem is not added to the ISC port (1), and is found on MLAG port 3. Please correct.
-MLAG config check completed.
+* PEER_2.142 # run script mlag_config_check.py
+
+>> Checking MLAG Configuration and Status...
+
+>> Checking MLAG Peer "PEER_1"...
+>> CONFIG ERROR: Port 2, a LAG member of the ISC for peer PEER_1, is down.  Please resolve.
+>> CONFIG ERROR: MLAG port 6 for peer PEER_1 is down.  Please resolve.
+>> CONFIG ERROR: VLAN VLAN_0100 is found on an MLAG port but not added to ISC port 1
+>> CONFIG ERROR: VLAN VLAN_0200 is found on an MLAG port but not added to ISC port 1
+>> Would you like to add the missing vlans to the ISC? (y/n)
+
+>> Checking MLAG Peer "PEER_3"...
+>> CONFIG ERROR: ISC for PEER_3 is not a LAG.  It is recommended that all ISC connections use link aggregation
+>> CONFIG ERROR: ISC port 3 for Peer PEER_3 not active. Please resolve.
+
+>> MLAG config check completed.
 ```
 
-## Notes
-This currently only supports MLAG implementations with one MLAG peer.
+
 
 ## License
 Copyright© 2015, Extreme Networks.  All rights reserved.
