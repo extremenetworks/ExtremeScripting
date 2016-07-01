@@ -19,28 +19,6 @@ FMT_CFG = '>> CONFIG ERROR: {0}'
 FMT_H1 = '\n>> {0}...'
 FMT_H2 = '{0}'
 
-def cmd2data(cmd):
-    #need to fix exceptions like show switch
-    import re
-    import xml.etree.cElementTree as ElementTree
-    re_reply = re.compile(r'<reply>.+?</reply>', re.DOTALL)
-    xmlout = clicmd(cmd, capture=False, xml=True)
-    data = []
-    for reply in re.finditer(re_reply, xmlout):
-        if reply:
-            reply_xml = reply.group()
-            root = ElementTree.fromstring(reply_xml)
-            for message in root.iter('message'):
-                for element in message:
-                    mdata = {}
-                    edata = {}
-                    for e in element:
-                        text = int(e.text) if e.text is not None and e.text.isdigit() else e.text
-                        edata[e.tag] = text
-                    mdata[element.tag] = edata
-                    data.append(mdata)
-    return data
-
 
 def get_mlag_peers():
     mlagpeerRslt = json.loads(clicmd('debug cfgmgr show next vsm.mLagPeer', True))
