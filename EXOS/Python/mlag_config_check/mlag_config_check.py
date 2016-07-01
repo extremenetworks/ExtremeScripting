@@ -1,7 +1,12 @@
 # mlag_config_check.py
-# This script will check a switch's MLAG config to ensure that there is only one port in the ISC
-# vlan, all vlans added to MLAG port also exist on the ISC port, and that all MLAG and ISC ports 
-# are active and added to aggreagor (if LAG).  The tool also now supports Multi-peer MLAG
+# This script will check a switch's MLAG config to ensure that there is only one port 
+# in the ISC vlan, all vlans added to MLAG port also exist on the ISC port, and that
+# all MLAG and ISC ports are active (and added to the aggregator if in a LAG).
+#
+# If a VLAN is not present on the ISC an option to auto-correct the configuration is provided
+#
+# The tool also now supports multi-peer MLAG
+#
 # This does not ensure that the tagging on vlans matches across MLAG peers.
 # 
 # Last updated: July 1, 2016
