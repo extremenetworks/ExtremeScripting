@@ -26,7 +26,13 @@ from exsh import clicmd
 from time import sleep
 import sys
 import re
-import subprocess
+
+
+class ArgParser(argparse.ArgumentParser):
+   def error(self, message):
+      sys.stderr.write('error: %s\n' % message)
+      self.print_help()
+      sys.exit(2)
 
 def try_cli(command):
     """Try CLI command and exit if invalid"""
@@ -37,11 +43,24 @@ def try_cli(command):
         print 'Script Error: Check Command Syntax'
         exit()
 
-class ArgParser(argparse.ArgumentParser):
-   def error(self, message):
-      sys.stderr.write('error: %s\n' % message)
-      self.print_help()
-      sys.exit(2)
+def version_check():
+    pimage = True
+    sh_switch = clicmd('show switch', True)
+    ver = ''
+    if 'Image Selected:   secondary' in sh_switch:
+        pimage = False
+    sh_switch = sh_switch.splitlines()
+    for line in sh_switch:
+        if (pimage and ('Primary ver:' in line)) or (not pimage and ('Secondary ver:' in line)):
+            ver = line.split(':')
+            ver = ver[1].strip()
+    if ver == '':
+        print FMT_ERROR.format('Problem detecting software version')
+        exit()
+    elif ver.startswith('15.6') or ver.startswith('15.7'):
+        return True
+    else:
+        return False
 
 
 def main():
@@ -64,15 +83,21 @@ def main():
     stat_diff = args.diff
 
     cli_refresh = True
-    # Check to see if cli refresh is disabled
-    cli_out = clicmd('show management | include "CLI refresh"', True)
-    if 'Disabled' in cli_out:
-        cli_refresh = False
+    legacy_version = version_check()
 
-    print cli_refresh
-    if cli_refresh:
-        # Temporarily disable refreshing CLI commands to prevent script from hanging
-        clicmd('disable cli refresh')
+    # Handle Auto-refreshing Commands
+    if legacy_version:
+        print 'WARNING: Switch is running pre 16.1 code.  Please be sure to not use auto-refreshing commands\n'
+    else:
+        # Check to see if cli refresh is disabled
+        cli_out = clicmd('show management | include "CLI refresh"', True)
+        if 'Disabled' in cli_out:
+            cli_refresh = False
+
+        print cli_refresh
+        if cli_refresh:
+            # Temporarily disable refreshing CLI commands to prevent script from hanging
+            clicmd('disable cli refresh')
 
     if stat_diff:
         prev_output = try_cli(cmd)
@@ -99,13 +124,12 @@ def main():
                 print
             count -= 1
             prev_output = curr_output
-
     else:
         for i in range(count):
             print try_cli(cmd)
             sleep(interval)
 
-    if cli_refresh:
+    if cli_refresh and not legacy_version:
         # Restore CLI refresh
         clicmd('enable cli refresh')
 
