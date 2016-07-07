@@ -37,22 +37,6 @@ def try_cli(command):
         print 'Script Error: Check Command Syntax'
         exit()
 
-def test_auto_refresh(command):
-
-    exsh_cmd = "/exos/bin/exsh -n 0 -c '{0}'".format(command)
-    try:
-        p = subprocess.Popen(shlex.split(exsh_cmd), bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             stdin=subprocess.PIPE)
-        for line in iter(p.stdout.readline, ''):
-            if 'ESC->exit' in line:
-                p.kill()
-                print 'This command is an auto-refreshing command.  Please use the no-refresh variety'
-                exit()
-    except:
-        print 'Script Error: Check Command Syntax'
-        exit()
-
-
 class ArgParser(argparse.ArgumentParser):
    def error(self, message):
       sys.stderr.write('error: %s\n' % message)
@@ -79,7 +63,16 @@ def main():
     interval = args.interval
     stat_diff = args.diff
 
-    test_auto_refresh(cmd)
+    cli_refresh = True
+    # Check to see if cli refresh is disabled
+    cli_out = clicmd('show management | include "CLI refresh"', True)
+    if 'Disabled' in cli_out:
+        cli_refresh = False
+
+    print cli_refresh
+    if cli_refresh:
+        # Temporarily disable refreshing CLI commands to prevent script from hanging
+        clicmd('disable cli refresh')
 
     if stat_diff:
         prev_output = try_cli(cmd)
@@ -112,6 +105,9 @@ def main():
             print try_cli(cmd)
             sleep(interval)
 
+    if cli_refresh:
+        # Restore CLI refresh
+        clicmd('enable cli refresh')
 
 
 if __name__ == '__main__':
@@ -120,4 +116,3 @@ if __name__ == '__main__':
     except SystemExit:
         # catch SystemExit to prevent EXOS shell from exiting to the login prompt
         pass
-
