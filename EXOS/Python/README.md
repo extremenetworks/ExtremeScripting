@@ -35,4 +35,4 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[VLAN ELRP Check](vlan_elrp_check)|This script will run ELRP on all VLANS on an EXOS switch.|
 |[VLAN Copy Port](vlan_copy_port)|This EXOS script will copy/move vlans from one port to another.|
 |[Watch Command](watch)|Simple script that repeats a CLI command every *n* seconds|
-| [JSONRPC CLI Example](jsonrpc_example)| This python script is an example of how to interface with EXOS 21.1 using JSONRPC over HTTP/HTTPS.|
+| [JSONRPC CLI Example](jsoncli)| This python script is an example of how to interface with EXOS 21.1 using JSONRPC over HTTP/HTTPS.|
