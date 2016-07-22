@@ -1,19 +1,5 @@
 # Show Port VID
 
-## Disclaimer
-Python Scripts provided by Extreme Networks.
-
-This script is provided free of charge by Extreme.  We hope such scripts are
-helpful when used in conjunction with Extreme products and technology;
-however, scripts are provided simply as an accommodation and are not
-supported nor maintained by Extreme.  ANY SCRIPTS PROVIDED BY EXTREME ARE
-HEREBY PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL EXTREME OR ITS
-THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
-
 ## Description
 This script displays the VLAN assignment and tagging configuration for all or sellected ports on the switch.  You can also see vlan descriptions.
 
