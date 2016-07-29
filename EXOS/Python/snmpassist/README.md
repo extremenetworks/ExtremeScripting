@@ -1,25 +1,26 @@
-# Wipe SNMP configuration
+# Create and delete SNMPv3 configuration
 
 ## Description
-This widget provides a method of deleting the SNMP configuration a switch.
+This widget provides a method of deleting and creating the SNMP configuration a switch.
 
 ### Files
-* [wipeSNMP.py](wipeSNMP.py)
+* [snmpassist.py](snmpassist.py)
 * [README.md](README.md)
 
 
 ### Requirements
-* Firmware: ExtremeXOS(TM) 15.6 and Newer
+* Tested on 21.1.1.4
 * Platform(s): Any ExtremeXOS switch
 
 ## Example
 ```
-* X670G2-72x.8 # run script wipeSNMP
-!!!WARNING!!! THIS SCRIPT WILL WIPE ALL SNMP CONFIGURATION ON THE SWITCH!!!
-Wipe SNMPv3 settings? (yes or no): yes
+* X440G2-12t8fxG4.13 # run script SNMPassistv3
+Would you like to (D)elete or (C)onfigure SNMPv3? d
+This script will completely delete the currently existing SNMPv3 configuration. Are you sure you wish to do this? (y/n): y
 Deleting SNMP configuration...
 Deleting trap receivers...
 Deleting notification logs...
+Deleting non-default SNMPv3 groups
 Deleting non-default SNMPv3 access profiles...
 Deleting non-default SNMPv3 communities...
 Deleting filters...
@@ -31,17 +32,29 @@ Deleting target parameters...
 Deleting non-default SNMPv3 users...
 Deleting non-default communities...
 Deleting SNMP readonly communities...
+Deleting groups...
 Enabling SNMPv3 default group...
 Enabling SNMPv3 default user...
-Deletion of SNMP configuration completed successfully.
-* X670G2-72x.9 # 
 
+SNMP configuration has been deleted.
+* X440G2-12t8fxG4.13 # 
+* X440G2-12t8fxG4.15 # run script snmpassist
+Would you like to (D)elete or (C)onfigure SNMPv3? c
+Please enter your SNMPv3 User name: admin
+Please enter your SNMPv3 User password (8 to 49 char): adminpass
+Please enter your SNMPv3 privacy password (8 to 49 char): adminpriv
+Please enter your SNMPv3 Group name: v3group
+Please enter your SNMPv3 Access preferences: admin
+Would you like to disable SNMP v1v2c access?(y/n): y
+Would you like to disable the default SNMPv3 user?(y/n): y
+Would you like to disable the default SNMPv3 group? (y/n): y
+SNMPv3 configuration has been completed
+* X440G2-12t8fxG4.15 # 
 ```
 
 ## Notes:
 
-Specifically, this widget performs the following functions:
-
+The Delete portion of the script does the following:
 
 1.  Delete trap receivers
 2.  Delete notification logs
@@ -58,6 +71,8 @@ Specifically, this widget performs the following functions:
 13. Delete SNMP readonly communities
 14. Enable SNMPv3 default group
 15. Enable SNMPv3 default user
+
+The Configure portion of the scripts asks a series of questions relating to the user name, and group configuration. The script assumes that MD5 and des privacy settings will be used. Future versions of this script will have these settings configurable as well. The configure portion of the script also asks the user if they want to disable SNMP v1v2c access, disable the default SNMPv3 user, and disable the default SNMPV3 group.
 
 In this current iteration, this script does not:
 
