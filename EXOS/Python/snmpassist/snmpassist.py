@@ -74,18 +74,64 @@ def main():
     if dec == 'c':
         exsh.clicmd('create log entry \"Starting configuration of SNMPv3 using SNMPassist.py\"', capture=True)
         snmpuser = raw_input("Please enter your SNMPv3 User name: ")
-        snmpuserpw = get_input("Please enter your SNMPv3 User password (8 to 49 char): ", 1)
-        snmpprivacypw = get_input("Please enter your SNMPv3 privacy password (8 to 49 char): ", 1)
-        exsh.clicmd(
-            'configure snmpv3 add user %s authentication md5 %s privacy des %s' % (snmpuser, snmpuserpw, snmpprivacypw),
-            capture=True)
+        authpw = get_input("Please enter your SNMPv3 User password (8 to 49 char): ", 1)
+        privpw = get_input("Please enter your SNMPv3 privacy password (8 to 49 char): ", 1)
+        authtype = get_input("Please enter your authentication type (SHA/MD5): ", 3)
+        privtype = get_input("Please enter your encryption type (3DES, AES, DES, HEX): ", 4)
+        if privtype == 'aes':
+            string = exsh.clicmd('show configuration', True)
+            if string.find("enable ssh2") != -1:
+                pass
+            else:
+                print
+                ynenablessh = get_input("SSH2 must be enabled to configure privacy type as AES. If you choose to \n"
+                                        'enable it, key generation can take 10-15 minutes to complete and the \nCLI '
+                                        'will be unavailable during that time. \n'
+                                         "Would you like to enable it? (y/n): ", 0)
+                string = exsh.clicmd('show version', True)
+                if string.find("21.") != -1:
+                    if ynenablessh:
+                        exsh.clicmd('enable ssh2', capture=True)
+                        print('After running the script, please restart process snmpMaster and snmpSubagent')
+                    else:
+                        privtype = get_input("Please enter your encryption type (DES, HEX): ", 5)
+                else:
+                    print('Please download and install the SSH xmod from https://support.extremenetworks.com')
+                    print('After installing the SSH xmod, please re-run the script to complete configuration '
+                          'after SSH is enabled.')
+                    pass
+        if privtype == '3des':
+            string = exsh.clicmd('show configuration', True)
+            if string.find("enable ssh2") != -1:
+                pass
+            else:
+                print
+                ynenablessh = get_input("SSH2 must be enabled to configure privacy type as 3DES. If you choose to \n"
+                                        'enable it, key generation can take 10-15 minutes to complete and the \nCLI '
+                                        'will be unavailable during that time. \n'
+                                         "Would you like to enable it? (y/n): ", 0)
+                string = exsh.clicmd('show version', True)
+                if string.find("21.") != -1:
+                    if ynenablessh:
+                        exsh.clicmd('enable ssh2', capture=True)
+                        print('After running the script, please restart process snmpMaster and snmpSubagent')
+                else:
+                    print('Please download and install the SSH xmod from our support portal')
+                    print('After installing the SSH xmod, please re-run the script to complete configuration '
+                          'after SSH is enabled.')
+                    pass
+        exsh.clicmd('configure snmpv3 add user {0} authentication {1} {2} privacy {3} {4}'.format
+                    (snmpuser, authtype, authpw, privpw, privtype))
+        print
+        print('SNMP Group name is used to link multiple SNMP users together. Its not something that '
+              'Netsight/ExtremeControl asks for.')
         snmpgroupname = raw_input("Please enter your SNMPv3 Group name: ")
-        exsh.clicmd('configure snmpv3 add group %s user %s sec-model usm' % (snmpgroupname, snmpuser), capture=True)
-        snmpaccessname = raw_input("Please enter your SNMPv3 Access preferences: ")
+        exsh.clicmd('configure snmpv3 add group {0} user {1} sec-model usm'.format(snmpgroupname,snmpuser), capture=True)
+        snmpaccessname = raw_input("Please enter your SNMPv3 Access preferences: ") #Optional to enter a new access name
         exsh.clicmd('configure snmpv3 add access %s sec-model usm sec-level priv read-view defaultAdminView '
                     'write-view defaultAdminView notify-view defaultAdminView' % snmpaccessname, capture=True)
-        yndisablev1v2access = get_input("Would you like to disable SNMP v1v2c access?(y/n): ", 0)
-        yndisablev3user = get_input("Would you like to disable the default SNMPv3 user?(y/n): ", 0)
+        yndisablev1v2access = get_input("Would you like to disable SNMP v1v2c access? (y/n): ", 0)
+        yndisablev3user = get_input("Would you like to disable the default SNMPv3 user? (y/n): ", 0)
         yndisablev3group = get_input("Would you like to disable the default SNMPv3 group? (y/n): ", 0)
         exsh.clicmd('enable snmp access vr vr-default', capture=True)
         if yndisablev1v2access:
@@ -127,14 +173,36 @@ def get_input(request, fmt_chk):
             return input
         print 'Invalid input.  Password must be between 8 and 49 characters'
         get_input(request, fmt_chk)
-    elif fmt_chk == 2:
+    if fmt_chk == 2:
         if input in ('d', 'D'):
             return "d"
         elif input in ('c', 'C', ''):
             return "c"
         print 'Invalid input.  Please enter \'D\' or \'C\''
         get_input(request, fmt_chk)
-
+    if fmt_chk == 3:
+        if input in ('md5', 'MD5', 'Md5', 'mD5'):
+            return "md5"
+        elif input in ('SHA', 'sha', 'sHa', 'Sha', 'sHA', 'SHa'):
+            return "sha"
+        print 'Invalid input. Please enter \'sha\' or \'md5\''
+        get_input(request, fmt_chk)
+    if fmt_chk == 4:
+        if input in ('3DES', '3des', '3Des', '3DEs', '3dES', '3DeS', '3DeS'):
+            return "3des"
+        if input in ('aes', 'AES', 'Aes', 'AEs', 'aeS', 'AeS'):
+            return "aes"
+        if input in ('hex', 'Hex', 'hEx', 'heX', 'HEx', 'hEX', 'HeX'):
+            return "hex"
+        elif input in ('des', 'DES', 'DEs', 'Des', 'dES'):
+            return "des"
+        print 'Invalid input.  Please enter \'sha\' or \'md5\''
+    if fmt_chk == 5:
+        if input in ('des', 'DES', 'DEs', 'Des', 'dES'):
+            return "des"
+        elif input in ('hex', 'Hex', 'hEx', 'heX', 'HEx', 'hEX', 'HeX'):
+            return "hex"
+        print 'Invalid input. Please enter \'hex\' or \'des\''
 
 if __name__ == '__main__':
     try:
