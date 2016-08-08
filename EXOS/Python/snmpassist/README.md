@@ -1,7 +1,7 @@
 # Create and delete SNMPv3 configuration
 
 ## Description
-This widget provides a method of deleting and creating the SNMP configuration a switch.
+This widget provides a method of deleting and creating the SNMP configuration of a switch.
 
 ### Files
 * [snmpassist.py](snmpassist.py)
@@ -14,7 +14,7 @@ This widget provides a method of deleting and creating the SNMP configuration a 
 
 ## Example
 ```
-* X440G2-12t8fxG4.13 # run script SNMPassistv3
+* X440G2-12t8fxG4.13 # run script snmpassist
 Would you like to (D)elete or (C)onfigure SNMPv3? d
 This script will completely delete the currently existing SNMPv3 configuration. Are you sure you wish to do this? (y/n): y
 Deleting SNMP configuration...
@@ -37,19 +37,29 @@ Enabling SNMPv3 default group...
 Enabling SNMPv3 default user...
 
 SNMP configuration has been deleted.
-* X440G2-12t8fxG4.13 # 
-* X440G2-12t8fxG4.15 # run script snmpassist
+
+* X440G2-12t8fxG4.16 # run script snmpassist
 Would you like to (D)elete or (C)onfigure SNMPv3? c
-Please enter your SNMPv3 User name: admin
-Please enter your SNMPv3 User password (8 to 49 char): adminpass
-Please enter your SNMPv3 privacy password (8 to 49 char): adminpriv
+Please enter your SNMPv3 User name: extreme
+Please enter your SNMPv3 User password (8 to 49 char): be3xtr3m3
+Please enter your SNMPv3 privacy password (8 to 49 char): be3xtr3m3
+Please enter your authentication type (SHA/MD5): MD5
+Please enter your encryption type (3DES, AES, DES, HEX): AES
+
+SSH2 must be enabled to configure privacy type as AES. If you choose to 
+enable it, key generation can take 10-15 minutes to complete and the 
+CLI will be unavailable during that time. 
+Would you like to enable it? (y/n): y
+After running the script, please restart process snmpMaster and snmpSubagent
+
+SNMP Group name is used to link multiple SNMP users together. Its not something that Netsight/ExtremeControl asks for.
 Please enter your SNMPv3 Group name: v3group
-Please enter your SNMPv3 Access preferences: admin
-Would you like to disable SNMP v1v2c access?(y/n): y
-Would you like to disable the default SNMPv3 user?(y/n): y
+Please enter your SNMPv3 Access preferences: adminaccess
+Would you like to disable SNMP v1v2c access? (y/n): y
+Would you like to disable the default SNMPv3 user? (y/n): y
 Would you like to disable the default SNMPv3 group? (y/n): y
 SNMPv3 configuration has been completed
-* X440G2-12t8fxG4.15 # 
+* X440G2-12t8fxG4.16 # 
 ```
 
 ## Notes:
@@ -72,7 +82,13 @@ The Delete portion of the script does the following:
 14. Enable SNMPv3 default group
 15. Enable SNMPv3 default user
 
-The Configure portion of the scripts asks a series of questions relating to the user name, and group configuration. The script assumes that MD5 and des privacy settings will be used. Future versions of this script will have these settings configurable as well. The configure portion of the script also asks the user if they want to disable SNMP v1v2c access, disable the default SNMPv3 user, and disable the default SNMPV3 group.
+The Configure portion of the scripts asks a series of questions relating to the user name, group configuration, and access profile information. 
+The configure portion of the script also asks the user if they want to disable SNMP v1v2c access, disable the default SNMPv3 user, and disable 
+the default SNMPV3 group.
+
+In order to use 3DES or AES encryption, the SSH module is required to be installed, configured, and enabled. The script will automatically check to see if SSH is enabled.
+If running EXOS version 21 or later, The switch will enable SSH for you. If running EXOS version 16 or earlier, and SSH is not enabled, the switch will prompt the user to
+download SSH from https://support.extremenetworks.com .
 
 In this current iteration, this script does not:
 
@@ -80,7 +96,7 @@ In this current iteration, this script does not:
 
 
 ## License
-Copyright© 2015, Extreme Networks.  All rights reserved.
+Copyright© 2016, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
