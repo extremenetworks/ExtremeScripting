@@ -29,7 +29,7 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[Radius NetLogin config](radiusnetloginconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch for RADIUS netlogin.|
 |[show config clean](show_config_clean)|Hides unused config sections from the output of "show configuration"|
 |[Show vlanID](show_vid)|Shows EXOS VLANs in VID order|
-|[snmpassist](snmpassistpy)|Wizard for deleting and configuring SNMPv3 for an ExtremeXOS(TM) switch.|
+|[SNMPassist](snmpassist)|Wizard for deleting and configuring SNMPv3 for an ExtremeXOS(TM) switch.|
 |[SNMP v1v2 config](snmpv1v2configpy)|Wizard for SNMP V1/V2 configuration for an ExtremeXOS(TM) switch.|
 |[SNTP config](sntpconfigpy)|Example for Simple Network Time Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.|
 |[Show port vid](show_port_vid)|This script displays the VLAN assignment and tagging configuration for all ports on the switch.|
