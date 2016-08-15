@@ -24,6 +24,8 @@ This script was tested on 16.1.
 * Copy the script to the switch
 * Adjust in the script the following lines:
 
+    myVirtualRouter = 2  <- Number of your virtual-router to reach SMTP server
+
     FromDomain = "@email.com"
 
     to = 'Your@email.com'
