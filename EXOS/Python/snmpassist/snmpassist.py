@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 
-# Wizard to configure or delete SNMP configuration
-
+# Wizard to configure or delete SNMPv3 configuration
 ##############################################################################
 # Imports
 ##############################################################################
 import re
-
 #############################################################################
 # SNMP v3 Variable definitions
 #############################################################################
 config = exsh.clicmd('show config snmp', capture=True)
-
-
+version = exsh.clicmd('show version', capture=True)
 ##############################################################################
 # Main function
 ##############################################################################
@@ -88,8 +85,7 @@ def main():
                                         'enable it, key generation can take 10-15 minutes to complete and the \nCLI '
                                         'will be unavailable during that time. \n'
                                          "Would you like to enable it? (y/n): ", 0)
-                string = exsh.clicmd('show version', True)
-                if string.find("21.") != -1:
+                if version.find('21.1') != -1 or version.find('16.2') != -1:
                     if ynenablessh:
                         exsh.clicmd('enable ssh2', capture=True)
                         print('After running the script, please restart process snmpMaster and snmpSubagent')
@@ -110,8 +106,7 @@ def main():
                                         'enable it, key generation can take 10-15 minutes to complete and the \nCLI '
                                         'will be unavailable during that time. \n'
                                          "Would you like to enable it? (y/n): ", 0)
-                string = exsh.clicmd('show version', True)
-                if string.find("21.") != -1:
+                if version.find('21.1') != -1 or version.find('16.2') != -1:
                     if ynenablessh:
                         exsh.clicmd('enable ssh2', capture=True)
                         print('After running the script, please restart process snmpMaster and snmpSubagent')
