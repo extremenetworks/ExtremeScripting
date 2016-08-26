@@ -245,23 +245,30 @@ class ShowVid(object):
 
 
     def get_flags(self, v):
-        # The form of vlanProc that returns the flags is SHOW_VLAN action
+        # The form of vlanProc object that returns the flags is SHOW_VLAN action
         # The behavior of this action is to return the next VLAN
-        # so to spoof vlanProc, we ask for the previous VLAN name to get
-        # the one we are really after.
-        # This logic creates an full ordered list of VLAN names
-        try:
-            idx = self.db.vnames.index(v['name1'])
-            vname_prev = None
-            if idx == 0:
-                vname_prev = None
-            else:
-                vname_prev = self.db.vnames[idx - 1]
-        except LookupError:
-            vname_prev = None
+        # so to spoof vlanProc, we trim the trailing character off of the
+        # name so it gets the next one higher
+        vname = v.get('name1')
+        vname_prev = vname[0:-1] + chr(ord(vname[-1]) - 1)
 
-        reply = self.db.get_vlan_proc_flags(vname_prev)
-        return '' if reply['flags'] is None else reply['flags']
+
+        while True:
+            reply = self.db.get_vlan_proc_flags(vname_prev)
+            if reply.get('status') in ['ERROR'] or reply.get('name1') is None:
+                # ran off the end of all VLANs
+                return ''
+
+            if reply.get('name1').lower > vname.lower():
+                # returned name is past the one we are looking for
+                return ''
+
+            if reply.get('name1') == vname:
+                # matched the name we are looking for
+                return '' if reply.get('flags') is None else reply.get('flags')
+
+            # find the next VLAN name
+            vname_prev = reply.get('name1')
 
 
     def print_summary_line(self, v):

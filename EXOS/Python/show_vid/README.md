@@ -2,6 +2,9 @@
 ## Description
 This script is a substitute to the "show vlan" command for users that like to see vlans in VID order.
 
+### History
+26-Sep-2016 - fixed VLAN flags display to always report flags with correct VLAN name
+
 ### Files
 * [showvid.py](showvid.py)
 * [README.md](README.md)
