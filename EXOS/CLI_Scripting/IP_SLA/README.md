@@ -7,7 +7,7 @@ This script is meant to be an example of a possible scripting solution.  It has 
 
 ### Files
 * [ip_sla.xsf](ip_sla.xsf) 	-  The Core Script
-[README.md](README.md)	-  This Readme
+* [README.md](README.md)	-  This Readme
 
 ### Requirements
 * Firmware: ExtremeXOS(TM) 12.3.x and Newer for ip_sla.xsf standard
@@ -15,7 +15,7 @@ This script is meant to be an example of a possible scripting solution.  It has 
 * TFTP Server
 
 ###Example
-
+```
 * X450G2-48t-10G4.5 # load script ip_sla.xsf
 * X450G2-48t-10G4.7 # show upm timers 
 Current Time: 2016-09-19 15:04:55
@@ -35,7 +35,7 @@ Flags: e - Profile is enabled, d: Profile is disabled
 09/19/2016 15:00:17.18 <Info:System.userComment> : 1st ping attempt failed for Preferred Route 192.168.22.1 .
 09/19/2016 15:00:13.19 <Noti:UPM.Msg.upmMsgExshLaunch> : Launched profile IP_SLA for the event UPM Timer IP_SLA_Timer
 09/19/2016 14:46:13.19 <Noti:UPM.Msg.upmMsgExshLaunch> : Previous message repeated 28 additional times in the last 810 second(s)
-
+```
 
 
 ## License
