@@ -1,0 +1,77 @@
+enable cli scripting 
+
+create upm profile IP_SLA
+
+###############################################################
+# Last Change: 06-09-2015
+# This Script uses ping results to failover the default gateway *Emulates IP SLA*
+###########################################################
+##Start of the script 
+disable clipaging 
+enable cli scripting
+enable cli scripting permanent
+set var PreferredRoute 10.10.10.10 #FORMAT: x.x.x.x  #Preferred Route
+set var SecondaryRoute 10.10.10.11 #FORMAT: x.x.x.x
+#<--Track Preferred Route------------------------------------------------->
+set var CLI.OUT " "
+ping $PreferredRoute #<- Tracked Preferred IP 
+set var xpinginfo $TCL(split ${CLI.OUT} "\n") 
+set var PreferredStatus $TCL(lsearch -glob $xpinginfo {4 packets transmitted, 4 packets received, 0% loss}) #<- Check for successful pings 
+IF ( $PreferredStatus < 0 ) THEN #<- If first ping is unsuccessful, check again 
+    create log entry "1st ping attempt failed for Preferred Route $PreferredRoute ." 
+    set var temp $TCL(after [expr {1 *1000}])    #<- Waits for a minute before pinging the critical resource again 
+    ping $PreferredRoute #<- Tracked Preferred IP Again 
+    set var xpinginfo $TCL(split ${CLI.OUT} "\n") 
+    set var PreferredStatus $TCL(lsearch -glob $xpinginfo {4 packets transmitted, 4 packets received, 0% loss}) #<- Check for successful pings 
+ENDIF 
+#<--Track Secondary Route------------------------------------------------->
+set var CLI.OUT " "
+ping $SecondaryRoute #<- Tracked Secondary IP 
+set var xpinginfo $TCL(split ${CLI.OUT} "\n") 
+set var SecondaryStatus $TCL(lsearch -glob $xpinginfo {4 packets transmitted, 4 packets received, 0% loss}) #<- Check for successful pings 
+IF ( $SecondaryStatus < 0 ) THEN 
+    create log entry "1st ping attempt failed for Secondary Route $SecondaryRoute ." 
+    set var temp $TCL(after [expr {1 *1000}])    #<- Waits for a minute before pinging the critical resource again 
+    ping $SecondaryRoute #<- Tracked Secondary IP Again 
+    set var xpinginfo $TCL(split ${CLI.OUT} "\n") 
+    set var SecondaryStatus $TCL(lsearch -glob $xpinginfo {4 packets transmitted, 4 packets received, 0% loss}) #<- Check for successful pings 
+ENDIF 
+#<--Get Current Default Route------------------------------------------------->
+set var CLI.OUT " "
+show iproute | include "Default Route"
+set var CurrentDefault $TCL(split ${CLI.OUT})
+#<--If Current Default Route is the Preferred Route------------------------------------------------->
+set var match $TCL(lsearch -glob $CurrentDefault $PreferredRoute)
+IF ( $match > 0 ) THEN 
+    IF ( $PreferredStatus < 0 && $SecondaryStatus > 0 ) THEN  #<- If Preferred Route is DOWN and Secondary is UP 
+        configure iproute add default $SecondaryRoute
+        configure iproute delete default $PreferredRoute
+        create log entry "2nd ping attempt failed for Preferred Route $PreferredRoute . Default Route is now $SecondaryRoute instead of $PreferredRoute " 
+    ENDIF
+ENDIF
+#<--If Current Default Route is the Secondary Route------------------------------------------------->
+set var match $TCL(lsearch -glob $CurrentDefault $SecondaryRoute)
+IF ( $match > 0 ) THEN 
+    IF ( $PreferredStatus > 0 ) THEN #<- If Preferred Route is UP, use it instead of Secondary Route
+        configure iproute add default $PreferredRoute
+        configure iproute delete default $SecondaryRoute
+        create log entry "The Preferred Route is now up. Default Route is now $PreferredRoute instead of $SecondaryRoute " 
+    ENDIF
+    IF ( ($SecondaryStatus < 0) && ($PreferredStatus < 0) ) THEN #<- If both routes are down, use the Preferred Route
+        configure iproute add default $PreferredRoute
+        configure iproute delete default $SecondaryRoute
+        create log entry "2nd ping attempt failed for both Preferred Route $PreferredRoute and Secondary Route $SecondaryRoute . Default Route is now $PreferredRoute instead of $SecondaryRoute " 
+    ENDIF
+ENDIF
+disable clipaging 
+disable cli scripting
+disable cli scripting permanent
+.
+
+configure upm profile IP_SLA maximum execution 7200 
+
+create upm timer IP_SLA_Timer 
+
+configure upm timer IP_SLA_Timer profile IP_SLA 
+
+configure upm timer IP_SLA_Timer after 30 every 30

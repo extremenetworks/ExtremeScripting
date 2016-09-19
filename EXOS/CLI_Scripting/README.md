@@ -13,6 +13,7 @@ Did you know that you can use the [ExtremeXOS Notepad ++ XSF style template](npp
 | [edpavp](edpavp)      | This script will auto-configure an edge switch based on the ports seen on the uplink port using EDP. |
 | [enablefeaturescheck](enablefeaturescheck)      | This script identifies the features enabled on a switch. |
 | [fwvcvalidate](fwvcvalidate)      | When a switch boots, this script matches the configured-firmware-version with the correct-firmware setting. |
+| [IP SLA](IP_SLA)      | This script provides an example of IP SLA by using UPM scripting with UPM timers. |
 | [ipv6uniconfig](ipv6uniconfig)      | This script provides an example of IPv6 unicast routing in ExtremeXOS. |
 | [latencyfortdmcalc](latencyfortdmcalc)      | This tool calculates the estimate of PSN bandwidth and the end-to-end latency incurred in encapsulating given TDM payload. |
 | [legacysnmpv1v2](legacysnmpv1v2)      | This script provides an example of SNMP V1/V2 configuration for an ExtremeXOS(TM) switch. |
