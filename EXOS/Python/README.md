@@ -15,6 +15,7 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[Automatic Backup](autofsbackuppy)|Runs automated back up on all scripts, including configuration, policy and scripts.|
 |[Clean Switch](cleanswitch)|Provides a method of deleting all configuration parameters and files from an EXOS switch.|
 |[Config Diff](conf_diff)|Script to compare the current running config with the last saved configuration|
+|[dhcp43](dhcp43)|Script to generate option 43 configuration to use with EXOS ZTP|
 | [EAPS Checker](eaps_checker)|This script will check eaps config and status from a PC/Server.|
 |[EDP and port VLAN Dif](edp_and_port_vlan_check)|This Script uses EDP to check if the local and remote port have the same vlans added to the ports.|
 |[Enable Features Check](enablefeaturescheckpy)|Identifies the features enabled on a switch|
