@@ -16,7 +16,30 @@ If a VLAN is provided, the script will configure the DHCP options on the specifi
 ExtremeXOS 15.6+
 
 ### Usage
-    run script dhcp43.py [-h] [-s SERVER_ADDRESS] [-v VLAN_NAME] files [files ...]
+```
+usage: dhcp43.py [-h] [-s SERVER_ADDRESS] [-v VLAN_NAME] files [files ...]
+
+This script will generate the hex needed to configure EXOS's built-in DHCP
+server with option 43 for ZTP. It will also either provide the command to use,
+or configure the option on the specified VLAN.
+
+positional arguments:
+  files                 Files to be downloaded. If the '-s' option is used,
+                        this may be simply be a file name. If the '-s' option
+                        is not used, this should be a full URL. (IE,
+                        tftp://192.168.1.10/config.xsf)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SERVER_ADDRESS, --server_address SERVER_ADDRESS
+                        IP Address of TFTP server for sub-option 100. May be
+                        omitted if a URL is used for sub-option 101.
+  -v VLAN_NAME, --vlan_name VLAN_NAME
+                        VLAN to configure option 43 on. If this is included,
+                        the option 43 config will be added to the DHCP server
+                        configuration on this switch for this VLAN. If not,
+                        the config command will simply be printed.
+```
 
 ### Examples
 ```
