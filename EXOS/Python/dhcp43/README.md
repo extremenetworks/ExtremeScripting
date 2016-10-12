@@ -2,9 +2,11 @@
 dhcp43 is a script that will take generate the command needed to configure an EXOS switch's built in DHCP server to provide DHCP option 43 for EXOS ZTP automated config download.
 
 ## Description
-This script takes arguments of filenames or URLS, and optionally a server IP address and a VLAN.
+[EXOS ZTP](http://documentation.extremenetworks.com/exos/exos_21_1/getting_started/c_zero-touch-provisioning.shtml) will automatically download config files (.cfg), scripts (.xsf or .py), policy files (.pol), EXOS images (.xos), or EXOS XMOD files (.xmod) from a TFTP server if the correct information is provided in option 43 of a DHPC offer. 
 
-If the VLAN is provided, the script will configure the DHCP options on the specified vlan. Otherwise, it will simply provide the command needed to make this configuration change (without the VLAN specified)
+This script takes arguments of filenames or URLS, and optionally a server IP address and a VLAN. It then generates the correctly formatted DHCP option 43 to be used with the EXOS DHCP server.
+
+If a VLAN is provided, the script will configure the DHCP options on the specified VLAN. Otherwise, it will simply provide the command needed to make this configuration change (without the VLAN specified)
 
 ### Files
 * [dhcp43.py](dhcp43.py)
@@ -14,14 +16,27 @@ If the VLAN is provided, the script will configure the DHCP options on the speci
 ExtremeXOS 15.6+
 
 ### Usage
-run script dhcp43.py [-h] [-s SERVER_ADDRESS] [-v VLAN_NAME] files [files ...]
+    run script dhcp43.py [-h] [-s SERVER_ADDRESS] [-v VLAN_NAME] files [files ...]
 
-### Example
+### Examples
 ```
 X620-16x.1 # run script dhcp43.py -s 192.168.1.101 config.xsf summitX-21.1.2.14.xos
 configure vlan <vlan_name> dhcp-options code 43 hex 64:04:c0:a8:01:65:65:0a:63:6f:6e:66:69:67:2e:78:73:66:65:15:73:75:6d:6d:69:74:58:2d:32:31:2e:31:2e:32:2e:31:34:2e:78:6f:73
 ```
 
+```
+X620-16x.2 # run script dhcp43.py tftp://192.168.1.101/config.xsf
+configure vlan <vlan_name> dhcp-options code 43 hex 65:1f:74:66:74:70:3a:2f:2f:31:39:32:2e:31:36:38:2e:31:2e:31:30:31:2f:63:6f:6e:66:69:67:2e:78:73:66
+```
+
+```
+X620-16x.2 # run script dhcp43.py -v Default tftp://192.168.1.101/config.xsf
+* X620-16x.3 # show conf nettools
+#
+# Module netTools configuration.
+#
+configure vlan Default dhcp-option code 43 hex 65:1f:74:66:74:70:3a:2f:2f:31:39:32:2e:31:36:38:2e:31:2e:31:30:31:2f:63:6f:6e:66:69:67:2e:78:73:66
+```
 
 ## License
 Copyright© 2016, Extreme Networks
