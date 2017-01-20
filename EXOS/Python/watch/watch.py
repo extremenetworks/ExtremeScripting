@@ -94,7 +94,6 @@ def main():
         if 'Disabled' in cli_out:
             cli_refresh = False
 
-        print cli_refresh
         if cli_refresh:
             # Temporarily disable refreshing CLI commands to prevent script from hanging
             clicmd('disable cli refresh')
