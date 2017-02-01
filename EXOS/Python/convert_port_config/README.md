@@ -20,7 +20,7 @@ Firmware: Webserver/python
 
 ### How to use
 * Copy the files to a webserver directory and load this in a browser
-* Download the .tgz file to make this easier. [cfgconvert.tgz](dist/cfgconvert.tgz)
+* Download the .tgz file to make this easier. [cfgconvert.tgz](https://github.com/extremenetworks/ExtremeScripting/raw/master/EXOS/Python/convert_port_config/dist/cfgconvert.tgz)
 
 
 ## License
