@@ -2,7 +2,7 @@
 dhcp43 is a script that will take generate the command needed to configure an EXOS switch's built in DHCP server to provide DHCP option 43 for EXOS ZTP automated config download.
 
 ## Description
-[EXOS ZTP](http://documentation.extremenetworks.com/exos/exos_21_1/getting_started/c_zero-touch-provisioning.shtml) will automatically download config files (.cfg), scripts (.xsf or .py), policy files (.pol), EXOS images (.xos), or EXOS XMOD files (.xmod) from a TFTP server if the correct information is provided in option 43 of a DHCPd offer. 
+[EXOS ZTP](http://documentation.extremenetworks.com/exos/exos_21_1/getting_started/c_zero-touch-provisioning.shtml) will automatically download config files (.cfg), scripts (.xsf or .py), policy files (.pol), EXOS images (.xos), or EXOS XMOD files (.xmod) from a TFTP server if the correct information is provided in option 43 of a DHCP offer. 
 
 This script takes arguments of filenames or URLS, and optionally a server IP address and a VLAN. It then generates the correctly formatted DHCP option 43 to be used with the EXOS DHCP server.
 
