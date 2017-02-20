@@ -6,7 +6,7 @@ This Script uses EDP to check if the local and remote port have the same vlans a
 
 ## Files
 
-* [edp_and_port_vlan_check.py](edp_and_port_vlan_check.py)
+* [edp_vlan_check](edp_vlan_check)
 * [README.md](README.md)
 
 
@@ -25,25 +25,22 @@ This Script uses EDP to check if the local and remote port have the same vlans a
 ##### Switch script example
 
 ```
-Switch# run script edp_and_port_vlan_check.py
-What port would you like to check?: 5
+Switch# load sc edp_vlan_check.py
+What port would you like to check?: 2
 
+Local port 2 and/or remote port 1:2 configurations do NOT match!!!
 
-EDP VLAN data: ['ISC_MLAG', 'V10_C0', 'V11_C1', 'V12_C2']
-VLANS on port: ['ISC_MLAG', 'V10_C0', 'V11_C1', 'V12_C2']
+Please add the below vlans to port 2.
+['SYS_VLAN_0002', 'SYS_VLAN_2051', 'SYS_VLAN_2200', 'SYS_VLAN_2201', 'SYS_VLAN_2202', 'SYS_VLAN_2204']
 
-They match!!!
-Switch#
-Switch# conf "ISC_mlag" del port 5
-Switch# run script edp_and_port_vlan_check.py
-What port would you like to check?: 5
+Please add the below vlans to the remote port 1:2.
+['SYS_VLAN_0010', 'SYS_VLAN_0011', 'SYS_VLAN_0012', 'Data']
 
+Switch# # load sc edp_vlan_check.py
+What port would you like to check?: 1:11
 
-EDP VLAN data: ['ISC_MLAG', 'V10_C0', 'V11_C1', 'V12_C2']
-VLANS on port: ['V10_C0', 'V11_C1', 'V12_C2']
+Local and remote port vlan configurations match.
 
-No Match!!!
-Switch#
 ```
 
 ## License
