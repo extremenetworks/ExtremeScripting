@@ -22,7 +22,8 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[Email event](Email_event)|This EXOS script will send an email when an event is logged|
 |[FDB OUI ](fdb_oui)|Scans the FDB table and reports the vendor of the device connected.|
 |[Flow Tracker](flowtracker)|Creates a dynamic ACL to count packets.|
-|[IOS to Policy](IOStoPolicy)|IOS ACL to EXOS policy convertor.|
+|[IOS to Policy](IOStoPolicy)|IOS ACL to EXOS policy converter.|
+|[LAGutil](LAGUtil)|Shows the combined utilization for all ports in each loadshare/LAG.|
 |[MLAG config check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
 |[NON-stacking config converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[Convert Port Config](convert_port_config)|Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
