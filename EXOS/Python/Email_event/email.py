@@ -48,9 +48,9 @@ def main():
                                                                           
     myVirtualRouter = 2                                                   
                                                                           
-    FromDomain = "okoot@extremenetworks.com"                              
-    to = 'okoot@extremenetworks.com'                                      
-    smtp = 'smtp.extremenetworks.com'                                     
+    FromDomain = "user@example.com"                              
+    to = 'user@example.com'                                      
+    smtp = 'smtp.example.com'                                     
                                                                           
     ###################################                                   
     # End User changeable parameters                                      
