@@ -131,6 +131,13 @@ def legacy_mlag_check():
         else:
             print FMT_ERROR.format('An error occurred. Unable to determine ISC port')
             return
+
+        # if there is a no display string, disp_string_index will be -1. Otherwise, strip everyting after the first paren around the display string
+
+        if disp_string_index != -1:
+           isc_port = isc_port[:disp_string_index]
+
+        
         # Remove the flags around the port number
         if isc_port.endswith('g'):
             isc_port = isc_port[:-1]
