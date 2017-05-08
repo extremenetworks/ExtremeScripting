@@ -25,7 +25,7 @@ to add the script to this list with no spaces for the table like autofsbackup do
 |[IOS to Policy](IOStoPolicy)|IOS ACL to EXOS policy convertor.|
 |[MLAG config check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
 |[NON-stacking config converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
-|[Convert Port Config](convert_port_config)|Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
+|[Convert Port Config](convert_port_config)| Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
 |[QOS Config Wizard](qosconfigpy)|Wizard to aid in creating QoS profiles|
 |[Radius mgmt config](radiusmgmtconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch with RADIUS management information.|
 |[Radius NetLogin config](radiusnetloginconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch for RADIUS netlogin.|
