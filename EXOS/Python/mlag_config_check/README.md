@@ -12,7 +12,7 @@ The tool also now supports multi-peer MLAG
 This does not ensure that the tagging on vlans matches across MLAG peers.
 
 ### Files
-* [mlag_config_check.py](https://raw.githubusercontent.com/extremenetworks/ExtremeScripting/master/EXOS/Python/mlag_config_check/mlag_config_check.py)
+* [mlag_config_check.py](mlag_config_check.py)
 * [README.md](README.md)
 
 ### Requirements
