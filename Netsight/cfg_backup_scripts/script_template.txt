@@ -1,0 +1,248 @@
+-- This is a TEMPLATE FILE for creating Device Family Definition files.
+--
+-- The following lines show how to define values for the Definition file name and description.
+--   The name value is what is seen in the InventoryMgr "Device Family Definition File Name" selection.
+--   The script can be set up from the Network Elements tab's Image Information panel and
+--   the Firmware Management tab's General panel
+--
+-- NOTE: These scripts are intended to run in a timely manner.  If not, they will tie up server threading
+--       resources and cause undesirable side effects.
+--
+-- For example:
+-- name="Brand X Networks"
+-- desc="SSH/TFTP Scripts"
+-- protocol=TFTP|FTP|SCP  defaults to ANY
+-- separator=UNIX_FILE_SEPARATOR or WINDOWS_FILE_SEPARATOR or 'user specified string'
+--     where UNIX_FILE_SEPARATOR equals "/"
+--           WINDOWS_FILE_SEPARATOR equals "\\"
+--     **see the %PATH_SEPARATOR% variable below for how the separator is used.
+-- timed_reset_delay_format="HH:mm"    (HH:mm is the default)
+--     where
+--        H     Hours
+--        m     minutes
+--        s     seconds
+--        S     Milliseconds
+-- timed_reset_absolute_format="MM dd yyyy HH mm ss"  ( this is the default, for example: 04 15 2005 08 00 00  => April 15, 2005 at 8am)
+--     where
+--        M     month
+--        d     day
+--        y     year
+--        H     Hours
+--        m     minutes
+--        s     seconds
+-- perform_success_test_always=true (default = false)
+--     where true means test for success even if a failure is reported. Used to test if partial script has succeeded.
+--
+-- A comment line is started by '--' and its contents will be ignored when the Device Family Definition file
+-- is parsed.  Comments are only valid outside of a script.  They are used only to document what the scripts do
+-- are not for use inside of a script.
+--
+-- There are a number of predefined variables that can be used in the script, pre-script or post-script parts of the file.
+-- They are as follows:
+--    %TFTP_URL%   =   tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+--    %FTP_URL%    =   ftp://%FTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+--    %SCP_URL%    =   scp://%SCP_IP%/%RELATIVE_TARGET_FILE_PATH%
+--    %TIMED_RESET_DELAY_SECONDS%
+--    %TIMED_RESET_ABSOLUTE_TIME% = the number of seconds until the device resets itself (used for XOS)
+--    %TFTP_IP%
+--    %FTP_IP%
+--    %FTP_USER%
+--    %FTP_PSWD%
+--    %FTP_PORT%
+--    %SCP_IP%
+--    %SCP_USER%
+--    %SCP_PSWD%
+--    %SCP_PORT%
+--    %SERVER_IP%
+--    %TARGET_FILE_NAME%
+--    %RELATIVE_TARGET_FILE_PATH%  =  configs/tmp/xx_xx_xx_xx.cfg  (where xx_xx_xx_xx is the device ip)
+--    %ABSOLUTE_TARGET_FILE_PATH%  =  serverRootDir/configs/tmp/xx_xx_xx_xx.cfg (where serverRootDir is defined in the
+--                                    options based on the File Transfer Mode selected for the device).
+--    %RELATIVE_SERVER_DIR_PATH%  =  configs/tmp/
+--    %ABSOLUTE_SERVER_DIR_PATH%  =  serverRootDir/configs/tmp/ (where serverRootDir is defined in the
+--                                    options based on the File Transfer Mode selected for the device).
+--    %PATH_SEPARATOR% = the separator defined at the top of the file using the "separator = " tag.
+--    %DATA_STORAGE_DIR_PATH% = the absolute path of the InvMgr app data directory.
+--
+-- Other variables provided by the command script service. They can ONLY be used in the script portion.
+-- They are:
+--    %DEVICEIP%
+--    %LOGINUSER%
+--    %LOGINPSWD%
+--    %ENABLEPSWD%
+--    %CONFIGPSWD%
+--
+-- The scripts must start and end with the separator lines that look like this.
+--  "-----BEGIN SCRIPT "Configuration Upload"-----"
+--  "-----END SCRIPT-----"
+--
+-- Hint:
+-- The BEGIN SCRIPT names MUST be spelled exactly as they are in the examples below, otherwise the script
+-- will not be found by Inventory Manager.
+--
+-- Hint:
+-- The script can only contain lines that are meaningful to the device and any META commands
+-- defined by the Command Script Service.  Meta-Commands are commands that are executed by the
+-- Command Script service, not by the device. At this time, the META commands that exist are:
+-- @KEY [ c | %xx]
+--              Enters a single character c, or a single character ASCII xx (hexadecimal) with no carriage return.
+-- @SLEEP n
+--              Pauses (does nothing) for n seconds.
+-- @RECEIVE n
+--              Receives device output for n seconds.
+-- @RECEIVEUNTIL n "search text"
+--      Receive device output for n seconds OR until the device output has a match on the "search text" regular expression.
+-- @COMMANDDONE n
+--      Set idle timeout to n seconds.  The default is 1 second.
+--      This should be increased when the device reply is greater than 1 sec to keep the connection from being terminated.
+-- @#
+--      Anything after this is a script comment.
+--
+-- Hint:
+-- The '--' comment characters are only valid outside the script separator lines, not within a script.
+--
+-- Hint:
+-- Script files usually must end with an "exit" command to terminate the SSH session.
+-- "Configuration Upload" is an archive save.
+-- "Configuration Download" is an archive restore.
+--
+-- There is an optional feature to check the device terminal output for a regular expression to test for success.
+-- The separator lines look like this.  Each line between these separator lines must contain regular expressions.
+--  "-----BEGIN SUCCESS "Configuration Upload"-----"
+--  "-----END SUCCESS-----"
+--
+-- There is an optional feature to check the device terminal output for a regular expression to test for a failure regex to
+-- return a more specialized error message. THis will only run if the SUCCESS regex has found that the script has failed.
+-- aEach line between these separator lines must contain  regular expressions at a minimum.  An optional error message can
+-- be placed after an '=' to separate the regex from the message.
+-- In the example below, if the "Permission denied" text is found in the script output, the
+-- "SCP server password is incorrect.  Check value in options." error message will be reported after the action has completed.
+--  "-----BEGIN FAILURE MAPPINGS "Configuration Upload"-----"
+--  Permission denied==SCP server password is incorrect.  Check value in options.
+--  "-----END  FAILURE MAPPINGS-----"
+--
+-- There is an optional feature to create one or more files before the script runs.  This is a work around in case
+-- the path for the file referenced by Inventory Manager is not where it is expected.  For example, some devices
+-- can only tftp files to an absolute path during Configuration Upload.  The PRE-SCRIPT allows an empty file to be
+-- created where the config file will be written to by the device.
+--  "-----BEGIN PRE-SCRIPT "Configuration Upload"-----"
+--   create absoluteFilePath1
+--   create absoluteFilePath2
+--  "-----END PRE-SCRIPT-----"
+--
+-- There is an optional feature to copy one or more files after the script runs.  This is a work around in case
+-- the device is not expected to reference a file at the path Inventory Manager expects.  For example, some devices
+-- can only tftp files to an absolute path during Configuration Upload.  The POST-SCRIPT should be used to copy the
+-- tftped config file to the relative file path expected by Inventory Manager, so the file upload can complete successfully.
+--  "-----BEGIN POST-SCRIPT "Configuration Upload"-----"
+--   copy fromAbsoluteFilePath1 toAbsoluteFilePath1
+--   copy fromAbsoluteFilePath2 toAbsoluteFilePath2
+--  "-----END POST-SCRIPT-----"
+--
+-- USER DEFINED VARIABLES
+--     A user can define a variable name and assign a value by ip address.  A default value can be provided to
+--     be used if the given IP address does not exist.
+--
+--     The format of the line is as follows:
+--     userDefinedVariableName.Default=myvalue
+--        where userDefinedVariableName should be replaced with the unique, case insensitive variable name
+--        where Default can be left as default OR replaced with the ip address of a device this script will be used on
+--        where myvalue should be replaced with the expected value that this variable will be replaced by
+--
+--     - User defined variable names are case insensitive and must be unique.
+--     - User defined variable names will be converted to upper case.
+--     - User defined variable names should not contain an '=' sign or '.' or percent sign
+--     - Values can be any alphanumeric character and the underscore.  Quotes will be retained on any value.  The value spans from the '=' sign to the end of the line
+--
+--     The user defined variable can be used in any script block by wrapping the name in percent signs, for example %userDefinedVariableName%
+--
+name="Brand X Networks"
+desc="SSH/TFTP Scripts"
+separator=WINDOWS_FILE_SEPARATOR
+timed_reset_delay_format="HH:mm"
+--
+-----BEGIN PRE-SCRIPT "Configuration Upload"-----
+-----END PRE-SCRIPT-----
+-----BEGIN PRE-SCRIPT "Configuration Download"-----
+-----END PRE-SCRIPT-----
+-----BEGIN PRE-SCRIPT "Firmware Download"-----
+-----END PRE-SCRIPT-----
+-----BEGIN PRE-SCRIPT "BootPROM Download"-----
+-----END PRE-SCRIPT-----
+-----BEGIN PRE-SCRIPT "Reset"-----
+-----END PRE-SCRIPT-----
+-----BEGIN PRE-SCRIPT "Timed Reset"-----
+-----END PRE-SCRIPT-----
+-----BEGIN PRE-SCRIPT "Timed Reset Abort"-----
+-----END PRE-SCRIPT-----
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Firmware Download"-----
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "BootPROM Download"-----
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Reset"-----
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Timed Reset"-----
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Timed Reset Abort"-----
+exit
+-----END SCRIPT-----
+--
+-----BEGIN SUCCESS "Configuration Upload"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Configuration Download"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Firmware Download"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "BootPROM Download"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Reset"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Timed Reset"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Timed Reset Abort"-----
+-----END SUCCESS-----
+--
+-----BEGIN FAILURE MAPPINGS "Configuration Upload"-----
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Download"-----
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "Firmware Download"-----
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "BootPROM Download"-----
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "Reset"-----
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "Timed Reset"-----
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "Timed Reset Abort"-----
+-----END FAILURE MAPPINGS-----
+--
+-----BEGIN POST-SCRIPT "Configuration Upload"-----
+-----END POST-SCRIPT "Configuration Upload"-----
+-----BEGIN POST-SCRIPT "Configuration Download"-----
+-----END POST-SCRIPT "Configuration Download"-----
+-----BEGIN POST-SCRIPT "Firmware Download"-----
+-----END POST-SCRIPT "Firmware Download"-----
+-----BEGIN POST-SCRIPT "BootPROM Download"-----
+-----END POST-SCRIPT-----
+-----BEGIN POST-SCRIPT "Reset"-----
+-----END POST-SCRIPT "Reset"-----
+-----BEGIN POST-SCRIPT "Timed Reset"-----
+-----END POST-SCRIPT "Timed Reset"-----
+-----BEGIN POST-SCRIPT "Timed Reset Abort"-----
+-----END POST-SCRIPT "Timed Reset Abort"-----
+
+--
+-----BEGIN USER-DEFINED VARIABLES -----
+-----END USER-DEFINED VARIABLES -----
