@@ -6,5 +6,9 @@
 # Netsight Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
-|[Ubiquiti EdgeRouter](EdgOS)| Configuration backups of a Ubiquiti EdgeRouter.|
-|[Palo Alto firewalls](Palo_Alto_SCP_Script)|Configuration backups of a Palo Alto firewall.|
+|[Ubiquiti EdgeRouter](EdgOS)|Netsight Configuration backups of Ubiquiti EdgeRouter.|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script)|Netsight Configuration backups of Palo Alto firewall.|
+|[Cisco WLC 5500](Cisco_WLC_5500)|Configuration backups of Cisco WLC 5500.|Netsight Configuration backups of Cisco WLC 5500|
+|[Dell Force10](dell-force10)|Netsight Configuration backups of Dell Force10|
+|[FortiGate Firewall](FortiGate)|Netsight Configuration backups of FortiGate|
+[Juniper EX](juniper_EX)|Netsight Configuration backups of Juniper EX|

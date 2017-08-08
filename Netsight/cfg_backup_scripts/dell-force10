@@ -1,0 +1,16 @@
+-- Use these scripts to manage Dell Force 10 devices
+name="Dell Force 10 - TFTP"
+desc="Dell Force 10  SSH/TFTP Scripts"
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy flash:/startup-config tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+@receive 30
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+-----END SUCCESS-----

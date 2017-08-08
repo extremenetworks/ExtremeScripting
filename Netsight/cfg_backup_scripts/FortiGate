@@ -1,0 +1,14 @@
+-- Use this script to manage FortiGate backups
+name="Forti Script tftp"
+desc="SSH/TFTP Scripts"
+separator=UNIX_FILE_SEPARATOR
+timed_reset_delay_format="HH:mm"
+
+-----BEGIN SCRIPT "Configuration Upload"-----
+execute backup config tftp %RELATIVE_TARGET_FILE_PATH% %TFTP_IP%
+@receive 10
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+tftp server OK
+-----END SUCCESS-----

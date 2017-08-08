@@ -1,0 +1,18 @@
+-- Use these scripts to manage Juniper EX devices 
+name="Juniper EX - scp" 
+desc="Juniper SSH/SCP Scripts" 
+-- 
+separator=UNIX_FILE_SEPARATOR 
+timed_reset_delay_format="HH:mm" 
+perform_success_test_always=true 
+-----BEGIN SCRIPT "Configuration Upload"----- 
+file copy config scp://%SCP_USER%@%SCP_IP%:%ABSOLUTE_TARGET_FILE_PATH% 
+@receive 2 
+%SCP_PSWD% 
+@receive 30 
+@COMMANDDONE 20 
+exit 
+-----END SCRIPT----- 
+-----BEGIN SUCCESS "Configuration Upload"----- 
+[OK] 
+-----END SUCCESS----- 
