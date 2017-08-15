@@ -9,13 +9,14 @@
 #
 # This does not ensure that the tagging on vlans matches across MLAG peers.
 # 
-# Last updated: July 1, 2016
+# Last updated: August 15, 2017
 import json
 from exsh import clicmd
 from sys import exit
 
 FMT_ERROR = 'ERROR: {0}'
 FMT_CFG = '>> CONFIG ERROR: {0}'
+FMT_CFG_WRN = '>> CONFIG WARNING: {0}'
 FMT_H1 = '\n>> {0}...'
 FMT_H2 = '{0}'
 
@@ -311,6 +312,9 @@ def main():
             # Create a list of all VLANs on all MLAG ports for the peer
             for port in mlag_ports:
                 vlan_list = get_port_vlan_list(port)
+                if vlan_list == ['None']:
+                    print FMT_CFG_WRN.format('No VLANs added to MLAG Port {0}'.format(port))
+                    continue
                 for vid in vlan_list:
                     if vid not in mport_vids:
                         mport_vids.append(vid)
