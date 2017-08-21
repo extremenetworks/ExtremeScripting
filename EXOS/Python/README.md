@@ -4,14 +4,14 @@
 
 <!---
 ------git_dlownload.py------
-To allow git_download.py to find the scripts you need
-to add the script to this list with no spaces for the table like autofsbackup does.
+To allow git_download.py to find the scripts add the script to this list with no spaces for the table like autofsbackup does.
+Add a space at the begining of the Description to omit the script from git_download. (see jsoncli)
 -->
 
 # Python Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
-|[GitHub Script Downloader](git_download)| Downloads python scripts located on this page directly to your switch.|
+|[GitHub Script Downloader](git_download)|Downloads python scripts located on this page directly to your switch.|
 |[Automatic Backup](autofsbackuppy)|Runs automated back up on all scripts, including configuration, policy and scripts.|
 |[Clean Switch](cleanswitch)|Provides a method of deleting all configuration parameters and files from an EXOS switch.|
 |[Config Diff](conf_diff)|Script to compare the current running config with the last saved configuration|

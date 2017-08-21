@@ -52,7 +52,10 @@ def main():
                 path = line[1].split('(')
                 name = path[0][1:-1]
                 detail = line[2].split('(')
-                github.append({'name': name, 'path': path[1][:-1], 'Description': detail[0]})
+                #Check for space to omit script
+                if detail[0][:1] != ' ':
+                    github.append({'name': name, 'path': path[1][:-1], 'Description': detail[0]})
+        github.append({'name': 'Exit\\Quit', 'path': 'NA', 'Description': 'Exit Program'})
 
         # This part prints the scripts names and descriptions collected so you can select the script to download
         n = 0
@@ -72,7 +75,7 @@ def main():
         except:
             pass
 
-        if input != '' and 1 <= input <= len(github):
+        if input != '' and 1 <= input <= len(github) and path != 'NA':
             userinput = int(input) - 1
 
             # This uses the user input[index] to go to the script page to get the .py file name.
@@ -96,6 +99,7 @@ def main():
                     print ("Terms in the readme, available at the URL below.\n")
                     print ("https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/Python/{0}/README.md\n".format(github[userinput]['path']))
                     print ("{0} was downloaded to /usr/local/cfg/.\n".format(script_name))
+                    main()
         else:
             print ("Wrong input please select valid number.")
     else:
