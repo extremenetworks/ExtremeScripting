@@ -43,7 +43,7 @@ def PortDecode(prts):
         retstring = prts[1]+";"
         used = 2
     if prts[0] == "range":
-        retstring = prts[1]+" "+prts[2]+";"
+        retstring = prts[1]+"-"+prts[2]+";"
         used = 3
     return [retstring,used]
 
