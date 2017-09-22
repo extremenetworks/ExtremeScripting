@@ -86,9 +86,9 @@ def main():
                 ACLname = m.group(1)
                 out = ""
             elif len(parts) > 0 and parts[0] == "remark":
-                out += "@"
+                out += "# "
                 for prt in parts:
-                    out += prt
+                    out += prt+" "
                 out += "\n"
             elif len(parts) > 3:
                 try:
