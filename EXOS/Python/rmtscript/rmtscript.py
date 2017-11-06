@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 # Python Scripts provided by Extreme Networks.
 
 # This script is provided free of charge by Extreme.  We hope such scripts are
@@ -186,7 +187,7 @@ def main():
                 # read the entire script into the first params entry
                 params = [fd.read()]
         except Exception as e:
-            print e
+            print(e)
             continue
 
         # add any additional parameters to the params list
@@ -196,18 +197,18 @@ def main():
         try:
             response = jsonrpc.send(params)
         except Exception as e:
-            print e
+            print(e)
             continue
 
         # extract the response stored in 2 variables 'stdout' and 'stderr'
         result = response.get('result')
         if result:
             if result.get('stdout'):
-                print result.get('stdout')
+                print(result.get('stdout'))
 
             # if something was output to stderr, print that last
             if result.get('stderr'):
-                print 'STDERR\n',result.get('stderr')
+                print('STDERR\n',result.get('stderr'))
 try:
     main()
 except KeyboardInterrupt:
