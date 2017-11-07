@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 # Python Scripts provided by Extreme Networks.
 
 # This script is provided free of charge by Extreme.  We hope such scripts are
@@ -54,6 +53,7 @@ from __future__ import print_function
 #
 #
 
+from __future__ import print_function
 import argparse
 import json
 import requests
