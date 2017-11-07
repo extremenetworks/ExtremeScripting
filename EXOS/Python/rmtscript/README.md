@@ -13,7 +13,7 @@ Customers that have a central storage of EXOS scripts can run them on a switch w
 This capability allows any EXOS script to be sent and run on a switch providing a programmatic way to manage switches and collect information.
 The script follows the same conventions as if it were download to a switch and started using the EXOS CLI command:
 
-_run script <scriptname>_
+_run script \<scriptname\>_
 
 The stdout and stderr from the script is returned to the server.
 
@@ -64,7 +64,7 @@ is the same as:
 The rmtscript.py starts running and prompts. In the example below, our script name is sample.py. sample.py does not take any command line arguments.
 
 ```
-run script <file> [args]: sample.py
+run script \<file\> [args]: sample.py
 ```
    sample.py is sent to the switch
    It would be the same as transfering sample.py to a switch and running the following command
