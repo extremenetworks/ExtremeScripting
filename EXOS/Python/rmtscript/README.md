@@ -1,16 +1,19 @@
 # rmtscript Example
 ## Description
-This python script is an example of how to interface with EXOS 21.1 to run scripts remotely on EXOS switches.
-The script runs on a server communicating with a remote EXOS switch using the JSONRPC interface. The script does not run on an EXOS switch. 
+rmtscript.py is an example of how to interface with EXOS 21.1 to run scripts remotely on EXOS switches.
+rmtscript.py runs on a server communicating with a remote EXOS switch using the JSONRPC interface.
+rmtscript.py does not run on an EXOS switch. 
 
-The JSONRPC interface offers a means of running scripts on switches without the need to transfer the script to the switch first.
+The JSONRPC interface provides a means of running EXOS scripts by encoding, transporting, extracting and running the script on the switch.
 
 ### BENEFIT
 Customers that have a central storage of EXOS scripts can run them on a switch without downloading/installing them on each switch. By maintaining scripts centrally, the task of script version control is simplified. The operator may run scripts on remote switches when the need arrises. It is not necessary to download a script to a switch before running it.
 
 ### FEATURE
-This capability allows any script to be sent and run on an EXOS switch providing a programmatic way to manage switches and collect information.
-The script follows the same conventions as if it were download to a switch and started using the EXOS CLI: _run script <scriptname>_ command.
+This capability allows any EXOS script to be sent and run on a switch providing a programmatic way to manage switches and collect information.
+The script follows the same conventions as if it were download to a switch and started using the EXOS CLI command:
+
+_run script <scriptname>_
 
 The stdout and stderr from the script is returned to the server.
 
@@ -24,7 +27,7 @@ The rmtscript.py example script is intended to show a Python programmer how to i
 * [JSONRPC Release Notes](http://documentation.extremenetworks.com/app_notes/MMI/121152_MMI_Application_Release_Notes.pdf)
 
 ### Requirements
-- A python environment
+- A python environment on the server
 - The requests python module installed
 - ExtremeXOS 21.1.1.4 and later.
 - The web interface is enabled (default for EXOS 21.1 and later).
@@ -45,6 +48,7 @@ Command line parameters:
                 Login password for the EXOS switch. If the EXOS switch does not have a password, this option is not needed.
 ```
 or
+
 If the command line parameters are not specified, rmtscript.py will prompt for the information:
 ```
 # python rmtscript.py
@@ -57,7 +61,20 @@ is the same as:
 # python rmtscript.py -i 10.68.65.80 -u admin
 ```
 
+The rmtscript.py starts running and prompts. In the example below, our script name is sample.py. sample.py does not take any command line arguments.
+
+```
+run script <file> [args]: sample.py
+```
+   sample.py is sent to the switch
+   It would be the same as transfering sample.py to a switch and running the following command
+       run script sample.py
+   The sample.py stdout and stderr are captured and returned to the server
+
+### Example 2:
+
 The rmtscript.py starts running and prompts. In the example below, our script name is sample.py. sample.py takes command line arguments -a -b def.
+
 ```
 run script <file> [args]: sample.py -a -b def
 ```
