@@ -149,6 +149,8 @@ def main():
                     sline[6] = port2
                     line = " ".join(sline) # removing the table so it looks like a command
                     f.write("%s\n" % line) # writing the line to the new config file
+                else:
+                    f.write("%s" % line)  # catch all when using new add vlan for mirror
                 pass
 
             # If port-list is seen in the line.
