@@ -3,6 +3,7 @@ Scripts and Utilities for working with Extreme Management Center.
 
 # Categories
 * [Config backup scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/cfg_backup_scripts/README.md)
+* [OneView scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/oneview_CLI_scripts/README.md)
 
 
 # Support

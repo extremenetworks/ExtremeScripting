@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Configure Vlan on the Port - Cisco-Extreme">
+    <version>0</version>
+    <comments>Will create vlan (if does not exist) and assign the vlan to selected ports</comments>
+    <content># @METADATASTART
+#@DetailDescriptionStart
+################################################################################
+# Community maintained CLI Scripting Library
+#
+# Script        : Configure vlan on ports - tagged or untagged based on request
+# Revision      : 1.1
+# Last updated  : 09.12.2017
+# Purpose       : Configure PVID on selected ports
+# Devices	    : Cisco Catalyst 12.2, XOS 15.7, XOS 21.3, XOS 22.2, XOS 15.3
+#
+# Note:  This script does configure VLAN on ports.
+################################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "Basic script for vlan assignment. Please see Script View tab for details."
+# @SectionStart ( description = "Provide your input please.")
+
+# @VariableFieldLabel (description = "VLAN name mandatory",
+#    type       = String,
+#    scope      = global,
+#    required   = yes
+#    )
+set var VLANNAME ""
+
+# @VariableFieldLabel (description   = "VLAN ID (tag) if the vlan does not exist", 
+#    type       = String,
+#    required   = no,
+#    scope      = global
+#    )
+set var VLANID ""
+
+# @VariableFieldLabel (description   = "Selected ports will be tagged or untagged?",
+#    type       = String,
+#    scope      = global,
+#    required   = yes,
+#    validValues=[tagged,untagged]
+#    )
+set var EGRESS "untagged"
+
+# @VariableFieldLabel (description   = "Save the config after?",
+#    type       = String,
+#    scope      = global,
+#    required   = yes,
+#    validValues=[yes,no]
+#    )
+set var SAVECONFIG "yes"
+
+# @SectionEnd
+# @MetaDataEnd
+
+################################################################################
+#    Here starts the magic
+################################################################################
+
+proc CiscoPortConfig {portname vlanid egress} {
+    CLI interface $portname
+	IF ($egress == "untagged" ) THEN
+        CLI switchport mode access
+		CLI switchport access vlan $vlanid
+	ELSE
+        CLI switchport trunk encapsulation dot1q
+        CLI switchport mode trunk
+		CLI switchport trunk allowed vlan add $vlanid
+	ENDIF
+    CLI exit
+}
+
+proc EXOSPortConfig {portname vlanname egress} {
+	IF ($egress == "untagged" ) THEN
+        puts "### Lets check if there is a vlan on the port already! ###"
+        CLI show ports $portname information detail | include Internal
+        set COUTPUT $CLI_OUT
+		set COMMA [string first "," $COUTPUT 0]
+        set COLUMN [string first "Name:" $COUTPUT 0]
+        incr COLUMN 6
+        incr COMMA -1
+        set VLANONPORT [string range $COUTPUT $COLUMN $COMMA]
+        IF ($VLANONPORT != "" ) THEN
+            puts "### Lets remove assigned VLAN from the port first! ###"
+            CLI configure vlan $VLANONPORT delete ports $portname
+        ENDIF
+        puts "### Lets add the VLAN to the port. ###"
+        CLI configure vlan $vlanname add ports $portname untagged
+        regexp {.*Adding EAPS ring ports to a VLAN could cause a loop.*} ${CLI.OUT} foundWarning6
+        IF ([info exists foundWarning6]) THEN
+          CLI yes
+        ENDIF
+	ELSE
+        puts "### Lets add the VLAN to the port. ###"
+        CLI configure vlan $vlanname add ports $portname tagged
+        regexp {.*Adding EAPS ring ports to a VLAN could cause a loop.*} ${CLI.OUT} foundWarning5
+        IF ([info exists foundWarning5]) THEN
+          CLI yes
+        ENDIF
+	ENDIF
+}
+
+if {[catch {
+  set LENGTH [string length $port]
+} result ]} {
+     puts "### You have not selected any port. What had you expected me to do? ###"
+     puts "### Dying now. ###"
+     Die
+   }
+
+IF ($vendor =="Cisco" ) THEN
+        CLI
+		regexp {.*&gt;.*} ${CLI.OUT} foundWarning7
+        IF ([info exists foundWarning7]) THEN
+            CLI enable
+        ENDIF
+        set var VLANTAG $VLANID
+        puts "### Does the vlan exist already? ###"
+		CLI show vlan | include $#
+        CLI show vlan name $VLANNAME | include $VLANNAME
+        regexp {.*not found in current VLAN database.*} ${CLI.OUT} foundWarning4
+        IF ([info exists foundWarning4]) THEN
+            puts "### VLAN does not exist. Is the vlan ID used? ###"
+            if ($VLANID == "" ) THEN
+               puts "### VLAN $VLANNAME does not exist but ID was not entered! ###"
+               puts "### Dying now. ###"
+               Die
+            ENDIF
+            CLI show vlan id $VLANID | include $VLANID
+            regexp {.*not found in current.*} ${CLI.OUT} foundWarning9
+            IF ([info exists foundWarning9]) THEN
+                puts "### Lets create the VLAN. ###"
+                CLI configure terminal
+                CLI vlan $VLANID
+                CLI name $VLANNAME
+                CLI exit
+                CLI exit
+            ELSE
+               puts "### VLAN $VLANNAME does not exist but ID $VLANID is already used! ###"
+               puts "### Dying now. ###"
+               Die
+            ENDIF		
+        ELSE
+            set content $CLI.OUT
+            set records [split $content "\n"]
+            set var TEMP ""
+            foreach line $records {
+                set LENGTH [string length $line]
+                set SPACE [string first " " $line 0]
+                set VLANTAG $TEMP
+                set TEMP [string range $line 0 $SPACE] 
+            }
+            puts "### VLAN $VLANNAME does have tag $VLANTAG"
+        ENDIF
+		CLI configure terminal
+		set LENGTH [string length $port]
+		set I 0
+		set COMMA [string first "," $port $I]
+		while {$COMMA != -1 } {
+		 incr COMMA -1
+		 set UNIQUEPORT [string range $port $I $COMMA] 
+         puts "### Lets configure vlan $VLANTAG on the port $UNIQUEPORT as $EGRESS ###"
+		 CiscoPortConfig $UNIQUEPORT $VLANTAG $EGRESS
+		 set I $COMMA
+		 incr I 2
+		 set COMMA [string first "," $port $I]
+		}
+		set UNIQUEPORT [string range $port $I $LENGTH]
+        puts "### Lets configure vlan $VLANTAG on the port $UNIQUEPORT as $EGRESS ###"
+		CiscoPortConfig $UNIQUEPORT $VLANTAG $EGRESS
+		CLI exit
+		IF ($SAVECONFIG == "yes" ) THEN
+          puts "### Lets save the config as was requested. ###"
+          CLI write
+        ENDIF
+        puts "### Have a nice day! ###"
+        PerformSync -scope VLAN
+ENDIF
+
+IF ($vendor =="Extreme" ) THEN
+        puts "### Does the vlan exist already? ###"
+		CLI show vlan "$VLANNAME"
+        regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning1
+        IF ([info exists foundWarning1]) THEN
+            puts "### VLAN does not exist. Is the vlan ID used? ###"
+            CLI show vlan tag $VLANID
+            regexp {.*tag is not configured for any.*} ${CLI.OUT} foundWarning2
+            IF ([info exists foundWarning2]) THEN
+                puts "### Lets create the VLAN. ###"
+                CLI create vlan $VLANNAME tag $VLANID
+            ELSE
+               puts "### VLAN $VLANNAME does not exist but ID $VLANID is already used! ###"
+               puts "### Dying now. ###"
+               Die
+            ENDIF		
+        ENDIF		
+		set LENGTH [string length $port]
+		set I 0
+		set COMMA [string first "," $port $I]
+		while {$COMMA != -1 } {
+		 incr COMMA -1
+		 set UNIQUEPORT [string range $port $I $COMMA] 
+         puts "### Lets configure vlan $VLANNAME on the port $UNIQUEPORT as $EGRESS ###"
+		 EXOSPortConfig $UNIQUEPORT $VLANNAME $EGRESS
+		 set I $COMMA
+		 incr I 2
+		 set COMMA [string first "," $port $I]
+		}
+		set UNIQUEPORT [string range $port $I $LENGTH]
+        puts "### Lets configure vlan $VLANNAME on the port $UNIQUEPORT as $EGRESS ###"
+		EXOSPortConfig $UNIQUEPORT $VLANNAME $EGRESS
+		IF ($SAVECONFIG == "yes" ) THEN
+          puts "### Lets save the config as was requested. ###"
+          CLI save
+        ENDIF
+        puts "### Have a nice day! ###"
+        PerformSync -scope VLAN
+ENDIF
+</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1512512986642</creationDate>
+    <category>,VLAN,</category>
+    <vendor></vendor>
+    <scriptType>TCL</scriptType>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Configure_Vlan_on_the_Port_-_Cisco-Extreme.xml</metaDataPath>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Configure_Vlan_on_the_Port_-_Cisco-Extreme.tcl</scriptPath>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1512834549249</lastUpdateDate>
+    <contexts>,Port,Device,</contexts>
+</script>
+
