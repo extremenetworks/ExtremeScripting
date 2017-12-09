@@ -6,6 +6,6 @@
 # Extreme Management Center version 8.0+ Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
-|[Configure Vlan on the Port Cisco-Extreme](xml\Configure_Vlan_on_the_Port-Cisco-Extreme.xml)|Configure vlan on ports - tagged or untagged based on request.|
+|[Configure Vlan on the Port Cisco-Extreme](xml/Configure_Vlan_on_the_Port-Cisco-Extreme.xml)|Configure vlan on ports - tagged or untagged based on request.|
 
 >Be Extreme
