@@ -179,9 +179,21 @@ ENDIF
 
 IF ($vendor =="Extreme" ) THEN
         puts "### Does the vlan exist already? ###"
-		CLI show vlan "$VLANNAME"
+        CLI show vlan "$VLANNAME" | include \"name $VLANNAME \"
         regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning1
-        IF ([info exists foundWarning1]) THEN
+        regexp {.*Ambiguous command.*} ${CLI.OUT} foundWarning1
+        set records [split $CLI.OUT "\n"]
+        set var I 0
+        set var VLANEXISTS "NO"
+        foreach line $records {
+            IF ($I &gt; 0) THEN
+                IF ([string first " name $VLANNAME" $line 0] != -1) THEN
+                    set VLANEXISTS "YES"
+                ENDIF
+            ENDIF
+            incr I
+        }
+        IF ($VLANEXISTS == "NO" || [info exists foundWarning1]) THEN
             puts "### VLAN does not exist. Is the vlan ID used? ###"
             CLI show vlan tag $VLANID
             regexp {.*tag is not configured for any.*} ${CLI.OUT} foundWarning2
@@ -193,7 +205,7 @@ IF ($vendor =="Extreme" ) THEN
                puts "### Dying now. ###"
                Die
             ENDIF		
-        ENDIF		
+        ENDIF
 		set LENGTH [string length $port]
 		set I 0
 		set COMMA [string first "," $port $I]
@@ -236,7 +248,7 @@ ENDIF
     <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Configure_Vlan_on_the_Port_-_Cisco-Extreme.tcl</scriptPath>
     <roles>,NetSight Administrator,</roles>
     <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1512834549249</lastUpdateDate>
+    <lastUpdateDate>1512928379672</lastUpdateDate>
     <contexts>,Port,Device,</contexts>
 </script>
 
