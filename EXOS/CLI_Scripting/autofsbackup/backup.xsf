@@ -10,9 +10,9 @@ enable cli scripting
 #####
 # Configurable Variables for use
 #####
-set var tftp 10.0.12.254
+set var tftp 192.168.0.1
 
-set var vrtr vr-default
+set var vrtr vr-mgmt
 
 #####
 # Start Functions
