@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script name="Create EAPS protected VLAN">
+<script name="Create EAPS control VLAN">
     <version>0</version>
-    <comments>Will create EAPS protected vlan and add the vlan to the RING ports</comments>
-    <content># @METADATASTART
+    <comments>Will create EAPS protected vlan and add to the ring ports</comments>
+    <content>#@METADATASTART
 #@DetailDescriptionStart
 ################################################################################
 # Community maintained CLI Scripting Library
 #
-# Script        : Create EAPS protected VLAN and add it to the EAPS ring ports. 
-#                 in addition it will add the vlan to selected non ring ports.
+# Script        : Create EAPS Control VLAN and add it to the EAPS ring ports. 
+#
 # Revision      : 1.0
-# Last updated  : 10.12.2017
-# Purpose       : Create EAPS protected VLAN and add it to the EAPS ring ports
+# Last updated  : 13.12.2017
+# Purpose       : Create EAPS Control VLAN and add it to the EAPS ring ports
 # Devices	    : XOS 15.3 and newer
 #
 ################################################################################
@@ -20,6 +20,13 @@
 # @ScriptDescription "Basic script for vlan assignment. Please see Script View tab for details."
 # @SectionStart ( description = "Provide your input please.")
 
+# @VariableFieldLabel (description = "EAPS ring name",
+#    type       = String,
+#    scope      = global,
+#    required   = yes
+#    )
+set var EAPSNAME ""
+
 # @VariableFieldLabel (description = "VLAN name mandatory",
 #    type       = String,
 #    scope      = global,
@@ -27,12 +34,6 @@
 #    )
 set var VLANNAME ""
 
-# @VariableFieldLabel (description = "EAPS ring name (if not unique)",
-#    type       = String,
-#    scope      = global,
-#    required   = no
-#    )
-set var EAPSNAME ""
 
 # @VariableFieldLabel (description   = "VLAN ID (tag) if the vlan does not exist", 
 #    type       = String,
@@ -41,21 +42,13 @@ set var EAPSNAME ""
 #    )
 set var VLANID ""
 
-# @VariableFieldLabel (description   = "Selected ports will be tagged or untagged?",
-#    type       = String,
-#    scope      = global,
-#    required   = yes,
-#    validValues=[tagged,untagged]
-#    )
-set var EGRESS "untagged"
-
 # @VariableFieldLabel (description   = "Save the config after?",
 #    type       = String,
 #    scope      = global,
 #    required   = yes,
 #    validValues=[yes,no]
 #    )
-set var SAVECONFIG "yes"
+set var SAVECONFIG "no"
 
 # @SectionEnd
 # @MetaDataEnd
@@ -78,10 +71,10 @@ proc ExtractPort {line} {
 	return [string range $line $BEGINING $ENDING]
 }
 
-proc EXOSPortConfig {portname vlanname egress} {
+proc EXOSPortConfig {NameOfPort vlanname egress} {
 	IF ($egress == "untagged" ) THEN
         puts "### Lets check if there is a vlan on the port already! ###"
-        CLI show ports $portname information detail | include Internal
+        CLI show ports $NameOfPort information detail | include Internal
         set COUTPUT $CLI_OUT
 		set COMMA [string first "," $COUTPUT 0]
         set COLUMN [string first "Name:" $COUTPUT 0]
@@ -90,17 +83,17 @@ proc EXOSPortConfig {portname vlanname egress} {
         set VLANONPORT [string range $COUTPUT $COLUMN $COMMA]
         IF ($VLANONPORT != "" ) THEN
             puts "### Lets remove assigned VLAN from the port first! ###"
-            CLI configure vlan $VLANONPORT delete ports $portname
+            CLI configure vlan $VLANONPORT delete ports $NameOfPort
         ENDIF
         puts "### Lets add the VLAN to the port. ###"
-        CLI configure vlan $vlanname add ports $portname untagged
+        CLI configure vlan $vlanname add ports $NameOfPort untagged
         regexp {.*Adding EAPS ring ports to a VLAN could cause a loop.*} ${CLI.OUT} foundWarning6
         IF ([info exists foundWarning6]) THEN
           CLI yes
         ENDIF
 	ELSE
         puts "### Lets add the VLAN to the port. ###"
-        CLI configure vlan $vlanname add ports $portname tagged
+        CLI configure vlan $vlanname add ports $NameOfPort tagged
         regexp {.*Adding EAPS ring ports to a VLAN could cause a loop.*} ${CLI.OUT} foundWarning5
         IF ([info exists foundWarning5]) THEN
           CLI yes
@@ -109,58 +102,14 @@ proc EXOSPortConfig {portname vlanname egress} {
 	ENDIF
 }
 
-set HAVESELECTEDPORTS "YES"
-
-if {[catch {
-  set LENGTH [string length $port]
-} result ]} {
-     set HAVESELECTEDPORTS "NO"
-   }
-
 IF ($vendor =="Extreme" ) THEN
-		set var HAVEEAPSNAME "YES"
-		set var EAPSNAMETOUSE $EAPSNAME
-		IF ($EAPSNAME == "") THEN
-			 set HAVEEAPSNAME "NO"
-		ELSE
-                puts "### Does the EAPS ring exist? ###"
-                CLI show eaps $EAPSNAME | include $EAPSNAME
-				regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning10
-				IF ([info exists foundWarning10]) THEN
-					set HAVEEAPSNAME "NO"
-				ENDIF
-		ENDIF
-		IF ($HAVEEAPSNAME == "NO") THEN
-				set NUMBEROFRINGS 0
-                puts "### What EAPS ring exists? ###"
-				CLI show eaps detail | include " Name: "
-				set records [split $CLI.OUT "\n"]
-				foreach line $records {
-					set HIT [string first "Name: " $line]
-					IF ($HIT != -1 ) THEN
-						IF ($NUMBEROFRINGS != 0) THEN
-							set BEGINING [string first "Name:" $line 0]
-							set ENDING [string first "Priority:" $line 0]
-							incr BEGINING 5
-							incr ENDING -1
-							while {[string index $line $BEGINING] == " " } {
-								 incr BEGINING
-							}
-							while {[string index $line $ENDING] == " " } {
-								 incr ENDING -1
-							}
-							set EAPSNAMETOUSE [string range $line $BEGINING $ENDING]
-						ENDIF
-						incr NUMBEROFRINGS
-					ENDIF
-				}
-				IF ($NUMBEROFRINGS != 2) THEN
-					   puts "### Do not know which EAPS ring! ###"
-					   puts "### Dying now. ###"
-					   Die
-				ELSE
-                    puts "### Will use EAPS ring $EAPSNAMETOUSE! ###"
-                ENDIF
+        puts "### Does the EAPS ring exist? ###"
+        CLI show eaps $EAPSNAME | include $EAPSNAME
+		regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning10
+		IF ([info exists foundWarning10]) THEN
+			   puts "### The EAPS $EAPSNAME does not exist! ###"
+			   puts "### Dying now. ###"
+			   Die
 		ENDIF
         puts "### Does the vlan exist already? ###"
         CLI show vlan "$VLANNAME" | include \"name $VLANNAME \"
@@ -190,24 +139,8 @@ IF ($vendor =="Extreme" ) THEN
                Die
             ENDIF		
         ENDIF
-        IF ($HAVESELECTEDPORTS == "YES" ) THEN
-			set LENGTH [string length $port]
-			set I 0
-			set COMMA [string first "," $port $I]
-			while {$COMMA != -1 } {
-			 incr COMMA -1
-			 set UNIQUEPORT [string range $port $I $COMMA] 
-			 puts "### Lets configure vlan $VLANNAME on the port $UNIQUEPORT as $EGRESS ###"
-			 EXOSPortConfig $UNIQUEPORT $VLANNAME $EGRESS
-			 set I $COMMA
-			 incr I 2
-			 set COMMA [string first "," $port $I]
-			}
-			set UNIQUEPORT [string range $port $I $LENGTH]
-			puts "### Lets configure vlan $VLANNAME on the port $UNIQUEPORT as $EGRESS ###"
-			EXOSPortConfig $UNIQUEPORT $VLANNAME $EGRESS
-        ENDIF
-        CLI show eaps $EAPSNAMETOUSE | include \"Port status: \"
+        puts "### What are the ring ports? ###"
+        CLI show eaps $EAPSNAME | include \"Port status: \"
         set content $CLI.OUT
         set records [split $content "\n"]
         set var TEMP ""
@@ -224,8 +157,11 @@ IF ($vendor =="Extreme" ) THEN
                 set SECONDARYPORT [ ExtractPort $line ]
             ENDIF
         }
-        CLI configure eaps $EAPSNAMETOUSE add protected vlan $VLANNAME
+        puts "### Lets add the control VLAN ###"
+        CLI configure eaps $EAPSNAME add control vlan $VLANNAME
+        puts "### Lets add the contorl VLAN to ring port ###"
         EXOSPortConfig $PRIMARYPORT $VLANNAME tagged
+        puts "### Lets add the contorl VLAN to ring port ###"
         EXOSPortConfig $SECONDARYPORT $VLANNAME tagged
         IF ($SAVECONFIG == "yes" ) THEN
           puts "### Lets save the config as was requested. ###"
@@ -247,13 +183,15 @@ ENDIF
     <rollbackScript></rollbackScript>
     <postprocessScript></postprocessScript>
     <miscXMLData></miscXMLData>
-    <creationDate>1512925616887</creationDate>
+    <creationDate>1513172676534</creationDate>
     <category>,EAPS,</category>
     <vendor></vendor>
     <scriptType>TCL</scriptType>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Create_EAPS_control_VLAN.xml</metaDataPath>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Create_EAPS_control_VLAN.tcl</scriptPath>
     <roles>,NetSight Administrator,</roles>
     <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1513165814991</lastUpdateDate>
-    <contexts>,Port,Device,Groups,</contexts>
+    <lastUpdateDate>1513177332756</lastUpdateDate>
+    <contexts>,Groups,Device,</contexts>
 </script>
 

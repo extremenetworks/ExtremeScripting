@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Create EAPS">
+    <version>0</version>
+    <comments>Will create EAPS and assign selected ports as ring ports</comments>
+    <content>#@METADATASTART
+#@DetailDescriptionStart
+################################################################################
+# Community maintained CLI Scripting Library
+#
+# Script        : Create EAPS Control VLAN and add it to the EAPS ring ports. 
+#
+# Revision      : 1.0
+# Last updated  : 13.12.2017
+# Purpose       : Create EAPS Control VLAN and add it to the EAPS ring ports
+# Devices	    : XOS 15.3 and newer
+#
+################################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "Basic script for vlan assignment. Please see Script View tab for details."
+# @SectionStart ( description = "Provide your input please.")
+
+# @VariableFieldLabel (description = "EAPS ring name",
+#    type       = String,
+#    scope      = global,
+#    required   = yes
+#    )
+set var EAPSNAME ""
+
+# @VariableFieldLabel (description = "EAPS ring Master switch IP",
+#    type       = String,
+#    scope      = global,
+#    required   = yes
+#    )
+set var MASTERIP ""
+
+# @VariableFieldLabel (description = "EAPS ring Master switch primary port",
+#    type       = String,
+#    scope      = global,
+#    required   = yes
+#    )
+set var PRIMARYPORT ""
+
+# @VariableFieldLabel (description   = "Save the config after?",
+#    type       = String,
+#    scope      = global,
+#    required   = yes,
+#    validValues=[yes,no]
+#    )
+set var SAVECONFIG "no"
+
+# @SectionEnd
+# @MetaDataEnd
+
+################################################################################
+#    Here starts the magic
+################################################################################
+proc string_occurrences {needleString haystackString} {
+    set j [string first $needleString $haystackString 0]
+    if {$j == -1} {return 0}
+    set i 0
+    while {$j != -1 } {
+        set j [string first $needleString $haystackString [incr j]]
+        incr i
+    }
+    return $i
+}
+
+IF ($vendor =="Extreme" ) THEN
+        set var EAPSNAMETOUSE $EAPSNAME
+        puts "### Does the EAPS ring exist? ###"
+        set HAVEEAPSNAME "YES"
+        CLI show eaps $EAPSNAME | include $EAPSNAME
+  		regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning10
+		IF (![info exists foundWarning10]) THEN
+		    puts "### EAPS ring already exists! ###"
+			puts "### Dying now. ###"
+            Die
+		ENDIF
+        set IAMMASTER "NO"
+        IF ($deviceIP == $MASTERIP) THEN
+            set IAMMASTER "YES"
+        ENDIF
+        if {[catch {
+          set LENGTH [string length $port]
+        } result ]} {
+	        puts "### The EAPS ring does need 2 ports! ###"
+  			puts "### Dying now. ###"
+            Die
+        }
+        IF ([string_occurrences "," $port] != 1) THEN
+		    puts "### The EAPS ring does need 2 ports! ###"
+			puts "### Dying now. ###"
+            Die
+        ENDIF
+        puts "### Lets start! ###"
+        CLI disable cli prompting
+        CLI enable eaps
+        puts "### Lets create ring $EAPSNAME ###"
+        CLI create eaps $EAPSNAME
+        IF ($IAMMASTER == "YES") THEN
+            puts "### This node is master node ###"
+            CLI configure eaps $EAPSNAME mode master
+            set LENGTH [string length $port]
+			set COMMA [string first "," $port 0]
+            incr COMMA -1
+    		set UNIQUEPORT [string range $port 0 $COMMA]
+            incr COMMA 2
+		    puts "### Lets configure the port $UNIQUEPORT primary ###"
+		    CLI configure eaps $EAPSNAME primary port $PRIMARYPORT
+            IF ($UNIQUEPORT == $PRIMARYPORT) THEN
+                set UNIQUEPORT [string range $port $COMMA $LENGTH]
+                puts "### Lets configure the port $UNIQUEPORT as secondary ###"
+    			CLI configure eaps $EAPSNAME secondary port $UNIQUEPORT
+            ELSE
+                puts "### Lets configure the port $UNIQUEPORT as secondary ###"
+    			CLI configure eaps $EAPSNAME secondary port $UNIQUEPORT
+            ENDIF
+        ELSE
+            puts "### This node is transit node ###"
+            CLI configure eaps $EAPSNAME mode transit
+            regexp {.*sure this EAPS domain has a Master.*} ${CLI.OUT} foundWarning5
+            IF ([info exists foundWarning5]) THEN
+              CLI yes
+            ENDIF
+            set LENGTH [string length $port]
+			set COMMA [string first "," $port 0]
+            incr COMMA -1
+    		set UNIQUEPORT [string range $port 0 $COMMA] 
+            incr COMMA 2
+			puts "### Lets configure the port $UNIQUEPORT primary ###"
+			CLI configure eaps $EAPSNAME primary port $UNIQUEPORT
+			set UNIQUEPORT [string range $port $COMMA $LENGTH]
+			puts "### Lets configure the port $UNIQUEPORT as secondary ###"
+			CLI configure eaps $EAPSNAME secondary port $UNIQUEPORT
+        ENDIF
+        CLI enable eaps $EAPSNAME
+        IF ($SAVECONFIG == "yes" ) THEN
+          puts "### Lets save the config as was requested. ###"
+          CLI save
+        ENDIF
+        puts "### The next step is to configure control EAPS VLAN ###"
+        puts "### Have a nice day! ###"
+        PerformSync -device $deviceIP -scope VLAN
+        PerformSync -device $deviceIP -scope EapsDomain
+ENDIF
+</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1513164612326</creationDate>
+    <category>,EAPS,</category>
+    <vendor></vendor>
+    <scriptType>TCL</scriptType>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Create_EAPS.xml</metaDataPath>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Create_EAPS.tcl</scriptPath>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1513177629170</lastUpdateDate>
+    <contexts>,Device,Groups,Port,</contexts>
+</script>
+
