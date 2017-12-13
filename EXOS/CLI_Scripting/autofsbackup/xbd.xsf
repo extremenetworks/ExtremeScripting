@@ -102,7 +102,7 @@ set var slist $tcl(lindex $slist $slistsearch)
 #####
 
 set var baseSystemTime $TCL(clock seconds)
-set var systemTime $TCL(clock format $baseSystemTime -format {%y%m%H%M})
+set var systemTime $TCL(clock format $baseSystemTime -format {%d.%m.%y_%H:%M:%S})
 
 #####
 # Doing some string manipulation and formatting
