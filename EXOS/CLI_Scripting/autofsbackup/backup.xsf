@@ -10,9 +10,9 @@ enable cli scripting
 #####
 # Configurable Variables for use
 #####
-set var tftp 172.16.254.78
+set var tftp 10.0.12.254
 
-set var vrtr vr-mgmt
+set var vrtr vr-default
 
 #####
 # Start Functions
@@ -71,7 +71,7 @@ set var slist $tcl(lindex $slist $slistsearch)
 #####
 
 set var baseSystemTime $TCL(clock seconds)
-set var systemTime $TCL(clock format $baseSystemTime -format {%y%m%H%M})
+set var systemTime $TCL(clock format $baseSystemTime -format {%d.%m.%Y-%H:%M:%S})
 
 #####
 # Doing some string manipulation and formatting
@@ -82,9 +82,9 @@ set var sysnamelen $tcl(string bytelength $sysname)
 set var sysnamelen ($sysnamelen - 1)
 set var systimelen $tcl(string bytelength $systemTime)
 set var systimelen ($systimelen - 1)
-set var current c$(syssn)$(systemtime)
-set var currnet $tcl(join $current)
-set var current $tcl(string replace $current $syssnlen $syssnlen {})
+set var current $(sysname)$(systemtime)
+set var current $tcl(join $current)
+set var current $tcl(string replace $current $sysnamelen $sysnamelen {_})
 set var currentlen $tcl(string bytelength $current)
 set var currentlen ($currentlen - 1)
 set var upload $(current)
@@ -93,9 +93,9 @@ set var current $(current).cfg
 #####
 # Uploading current config
 #####
-
-tftp put $tftp vr $vrtr $slist $current
-create log entry "Current configuration loaded as $(current)"
+# Commented out because all .cfg files are uploaded anyway
+#tftp put $tftp vr $vrtr $slist $current
+#create log entry "Current configuration loaded as $(current)"
 
 #####
 # Starting the loop to upload all files
@@ -113,9 +113,8 @@ set var count 0
 ####
 		set var tmpcfg $tcl(regexp -all {.pol} $curr)
 			if ($tmpcfg) then
-			set var ul $(upload)$(curr)
-			set var ul $tcl(join ul)
-			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
 			tftp put $tftp vr $vrtr $curr $ul
 			endif
 ####
@@ -123,9 +122,8 @@ set var count 0
 ####
 		set var tmpcfg $tcl(regexp -all {.cfg} $curr)
 			if ($tmpcfg) then
-			set var ul $(upload)$(curr)
-			set var ul $tcl(join ul)
-			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
 			tftp put $tftp vr $vrtr $curr $ul
 			endif
 ####
@@ -133,11 +131,12 @@ set var count 0
 ####
 		set var tmpcfg $tcl(regexp -all {.xsf} $curr)
 			if ($tmpcfg) then
-			set var ul $(upload)$(curr)
-			set var ul $tcl(join ul)
-			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
 			tftp put $tftp vr $vrtr $curr $ul
 			endif
 		set var count ($count + 1)
 	endwhile
-del var "cli.out"
+	
+create log message "Files uploaded successfully to server $(tftp)"
+del var cli.out
