@@ -6,17 +6,15 @@ scripts. Benefits include a simple rollback and configuration history.
 
 ### Files
 
-* [xbd.xsf](xbd.xsf)             -  The Core Script
-* [README.md](README.md)      -  This Readme
+* [backup.xsf](backup.xsf)    - Manual backup script
+* [xbd.xsf](xbd.xsf)          - The UPM triggered backup script
+* [README.md](README.md)      - This Readme
 
 
 ### Requirements
-* Firmware: ExtremeXOS(TM) 12.3.x and Newer
+* Firmware: ExtremeXOS(TM) 12.3.x or higher
 * Platform(s): Any ExtremeXOS switch.
 * TFTP Server: IPv4 TFTP Server that allows switch to write files
-
-
-
 
 
 ### Example
@@ -29,16 +27,18 @@ second file in the root of the tftp for use with the Interactive Recovery script
 ```
 
 
-
 ### Notes
 
 * This requires a TFTP Server with write privileges by the switch
-* This requires a date structure in the TFTP directory
+* This requires a date structure in the TFTP directory [This is currently not implemented!]
 ```   (e.g. /tftpboot/<year>/<mo>/<day> or /tftpboot/2010/04/27)```
 
+
 ### Updates
-1.0 - ( March 2009) First Version of the script
-1.1 - ( April 2010) Changes made to interact with other scripts
+1.0 - ( Mar 2009) First Version of the script
+1.1 - ( Apr 2010) Changes made to interact with other scripts
+1.2 - ( Dec 2017) On backup.xsf: corrcetions to bad syntax, removal of redundant .cfg upload
+                  addition of user prompts for tftp IP addr. and VR.
 
 
 ## License
