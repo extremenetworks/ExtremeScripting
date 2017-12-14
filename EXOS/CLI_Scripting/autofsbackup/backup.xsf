@@ -6,7 +6,7 @@
 # Revision      	: 1.2
 # Last Updated  	: 14 Dec 2017
 # 
-# Purpose: back up .cfg, .pol and .xsf files contained in /usr/local/cfg
+# Purpose: backup .cfg, .pol and .xsf files contained in /usr/local/cfg
 #		   to an tftp server.
 # 
 # Notes:   N.A.
