@@ -1,0 +1,167 @@
+#@DetailDescriptionStart
+###############################################################################
+# Extreme Networks(R) CLI Scripting Library
+#
+# Script        	: backup.xsf
+# Revision      	: 1.1
+# Last Updated  	: 14 Dec 2017
+# 
+# Purpose: back up .cfg, .pol and .xsf files contained in /usr/local/cfg
+#		   to an tftp server.
+# 
+# Notes:   N.A.
+#
+# Author	: Extreme Extensibility Team
+# Editors	: Ernesto Lorenz (ernesto_lorenz@gmx.de)
+# Contact	: https://community.extremenetworks.com/extreme
+###############################################################################
+# Caveats:
+#	No checking for tftp upload file length
+#
+###############################################################################
+#  Change Log:
+#
+# 	21 Jan 2010: Script Created
+#	19 Apr 2010: Updated Header for Syntax and Standard
+#	14 Dec 2017: Corrected sytax error and removed redundant primary.cfg upload
+#				 Added user prompts for tftp server IP and VR	 
+#
+###############################################################################
+
+# Work Around entry for loop protection
+disable clip
+enable cli scripting
+#enable cli scripting output
+
+#####
+# Configurable Variables for use
+#####
+<<<<<<< HEAD
+set var tftp $READ(Enter the tftp server IP:)
+
+set var vrtr $READ(Enter the VR:)
+=======
+set var tftp 192.168.0.1
+
+set var vrtr vr-mgmt
+>>>>>>> 1911563af2712680f84a344920cd01b75b14ca99
+
+#####
+# Start Functions
+#####
+
+set var cli.out 0
+ls
+set var lslist $tcl(split ${cli.out} "\n")
+set var lslistlen $tcl(llength $lslist)
+
+#####
+# Getting some Information out of SNMP: SysName
+#####
+
+set var cli.out 0
+show snmp get 1.3.6.1.2.1.1.5.0
+set var snmpnameraw $tcl(split ${cli.out} " ")
+set var snmpsearch $tcl(regexp -nocase {=} $snmpnameraw)
+set var snmpsearch ($snmpsearch + 1)
+set var sysname $tcl(lindex $snmpnameraw $snmpsearch)
+
+#####
+# Done
+#####
+
+#####
+# Gettng some Information out of SNMP: Switch Serial
+#####
+
+set var cli.out 0
+show snmp get 1.3.6.1.2.1.47.1.1.1.1.11.1
+set var snmpnameraw $tcl(split ${cli.out} " ")
+set var snmpsearch $tcl(regexp -nocase {=} $snmpnameraw)
+set var snmpsearch ($snmpsearch + 1)
+set var syssn $tcl(lindex $snmpnameraw $snmpsearch)
+
+#####
+# Done
+#####
+
+#####
+# Getting your selected config for individual backup
+#####
+
+set var cli.out 0
+show switch
+set var slist $tcl(split ${cli.out} "\n")
+set var slistsearch $tcl(lsearch -regexp $slist {Config Selected:})
+set var slist $tcl(lindex $slist $slistsearch)
+set var slist $tcl(split $slist " ")
+set var slistsearch $tcl(lsearch -regexp $slist {.cfg})
+set var slist $tcl(lindex $slist $slistsearch)
+
+#####
+# Getting System Time
+#####
+
+set var baseSystemTime $TCL(clock seconds)
+set var systemTime $TCL(clock format $baseSystemTime -format {%d.%m.%Y-%H:%M:%S})
+
+#####
+# Doing some string manipulation and formatting
+#####
+
+set var syssnlen $tcl(string bytelength $syssn)
+set var sysnamelen $tcl(string bytelength $sysname)
+set var sysnamelen ($sysnamelen - 1)
+set var systimelen $tcl(string bytelength $systemTime)
+set var systimelen ($systimelen - 1)
+set var current $(sysname)$(systemtime)
+set var current $tcl(join $current)
+set var current $tcl(string replace $current $sysnamelen $sysnamelen {_})
+set var currentlen $tcl(string bytelength $current)
+set var currentlen ($currentlen - 1)
+set var upload $(current)
+set var current $(current).cfg
+
+#####
+# Starting the loop to upload all files
+#####
+
+set var count 0
+	while ($count < $lslistlen) do
+		set var curr $tcl(lindex $lslist $count)
+		set var curr $tcl(split $curr " ")
+		set var currlen $tcl(llength $curr)
+		set var currlen ($currlen - 1)
+		set var curr $tcl(lindex $curr $currlen)
+####
+# Getting all policies
+####
+		set var tmpcfg $tcl(regexp -all {.pol} $curr)
+			if ($tmpcfg) then
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
+			tftp put $tftp vr $vrtr $curr $ul
+			endif
+####
+# Getting all configs
+####
+		set var tmpcfg $tcl(regexp -all {.cfg} $curr)
+			if ($tmpcfg) then
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
+			tftp put $tftp vr $vrtr $curr $ul
+			endif
+####
+# Getting all scripts
+####
+		set var tmpcfg $tcl(regexp -all {.xsf} $curr)
+			if ($tmpcfg) then
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
+			tftp put $tftp vr $vrtr $curr $ul
+			endif
+		set var count ($count + 1)
+	endwhile
+	
+create log message "Files uploaded successfully to server $(tftp)"
+del var cli.out
