@@ -3,7 +3,7 @@
 # Extreme Networks(R) CLI Scripting Library
 #
 # Script        	: backup.xsf
-# Revision      	: 1.1
+# Revision      	: 1.2
 # Last Updated  	: 14 Dec 2017
 # 
 # Purpose: back up .cfg, .pol and .xsf files contained in /usr/local/cfg
