@@ -27,6 +27,7 @@ second file in the root of the tftp for use with the Interactive Recovery script
 
 * This requires a TFTP Server with write privileges by the switch
 * This requires a date structure in the TFTP directory. NOT IMPLEMENTED YET!
+
 ```   (e.g. /tftpboot/<year>/<mo>/<day> or /tftpboot/2010/04/27)```
 
 ### Updates
