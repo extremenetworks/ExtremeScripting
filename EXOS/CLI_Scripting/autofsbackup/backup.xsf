@@ -36,15 +36,9 @@ enable cli scripting
 #####
 # Configurable Variables for use
 #####
-<<<<<<< HEAD
+
 set var tftp $READ(Enter the tftp server IP:)
-
 set var vrtr $READ(Enter the VR:)
-=======
-set var tftp 192.168.0.1
-
-set var vrtr vr-mgmt
->>>>>>> 1911563af2712680f84a344920cd01b75b14ca99
 
 #####
 # Start Functions
@@ -67,10 +61,6 @@ set var snmpsearch ($snmpsearch + 1)
 set var sysname $tcl(lindex $snmpnameraw $snmpsearch)
 
 #####
-# Done
-#####
-
-#####
 # Gettng some Information out of SNMP: Switch Serial
 #####
 
@@ -80,10 +70,6 @@ set var snmpnameraw $tcl(split ${cli.out} " ")
 set var snmpsearch $tcl(regexp -nocase {=} $snmpnameraw)
 set var snmpsearch ($snmpsearch + 1)
 set var syssn $tcl(lindex $snmpnameraw $snmpsearch)
-
-#####
-# Done
-#####
 
 #####
 # Getting your selected config for individual backup
