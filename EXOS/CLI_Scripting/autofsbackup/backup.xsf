@@ -1,6 +1,32 @@
-#####
-# Caveats: No checking for tftp upload file length
-#####
+#@DetailDescriptionStart
+###############################################################################
+# Extreme Networks(R) CLI Scripting Library
+#
+# Script        	: backup.xsf
+# Revision      	: 1.2
+# Last Updated  	: 14 Dec 2017
+# 
+# Purpose: backup .cfg, .pol and .xsf files contained in /usr/local/cfg
+#		   to an tftp server.
+# 
+# Notes:   N.A.
+#
+# Author	: Extreme Extensibility Team
+# Editors	: Ernesto Lorenz (ernesto_lorenz@gmx.de)
+# Contact	: https://community.extremenetworks.com/extreme
+###############################################################################
+# Caveats:
+#	No checking for tftp upload file length
+#
+###############################################################################
+#  Change Log:
+#
+# 	21 Jan 2010: Script Created
+#	19 Apr 2010: Updated Header for Syntax and Standard
+#	14 Dec 2017: Corrected sytax error and removed redundant primary.cfg upload
+#				 Added user prompts for tftp server IP and VR	 
+#
+###############################################################################
 
 # Work Around entry for loop protection
 disable clip
@@ -10,9 +36,9 @@ enable cli scripting
 #####
 # Configurable Variables for use
 #####
-set var tftp 172.16.254.78
 
-set var vrtr vr-mgmt
+set var tftp $READ(Enter the tftp server IP:)
+set var vrtr $READ(Enter the VR:)
 
 #####
 # Start Functions
@@ -35,10 +61,6 @@ set var snmpsearch ($snmpsearch + 1)
 set var sysname $tcl(lindex $snmpnameraw $snmpsearch)
 
 #####
-# Done
-#####
-
-#####
 # Gettng some Information out of SNMP: Switch Serial
 #####
 
@@ -48,10 +70,6 @@ set var snmpnameraw $tcl(split ${cli.out} " ")
 set var snmpsearch $tcl(regexp -nocase {=} $snmpnameraw)
 set var snmpsearch ($snmpsearch + 1)
 set var syssn $tcl(lindex $snmpnameraw $snmpsearch)
-
-#####
-# Done
-#####
 
 #####
 # Getting your selected config for individual backup
@@ -71,7 +89,7 @@ set var slist $tcl(lindex $slist $slistsearch)
 #####
 
 set var baseSystemTime $TCL(clock seconds)
-set var systemTime $TCL(clock format $baseSystemTime -format {%y%m%H%M})
+set var systemTime $TCL(clock format $baseSystemTime -format {%d.%m.%Y-%H:%M:%S})
 
 #####
 # Doing some string manipulation and formatting
@@ -82,20 +100,13 @@ set var sysnamelen $tcl(string bytelength $sysname)
 set var sysnamelen ($sysnamelen - 1)
 set var systimelen $tcl(string bytelength $systemTime)
 set var systimelen ($systimelen - 1)
-set var current c$(syssn)$(systemtime)
-set var currnet $tcl(join $current)
-set var current $tcl(string replace $current $syssnlen $syssnlen {})
+set var current $(sysname)$(systemtime)
+set var current $tcl(join $current)
+set var current $tcl(string replace $current $sysnamelen $sysnamelen {_})
 set var currentlen $tcl(string bytelength $current)
 set var currentlen ($currentlen - 1)
 set var upload $(current)
 set var current $(current).cfg
-
-#####
-# Uploading current config
-#####
-
-tftp put $tftp vr $vrtr $slist $current
-create log entry "Current configuration loaded as $(current)"
 
 #####
 # Starting the loop to upload all files
@@ -113,9 +124,8 @@ set var count 0
 ####
 		set var tmpcfg $tcl(regexp -all {.pol} $curr)
 			if ($tmpcfg) then
-			set var ul $(upload)$(curr)
-			set var ul $tcl(join ul)
-			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
 			tftp put $tftp vr $vrtr $curr $ul
 			endif
 ####
@@ -123,9 +133,8 @@ set var count 0
 ####
 		set var tmpcfg $tcl(regexp -all {.cfg} $curr)
 			if ($tmpcfg) then
-			set var ul $(upload)$(curr)
-			set var ul $tcl(join ul)
-			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
 			tftp put $tftp vr $vrtr $curr $ul
 			endif
 ####
@@ -133,11 +142,12 @@ set var count 0
 ####
 		set var tmpcfg $tcl(regexp -all {.xsf} $curr)
 			if ($tmpcfg) then
-			set var ul $(upload)$(curr)
-			set var ul $tcl(join ul)
-			set var ul $tcl(string replace $ul $currentlen $currentlen {})
+			set var ul $(upload)_$(curr)
+			set var ul $tcl(join $ul)
 			tftp put $tftp vr $vrtr $curr $ul
 			endif
 		set var count ($count + 1)
 	endwhile
-del var "cli.out"
+	
+create log message "Files uploaded successfully to server $(tftp)"
+del var cli.out
