@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Authentication EXOS">
+    <version>0</version>
+    <comments>Script will configure NetLogin and Radius on EXOS devices on ports</comments>
+    <content># @METADATASTART
+#@DetailDescriptionStart
+################################################################################
+# Community maintained CLI Scripting Library
+#
+# Script        : Create Netlogin VLAN, Configure RADIUS, Configure Netlogin
+# Revision      : 1.0
+# Last updated  : 25.12.2017
+# Purpose       : On selected ports will enable authentication
+# Devices	    : XOS 15.3.5+
+#
+# Note:  This script does configure Authentication on ports.
+################################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "Basic script for AAA assignment. Please see Script View tab for details."
+
+# @SectionStart ( description = "NetLogin")
+
+# @VariableFieldLabel (description = "NetLogin VLAN name (optional; will be created)",
+#    type       = String,
+#    scope      = global,
+#    required   = no
+#    )
+set var VLANNAME ""
+
+# @VariableFieldLabel (description   = "VLAN ID (tag; optional)", 
+#    type       = String,
+#    required   = no,
+#    scope      = global
+#    )
+set var VLANID ""
+
+# @SectionEnd
+
+# @SectionStart (description = Radius server configuration)
+
+# @VariableFieldLabel (description = "Radius Server 1 (optional)",
+#    type       = String,
+#    scope      = global)
+set var Radius1 127.0.0.1
+
+# @VariableFieldLabel (description = "Radius Server 2 (optional)",
+#    type       = String,
+#    scope      = global)
+set var Radius2 ""
+
+# @VariableFieldLabel (description = "Radius Shared Secret")
+set var SharedSecret ETS_TAG_SHARED_SECRET
+
+# @VariableFieldLabel (description = "Realm", validValues = [Network, Mgmt, Both])
+set var Realm Network
+
+# @VariableFieldLabel (description = "Configure Accounting", validValues = [Yes, No])
+set var Accounting Yes
+
+# @SectionEnd
+
+# @SectionStart (description = Authentication configuration)
+
+# @VariableFieldLabel (description = "802.1x or MACauth or Both?", validValues = [Dot1x, MACauth, Both])
+set var AuthType Both
+
+# @VariableFieldLabel (description = "Reauthenentication", validValues = [Yes, No])
+set var Reauthentication Yes
+
+# @VariableFieldLabel (description = "Reauth interval (seconds)")
+set var ReauthInterval 3600
+
+
+# @SectionEnd
+
+# @SectionStart ( description = "Save?.")
+
+# @VariableFieldLabel (description   = "Save the config after?",
+#    type       = String,
+#    scope      = global,
+#    required   = yes,
+#    validValues=[yes,no]
+#    )
+set var SAVECONFIG "yes"
+
+# @SectionEnd
+# @MetaDataEnd
+
+################################################################################
+#    Here starts the magic
+################################################################################
+
+proc EXOSPortAuthConfig {VARportname VARauthtype VARreauthentication VARreauthinterval} {
+    IF ($VARreauthentication == "Yes") THEN
+        set var REAUTH "on"
+    ELSE
+        set var REAUTH "off"
+    ENDIF
+
+    IF ($VARauthtype == "MACauth") THEN
+        CLI configure netlogin mac ports $VARportname timers reauth-period $VARreauthinterval 
+        regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning7
+        IF ([info exists foundWarning7]) THEN
+            puts "### Ok the old way. ###"
+            IF ($REAUTH == "on") THEN
+                configure netlogin mac timers reauth-period $VARreauthinterval
+            ELSE
+                configure netlogin mac timers reauth-period 0
+            ENDIF
+        ELSE
+            CLI configure netlogin mac ports $VARportname timers reauthentication $REAUTH
+        ENDIF
+        CLI enable netlogin ports $VARportname mac
+    ENDIF
+    
+    IF ($VARauthtype == "Dot1x") THEN
+        CLI configure netlogin dot1x ports $VARportname timers reauth-period $VARreauthinterval
+        regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning7
+        IF ([info exists foundWarning7]) THEN
+            puts "### Ok the old way. ###"
+            IF ($REAUTH == "on") THEN
+                configure netlogin dot1x timers reauth-period $VARreauthinterval
+            ELSE
+                configure netlogin dot1x timers reauth-period 0
+            ENDIF
+        ELSE
+            CLI configure netlogin dot1x ports $VARportname timers reauthentication $REAUTH
+        ENDIF
+        CLI enable netlogin ports $VARportname dot1x
+    ENDIF
+    
+    IF ($VARauthtype == "Both") THEN
+        CLI configure netlogin mac ports $VARportname timers reauth-period $VARreauthinterval 
+        regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning7
+        IF ([info exists foundWarning7]) THEN
+            puts "### Ok the old way. ###"
+            IF ($REAUTH == "on") THEN
+                configure netlogin dot1x timers reauth-period $VARreauthinterval
+                configure netlogin mac timers reauth-period $VARreauthinterval
+            ELSE
+                configure netlogin dot1x timers reauth-period 0
+                configure netlogin mac timers reauth-period 0
+            ENDIF
+        ELSE
+            CLI configure netlogin mac ports $VARportname timers reauthentication $REAUTH
+            CLI configure netlogin dot1x ports $VARportname timers reauth-period $VARreauthinterval
+            CLI configure netlogin dot1x ports $VARportname timers reauthentication $REAUTH
+        ENDIF
+        CLI enable netlogin ports $VARportname dot1x mac
+    ENDIF
+
+    CLI configure netlogin ports $VARportname mode mac-based-vlans
+    CLI configure netlogin ports $VARportname restart
+}
+
+################################################################################
+#    Here starts the main procedure
+################################################################################
+
+IF ($vendor =="Extreme" ) THEN
+
+    set VR $deviceVR
+    IF ($VR == "") THEN
+        set VR "vr-mgmt"
+    ENDIF
+    IF ($Radius1 != "") THEN
+        puts "### Lets configure primary radius server. ###"
+        CLI configure radius netlogin 1 server $Radius1 1812 client-ip $deviceIP vr $VR shared-secret $SharedSecret
+        regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning3
+        IF ([info exists foundWarning3]) THEN
+            puts "### Ok the old way. ###"
+            CLI configure radius netlogin primary server $Radius1 1812 client-ip $deviceIP vr $VR
+            CLI configure radius netlogin primary shared-secret $SharedSecret
+        ENDIF
+        IF ($Accounting == "Yes") THEN
+            CLI configure radius-accounting netlogin 1 server $Radius1 1813 client-ip $deviceIP vr $VR shared-secret $SharedSecret
+            regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning5
+            IF ([info exists foundWarning5]) THEN
+                puts "### Ok the old way. ###"
+                CLI configure radius-accounting netlogin primary server  $Radius1 1813 client-ip $deviceIP vr $VR
+                CLI configure radius-accounting netlogin primary shared-secret $SharedSecret
+            ENDIF
+        ENDIF
+    ENDIF
+    IF ($Radius2 != "") THEN
+        puts "### Lets configure secondary radius server. ###"
+        CLI configure radius netlogin 2 server $Radius2 1812 client-ip $deviceIP vr $VR shared-secret $SharedSecret
+        regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning4
+        IF ([info exists foundWarning4]) THEN
+            puts "### Ok the old way. ###"
+            CLI configure radius netlogin secondary server $Radius2 1812 client-ip $deviceIP vr $VR
+            CLI configure radius netlogin secondary shared-secret $SharedSecret
+        ENDIF
+        IF ($Accounting == "Yes") THEN
+            CLI configure radius-accounting netlogin 2 server $Radius2 1813 client-ip $deviceIP vr $VR shared-secret $SharedSecret
+            regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning6
+            IF ([info exists foundWarning6]) THEN
+                puts "### Ok the old way. ###"
+                CLI configure radius-accounting netlogin secondary server  $Radius2 1813 client-ip $deviceIP vr $VR
+                CLI configure radius-accounting netlogin secondary shared-secret $SharedSecret
+            ENDIF
+        ENDIF
+    ENDIF
+    IF ($Radius1 != "" || $Radius2 != "") THEN
+		IF ($Realm == "Network") THEN
+			CLI enable radius
+			CLI disable radius mgmt-access
+			CLI enable radius netlogin
+			IF ($Accounting == "Yes") THEN
+				CLI enable radius-accounting
+				CLI disable radius-accounting mgmt-access
+				CLI enable radius-accounting netlogin
+			ENDIF
+		ENDIF
+		IF ($Realm == "Mgmt") THEN
+			CLI enable radius
+			CLI enable radius mgmt-access
+			CLI disable radius netlogin
+			IF ($Accounting == "Yes") THEN
+				CLI enable radius-accounting
+				CLI enable radius-accounting mgmt-access
+				CLI disable radius-accounting netlogin
+			ENDIF
+		ENDIF
+		IF ($Realm == "Both") THEN
+			CLI enable radius
+			CLI enable radius mgmt-access
+			CLI enable radius netlogin
+			IF ($Accounting == "Yes") THEN
+				CLI enable radius-accounting
+				CLI enable radius-accounting mgmt-access
+				CLI enable radius-accounting netlogin
+			ENDIF
+		ENDIF
+    ENDIF
+    IF ($VLANNAME != "") THEN
+		puts "### Does the vlan exist already? ###"
+		CLI show vlan "$VLANNAME" | include \"name $VLANNAME \"
+		regexp {.*Invalid input detected at.*} ${CLI.OUT} foundWarning1
+		regexp {.*Ambiguous command.*} ${CLI.OUT} foundWarning1
+		set records [split $CLI.OUT "\n"]
+		set var I 0
+		set var VLANEXISTS "NO"
+		foreach line $records {
+			IF ($I &gt; 0) THEN
+				IF ([string first " name $VLANNAME" $line 0] != -1) THEN
+					set VLANEXISTS "YES"
+				ENDIF
+			ENDIF
+			incr I
+		}
+		IF ($VLANEXISTS == "NO" || [info exists foundWarning1]) THEN
+			IF ($VLANID == "") THEN
+				puts "### VLAN does not exist. Lets create it. ###"            
+				CLI create vlan $VLANNAME
+			ELSE
+				puts "### VLAN does not exist. Is the vlan ID used? ###"
+				CLI show vlan tag $VLANID
+				regexp {.*tag is not configured for any.*} ${CLI.OUT} foundWarning2
+				IF ([info exists foundWarning2]) THEN
+					puts "### Lets create the VLAN. ###"
+					CLI create vlan $VLANNAME tag $VLANID
+				ELSE
+				   puts "### VLAN $VLANNAME does not exist but ID $VLANID is already used! Ignoring the tag ###"
+					CLI create vlan $VLANNAME
+				ENDIF
+			ENDIF
+		ENDIF
+        puts "### Lets configure NetLogin vlan. ###"
+        CLI configure netlogin vlan $VLANNAME
+    ELSE
+        puts "### NetLogin vlan not received. ###"
+    ENDIF
+
+    CLI configure netlogin authentication protocol-order dot1x mac web-based
+
+    if {[catch {
+      set LENGTH [string length $port]
+    } result ]} {
+         puts "### You have not selected any port. ###"
+         set LENGTH 0
+         }
+    IF ($LENGTH &gt; 0) THEN
+		set I 0
+		set COMMA [string first "," $port $I]
+		while {$COMMA != -1 } {
+		 incr COMMA -1
+		 set UNIQUEPORT [string range $port $I $COMMA] 
+		 puts "### Lets configure the port $UNIQUEPORT for $AuthType ###"
+		 EXOSPortAuthConfig $UNIQUEPORT $AuthType $Reauthentication $ReauthInterval
+		 set I $COMMA
+		 incr I 2
+		 set COMMA [string first "," $port $I]
+		}
+		set UNIQUEPORT [string range $port $I $LENGTH]
+		puts "### Lets configure the port $UNIQUEPORT for $AuthType ###"
+		EXOSPortAuthConfig $UNIQUEPORT $AuthType $Reauthentication $ReauthInterval
+    ENDIF
+
+    IF ($AuthType == "Both")THEN
+        puts "### Lets configure both authentications. ###"
+        CLI configure netlogin add mac-list ff:ff:ff:ff:ff:ff 48
+        CLI enable netlogin dot1x mac
+    ENDIF
+
+    IF ($AuthType == "MACauth")THEN
+        puts "### Lets configure MACauth. ###"
+        CLI configure netlogin add mac-list ff:ff:ff:ff:ff:ff 48
+        CLI enable netlogin mac
+    ENDIF
+
+    IF ($AuthType == "Dot1x")THEN
+        puts "### Lets configure Dot1x. ###"
+        CLI enable netlogin dot1x
+    ENDIF
+
+    IF ($SAVECONFIG == "yes" ) THEN
+      puts "### Lets save the config as was requested. ###"
+      CLI save
+    ENDIF
+    puts "### Have a nice day! Be Extreme! ###"
+ENDIF
+</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1512512986642</creationDate>
+    <category>,Access Control,</category>
+    <vendor></vendor>
+    <scriptType>TCL</scriptType>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_EXOS.xml</metaDataPath>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_EXOS.tcl</scriptPath>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1514233526781</lastUpdateDate>
+    <contexts>,Port,Device,</contexts>
+</script>
+
