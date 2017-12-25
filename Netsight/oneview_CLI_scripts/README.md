@@ -10,6 +10,6 @@
 |[Create EAPS ](xml/Create_EAPS.xml)|Creates the ring, assign selected ports as ring ports, confirue one switch as master and all other switches are transit nodes.|TCL|
 |[Create EAPS control VLAN](xml/Create_EAPS_control_VLAN.xml)| If the vlan does not exist it does create the vlan, it add the vlan to the EAPS as control. Control vlan is configured as tagged on all EAPS ring ports.|TCL|
 |[Create EAPS protected VLAN](xml/Create_EAPS_protected_VLAN.xml)|Add vlan to the EAPS as protected. If the vlan does not exits then it creates it. Selected ports are added as tagged or untagged. If there is only one EAPS ring then you do not need to specify the EAPS ring name. Ring ports are added as tagged automatically.|TCL|
-|[Authentication EXOS](xml/Authentication_EXOS.xml.xml)|Script does create NetLogin vlan (if does not exist) configure NetLogin on ports and Radius on EXOS devices.|TCL|
+|[Authentication EXOS](xml/Authentication_EXOS.xml)|Script does create NetLogin vlan (if does not exist) configure NetLogin on ports and Radius on EXOS devices.|TCL|
 
 >Be Extreme
