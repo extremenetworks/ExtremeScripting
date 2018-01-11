@@ -24,6 +24,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[Flow Tracker](flowtracker)|Creates a dynamic ACL to count packets.|
 |[IOS to Policy](IOStoPolicy)|IOS ACL to EXOS policy converter.|
 |[LAGutil](LAGUtil)|Shows the combined utilization for all ports in each loadshare/LAG.|
+|[MIB View](mibview)|Converts a MIB view defined with asterisks to the mask notation used in EXOS configuration.|
 |[MLAG config check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
 |[NON-stacking config converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[Convert Port Config](convert_port_config)| Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
