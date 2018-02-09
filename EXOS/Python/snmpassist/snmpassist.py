@@ -23,7 +23,7 @@ def main():
                                  "Are you sure you wish to do this? (y/n): ", 0)
         if confirmation:
             print("Deleting SNMP configuration...")
-            exsh.clicmd('create log entry \"Deleting SNMP Configuration using SNMPassist.py\"', capture=True)
+            exsh.clicmd('create log message \"Deleting SNMP Configuration using SNMPassist.py\"', capture=True)
             print("Deleting trap receivers...")
             exsh.clicmd('configure snmp delete trapreceiver all')
             print("Deleting notification logs...")
@@ -62,14 +62,14 @@ def main():
             print("Enabling SNMPv3 default user...")
             exsh.clicmd('enable snmpv3 default-user')
             print
-            exsh.clicmd('create log entry \"SNMP configuration has been deleted by SNMPassist.py\"', capture=True)
+            exsh.clicmd('create log message \"SNMP configuration has been deleted by SNMPassist.py\"', capture=True)
             print("SNMP configuration has been deleted.")
 
     ####################################################################################
     # Configure SNMPv3 function
     ####################################################################################
     if dec == 'c':
-        exsh.clicmd('create log entry \"Starting configuration of SNMPv3 using SNMPassist.py\"', capture=True)
+        exsh.clicmd('create log message \"Starting configuration of SNMPv3 using SNMPassist.py\"', capture=True)
         snmpuser = raw_input("Please enter your SNMPv3 User name: ")
         authpw = get_input("Please enter your SNMPv3 User password (8 to 49 char): ", 1)
         privpw = get_input("Please enter your SNMPv3 privacy password (8 to 49 char): ", 1)
@@ -141,7 +141,7 @@ def main():
             exsh.clicmd("disable snmpv3 default-group")
         else:
             exsh.clicmd("enable snmpv3 default-group")
-        exsh.clicmd('create log entry \"SNMPv3 configuration has been completed using SNMPassist.py\"', capture=True)
+        exsh.clicmd('create log message \"SNMPv3 configuration has been completed using SNMPassist.py\"', capture=True)
         print("SNMPv3 configuration has been completed")
 
 
