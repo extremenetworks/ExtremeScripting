@@ -29,14 +29,14 @@ snmptrap3 = raw_input("SNMP Trap Receiver #3: ")
 
 #if (re.match(clierrormode,"ignore")):
 #  configure cli mode scripting ignore-error
-#  create log entry "CLI mode set for Ignore on Error"
+#  create log message "CLI mode set for Ignore on Error"
 #else
 #  configure cli mode scripting abort-on-error
-#  create log entry "CLI mode set for Abort on Error"
+#  create log message "CLI mode set for Abort on Error"
 
 
 if (re.match(ynsnmpconfig,"yes")):
-	exsh.clicmd("create log entry \"Starting SNMP Configuration\"", True)
+	exsh.clicmd("create log message \"Starting SNMP Configuration\"", True)
 	print("Starting SNMP Configuration")
 	exsh.clicmd("configure snmp sysName %s" % snmpname, True)
 	exsh.clicmd("configure snmp sysLocation %s" % snmplocation, True)
@@ -50,23 +50,23 @@ if (re.match(ynsnmpconfig,"yes")):
 	if (re.match(ynsnmpcommadd,"yes")):
 		exsh.clicmd("configure snmp add community readwrite %s" % snmprwname, True)
 		exsh.clicmd("configure snmp add community readonly %s" % snmproname, True)
-		exsh.clicmd("create log entry \"New SNMP Communities Created\"", True)
+		exsh.clicmd("create log message \"New SNMP Communities Created\"", True)
 		print("New SNMP Communities Created")
 	if (re.match(ynsnmpcommrem,"yes")):
 		exsh.clicmd("configure snmp delete community readwrite private", True)
 		exsh.clicmd("configure snmp delete community readonly public", True)
-		exsh.clicmd("create log entry \"Default SNMP Communities Removed\"", True)
+		exsh.clicmd("create log message \"Default SNMP Communities Removed\"", True)
 		print("Default SNMP Communities Removed")
 	else:
-		exsh.clicmd("create log entry \"Default SNMP Communities NOT Removed\"", True)
+		exsh.clicmd("create log message \"Default SNMP Communities NOT Removed\"", True)
 		print("Default SNMP Communities NOT Removed")
 else:
 	if (re.match(ynsnmpdisable,"yes")):
-		exsh.clicmd("create log entry \"Disabling SNMP access\"", True)
+		exsh.clicmd("create log message \"Disabling SNMP access\"", True)
 		print("Disabling SNMP access")
 		exsh.clicmd("disable snmp access snmp-v1v2", True)
 	else:
-		exsh.clicmd("create log entry \"SNMP Not Configured\"", True)
+		exsh.clicmd("create log message \"SNMP Not Configured\"", True)
 		print("SNMP Not Configured")
 
 
