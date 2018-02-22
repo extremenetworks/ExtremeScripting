@@ -42,6 +42,12 @@ def internet_check():
 
 def main():
 
+    try:
+        from httplib import HTTPSConnection
+    except ImportError:
+        print ("HTTPS ImportError: This script is only supported on EXOS 21.X and above.")
+        exit(0)
+		
     # Checks for internet access and downloads/organizes the script table into a list of dictionaries
     main_page_data = internet_check().split('\n')
     if main_page_data[0] != 'False':
