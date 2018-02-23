@@ -20,7 +20,7 @@ def main():
                          help='Enables verbose logging and leaves temp files for debugging',
                          action='store_true')
     parser.add_argument('-c', '--clean',
-                        help='Remove previous debug files. Executes "rm *temp*"',
+                        help='Remove previous debug files. Executes "rm temp_*; rm *.temp"',
                         action='store_true')
 
     args = parser.parse_args()
@@ -30,7 +30,8 @@ def main():
 
     if clean:
         print "DEBUG: Cleaning up previous debug files"
-        clicmd("rm *temp*")
+        clicmd("rm temp_*")
+        clicmd("rm *.temp")
 
     print "Comparing configurations, please wait..."
 
