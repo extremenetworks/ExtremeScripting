@@ -107,17 +107,89 @@ from os.path import (
     splitext,
     )
 
-__version__ = '1.0.0.1'
+__version__ = '1.0.0.2'
 
 PROCESS_NAME = splitext(basename(__file__))[0]
 
 
-class ShowLag(object):
+class ExosDb(object):
     def __init__(self):
-        self.args = None
+        self.proc_name = splitext(basename(__file__))[0]
+        self.port_lag = {}
         self.cmdb = {}
         self.lagdb = {}
         self.lagnamedb = {}
+
+    def json_clicmd(self, cmd):
+        # issue debug cfgmgr CLI command to EXOS and return the JSON data
+        self.log.debug(cmd)
+        json_result = exsh.clicmd(cmd, capture=True)
+
+        try:
+            json_dict = json.loads(json_result)
+        except Exception:
+            self.log.debug('JSON format error')
+            return None, None
+        # extract and return the data list
+        return (json_dict.get("class"), json_dict.get("data"))
+
+    def build_db(self):
+        # extract the LAGs and create a port list of all lag memberships
+        cm_class, cm_list = self.json_clicmd('debug cfgmgr show next vlan.ls_ports_show')
+        # store the command results in the cmdb
+        db_list = self.cmdb.setdefault(cm_class, [])
+        db_list += cm_list
+
+        # for the lags, build a list of member ports per lag
+        for row in cm_list:
+            if row.get("status") not in ["MORE", "SUCCESS"]:
+                continue
+            loadShareMaster = row.get("loadShareMaster")
+            port = row.get("port")
+            # Collect a list of member ports by lag master
+            lag_list = self.lagdb.setdefault(loadShareMaster, [])
+            lag_list.append(port)
+
+            # build cross reference of individual ports pointing to the lag masters
+            self.port_lag[port] = loadShareMaster
+
+        # build up CM data for LAGs and ports
+        for cmd in [
+                'debug cfgmgr show one vlan.show_ports_info portList={plist} port=None',
+                'debug cfgmgr show one vlan.show_ports_config portList={plist} port=None',
+                'debug cfgmgr show one vlan.show_ports_utilization portList={plist} port=None',
+                'debug cfgmgr show one vlan.show_ports_stats portList={plist} port=None',
+                'debug cfgmgr show one vlan.show_ports_rxerrors portList={plist} port=None',
+                'debug cfgmgr show one vlan.show_ports_txerrors portList={plist} port=None',
+                ]:
+            for port in self.port_lag.keys():
+                cm_class, cm_list = self.json_clicmd(cmd.format(plist=port))
+                db_list = self.cmdb.setdefault(cm_class, [])
+                row = cm_list[0]
+                if row.get("status") not in ["MORE", "SUCCESS"]:
+                    continue
+                db_list.append(row)
+        self.log.debug(json.dumps(self.cmdb, indent=2))
+
+        # build lag name to port dict
+        # lag name is the master port display string
+        # when no display string is present, 'lagnn' where nn is the port number
+        for cm_row in self.cmdb.get('show_ports_info'):
+            if cm_row.get("status") not in ["MORE", "SUCCESS"]:
+                continue
+            port = cm_row.get('port')
+            if port in self.lagdb:
+                lag_name = cm_row.get("displayString")
+                if lag_name is None:
+                    lag_name = 'lag{}'.format(port)
+                self.lagnamedb[lag_name] = port
+        self.log.debug(json.dumps(self.lagnamedb, indent=2))
+
+
+class ShowLag(ExosDb):
+    def __init__(self):
+        super(ShowLag, self).__init__()
+        self.args = None
         self.handler = logging.StreamHandler(sys.stderr)
         self.handler.setLevel(logging.INFO)
         self.handler.setFormatter(logging.Formatter(
@@ -193,58 +265,6 @@ class ShowLag(object):
         self.log.debug('lag list {}'.format(self.report_lagnames))
         self.log.debug('report type {}'.format(self.report_type))
 
-    def json_clicmd(self, cmd):
-        # issue debug cfgmgr CLI command to EXOS and return the JSON data
-        self.log.debug(cmd)
-        json_result = exsh.clicmd(cmd, capture=True)
-
-        try:
-            json_dict = json.loads(json_result)
-        except Exception:
-            self.log.debug('JSON format error')
-            return None, None
-        # extract and return the data list
-        return (json_dict.get("class"), json_dict.get("data"))
-
-    def build_db(self):
-        # build up CM data for LAGs and ports
-        for cmd in [
-                'debug cfgmgr show next vlan.ls_ports_show',
-                'debug cfgmgr show next vlan.show_ports_info portList=* port=None',
-                'debug cfgmgr show next vlan.show_ports_config portList=* port=None',
-                'debug cfgmgr show next vlan.show_ports_utilization portList=* port=None',
-                'debug cfgmgr show next vlan.show_ports_stats portList=* port=None',
-                'debug cfgmgr show next vlan.show_ports_rxerrors portList=* port=None',
-                'debug cfgmgr show next vlan.show_ports_txerrors portList=* port=None',
-                ]:
-            cm_class, cm_list = self.json_clicmd(cmd)
-            db_list = self.cmdb.setdefault(cm_class, [])
-            db_list += cm_list
-        self.log.debug(json.dumps(self.cmdb, indent=2))
-
-        # build lag membership dict
-        for cm_row in self.cmdb.get('ls_ports_show'):
-            if cm_row.get("status") not in ["MORE", "SUCCESS"]:
-                continue
-            loadShareMaster = cm_row.get("loadShareMaster")
-            lag_list = self.lagdb.setdefault(loadShareMaster, [])
-            lag_list.append(cm_row.get("port"))
-        self.log.debug(json.dumps(self.lagdb, indent=2))
-
-        # build lag name to port dict
-        # lag name is the master port display string
-        # when no display string is present, 'lagnn' where nn is the port number
-        for cm_row in self.cmdb.get('show_ports_info'):
-            if cm_row.get("status") not in ["MORE", "SUCCESS"]:
-                continue
-            port = cm_row.get('port')
-            if port in self.lagdb:
-                lag_name = cm_row.get("displayString")
-                if lag_name is None:
-                    lag_name = 'lag{}'.format(port)
-                self.lagnamedb[lag_name] = port
-        self.log.debug(json.dumps(self.lagnamedb, indent=2))
-
     def compute_total(self, data_type, port_field_name, port_list):
         sum_dict = {}
         cm_data_list = self.cmdb.get(data_type)
@@ -253,7 +273,9 @@ class ShowLag(object):
             return None
         for cm_row in cm_data_list:
             port = cm_row.get(port_field_name)
+            self.log.debug(cm_row)
             if str(port) not in port_list:
+                self.log.debug('Continue')
                 continue
             for k, v in cm_row.items():
                 try:
@@ -275,7 +297,7 @@ class ShowLag(object):
         return sum_dict
 
     def summarize_lag_data(self, data_type, port_field_name):
-        self.log.debug('Called ')
+        self.log.debug('Called {} {}'.format(data_type, port_field_name))
         sum_list = []
         for lagname in self.report_lagnames:
             master_port = self.lagnamedb.get(lagname)

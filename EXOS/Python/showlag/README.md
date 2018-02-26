@@ -4,8 +4,8 @@
 This script provide a summary view of LAG ports on EXOS. It scans the individual LAG member ports and computes the composite value.
 
 ## Files
-* [showlag.py](showlag.py)
-* [showlag_1.0.0.1.lst](showlag.lst)
+* [showlag.py](showlag.py?raw=true)
+* [showlag_1.0.0.2.lst](showlag_1.0.0.2.lst?raw=true)
 * [README.md](README.md)
 
 ## Requirements
@@ -14,7 +14,7 @@ ExtremeXOS 21.1 and later
 ## Download
 If your switch has internet access, you can download showlag directoy to your switch with the download url command. Copy the link to the .lst file and paste it to switch command line following `download url`.
 
-`download url` [showlag_1.0.0.1.lst](showlag.lst)
+`download url` [showlag_1.0.0.2.lst](showlag_1.0.0.2.lst?raw=true)
 
 ### Usage
 ```
@@ -86,6 +86,8 @@ Number of load sharing trunks: 3
 ### Example 1
 ```
 switch # run script showlag.py statistics
+```
+```
     LAG  Tx Pkt Tx Byte  Rx Pkt Rx Byte  Rx Pkt  Rx Pkt  Tx Pkt  Tx Pkt
           Count   Count   Count   Count   Bcast   Mcast   Bcast   Mcast
 ------- ------- ------- ------- ------- ------- ------- ------- -------
@@ -97,6 +99,8 @@ switch # run script showlag.py statistics
 ### Example 2
 ```
 switch # run script showlag.py all
+```
+```
       LAG        Tx        Tx        Tx        Tx        Tx        Tx
                Coll Late coll  Deferred    Errors      Lost    Parity
 --------- --------- --------- --------- --------- --------- ---------
@@ -109,18 +113,18 @@ switch # run script showlag.py all
         LAG        Link          Rx     Peak Rx          Tx     Peak Tx
                   Speed % bandwidth % bandwidth % bandwidth % bandwidth
 ----------- ----------- ----------- ----------- ----------- -----------
-       lag1        None     0.00000     0.00000     0.00000     0.00000
-      lag10        None     0.00000     0.00000     0.00000     0.00000
-      lag20        None     0.00000     0.00000     0.00000     0.00000
+       lag1        6000     0.00000     0.00000     0.00000     0.00000
+      lag10        3000     0.00000     0.00000     0.00000     0.00000
+      lag20        5000     0.00000     0.00000     0.00000     0.00000
 ----------- ----------- ----------- ----------- ----------- -----------
 
 
     LAG  Tx Pkt Tx Byte  Rx Pkt Rx Byte  Rx Pkt  Rx Pkt  Tx Pkt  Tx Pkt
           Count   Count   Count   Count   Bcast   Mcast   Bcast   Mcast
 ------- ------- ------- ------- ------- ------- ------- ------- -------
-   lag1       0       0       0       0       0       0       0       0
-  lag10       0       0       0       0       0       0       0       0
-  lag20       0       0       0       0       0       0       0       0
+   lag1   10803 1458651    5239  762579       0    4253       0    9822
+  lag10    3711  490243    2114  291031       0    1859       0    3460
+  lag20    6866  900912    4967  660678       0    4560       0    6446
 ------- ------- ------- ------- ------- ------- ------- ------- -------
 
 
