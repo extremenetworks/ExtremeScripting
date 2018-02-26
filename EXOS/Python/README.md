@@ -24,6 +24,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[Flow Tracker](flowtracker)|Creates a dynamic ACL to count packets.|
 |[IOS to Policy](IOStoPolicy)|IOS ACL to EXOS policy converter.|
 |[LAGutil](LAGUtil)|Shows the combined utilization for all ports in each loadshare/LAG.|
+|[Show LAG](showlag)|Shows statistics, rxerrors, txerrors, utilization for loadshare/LAGs.|
 |[List_Compress](list_compress)|This script takes a string of numerical values and compresses them into a string of condensed ranges.|
 |[MIB View](mibview)|Converts a MIB view defined with asterisks to the mask notation used in EXOS configuration.|
 |[MLAG config check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
