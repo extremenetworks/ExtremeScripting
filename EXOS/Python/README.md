@@ -30,6 +30,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[NON-stacking config converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[Convert Port Config](convert_port_config)| Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
 |[QOS Config Wizard](qosconfigpy)|Wizard to aid in creating QoS profiles|
+|[Port Statistics Ssummary](portsum)|Display a consolidated port statistics table|
 |[Radius mgmt config](radiusmgmtconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch with RADIUS management information.|
 |[Radius NetLogin config](radiusnetloginconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch for RADIUS netlogin.|
 |[show config clean](show_config_clean)|Hides unused config sections from the output of "show configuration"|
