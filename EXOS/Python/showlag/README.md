@@ -14,7 +14,7 @@ ExtremeXOS 21.1 and later
 ## Download
 If your switch has internet access, you can download showlag directoy to your switch with the download url command. Copy the link to the .lst file and paste it to switch command line following `download url`.
 
-`download url` [showlag_1.0.0.2.lst](showlag_1.0.0.2.lst?raw=true)
+`download url` [showlag_1.0.0.2.lst](showlag_1.0.0.2.lst)
 
 ### Usage
 ```
