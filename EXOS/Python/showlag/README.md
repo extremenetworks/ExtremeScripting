@@ -5,7 +5,7 @@ This script provide a summary view of LAG ports on EXOS. It scans the individual
 
 ## Files
 * [showlag.py](showlag.py?raw=true)
-* [showlag_1.0.0.2.lst](showlag_1.0.0.2.lst?raw=true)
+* [showlag_1.0.0.3.lst](showlag_1.0.0.3.lst?raw=true)
 * [README.md](README.md)
 
 ## Requirements
@@ -14,7 +14,7 @@ ExtremeXOS 21.1 and later
 ## Download
 If your switch has internet access, you can download showlag directoy to your switch with the download url command. Copy the link to the .lst file and paste it to switch command line following `download url`.
 
-`download url` [showlag_1.0.0.2.lst](showlag_1.0.0.2.lst)
+`download url` [showlag_1.0.0.3.lst](showlag_1.0.0.3.lst)
 
 ### Usage
 ```

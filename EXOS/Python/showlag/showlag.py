@@ -107,7 +107,7 @@ from os.path import (
     splitext,
     )
 
-__version__ = '1.0.0.2'
+__version__ = '1.0.0.3'
 
 PROCESS_NAME = splitext(basename(__file__))[0]
 
@@ -174,7 +174,7 @@ class ExosDb(object):
         # build lag name to port dict
         # lag name is the master port display string
         # when no display string is present, 'lagnn' where nn is the port number
-        for cm_row in self.cmdb.get('show_ports_info'):
+        for cm_row in self.cmdb.get('show_ports_info', []):
             if cm_row.get("status") not in ["MORE", "SUCCESS"]:
                 continue
             port = cm_row.get('port')
