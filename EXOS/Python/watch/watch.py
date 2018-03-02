@@ -85,6 +85,17 @@ def main():
     cli_refresh = True
     legacy_version = version_check()
 
+    # Create and register a hanlder for SIGINT so we handle ^C cleanly
+
+    def signal_handler(signal, frame):
+        if cli_refresh and not legacy_version:
+            # renable cli refresh, if we disabled it previously
+            clicmd('enable cli refresh')
+        sys.stdout.flush()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
     # Handle Auto-refreshing Commands
     if legacy_version:
         print 'WARNING: Switch is running pre 16.1 code.  Please be sure to not use auto-refreshing commands\n'
