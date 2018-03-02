@@ -46,6 +46,7 @@ Script:                             Description:
 18: vlanPortInfo                     This script displays the VLAN assignment and tagging configuration for all ports on the switch.
 19: vlan_elrp_check                  This script will run ELRP on all VLANS on an EXOS switch.
 20: vlan_copy_port                   This EXOS script will copy/move vlans from one port to another.
+To quit press <q> then <enter>.
 What script would you like to download? 20
 
 By downloading this file you agree to the License

@@ -1,5 +1,6 @@
 import httplib
-
+import signal
+import sys
 
 # This function Changes the VR
 def vr_change(vrid):
@@ -7,6 +8,11 @@ def vr_change(vrid):
     f.write(vrid)
     f.close()
 
+def signal_handler(signal, frame):
+    vr_change('0')
+    print ("\n")
+    exit(0)
+	
 
 # This function downloads github pages
 def pagegit(URL_location):
@@ -41,7 +47,7 @@ def internet_check():
 
 
 def main():
-
+    signal.signal(signal.SIGINT, signal_handler)
     try:
         from httplib import HTTPSConnection
     except ImportError:
@@ -61,7 +67,6 @@ def main():
                 #Check for space to omit script
                 if detail[0][:1] != ' ':
                     github.append({'name': name, 'path': path[1][:-1], 'Description': detail[0]})
-        github.append({'name': 'Exit\\Quit', 'path': 'NA', 'Description': 'Exit Program'})
 
         # This part prints the scripts names and descriptions collected so you can select the script to download
         n = 0
@@ -73,14 +78,14 @@ def main():
                 print ('{0}: {1} {2} {3}'.format(n, line['name'], (' ' * (31 - len(line['name']))),  line['Description']))
             else:
                 print (' {0}: {1} {2} {3}'.format(n, line['name'], (' ' * (31 - len(line['name']))),  line['Description']))
-
+        print ("To quit press <q> then <enter>.")
         # Collects user input and formats input for downloading the script readme file to get .py file name
-        input = raw_input("What script would you like to download? ")
+        input = raw_input("What script # would you like to download? ")
         try:
             input = int(input)
         except:
             pass
-
+        quit = ['q', 'quit', 'exit', 'goaway']
         if input != '' and 1 <= input <= len(github) and path != 'NA':
             userinput = int(input) - 1
 
@@ -106,6 +111,11 @@ def main():
                     print ("https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/Python/{0}/README.md\n".format(github[userinput]['path']))
                     print ("{0} was downloaded to /usr/local/cfg/.\n".format(script_name))
                     main()
+        if input.lower() in quit:
+            # Revert back to normal VR namespace
+            vr_change('0')
+            exit(0)
+
         else:
             print ("Wrong input please select valid number.")
     else:
