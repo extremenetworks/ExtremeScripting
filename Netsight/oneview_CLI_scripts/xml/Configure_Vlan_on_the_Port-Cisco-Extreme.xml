@@ -110,7 +110,7 @@ if {[catch {
 
 IF ($vendor =="Cisco" ) THEN
         CLI
-		regexp {.*&gt;.*} ${CLI.OUT} foundWarning7
+		regexp {.*>.*} ${CLI.OUT} foundWarning7
         IF ([info exists foundWarning7]) THEN
             CLI enable
         ENDIF
@@ -186,7 +186,7 @@ IF ($vendor =="Extreme" ) THEN
         set var I 0
         set var VLANEXISTS "NO"
         foreach line $records {
-            IF ($I &gt; 0) THEN
+            IF ($I > 0) THEN
                 IF ([string first " name $VLANNAME" $line 0] != -1) THEN
                     set VLANEXISTS "YES"
                 ENDIF
