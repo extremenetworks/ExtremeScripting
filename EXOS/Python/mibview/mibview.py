@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 
 # usage: mibview.py [-h] mibString
 # 
@@ -32,9 +32,7 @@ def main():
 
     args = parser.parse_args()
 
-    mibView = args.mibString[0]
-
-    mibView = mibView.split('.')
+    mibView = args.mibString[0].split('.')
 
     #Bitmask to be used in the final output.
     mask = 0
@@ -43,7 +41,7 @@ def main():
 
     for branch in mibView:
         #Left shift the bits in the mask. 
-        mask = mask * 2
+        mask = mask << 1
 
         if branch is not '*': 
             #Insert a 1 in the low-order bits of the mask.
