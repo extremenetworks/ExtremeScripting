@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="aZTF">
+    <version>0</version>
+    <comments>(almost) Zero Touch Fabric, dynamically creates a Fabric and configures it.</comments>
+    <content>'''
+Python Scripts provided by Extreme Networks.
+
+This script is provided free of charge by Extreme.  We hope such scripts are
+helpful when used in conjunction with Extreme products and technology;
+however, scripts are provided simply as an accommodation and are not
+supported nor maintained by Extreme.  ANY SCRIPTS PROVIDED BY EXTREME ARE
+HEREBY PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL EXTREME OR ITS
+THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
+
+This script setups Fabric Connect for VOSS. It assumes reachabilty to each 
+Fabric node (VSP) is available via an OoB network using the OoB Mgmt port or a
+dedicated port in a dedicated vlan for VSP4K platforms.
+
+almost Zero Touch Fabric (aZTF) should be executed from almost Factory Default switches.
+It tolerates to find front panel ports in vlan 0 on any platforms and a single dedicated inband 
+mgmt port in a mgmt vlan _only_ for VSP4K platforms.
+
+It will automatically find the neighboring VOSS switches and assumes they are part of the Fabric.
+All these ports are then NNI ports and the Fabric is configured automatically.
+
+Once the fabric is setup, non NNI ports are in vlan 1 in shutdown state, but the inband mgmt port on VSP4K.
+'''
+
+#@MetaDataStart
+# @DetailDescriptionStart
+######################################################################################
+# 
+# This script setups Fabric Connect for VOSS. It assumes reachabilty to each 
+# Fabric node (VSP) is available via an OoB network using the OoB Mgmt port or a
+# dedicated port in a dedicated vlan for VSP4K platforms.
+# 
+# almost Zero Touch Fabric (aZTF) should be executed from almost Factory Default switches.
+# It tolerates to find front panel ports in vlan 0 on any platforms and a single dedicated inband 
+# mgmt port in a mgmt vlan _only_ for VSP4K platforms.
+# 
+# It will automatically find the neighboring VOSS switches and assumes they are part of the Fabric.
+# All these ports are then NNI ports and the Fabric is configured automatically.
+# 
+# Once the fabric is setup, non NNI ports are in vlan 1 in shutdown state, but the inband mgmt port on VSP4K.
+#
+#######################################################################################
+# @DetailDescriptionEnd
+#@VariableFieldLabel (description = "BVLAN 1",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "bvlan1",
+#                     value = "4051"
+#                     )
+
+#@VariableFieldLabel (description = "BVLAN 2",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "bvlan2",
+#                     value = "4052"
+#                     )
+
+#@VariableFieldLabel (description = "Multicast Enable",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     validValues = [yes,no],
+#                     name = "multicast",
+#                     value = "no"
+#                     )
+#@MetaDataEnd
+
+import time
+
+SPBMID = "1"
+AREA = "49.0000"
+LLDP_WAIT = 30
+
+# cleans the output returned by XMC
+def getOutputOnly(inputStrings):
+    try:
+        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
+        pivotVersion = ''.join("8.1.1".split('.'))
+        if int(version) &gt; int(pivotVersion):
+            lines = inputStrings.splitlines()[1:]
+        else:
+            lines = inputStrings.splitlines()[1:-1]
+        return '\n'.join(lines)
+    except:
+        return None
+
+# executes a list of CLI commands
+def sendConfigCmds(cmds):
+    for cmd in cmds:
+        cli_results = emc_cli.send(cmd)
+        if cli_results.isSuccess() is False:
+            print cli_results.getError()
+            return None
+    return True
+
+# transforms the IP of the device into a nick-name
+# the lowest 20 bits of the IP are used for the nick-name
+# should be unique if the IP range for the switches is within a /12    
+def generateNickName(seed):
+    seed = seed.split('.')
+    base = int(seed[3]) + int(seed[2])*(2**8) + int(seed[1])*(2**16) + int(seed[0])*(2**24)
+    
+    base = bin(base)[2:]
+    base = base[12:32]
+    
+    c = hex(int(base[12:20],2))[2:]
+    b = hex(int(base[4:12],2))[2:]
+    a = hex(int(base[:4],2))[2:]
+    
+    nickname = str(a) + '.' + str(b) + '.' + str(c)
+    
+    return nickname
+
+# screen scraps the LLDP output to find what ports are connected to another switch
+# if the peer is a VSP platform we consider this port as a Fabric port and save it to a list
+# the list is returned once every LLDP neighbors have been parsed
+# we exclude the inband mgmtPort for VSP4K case
+def findLLDPneighbors(mgmtPort):
+    emc_cli.send('terminal more disable')
+    cli_results = emc_cli.send('show lldp neighbor summary')
+    emc_cli.send('terminal more enable')
+    if cli_results.isSuccess() is False:
+        print cli_results.getError()
+        return None
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    lines = cli_output.splitlines()[7:-2]
+    
+    lldp_neighbor = []
+    for line in lines:
+        parts = line.split()
+        if len(parts) &gt; 6:
+            if parts[6].startswith("VSP") and parts[0] != mgmtPort:
+                lldp_neighbor.append(parts[0])
+    
+    return lldp_neighbor
+
+# creates a dictionnary of state and vlan information per port
+def createPortListInfo(inputString):
+    myList = []
+    lines = inputString.splitlines()[7:-3]
+    
+    for line in lines:
+        ports_dict = {}
+        parts = line.split()
+        if len(parts) &gt;= 6:
+            ports_dict["port"] = parts[0]
+            ports_dict["tag"] = parts[1]
+            ports_dict["defaultvid"] = parts[4]
+            if len(parts[5].split(',')) &gt; 1:
+                ports_dict["vids"] = parts[5].split(',')
+            else:
+                ports_dict["vids"] = parts[5]
+        
+        myList.append(ports_dict)
+        
+    return myList
+
+# is it a VSP4K platform?
+def isVSP4K():
+    emc_cli.send('terminal more disable')
+    cli_results = emc_cli.send('show sys-info')
+    emc_cli.send('terminal more enable')
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    lines = cli_output.splitlines()[12:]
+    
+    chassis = lines[0].split(': ')
+    chassis[1] = chassis[1].replace(" ","")
+    if chassis[1].startswith("4"):
+        return True
+    else:
+        return False
+
+def findMgmtVlan(myList, ip):
+    # 'show ip route' gives us the vlan interface used for inband Mgmt
+    emc_cli.send('terminal more disable')
+    cli_results = emc_cli.send('show ip route')
+    emc_cli.send('terminal more enable')
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    lines = cli_output.splitlines()[6:-7]
+    intf = None
+    
+    for line in lines:
+        parts = line.split()
+        if len(parts) &gt;= 6:
+            if parts[2] == ip:
+                intf = parts[5]
+        
+    # 'show interface gigabitEthernet name intf' gives us the active port member
+    emc_cli.send('terminal more disable')
+    emc_cli.send('enable')
+    cli_results = emc_cli.send('show interfaces gigabitEthernet name {}'.format(intf))
+    emc_cli.send('terminal more enable')
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    lines = cli_output.splitlines()[7:]
+    active_port = None
+    
+    for line in lines:
+        parts = line.split()
+        if len(parts) == 6:
+            if parts[2] == "up":
+                active_port = parts[0]
+
+    return active_port,intf
+        
+# creates a port list without the inband port in use
+def inbandMgmt(myList, active_port):
+    first_port = myList[0]["port"]
+    last_port = myList[-1]["port"]
+    
+    aport = int(active_port.split('/')[1])
+    fport = int(first_port.split('/')[1])
+    lport = int(last_port.split('/')[1])
+    
+    if aport + 1 == lport:
+        list1 = first_port + "-" + "1/" + str(aport - 1) + "," + "1/" + str(aport + 1)
+    elif aport + 1 &gt; lport:
+        list1 = first_port + "-" + "1/" + str(lport - 1)
+    elif aport - 1 == fport:
+        list1 = first_port + "," + "1/" + str(aport + 1) + "-" + last_port
+    elif aport == fport:
+        list1 = "1/" + str(aport + 1) + "-" + last_port
+    else:
+        list1 = first_port + "-" + "1/" + str(aport - 1) + "," + "1/" + str(aport + 1) + "-" + last_port
+    
+    return list1
+            
+# finds all the NNI ports on the switch using LLDP
+def findNNIports():
+    emc_cli.send('terminal more disable')
+    cli_results = emc_cli.send('show ports vlans')
+    emc_cli.send('terminal more enable')
+    if cli_results.isSuccess() is False:
+        print cli_results.getError()
+        return None
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    myList = createPortListInfo(cli_output)
+    
+    # are we on a VSP4K platform?
+    VSP4K = isVSP4K()
+    if VSP4K:
+        mgmtPort, mgmtVlan = findMgmtVlan(myList, emc_vars["deviceIP"])
+        # we accept a single mgmt port
+        if len(mgmtPort.split(',')) &gt; 1 or len(mgmtPort.split('-')) &gt; 1:
+            return None
+        # check if all the ports are in default setting but the inband mgmt - we accept to find vlan 0 if the ports have been moved by habits
+        # note: they will be back into vlan 1 after completion - but in shutdown state
+        for row in myList:
+            if row.get("port") == mgmtPort:
+                continue
+            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0", "1", mgmtVlan] or len(row.get("vids")) &gt; 1:
+                return None
+            if len(row.get("vids")) == 1:
+                if row.get("vids") not in ["0", "1", mgmtVlan]:
+                    return None
+    else:
+        # check if all the ports are in default setting - we accept to find vlan 0 if the ports have been moved by habits
+        # note: they will be back into vlan 1 after completion - but in shutdown state
+        for row in myList:
+            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0","1"] or len(row.get("vids")) &gt; 1:
+                return None
+            if len(row.get("vids")) == 1:
+                if row.get("vids") not in ["0", "1"]:
+                    return None
+    
+    emc_cli.send('enable')
+    emc_cli.send('configure terminal')
+    
+    if VSP4K:
+        # VSP4K specific handling as they do not have an OoB Mgmt port, we don't want to lose IP reachability
+        plist = inbandMgmt(myList, mgmtPort)
+    else:
+        # we generate a global portlist to save IO time - on 84 ports it can save around 3mn
+        plist = myList[0]["port"] + "-" + myList[-1]["port"]
+    
+    # we remove all ports from vlan 1 and no shut them so they can exchange lldp PDUs
+    emc_cli.send('vlan members remove 1 {}'.format(plist))
+    emc_cli.send('interface gigabitEthernet {}'.format(plist))
+    emc_cli.send('no shutdown')
+    emc_cli.send('exit')
+ 
+    # we wait several seconds to let lldp discover neighbors
+    time.sleep(LLDP_WAIT)
+ 
+    # we check which ports have a LLDP neighbor and if this is a VOSS platform
+    # we don't want to transform an inband mgmt port into a fabric port for VSP4K
+    if VSP4K is False:
+        mgmtPort = None
+        
+    lldp_list = findLLDPneighbors(mgmtPort)
+    if lldp_list is None:
+        return None
+    
+    portlist = ','.join(lldp_list)
+    
+    # shutdown back all the ports - the configuration of the fabric will re-enable the necessary ports
+    # the ports are back into vlan 1 for consistency with an expected default config
+    emc_cli.send('interface gigabitEthernet {}'.format(plist))
+    emc_cli.send('shutdown')
+    emc_cli.send('exit')
+    emc_cli.send('vlan members add 1 {}'.format(plist))
+    
+    return portlist
+    
+    
+def main():
+    familyType = emc_vars["family"]
+    if familyType != "VSP Series":
+        print "Error: This script needs to run on VOSS"
+        return
+        
+    if int(emc_vars["bvlan1"]) &gt; 4094 or int(emc_vars["bvlan1"]) &lt; 2:
+        print "Error: BVLAN 1 Id is out of range"
+        return
+    if int(emc_vars["bvlan2"]) &gt; 4094 or int(emc_vars["bvlan2"]) &lt; 2:
+        print "Error: BVLAN 2 Id is out of range"
+        return
+    if int(emc_vars["bvlan1"]) == int(emc_vars["bvlan2"]):
+        print "Error: BVLAN 1 Id is identical than BVLAN 2 Id"
+        return
+    
+    portlist = findNNIports()
+    if portlist is None or portlist == []:
+        print "Error: No Fabric Ports have been detected. Make sure the Fabric nodes are connected and/or the front panel ports of the switches are in factory default configuration."
+        return
+    
+    nickname = generateNickName(emc_vars["deviceIP"])
+    
+    cmds = ["enable", "configure terminal"]
+    
+    # enable spbm mode on the switch
+    cmds.append("spbm")
+    # configuration of spbm on isis
+    cmds.append("router isis")
+    cmds.append("spbm {}".format(SPBMID))
+    cmds.append("spbm {} b-vid {},{} primary {}".format(SPBMID, emc_vars["bvlan1"], emc_vars["bvlan2"], emc_vars["bvlan1"]))
+    if emc_vars["multicast"] == "yes":
+        cmds.append("spbm {} multicast enable".format(SPBMID))
+    cmds.append("spbm {} nick-name {}".format(SPBMID, nickname))
+    cmds.append("manual-area {}".format(AREA))
+    cmds.append("exit")
+    # removes from vlan 1 the portlist
+    cmds.append("vlan members remove 1 {}".format(portlist))
+    # configuration of spbm on interfaces
+    cmds.append("interface gigabitEthernet {}".format(portlist))
+    cmds.append("isis")
+    cmds.append("isis spbm {}".format(SPBMID))
+    cmds.append("isis enable")
+    cmds.append("encapsulation dot1q")
+    cmds.append("no shutdown")
+    cmds.append("exit")
+    # creation of the bvlans
+    cmds.append("vlan create {} type spbm-bvlan".format(emc_vars["bvlan1"]))
+    cmds.append("vlan create {} type spbm-bvlan".format(emc_vars["bvlan2"]))
+    # activation of ISIS
+    cmds.append("router isis enable")
+    
+    result = sendConfigCmds(cmds)
+    if result is None:
+        return
+
+        
+main()</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>true</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1523452389536</creationDate>
+    <category>,Extreme Fabric Connect,</category>
+    <vendor></vendor>
+    <scriptType>Python</scriptType>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1523454895611</lastUpdateDate>
+    <contexts>,Device,Groups,Site,</contexts>
+</script>
+

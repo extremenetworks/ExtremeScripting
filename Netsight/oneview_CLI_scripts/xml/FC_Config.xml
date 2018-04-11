@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="FC Config">
+    <version>0</version>
+    <comments>configure Fabric Connect (VOSS)</comments>
+    <content>'''
+Python Scripts provided by Extreme Networks.
+
+This script is provided free of charge by Extreme.  We hope such scripts are
+helpful when used in conjunction with Extreme products and technology;
+however, scripts are provided simply as an accommodation and are not
+supported nor maintained by Extreme.  ANY SCRIPTS PROVIDED BY EXTREME ARE
+HEREBY PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL EXTREME OR ITS
+THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
+
+This script setups Fabric Connect for VOSS. It assumes reachabilty to each 
+Fabric node (VSP) is available (via OoB or else)
+'''
+
+#@MetaDataStart
+# @DetailDescriptionStart
+######################################################################################
+# 
+# This script setups Fabric Connect for VOSS. It assumes reachabilty to each 
+# Fabric node (VSP) is available (via OoB or else)
+#
+#######################################################################################
+# @DetailDescriptionEnd
+#@VariableFieldLabel (description = "NNI Fabric Port List",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "portlist",
+#                     value = "1/1-1/3"
+#                     )
+
+#@VariableFieldLabel (description = "BVLAN 1",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "bvlan1",
+#                     value = "4051"
+#                     )
+
+#@VariableFieldLabel (description = "BVLAN 2",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "bvlan2",
+#                     value = "4052"
+#                     )
+
+#@VariableFieldLabel (description = "Multicast Enable",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     validValues = [yes,no],
+#                     name = "multicast",
+#                     value = "no"
+#                     )
+#@MetaDataEnd
+
+SPBMID = "1"
+AREA = "49.0000"
+
+def getOutputOnly(inputStrings):
+    try:
+        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
+        pivotVersion = ''.join("8.1.1".split('.'))
+        if int(version) &gt; int(pivotVersion):
+            lines = inputStrings.splitlines()[1:]
+        else:
+            lines = inputStrings.splitlines()[1:-1]
+        return '\n'.join(lines)
+    except:
+        return None
+    
+def sendConfigCmds(cmds):
+    for cmd in cmds:
+        cli_results = emc_cli.send(cmd)
+        if cli_results.isSuccess() is False:
+            print cli_results.getError()
+            return None
+    return True
+
+def CreatePortList(portlist):
+    new_port_list = []
+    for port in portlist:
+        my_list = []
+        port = port.replace(' ','')
+        port = port.split(',')
+        
+        if '/' in port[0]:
+            prefix = port[0][:2]
+        else:
+            return None
+        
+        for entry in port:
+            entry = entry.replace(prefix,'')
+            my_list.append(entry)
+
+        for s in my_list:
+            if '-' in s:
+                s = s.split('-')
+                for i in range(int(s[0]), int(s[1])+1):
+                    new_port_list.append(prefix+str(i))
+            else:
+                new_port_list.append(prefix+s)
+                        
+    return new_port_list
+
+# send a CLI command and return the clean output 
+def getOutput(cmd):
+    cli_results = emc_cli.send(cmd)
+    if cli_results.isSuccess() is False:
+        print cli_results.getError()
+        return None
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    return cli_output
+    
+# finds if Fabric Connect is already configured
+# we assume there must be 2 bvlans
+# we check if spbm is Up and if the bvlans match and if the ISIS area matches as well
+# if it matches and only new NNI ports are found, we accept that as an extension 
+#   of an existing config, for example to add new nodes in the fabric, and return True
+# if critical config do not match we return False to stop the script
+# if no config is found we return None
+def FabricConnect():
+    # assumption is that the CLI cmd 'sh isis spbm' is good enough to find Fabric Connect info
+    # if there's no SPBM instance we assume FC is not configured
+    # otherwise FC must be configured and then we check the BVLAN if they match
+    output = getOutput("show isis spbm")
+    spbmlines = output.splitlines()[:-1]
+    spbminst = int(spbmlines[-1].split(": ")[1])
+    
+    if spbminst &gt; 0:
+        # if we do not have the same SPBM instance Id we return False and stop the script
+        if spbminst != int(SPBMID):
+            return False
+            
+        spbminfo = output.splitlines()[7:8]
+        spbminfo = spbminfo[0].split()
+        
+        # do we have the same ISIS area than desired?
+        output = getOutput("show isis area")
+        isisarea = output.splitlines()[7:]
+        isisarea[0] = isisarea[0].replace(" ","")
+        
+        if isisarea[0] != AREA:
+        # answer is no. We return False and stop the script
+            return False
+        
+        if len(spbminfo) &gt; 2:
+            bvids = spbminfo[1].split('-')
+            primary = spbminfo[2]
+            
+            if len(bvids) == 2:
+            # do we have our two bvlans and do they match with what we want to configure?
+                if bvids[0] in [emc_vars["bvlan1"], emc_vars["bvlan2"]] and bvids[1] in [emc_vars["bvlan1"], emc_vars["bvlan2"]] and primary == emc_vars["bvlan1"]:
+                    return True
+                else:
+                # answer is no. We return False and stop the script
+                    return False
+            else:
+            # we do not have 2 bvlans. We return False and stop the script - this script assumes always 2 bvlans
+            # we could make an enhancement to support a single one by setting a value to 0, for example. Not done at this time, what's the reason to not have 2 bvlans?
+                return False
+        else:
+        # this is a weird situation
+        # if there's an spbm instance we must have more than 3 entries
+        # for safety we return False and stop the script
+            return False
+        
+    # there's no spbm instance running, we return None and configure it all
+    return None
+
+def generateNickName(seed):
+    seed = seed.split('.')
+    base = int(seed[3]) + int(seed[2])*(2**8) + int(seed[1])*(2**16) + int(seed[0])*(2**24)
+    
+    base = bin(base)[2:]
+    base = base[12:32]
+    
+    c = hex(int(base[12:20],2))[2:]
+    b = hex(int(base[4:12],2))[2:]
+    a = hex(int(base[:4],2))[2:]
+    
+    nickname = str(a) + '.' + str(b) + '.' + str(c)
+    
+    return nickname
+    
+    
+def main():
+    familyType = emc_vars["family"]
+    if familyType != "VSP Series":
+        print "Error: This script needs to run on VOSS"
+        return
+        
+    if int(emc_vars["bvlan1"]) &gt; 4094 or int(emc_vars["bvlan1"]) &lt; 2:
+        print "Error: BVLAN 1 Id is out of range"
+        return
+    if int(emc_vars["bvlan2"]) &gt; 4094 or int(emc_vars["bvlan2"]) &lt; 2:
+        print "Error: BVLAN 2 Id is out of range"
+        return
+    if int(emc_vars["bvlan1"]) == int(emc_vars["bvlan2"]):
+        print "Error: BVLAN 1 Id is identical than BVLAN 2 Id"
+        return
+    
+    FC = FabricConnect()
+    if FC is False:
+        print "Error: Fabric Connect is already configured on switch {} and has different critical parameters".format(emc_vars["deviceIP"])
+        return
+    
+    nickname = generateNickName(emc_vars["deviceIP"])
+    
+    cmds = ["enable", "configure terminal"]
+    
+    if FC is None:
+        # enable spbm mode on the switch
+        cmds.append("spbm")
+        # configuration of spbm on isis
+        cmds.append("router isis")
+        cmds.append("spbm {}".format(SPBMID))
+        cmds.append("spbm {} b-vid {},{} primary {}".format(SPBMID, emc_vars["bvlan1"], emc_vars["bvlan2"], emc_vars["bvlan1"]))
+        if emc_vars["multicast"] == "yes":
+            cmds.append("spbm {} multicast enable".format(SPBMID))
+        cmds.append("spbm {} nick-name {}".format(SPBMID, nickname))
+        cmds.append("manual-area {}".format(AREA))
+        cmds.append("exit")
+    
+    # removes from vlan 1 the portlist
+    cmds.append("vlan members remove 1 {}".format(emc_vars["portlist"]))    
+    # configuration of spbm on interfaces
+    cmds.append("interface gigabitEthernet {}".format(emc_vars["portlist"]))
+    cmds.append("isis")
+    cmds.append("isis spbm {}".format(SPBMID))
+    cmds.append("isis enable")
+    cmds.append("encapsulation dot1q")
+    cmds.append("no shutdown")
+    cmds.append("exit")
+    
+    if FC is None:
+        # creation of the bvlans
+        cmds.append("vlan create {} type spbm-bvlan".format(emc_vars["bvlan1"]))
+        cmds.append("vlan create {} type spbm-bvlan".format(emc_vars["bvlan2"]))
+        # activation of ISIS
+        cmds.append("router isis enable")
+    
+    result = sendConfigCmds(cmds)
+    if result is None:
+        return
+
+        
+main()</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>true</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1523453954150</creationDate>
+    <category>,Extreme Fabric Connect,</category>
+    <vendor></vendor>
+    <scriptType>Python</scriptType>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1523454608052</lastUpdateDate>
+    <contexts>,Device,Groups,</contexts>
+</script>
+

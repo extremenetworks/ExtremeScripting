@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="FA Server Create">
+    <version>0</version>
+    <comments>configure FA Server on BEBs (VOSS)</comments>
+    <content>'''
+Python Scripts provided by Extreme Networks.
+
+This script is provided free of charge by Extreme.  We hope such scripts are
+helpful when used in conjunction with Extreme products and technology;
+however, scripts are provided simply as an accommodation and are not
+supported nor maintained by Extreme.  ANY SCRIPTS PROVIDED BY EXTREME ARE
+HEREBY PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL EXTREME OR ITS
+THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
+
+This script creates and configures Fabric Attach on an FA Server (VOSS).
+
+Several checks are performed to try to avoid mistakes.
+'''
+
+#@MetaDataStart
+# @DetailDescriptionStart
+######################################################################################
+# 
+# This script creates and configures Fabric Attach on an FA Server (VOSS).
+# 
+# Several checks are performed to try to avoid mistakes.
+#
+#######################################################################################
+# @DetailDescriptionEnd
+#@SectionStart (description = "Single BEB Port Assignment")
+#@VariableFieldLabel (description = "UNI Port",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "portlist",
+#                     value = "1/1"
+#                     )
+#@SectionEnd
+
+#@SectionStart (description = "Cluster BEBs MLT Assignment")
+#@VariableFieldLabel (description = "MLT",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "mlt",
+#                     value = "no"
+#                     )
+
+#@VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "mltid",
+#                     value = "1"
+#                     )
+
+#@VariableFieldLabel (description = "MLT Port Member",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "portmember",
+#                     value = "1/1"
+#                     )
+#@SectionEnd
+
+#@SectionStart (description = "FA Server Parameters")
+#@VariableFieldLabel (description = "UNI Port/MLT 802.1Q Tagging",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "tag",
+#                     value = "yes"
+#                     )
+
+#@VariableFieldLabel (description = "UNI Port/MLT No Shutdown",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "noshut",
+#                     value = "yes"
+#                     )
+
+#@VariableFieldLabel (description = "FA Authentication",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "fa-auth",
+#                     value = "no"
+#                     )
+#@SectionEnd
+
+#@SectionStart (description = "FA Management VLAN Configuration")
+#@VariableFieldLabel (description = "Management VLAN",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "mgmt",
+#                     value = "no"
+#                     )
+
+#@VariableFieldLabel (description = "Management VLAN Id",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "vid",
+#                     value = "100"
+#                     )
+
+#@VariableFieldLabel (description = "Management VLAN Service Id",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "isid",
+#                     value = "12000"
+#                     )
+#@SectionEnd
+#@MetaDataEnd
+
+
+def getOutputOnly(inputStrings):
+    try:
+        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
+        pivotVersion = ''.join("8.1.1".split('.'))
+        if int(version) &gt; int(pivotVersion):
+            lines = inputStrings.splitlines()[1:]
+        else:
+            lines = inputStrings.splitlines()[1:-1]
+        return '\n'.join(lines)
+    except:
+        return None
+
+def getVlanMember(inputString):
+    myList = []
+    lines = inputString.splitlines()[7:-2]
+    
+    for line in lines:
+        vid_dict = {}
+        parts = line.split()
+        if len(parts) &gt; 1:
+            vid_dict["vid"] = parts[0]
+            vid_dict["portlist"] = parts[1]
+        else:
+            vid_dict["vid"] = parts[0]
+
+        myList.append(vid_dict) 
+        
+    return myList
+
+def portIsInVLAN(ports):
+    cli_results = emc_cli.send('show vlan members port {}'.format(ports))
+    if cli_results.isSuccess() is False:
+        print cli_results.getError()
+        return None
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    if cli_output:
+        myList = getVlanMember(cli_output)
+        
+        for row in myList:
+            if row.get("vid") != "1":
+                return None
+        
+        return True
+    
+    return None
+    
+def sendConfigCmds(cmds):
+    for cmd in cmds:
+        cli_results = emc_cli.send(cmd)
+        if cli_results.isSuccess() is False:
+            print cli_results.getError()
+            return None
+    return True
+
+def CreateFAList():
+    myList = []
+    
+    cli_results = emc_cli.send('show fa interface')
+    if cli_results.isSuccess() is False:
+        print cli_results.getError()
+        return None
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    lines = cli_output.splitlines()[7:-4]
+    
+    for line in lines:
+        fa_dict = {}
+        parts = line.split()
+        if len(parts) &gt; 1:
+            if parts[0].startswith("Port"):
+                fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
+            else:
+                fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
+            fa_dict["status"] = parts[1]
+            fa_dict["auth"] = parts[4]
+        myList.append(fa_dict) 
+        
+    return myList
+
+def CheckFAonPort(interface):
+    fa = CreateFAList()
+    if fa is None:
+        return None
+    
+    for entry in fa:
+        if entry["intf"] == interface:
+            if entry["status"] == "enabled":
+                return None
+    return True
+    
+def CreateMLTList():
+    myList = []
+    
+    cli_results = emc_cli.send('show mlt')
+    if cli_results.isSuccess() is False:
+        print cli_results.getError()
+        return None
+    cli_output = cli_results.getOutput()
+    cli_output = getOutputOnly(cli_output)
+    
+    lines = cli_output.splitlines()[7:]
+    
+    for line in lines:
+        mlt_dict = {}
+        parts = line.split()
+        if parts == []:
+            return myList
+        mlt_dict["mltid"] = parts[0]
+        mlt_dict["portmember"] = parts[6]
+        mlt_dict["mltcurrent"] = parts[5]
+        myList.append(mlt_dict) 
+        
+    return myList
+    
+def CheckMLT(mltid, portmember):
+    mlt = CreateMLTList()
+    if mlt == []:
+        return True
+    
+    for entry in mlt:
+        if entry["mltid"] == mltid:
+            if entry["portmember"] != portmember:
+                return None
+    return True
+    
+    
+def main():
+    family = emc_vars["family"]
+    if family != "VSP Series":
+        print "Error: This script needs to be run on a VSP switch"
+        return
+
+    if emc_vars["mgmt"] == "yes":
+        if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
+            print "Error: Mgmt VLAN Id is out of range"
+            return
+        if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
+            print "Error: Mgmt Service Id is out of range"
+            return
+        
+    if CheckFAonPort((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"]) is None:
+        print "Error: Fabric Attach is already configured on interface {}".format((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"])
+        return
+    
+    if emc_vars["mlt"] == "yes":
+        # check if MLT already exists and what port is in it
+        if CheckMLT(emc_vars["mltid"], emc_vars["portmember"]) is None:
+            print "Error: MLT {} already exists and has a different port member than port {}".format(emc_vars["mltid"], emc_vars["portmember"])
+            return
+    else:
+        # check if the port is already a member of a VLAN
+        if portIsInVLAN(emc_vars["portlist"]) is None:
+           print "Error: Port {} is already part of a VLAN and cannot be configured for FA".format(emc_vars["portlist"])
+           return
+        
+    cmds = ["enable", "configure terminal"]
+    result = sendConfigCmds(cmds)
+    if result is None:
+        return
+    
+    cmds = []
+    if emc_vars["mgmt"] == "yes":
+        cmds.append("vlan create {} name Mgmt type port-mstprstp 0".format(emc_vars["vid"]))
+        cmds.append("vlan i-sid {} {}".format(emc_vars["vid"], emc_vars["isid"]))
+    
+    if emc_vars["mlt"] == "yes":
+        cmds.append("mlt {} enable".format(emc_vars["mltid"]))
+        cmds.append("mlt {} member {}".format(emc_vars["mltid"], emc_vars["portmember"]))
+        if emc_vars["tag"] == "yes":
+            cmds.append("mlt {} encapsulation dot1q".format(emc_vars["mltid"]))
+        cmds.append("vlan members remove 1 {}".format(emc_vars["portmember"]))
+        cmds.append("interface mlt {}".format(emc_vars["mltid"]))
+        cmds.append("smlt")
+        cmds.append("fa enable")
+        if emc_vars["fa-auth"] == "no":
+            cmds.append("no fa message-authentication")
+        if emc_vars["mgmt"] == "yes":
+            cmds.append("fa management i-sid {} c-vid {}".format(emc_vars["isid"], emc_vars["vid"]))
+        cmds.append("exit")
+        if emc_vars["noshut"] == "yes":
+            cmds.append("interface GigabitEthernet {}".format(emc_vars["portmember"]))
+            cmds.append("no shutdown")
+            cmds.append("exit")
+    else:
+        cmds.append("vlan members remove 1 {}".format(emc_vars["portlist"]))
+        cmds.append("interface GigabitEthernet {}".format(emc_vars["portlist"]))
+        cmds.append("fa enable")
+        if emc_vars["fa-auth"] == "no":
+            cmds.append("no fa message-authentication")
+        if emc_vars["tag"] == "yes":
+            cmds.append("encapsulation dot1q")
+        if emc_vars["mgmt"] == "yes":
+            cmds.append("fa management i-sid {} c-vid {}".format(emc_vars["isid"], emc_vars["vid"]))
+        if emc_vars["noshut"] == "yes":
+            cmds.append("no shutdown")
+        cmds.append("exit")
+        
+    result = sendConfigCmds(cmds)
+    if result is None:
+        return
+        
+main()</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>true</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1523454373255</creationDate>
+    <category>,Extreme Fabric Connect,</category>
+    <vendor></vendor>
+    <scriptType>Python</scriptType>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1523454950434</lastUpdateDate>
+    <contexts>,Device,Groups,</contexts>
+</script>
+

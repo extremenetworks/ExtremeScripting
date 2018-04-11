@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="FA L2VSN Create">
+    <version>0</version>
+    <comments>configure L2VSN between FA Proxy devices (BOSS and/or EXOS)</comments>
+    <content>'''
+Python Scripts provided by Extreme Networks.
+
+This script is provided free of charge by Extreme.  We hope such scripts are
+helpful when used in conjunction with Extreme products and technology;
+however, scripts are provided simply as an accommodation and are not
+supported nor maintained by Extreme.  ANY SCRIPTS PROVIDED BY EXTREME ARE
+HEREBY PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL EXTREME OR ITS
+THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
+
+This script provisions a L2VSN via Fabric Attach between several FA Proxy switches.
+
+It can create the required VLAN and associate the access ports to it.
+No need to specify the Uplink ports, as FA will do it dynamically.
+
+This script MUST be used either on ERS switches running BOSS or Summit/ExtremeSwitching
+switches running EXOS 22.4 or higher.
+'''
+
+#@MetaDataStart
+# @DetailDescriptionStart
+######################################################################################
+# 
+# This script provisions a L2VSN via Fabric Attach between several FA Proxy switches.
+# 
+# It can create the required VLAN and associate the access ports to it.
+# No need to specify the Uplink ports, as FA will do it dynamically.
+# 
+# This script MUST be used either on ERS switches running BOSS or Summit/ExtremeSwitching
+# switches running EXOS 22.4 or higher.
+#
+#######################################################################################
+# @DetailDescriptionEnd
+#@VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "vid",
+#                     value = "1"
+#                     )
+
+#@VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no
+#                     name = "isid",
+#                     value = "1000"
+#                     )
+
+#@VariableFieldLabel (description = "802.1Q Tagging for the access (UNI) ports",
+#                     type = string,
+#                     required = no,
+#                     validValues = [tag,untag],
+#                     readOnly = no,
+#                     name = "tagtype",
+#                     value = "untag"
+#                     )
+#@MetaDataEnd
+
+import json
+
+def getOutputOnly(inputStrings):
+    try:
+        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
+        pivotVersion = ''.join("8.1.1".split('.'))
+        if int(version) &gt; int(pivotVersion):
+            lines = inputStrings.splitlines()[1:]
+        else:
+            lines = inputStrings.splitlines()[1:-1]
+        return '\n'.join(lines)
+    except:
+        return None
+
+def getVidVsn(inputString):
+    myList = []
+    lines = inputString.splitlines()[6:-2]
+    
+    for line in lines:
+        vid_dict = {}
+        parts = line.split()
+        if len(parts) &gt; 1:
+            vid_dict["vid"] = parts[0]
+            vid_dict["isid"] = parts[-1]
+        else:
+            vid_dict["vid"] = parts[0]
+
+        myList.append(vid_dict) 
+        
+    return myList
+    
+def sendConfigCmds(cmds):
+    for cmd in cmds:
+        cli_results = emc_cli.send(cmd)
+        if cli_results.isSuccess() is False:
+            print cli_results.getError()
+            return None
+    return True
+
+def getVlanList(reply):
+    reply_json = json.loads(str(reply))
+    data = reply_json.get('data')
+    vlanList = []
+    if data:
+        for row in data:
+            vlanList.append(row.get('tag'))
+        return vlanList
+    return None
+
+def exosCheckNSI(vid, isid):
+    cli_results = emc_cli.send('debug cfgmgr show next lldp.faMapping')
+    reply = getOutputOnly(cli_results.getOutput())    
+    reply_json = json.loads(reply)
+    data = reply_json.get("data")
+    if data:
+        for row in data:
+            if isid == row.get("nsi"):
+                if vid == row.get("vlanId"):
+                    return 1,vid 
+                return 0,row.get("vlanId")
+    return 2,isid
+    
+def main():
+    createVlan = True
+    
+    try:
+        ports = emc_vars['port']
+    except:
+        ports = None
+
+    if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
+        print "Error: The VLAN Id is out of range"
+        return
+    if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
+        print "Error: The Service Id is out of range"
+        return
+        
+    familyType = emc_vars['family']
+        
+    if emc_vars["isExos"] == "true":
+        minExos = ''.join("22.4".split('.'))
+        version = ''.join(emc_vars["deviceSoftwareVer"].split('.')[:2])
+        if int(minExos) &gt; int(version):
+            print "Error: EXOS version must be 22.4 or greater"
+            return
+            
+        status,id = exosCheckNSI(emc_vars["vid"], emc_vars["isid"])
+        if status == 1:
+            createVlan = False
+        elif status == 0:
+            print "Error: The Service Id {} is already used for VLAN {} on device {}".format(emc_vars["isid"], id, emc_vars["deviceIP"])
+            return
+        else:       
+            cli_results = emc_cli.send('debug cfgmgr show next vlan.vlan')
+            if cli_results.isSuccess() is False:
+                print cli_results.getError()
+                return
+            cli_output = cli_results.getOutput()
+            cli_output = getOutputOnly(cli_output)
+        
+            if cli_output:
+                vlanList = getVlanList(cli_output)
+                if vlanList:
+                    if emc_vars["vid"] in vlanList:
+                        createVlan = False
+                else:
+                    print "Error: No VLAN found on device {}".format(emc_vars["deviceIP"])
+                    return
+            else:
+                print "Error: Cannot access VLAN database on device {}".format(emc_vars["deviceIP"])
+                return
+        
+        if createVlan:
+            cmds = ["create vlan {}".format(emc_vars["vid"])]
+        else:
+            cmds = []
+            
+        cmds.append("config vlan {} add nsi {}".format(emc_vars["vid"], emc_vars["isid"]))
+        if ports is None:           
+            print "Warning: No access ports have been selected to be part of the new VLAN {}".format(emc_vars["vid"])
+        else:
+            cmds.append("config vlan {} add ports {} {}".format(emc_vars["vid"], ports, emc_vars["tagtype"]))
+            
+        result = sendConfigCmds(cmds)
+        if result is None:
+            return
+        
+    elif familyType == 'ERS Series':
+        emc_cli.send("enable")
+        cli_results = emc_cli.send('show vlan i-sid')
+        if cli_results.isSuccess() is False:
+            print cli_results.getError()
+            return
+        cli_output = cli_results.getOutput()
+        cli_output = getOutputOnly(cli_output)
+    
+        if cli_output:
+            myList = getVidVsn(cli_output)
+        
+            for row in myList:
+                if row.get("vid") == emc_vars["vid"]:
+                    createVlan = False
+                    if row.get("isid"):
+                        print "Error: The VLAN {} is already associated to the Service {}".format(emc_vars["vid"], row.get("isid"))
+                        return
+                if row.get("isid"):
+                    if row.get("isid") == emc_vars["isid"]:
+                        print "Error: The Service Id {} is already associated to VLAN {}".format(emc_vars["isid"], row.get("vid"))
+                        return
+        else:
+            print "Error: Cannot access VLAN database on device {}".format(emc_vars["deviceIP"])
+            return
+            
+        cmds = ["enable", "configure terminal"]
+        if createVlan:
+            cmds.append("vlan create {} type port".format(emc_vars["vid"]))
+        
+        if ports is None:
+            print "Warning: No ports have been selected to be part of the new VLAN {}".format(emc_vars["vid"])
+        else:
+            cmds.append("vlan configcontrol automatic")
+            cmds.append("vlan port {} tagging {}".format(ports, emc_vars["tagtype"]+"All"))
+            cmds.append("vlan members add {} {}".format(emc_vars["vid"], ports))
+            
+        cmds.append("i-sid {} vlan {}".format(emc_vars["isid"], emc_vars["vid"]))
+        result = sendConfigCmds(cmds)
+        if result is None:
+            return   
+
+    else:
+        print "You need to run this script either on an EXOS or BOSS switch"
+    
+main()</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>true</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1523454209354</creationDate>
+    <category>,Extreme Fabric Connect,</category>
+    <vendor></vendor>
+    <scriptType>Python</scriptType>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1523454684606</lastUpdateDate>
+    <contexts>,Device,Groups,Site,</contexts>
+</script>
+
