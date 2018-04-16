@@ -21,14 +21,15 @@ Fabric node (VSP) is available (via OoB or else)
 '''
 
 #@MetaDataStart
-# @DetailDescriptionStart
+#@DetailDescriptionStart
 ######################################################################################
 # 
 # This script setups Fabric Connect for VOSS. It assumes reachabilty to each 
 # Fabric node (VSP) is available (via OoB or else)
 #
 #######################################################################################
-# @DetailDescriptionEnd
+#@DetailDescriptionEnd
+
 #@VariableFieldLabel (description = "NNI Fabric Port List",
 #                     type = string,
 #                     required = yes,
@@ -70,7 +71,7 @@ def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
         pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) &gt; int(pivotVersion):
+        if int(version) > int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
@@ -138,7 +139,7 @@ def FabricConnect():
     spbmlines = output.splitlines()[:-1]
     spbminst = int(spbmlines[-1].split(": ")[1])
     
-    if spbminst &gt; 0:
+    if spbminst > 0:
         # if we do not have the same SPBM instance Id we return False and stop the script
         if spbminst != int(SPBMID):
             return False
@@ -155,7 +156,7 @@ def FabricConnect():
         # answer is no. We return False and stop the script
             return False
         
-        if len(spbminfo) &gt; 2:
+        if len(spbminfo) > 2:
             bvids = spbminfo[1].split('-')
             primary = spbminfo[2]
             
@@ -201,10 +202,10 @@ def main():
         print "Error: This script needs to run on VOSS"
         return
         
-    if int(emc_vars["bvlan1"]) &gt; 4094 or int(emc_vars["bvlan1"]) &lt; 2:
+    if int(emc_vars["bvlan1"]) > 4094 or int(emc_vars["bvlan1"]) < 2:
         print "Error: BVLAN 1 Id is out of range"
         return
-    if int(emc_vars["bvlan2"]) &gt; 4094 or int(emc_vars["bvlan2"]) &lt; 2:
+    if int(emc_vars["bvlan2"]) > 4094 or int(emc_vars["bvlan2"]) < 2:
         print "Error: BVLAN 2 Id is out of range"
         return
     if int(emc_vars["bvlan1"]) == int(emc_vars["bvlan2"]):

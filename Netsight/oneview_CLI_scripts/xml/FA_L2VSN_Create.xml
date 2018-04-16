@@ -26,7 +26,7 @@ switches running EXOS 22.4 or higher.
 '''
 
 #@MetaDataStart
-# @DetailDescriptionStart
+#@DetailDescriptionStart
 ######################################################################################
 # 
 # This script provisions a L2VSN via Fabric Attach between several FA Proxy switches.
@@ -38,8 +38,9 @@ switches running EXOS 22.4 or higher.
 # switches running EXOS 22.4 or higher.
 #
 #######################################################################################
-# @DetailDescriptionEnd
-#@VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
+#@DetailDescriptionEnd
+
+#@VariableFieldLabel (description = "VLAN Id <1 - 4094>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -47,7 +48,7 @@ switches running EXOS 22.4 or higher.
 #                     value = "1"
 #                     )
 
-#@VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
+#@VariableFieldLabel (description = "SERVICE Id <1 - 16 000 000>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no
@@ -71,7 +72,7 @@ def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
         pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) &gt; int(pivotVersion):
+        if int(version) > int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
@@ -86,7 +87,7 @@ def getVidVsn(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
-        if len(parts) &gt; 1:
+        if len(parts) > 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
         else:
@@ -135,10 +136,10 @@ def main():
     except:
         ports = None
 
-    if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
+    if int(emc_vars["vid"]) > 4094 or int(emc_vars["vid"]) < 2:
         print "Error: The VLAN Id is out of range"
         return
-    if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
+    if int(emc_vars["isid"]) > 16000000 or int(emc_vars["isid"]) < 1:
         print "Error: The Service Id is out of range"
         return
         
@@ -147,7 +148,7 @@ def main():
     if emc_vars["isExos"] == "true":
         minExos = ''.join("22.4".split('.'))
         version = ''.join(emc_vars["deviceSoftwareVer"].split('.')[:2])
-        if int(minExos) &gt; int(version):
+        if int(minExos) > int(version):
             print "Error: EXOS version must be 22.4 or greater"
             return
             

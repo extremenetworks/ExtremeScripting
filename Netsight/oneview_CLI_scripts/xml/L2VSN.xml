@@ -27,7 +27,7 @@ for the single BEBs, providing the correct UNI port.
 '''
 
 #@MetaDataStart
-# @DetailDescriptionStart
+#@DetailDescriptionStart
 ######################################################################################
 # 
 # This script provisions a L2VSN between several BEBs running VOSS (VSP switches).
@@ -40,9 +40,10 @@ for the single BEBs, providing the correct UNI port.
 # for the single BEBs, providing the correct UNI port.
 #
 #######################################################################################
-# @DetailDescriptionEnd
+#@DetailDescriptionEnd
+
 #@SectionStart (description = "Service Definition")
-#@VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
+#@VariableFieldLabel (description = "VLAN Id <1 - 4094>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -50,7 +51,7 @@ for the single BEBs, providing the correct UNI port.
 #                     value = "1"
 #                     )
 
-#@VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
+#@VariableFieldLabel (description = "SERVICE Id <1 - 16 000 000>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -79,7 +80,7 @@ for the single BEBs, providing the correct UNI port.
 #                     value = "no"
 #                     )
 
-#@VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
+#@VariableFieldLabel (description = "MLT Id <1 - 256>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -105,7 +106,7 @@ def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
         pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) &gt; int(pivotVersion):
+        if int(version) > int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
@@ -120,7 +121,7 @@ def getVidVsn(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
-        if len(parts) &gt; 1:
+        if len(parts) > 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
         else:
@@ -153,7 +154,7 @@ def CreateFAList():
     for line in lines:
         fa_dict = {}
         parts = line.split()
-        if len(parts) &gt; 1:
+        if len(parts) > 1:
             if parts[0].startswith("Port"):
                 fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
             else:
@@ -178,10 +179,10 @@ def CheckFAonPort(interface):
 def main():
     createVlan = True
 
-    if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
+    if int(emc_vars["vid"]) > 4094 or int(emc_vars["vid"]) < 2:
         print "Error: The VLAN Id is out of range"
         return
-    if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
+    if int(emc_vars["isid"]) > 16000000 or int(emc_vars["isid"]) < 1:
         print "Error: The Service Id is out of range"
         return
         

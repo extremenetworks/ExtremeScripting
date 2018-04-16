@@ -22,15 +22,16 @@ Several checks are performed to try to avoid mistakes.
 '''
 
 #@MetaDataStart
-# @DetailDescriptionStart
+#@DetailDescriptionStart
 ######################################################################################
 # 
 # This script creates and configures Fabric Attach on an FA Server (VOSS).
-# 
+#
 # Several checks are performed to try to avoid mistakes.
 #
 #######################################################################################
-# @DetailDescriptionEnd
+#@DetailDescriptionEnd
+
 #@SectionStart (description = "Single BEB Port Assignment")
 #@VariableFieldLabel (description = "UNI Port",
 #                     type = string,
@@ -51,7 +52,7 @@ Several checks are performed to try to avoid mistakes.
 #                     value = "no"
 #                     )
 
-#@VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
+#@VariableFieldLabel (description = "MLT Id <1 - 256>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -65,6 +66,23 @@ Several checks are performed to try to avoid mistakes.
 #                     readOnly = no,
 #                     name = "portmember",
 #                     value = "1/1"
+#                     )
+
+#@VariableFieldLabel (description = "LACP",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "lacp",
+#                     value = "no"
+#                     )
+
+#@VariableFieldLabel (description = "LACP Key",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "lacpkey",
+#                     value = "1"
 #                     )
 #@SectionEnd
 
@@ -130,7 +148,7 @@ def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
         pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) &gt; int(pivotVersion):
+        if int(version) > int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
@@ -145,7 +163,7 @@ def getVlanMember(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
-        if len(parts) &gt; 1:
+        if len(parts) > 1:
             vid_dict["vid"] = parts[0]
             vid_dict["portlist"] = parts[1]
         else:
@@ -197,7 +215,7 @@ def CreateFAList():
     for line in lines:
         fa_dict = {}
         parts = line.split()
-        if len(parts) &gt; 1:
+        if len(parts) > 1:
             if parts[0].startswith("Port"):
                 fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
             else:
@@ -262,10 +280,10 @@ def main():
         return
 
     if emc_vars["mgmt"] == "yes":
-        if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
+        if int(emc_vars["vid"]) > 4094 or int(emc_vars["vid"]) < 2:
             print "Error: Mgmt VLAN Id is out of range"
             return
-        if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
+        if int(emc_vars["isid"]) > 16000000 or int(emc_vars["isid"]) < 1:
             print "Error: Mgmt Service Id is out of range"
             return
         
@@ -296,11 +314,14 @@ def main():
     
     if emc_vars["mlt"] == "yes":
         cmds.append("mlt {} enable".format(emc_vars["mltid"]))
-        cmds.append("mlt {} member {}".format(emc_vars["mltid"], emc_vars["portmember"]))
+        if emc_vars["lacp"] == "no":
+            cmds.append("mlt {} member {}".format(emc_vars["mltid"], emc_vars["portmember"]))
         if emc_vars["tag"] == "yes":
             cmds.append("mlt {} encapsulation dot1q".format(emc_vars["mltid"]))
         cmds.append("vlan members remove 1 {}".format(emc_vars["portmember"]))
         cmds.append("interface mlt {}".format(emc_vars["mltid"]))
+        if emc_vars["lacp"] == "yes":
+            cmds.append("lacp enable key {}".format(emc_vars["lacpkey"]))
         cmds.append("smlt")
         cmds.append("fa enable")
         if emc_vars["fa-auth"] == "no":
@@ -308,10 +329,13 @@ def main():
         if emc_vars["mgmt"] == "yes":
             cmds.append("fa management i-sid {} c-vid {}".format(emc_vars["isid"], emc_vars["vid"]))
         cmds.append("exit")
+        cmds.append("interface GigabitEthernet {}".format(emc_vars["portmember"]))
+        if emc_vars["lacp"] == "yes":
+            cmds.append("lacp key {} aggregation enable timeout-time short".format(emc_vars["lacpkey"]))
+            cmds.append("lacp enable")
         if emc_vars["noshut"] == "yes":
-            cmds.append("interface GigabitEthernet {}".format(emc_vars["portmember"]))
             cmds.append("no shutdown")
-            cmds.append("exit")
+        cmds.append("exit")
     else:
         cmds.append("vlan members remove 1 {}".format(emc_vars["portlist"]))
         cmds.append("interface GigabitEthernet {}".format(emc_vars["portlist"]))

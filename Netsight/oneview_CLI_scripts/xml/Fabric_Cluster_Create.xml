@@ -20,14 +20,15 @@ This script creates a VSP cluster (SMLT) with vIST.
 '''
 
 #@MetaDataStart
-# @DetailDescriptionStart
+#@DetailDescriptionStart
 ######################################################################################
 # 
 # This script creates a VSP cluster (SMLT) with vIST.
 # 
 #######################################################################################
-# @DetailDescriptionEnd
-#@VariableFieldLabel (description = "vIST VLAN Id &lt;1 - 4094&gt;",
+#@DetailDescriptionEnd
+
+#@VariableFieldLabel (description = "vIST VLAN Id <1 - 4094>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -35,7 +36,7 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     value = "4000"
 #                     )
 
-#@VariableFieldLabel (description = "vIST Service Id &lt;1 - 16000000&gt;",
+#@VariableFieldLabel (description = "vIST Service Id <1 - 16000000>",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -74,6 +75,15 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     name = "peersysid",
 #                     value = "0051.00d2.8084"
 #                     )
+
+#@VariableFieldLabel (description = "SMLT LACP",
+#                     type = string,
+#                     required = yes,
+#                     validValues = [yes,no],
+#                     readOnly = no,
+#                     name = "lacp",
+#                     value = "no"
+#                     )
 #@MetaDataEnd
 
 SPBMID = "1"
@@ -83,7 +93,7 @@ def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
         pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) &gt; int(pivotVersion):
+        if int(version) > int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
@@ -106,7 +116,7 @@ def getVidVsn(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
-        if len(parts) &gt; 1:
+        if len(parts) > 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
         else:
@@ -175,10 +185,10 @@ def main():
         print "Error: This script needs to be run on a VSP switch"
         return
 
-    if int(emc_vars["vist"]) &gt; 4094 or int(emc_vars["vist"]) &lt; 2:
+    if int(emc_vars["vist"]) > 4094 or int(emc_vars["vist"]) < 2:
         print "Error: The VLAN Id is out of range"
         return
-    if int(emc_vars["visid"]) &gt; 16000000 or int(emc_vars["visid"]) &lt; 1:
+    if int(emc_vars["visid"]) > 16000000 or int(emc_vars["visid"]) < 1:
         print "Error: The Service Id is out of range"
         return
     if len(emc_vars["vbmac"].split(':')) != 6:
@@ -220,6 +230,10 @@ def main():
     cmds.append("ip address {}".format(emc_vars["localip"]))
     cmds.append("exit")
     cmds.append("virtual-ist peer-ip {} vlan {}".format(emc_vars["peerip"], emc_vars["vist"]))
+    
+    if emc_vars["lacp"] == "yes":
+        cmds.append("lacp smlt-sys-id {}".format(emc_vars["vbmac"]))
+        cmds.append("lacp enable")
     
     if routerISIS:
         cmds.append("router isis enable")
