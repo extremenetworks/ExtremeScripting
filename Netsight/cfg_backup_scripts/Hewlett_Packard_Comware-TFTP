@@ -1,0 +1,47 @@
+-- Use these scripts to manage an HP device
+name="Hewlett Packard 5100 - TFTP"
+desc="Hewlett Packard SSH/TFTP Scripts"
+protocol=TFTP
+--
+-- When logging in, CLI asks -> Press any key to continue
+--    so need to have a return as the first line of the script.
+-- When logging out, 
+-- the y answers the question -> Do you want to log out [y/n]?
+-- the n answers the question -> Do you want to save current configuration [y/n]?    
+-- (this second question doesn't always show, so it is left out for now.  Otherwise an error occurs when it is sent because the session is closed.)  
+--     
+-----BEGIN SCRIPT "Configuration Upload"-----
+delete emc.cfg
+Y
+save flash:/emc.cfg
+Y
+copy flash:/emc.cfg tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+Y
+@receive 20
+quit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+copy %TFTP_URL% flash:/emc.cfg
+Y
+Y
+startup saved-configuration emc.cfg main
+@receive 60
+quit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Firmware Download"-----
+delete flash:/%TARGET_FILE_NAME%
+Y
+copy %TFTP_URL% flash:/
+Y
+@receive 1080
+boot-loader file flash:/%TARGET_FILE_NAME% all main
+Y
+@receive 20
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Reset"-----
+reboot
+Y
+
+Y
+Y
+-----END SCRIPT-----

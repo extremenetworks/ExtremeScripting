@@ -3,12 +3,13 @@
 * [What directory do you put custom device type scripts Inventory Manger?](https://gtacknowledge.extremenetworks.com/articles/Q_A/What-directory-do-you-put-custom-device-type-scripts-Inventory-Manger)
 
 
-# Netsight Scripts
+# Extreme Management Center (XMC) Scripts
 | Script name   | Description   |
 | ------------- |:-------------:|
-|[Ubiquiti EdgeRouter](EdgOS)|Netsight Configuration backups of Ubiquiti EdgeRouter.|
-|[Palo Alto firewalls](Palo_Alto_SCP_Script)|Netsight Configuration backups of Palo Alto firewall.|
-|[Cisco WLC 5500](Cisco_WLC_5500)|Configuration backups of Cisco WLC 5500.|Netsight Configuration backups of Cisco WLC 5500|
-|[Dell Force10](dell-force10)|Netsight Configuration backups of Dell Force10|
-|[FortiGate Firewall](FortiGate)|Netsight Configuration backups of FortiGate|
-[Juniper EX](juniper_EX)|Netsight Configuration backups of Juniper EX|
+|[Ubiquiti EdgeRouter](EdgOS)|XMC Configuration backups of Ubiquiti EdgeRouter.|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script)|XMC Configuration backups of Palo Alto firewall.|
+|[Cisco WLC 5500](Cisco_WLC_5500)|Configuration backups of Cisco WLC 5500.|XMC Configuration backups of Cisco WLC 5500|
+|[Dell Force10](dell-force10)|XMC Configuration backups of Dell Force10|
+|[FortiGate Firewall](FortiGate)|XMC Configuration backups of FortiGate|
+[Juniper EX](juniper_EX)|XMC Configuration backups of Juniper EX|
+[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups of Comware|
