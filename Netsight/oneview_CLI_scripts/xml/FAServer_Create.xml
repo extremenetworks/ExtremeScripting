@@ -163,13 +163,12 @@ def getVlanMember(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
+        
         if len(parts) > 1:
-            vid_dict["vid"] = parts[0]
-            vid_dict["portlist"] = parts[1]
-        else:
-            vid_dict["vid"] = parts[0]
-
-        myList.append(vid_dict) 
+            if "/" not in parts[0]:
+                vid_dict["vid"] = parts[0]
+                vid_dict["portlist"] = parts[1]
+                myList.append(vid_dict) 
         
     return myList
 
@@ -215,14 +214,15 @@ def CreateFAList():
     for line in lines:
         fa_dict = {}
         parts = line.split()
-        if len(parts) > 1:
-            if parts[0].startswith("Port"):
-                fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
-            else:
-                fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
-            fa_dict["status"] = parts[1]
-            fa_dict["auth"] = parts[4]
-        myList.append(fa_dict) 
+        if parts == []:
+            continue
+        if parts[0].startswith("Port"):
+            fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
+        else:
+            fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
+        fa_dict["status"] = parts[1]
+        fa_dict["auth"] = parts[4]
+        myList.append(fa_dict)
         
     return myList
 
@@ -230,6 +230,9 @@ def CheckFAonPort(interface):
     fa = CreateFAList()
     if fa is None:
         return None
+
+    if fa == []:
+        return True
     
     for entry in fa:
         if entry["intf"] == interface:
@@ -253,7 +256,7 @@ def CreateMLTList():
         mlt_dict = {}
         parts = line.split()
         if parts == []:
-            return myList
+            continue
         mlt_dict["mltid"] = parts[0]
         mlt_dict["portmember"] = parts[6]
         mlt_dict["mltcurrent"] = parts[5]

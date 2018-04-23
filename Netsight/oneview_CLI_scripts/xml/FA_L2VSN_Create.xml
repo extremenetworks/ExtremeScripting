@@ -87,6 +87,8 @@ def getVidVsn(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
+        if parts == []:
+            continue
         if len(parts) > 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]

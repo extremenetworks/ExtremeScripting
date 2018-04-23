@@ -121,6 +121,8 @@ def getVidVsn(inputString):
     for line in lines:
         vid_dict = {}
         parts = line.split()
+        if parts == []:
+            continue
         if len(parts) > 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
@@ -154,14 +156,15 @@ def CreateFAList():
     for line in lines:
         fa_dict = {}
         parts = line.split()
-        if len(parts) > 1:
-            if parts[0].startswith("Port"):
-                fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
-            else:
-                fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
-            fa_dict["status"] = parts[1]
-            fa_dict["auth"] = parts[4]
-        myList.append(fa_dict) 
+        if parts == []:
+            continue
+        if parts[0].startswith("Port"):
+            fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
+        else:
+            fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
+        fa_dict["status"] = parts[1]
+        fa_dict["auth"] = parts[4]
+        myList.append(fa_dict)
         
     return myList
 
@@ -170,6 +173,9 @@ def CheckFAonPort(interface):
     if fa is None:
         return None
     
+    if fa == []:
+        return True
+        
     for entry in fa:
         if entry["intf"] == interface:
             if entry["status"] == "enabled":
