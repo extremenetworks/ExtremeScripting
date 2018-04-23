@@ -1,0 +1,42 @@
+    <Rule name="H3C">
+            <ShellPrompt>
+                <defaultPrompt>
+                    <prompt>[\>\]]$</prompt>
+                </defaultPrompt>
+            </ShellPrompt>
+            <LoginPrompt>
+              <defaultPrompt>
+                <prompt>(?i)login:</prompt>
+              </defaultPrompt>
+            </LoginPrompt>
+            <PasswordPrompt>
+               <defaultPrompt>
+                 <prompt>(?i)^(password):</prompt>
+               </defaultPrompt>
+            </PasswordPrompt>
+            <CommandPrompt command=".*">
+                <defaultPrompt>
+                    <prompt>Press|to continue or|to quit:</prompt>
+                    <reply>y</reply>
+                </defaultPrompt>
+                <defaultPrompt>
+                    <prompt>---- More ----</prompt>
+                    <reply> </reply>
+                </defaultPrompt>
+                <defaultPrompt>
+                    <prompt>.*Are you sure\?.*</prompt>
+                    <reply>y</reply>
+                </defaultPrompt>
+                <defaultPrompt>
+                    <prompt>.*press the enter key.*</prompt>
+                    <reply></reply>
+                </defaultPrompt>
+                <defaultPrompt>
+                    <prompt>.*overwrite\?.*</prompt>
+                    <reply>y</reply>
+                </defaultPrompt>
+                <errors>
+                    <messagePattern>$ERROR</messagePattern>
+                </errors>
+            </CommandPrompt>
+    </Rule>
