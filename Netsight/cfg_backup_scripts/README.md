@@ -12,4 +12,4 @@
 |[Dell Force10](dell-force10)|XMC Configuration backups of Dell Force10|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backups of FortiGate|
 [Juniper EX](juniper_EX)|XMC Configuration backups of Juniper EX|
-[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups of Comware|
+[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups/restore & firmware upgrade of Comware|
