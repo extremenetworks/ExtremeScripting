@@ -8,7 +8,8 @@
 
 ## Prompt handling
 Some devices do answer with unexpected prompt. For such devices the appdata/scripting/CLIRules.xml needs to be updated (no reboot is required). The CLIrules.xml "Rule name" must match the 3rd party device profile.
-[HPE Comware / Comware](xml/H3C_myCLIRules.xml)
+
+[HPE Comware/H3C](xml/H3C_myCLIRules.xml)
 
 # Extreme Management Center version 8.0+ Scripts
 | Script name   | Description   | Type   |
@@ -19,6 +20,7 @@ Some devices do answer with unexpected prompt. For such devices the appdata/scri
 |[Create EAPS control VLAN](xml/Create_EAPS_control_VLAN.xml)| If the vlan does not exist it does create the vlan, it add the vlan to the EAPS as control. Control vlan is configured as tagged on all EAPS ring ports.|TCL|
 |[Create EAPS protected VLAN](xml/Create_EAPS_protected_VLAN.xml)|Add vlan to the EAPS as protected. If the vlan does not exits then it creates it. Selected ports are added as tagged or untagged. If there is only one EAPS ring then you do not need to specify the EAPS ring name. Ring ports are added as tagged automatically.|TCL|
 |[Authentication EXOS](xml/Authentication_EXOS.xml)|Script does create NetLogin vlan (if does not exist) configure NetLogin on ports and Radius on EXOS devices.|TCL|
+|[(almost) Zero Touch Fabric](xml/aZTF.xml)|It finds automatically the NNI ports, Creates & configures the Fabric dynamically, No user input necessary, all automated, Takes ~1mn to execute (30’’ are spent for LLDP).|Python|
 |[Automatic Fabric Creation](xml/FC_Config.xml)|Select group of switches with the same NNI portlist, specify some basic parameters.|Python|
 |[Configuration of a Cluster (vIST)](xml/Fabric_Cluster_Create.xml)|Cluster is created. You need their system-id before executing the script. Script must be executed one unit at a time. This script will disable/enable ISIS = it can disrupt traffic!|Python|
 |[Configuring FA Server on BEBs](xml/FAServer_Create.xml)|FA Server configuration|Python|

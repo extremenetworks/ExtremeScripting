@@ -31,7 +31,7 @@ Once the fabric is setup, non NNI ports are in vlan 1 in shutdown state, but the
 '''
 
 #@MetaDataStart
-# @DetailDescriptionStart
+#@DetailDescriptionStart
 ######################################################################################
 # 
 # This script setups Fabric Connect for VOSS. It assumes reachabilty to each 
@@ -48,7 +48,8 @@ Once the fabric is setup, non NNI ports are in vlan 1 in shutdown state, but the
 # Once the fabric is setup, non NNI ports are in vlan 1 in shutdown state, but the inband mgmt port on VSP4K.
 #
 #######################################################################################
-# @DetailDescriptionEnd
+#@DetailDescriptionEnd
+
 #@VariableFieldLabel (description = "BVLAN 1",
 #                     type = string,
 #                     required = yes,
@@ -85,8 +86,8 @@ LLDP_WAIT = 30
 def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
-        pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) &gt; int(pivotVersion):
+        pivotVersion = ''.join("8.1.2".split('.'))
+        if int(version) == int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
@@ -140,7 +141,7 @@ def findLLDPneighbors(mgmtPort):
     lldp_neighbor = []
     for line in lines:
         parts = line.split()
-        if len(parts) &gt; 6:
+        if len(parts) > 6:
             if parts[6].startswith("VSP") and parts[0] != mgmtPort:
                 lldp_neighbor.append(parts[0])
     
@@ -154,11 +155,11 @@ def createPortListInfo(inputString):
     for line in lines:
         ports_dict = {}
         parts = line.split()
-        if len(parts) &gt;= 6:
+        if len(parts) >= 6:
             ports_dict["port"] = parts[0]
             ports_dict["tag"] = parts[1]
             ports_dict["defaultvid"] = parts[4]
-            if len(parts[5].split(',')) &gt; 1:
+            if len(parts[5].split(',')) > 1:
                 ports_dict["vids"] = parts[5].split(',')
             else:
                 ports_dict["vids"] = parts[5]
@@ -197,7 +198,7 @@ def findMgmtVlan(myList, ip):
     
     for line in lines:
         parts = line.split()
-        if len(parts) &gt;= 6:
+        if len(parts) >= 6:
             if parts[2] == ip:
                 intf = parts[5]
         
@@ -231,7 +232,7 @@ def inbandMgmt(myList, active_port):
     
     if aport + 1 == lport:
         list1 = first_port + "-" + "1/" + str(aport - 1) + "," + "1/" + str(aport + 1)
-    elif aport + 1 &gt; lport:
+    elif aport + 1 > lport:
         list1 = first_port + "-" + "1/" + str(lport - 1)
     elif aport - 1 == fport:
         list1 = first_port + "," + "1/" + str(aport + 1) + "-" + last_port
@@ -260,14 +261,14 @@ def findNNIports():
     if VSP4K:
         mgmtPort, mgmtVlan = findMgmtVlan(myList, emc_vars["deviceIP"])
         # we accept a single mgmt port
-        if len(mgmtPort.split(',')) &gt; 1 or len(mgmtPort.split('-')) &gt; 1:
+        if len(mgmtPort.split(',')) > 1 or len(mgmtPort.split('-')) > 1:
             return None
         # check if all the ports are in default setting but the inband mgmt - we accept to find vlan 0 if the ports have been moved by habits
         # note: they will be back into vlan 1 after completion - but in shutdown state
         for row in myList:
             if row.get("port") == mgmtPort:
                 continue
-            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0", "1", mgmtVlan] or len(row.get("vids")) &gt; 1:
+            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0", "1", mgmtVlan] or len(row.get("vids")) > 1:
                 return None
             if len(row.get("vids")) == 1:
                 if row.get("vids") not in ["0", "1", mgmtVlan]:
@@ -276,7 +277,7 @@ def findNNIports():
         # check if all the ports are in default setting - we accept to find vlan 0 if the ports have been moved by habits
         # note: they will be back into vlan 1 after completion - but in shutdown state
         for row in myList:
-            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0","1"] or len(row.get("vids")) &gt; 1:
+            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0","1"] or len(row.get("vids")) > 1:
                 return None
             if len(row.get("vids")) == 1:
                 if row.get("vids") not in ["0", "1"]:
@@ -328,10 +329,10 @@ def main():
         print "Error: This script needs to run on VOSS"
         return
         
-    if int(emc_vars["bvlan1"]) &gt; 4094 or int(emc_vars["bvlan1"]) &lt; 2:
+    if int(emc_vars["bvlan1"]) > 4094 or int(emc_vars["bvlan1"]) < 2:
         print "Error: BVLAN 1 Id is out of range"
         return
-    if int(emc_vars["bvlan2"]) &gt; 4094 or int(emc_vars["bvlan2"]) &lt; 2:
+    if int(emc_vars["bvlan2"]) > 4094 or int(emc_vars["bvlan2"]) < 2:
         print "Error: BVLAN 2 Id is out of range"
         return
     if int(emc_vars["bvlan1"]) == int(emc_vars["bvlan2"]):

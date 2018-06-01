@@ -8,8 +8,8 @@
 # Community maintained CLI Scripting Library
 #
 # Script        : Configure vlan on ports - tagged or untagged based on request
-# Revision      : 1.1
-# Last updated  : 09.12.2017
+# Revision      : 1.2
+# Last updated  : 23.04.2018
 # Purpose       : Configure PVID on selected ports
 # Devices	    : Cisco Catalyst 12.2, XOS 15.7,
 # Devices       : XOS 21.3, XOS 22.2, XOS 15.3, 

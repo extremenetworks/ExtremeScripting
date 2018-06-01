@@ -92,8 +92,8 @@ SPBMID = "1"
 def getOutputOnly(inputStrings):
     try:
         version = ''.join(emc_vars["serverVersion"].split('.')[:3])
-        pivotVersion = ''.join("8.1.1".split('.'))
-        if int(version) > int(pivotVersion):
+        pivotVersion = ''.join("8.1.2".split('.'))
+        if int(version) == int(pivotVersion):
             lines = inputStrings.splitlines()[1:]
         else:
             lines = inputStrings.splitlines()[1:-1]
