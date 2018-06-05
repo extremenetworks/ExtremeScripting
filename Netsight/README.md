@@ -1,4 +1,4 @@
-# Netsight Scripting
+# Extreme Management Center (Netsight) Scripting
 Scripts and Utilities for working with Extreme Management Center.
 
 # Categories

@@ -7,9 +7,11 @@
 * Execute the script = In the Extreme Management Center -> Network -> Devices -> choose group -> select more devices -> Right click -> Tasks -> ...
 
 ## Prompt handling
-Some devices do answer with unexpected prompt. For such devices the appdata/scripting/CLIRules.xml needs to be updated (no reboot is required). The CLIrules.xml "Rule name" must match the 3rd party device profile.
+Some devices do answer with unexpected prompt. For such devices you can create appdata/scripting/myCLIRules.xml (no reboot is required). The myCLIRules.xml "Rule name" must match the Vendor Profiles -> CLI Rules File Name variable. Vendor Profiles are inherited, you can configure the variable for whole family.
 
-[HPE Comware/H3C](xml/H3C_myCLIRules.xml)
+| Device        | myCLIRules.xml | CLI Rules File Name |
+|:-------------:| -------------- | ------------------- |
+|HPE Comware/H3C|[myCLIRules.xml](xml/comware/myCLIRules.xml)|[comware](xml/comware/VendorProfilesComware.png?raw=true)|
 
 # Extreme Management Center version 8.0+ Scripts
 | Script name   | Description   | Type   |
@@ -27,4 +29,8 @@ Some devices do answer with unexpected prompt. For such devices the appdata/scri
 |[L2VSN between FA Proxy](xml/FA_L2VSN_Create.xml)|Provisioning a L2VSN between FA Proxy|Python|
 |[L2VSN between BEBs](xml/L2VSN.xml)|Provisioning a L2VSN between BEBs. It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary checks (FA enabled on it or not) but it doesn't create the MLT itself.|Python|
 
+# Support
+_The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
+
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
 >Be Extreme

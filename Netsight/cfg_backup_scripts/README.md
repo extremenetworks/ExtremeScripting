@@ -11,5 +11,11 @@
 |[Cisco WLC 5500](Cisco_WLC_5500)|Configuration backups of Cisco WLC 5500.|XMC Configuration backups of Cisco WLC 5500|
 |[Dell Force10](dell-force10)|XMC Configuration backups of Dell Force10|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backups of FortiGate|
-[Juniper EX](juniper_EX)|XMC Configuration backups of Juniper EX|
-[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups/restore & firmware upgrade of Comware|
+|[Juniper EX](juniper_EX)|XMC Configuration backups of Juniper EX|
+|[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups/restore & firmware upgrade of Comware|
+
+# Support
+_The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
+
+Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
+>Be Extreme

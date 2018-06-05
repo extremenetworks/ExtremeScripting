@@ -1,7 +1,8 @@
-    <Rule name="H3C">
+<CLIRules>
+    <Rule name="comware">
             <ShellPrompt>
                 <defaultPrompt>
-                    <prompt>[\>\]]$</prompt>
+                  <prompt>[>\]]$</prompt>
                 </defaultPrompt>
             </ShellPrompt>
             <LoginPrompt>
@@ -40,3 +41,4 @@
                 </errors>
             </CommandPrompt>
     </Rule>
+</CLIRules>
