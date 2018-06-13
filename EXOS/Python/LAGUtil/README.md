@@ -5,7 +5,7 @@ This script shows total utilization per loadshare/LAG, it runs on the switch.
 This script shows the combined utilization for all ports in each loadshare/LAG. 
 
 ### Files
-* [The Core Python Script - LAGUtil.py](LAGUtil.py)
+* [LAGUtil.py](LAGUtil.py)
 * [README.md](README.md)
 
 ### Requirements
