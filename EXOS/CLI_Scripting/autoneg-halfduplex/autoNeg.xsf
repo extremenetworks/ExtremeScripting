@@ -1,0 +1,31 @@
+## Set ready ports to 10M
+
+enable cli scripting
+disable clipaging
+set var CLI.OUT " "
+show port configuration no-refresh | include "R "
+set var PortTable $TCL(split ${CLI.OUT} "\n")
+set var looptime $TCL(llength $PortTable)
+WHILE ($looptime > -1) DO
+set var PCEntry $TCL(lindex $PortTable $looptime)
+set var PCPortState $TCL(regexp -inline {[0-9]{0,2}} $PCEntry)
+configure port $PCPortState auto off speed 10 duplex full
+set var looptime $TCL(expr {$looptime - 1})
+ENDWHILE
+set var temp $TCL(after [expr 30*1000])
+
+## Set still ready ports back to auto
+
+show port configuration no-refresh | include "R "
+set var PortTable $TCL(split ${CLI.OUT} "\n")
+set var looptime $TCL(llength $PortTable)
+WHILE ($looptime > -1) DO
+	set var PCEntry $TCL(lindex $PortTable $looptime)
+	set var PCPortState $TCL(regexp -inline {[0-9]{0,2}} $PCEntry)
+	configure port $PCPortState auto on
+	set var looptime $TCL(expr {$looptime - 1})
+ENDWHILE
+enable clipaging
+disable cli scripting
+
+## End of the script
