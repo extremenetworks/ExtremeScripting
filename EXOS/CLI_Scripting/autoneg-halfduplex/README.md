@@ -2,8 +2,8 @@
 
 ## Description
 This script will iterate through all ports on an ExtremeXOS(TM) switch and check if the port is in a Ready state.
-If so, the script will set the port to 10mb full duplex with auto off.  The script will wait for a period of time and then re-enable auto negotation for all ports still in ready state.
-This is to mitigate implementations for G2 models prior to hardware changes that support half duplex, so that customers do not have to track down and configure excessive amounts of ports to get legacy 10mb devices to work.
+If so, the script will set the port to 10mb full duplex with auto off.  The script will wait for a period of time and then re-enable auto negotiation for all ports still in ready state.
+This is to mitigate implementations for G2 models prior to hardware changes that support half duplex, so that you do not have to track down and configure excessive amounts of ports to get legacy 10mb devices to work.
 
 ###Files
 * [README.md](README.md)
