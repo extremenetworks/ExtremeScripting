@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="FA L2VSN Create">
-    <version>0</version>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1528991254216</cacheDate>
+    <category>,Extreme Fabric Connect,</category>
     <comments>configure L2VSN between FA Proxy devices (BOSS and/or EXOS)</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
@@ -40,7 +42,7 @@ switches running EXOS 22.4 or higher.
 #######################################################################################
 #@DetailDescriptionEnd
 
-#@VariableFieldLabel (description = "VLAN Id <1 - 4094>",
+#@VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -48,7 +50,7 @@ switches running EXOS 22.4 or higher.
 #                     value = "1"
 #                     )
 
-#@VariableFieldLabel (description = "SERVICE Id <1 - 16 000 000>",
+#@VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no
@@ -89,7 +91,7 @@ def getVidVsn(inputString):
         parts = line.split()
         if parts == []:
             continue
-        if len(parts) > 1:
+        if len(parts) &gt; 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
         else:
@@ -138,10 +140,10 @@ def main():
     except:
         ports = None
 
-    if int(emc_vars["vid"]) > 4094 or int(emc_vars["vid"]) < 2:
+    if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
         print "Error: The VLAN Id is out of range"
         return
-    if int(emc_vars["isid"]) > 16000000 or int(emc_vars["isid"]) < 1:
+    if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
         print "Error: The Service Id is out of range"
         return
         
@@ -150,7 +152,7 @@ def main():
     if emc_vars["isExos"] == "true":
         minExos = ''.join("22.4".split('.'))
         version = ''.join(emc_vars["deviceSoftwareVer"].split('.')[:2])
-        if int(minExos) > int(version):
+        if int(minExos) &gt; int(version):
             print "Error: EXOS version must be 22.4 or greater"
             return
             
@@ -241,24 +243,26 @@ def main():
         print "You need to run this script either on an EXOS or BOSS switch"
     
 main()</content>
-    <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>true</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
-    <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
     <creationDate>1523454209354</creationDate>
-    <category>,Extreme Fabric Connect,</category>
-    <vendor></vendor>
-    <scriptType>Python</scriptType>
-    <roles>,NetSight Administrator,</roles>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,Groups,</contexts>
+    <id>164</id>
+    <lastUpdateDate>1528991254195</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1523454684606</lastUpdateDate>
-    <contexts>,Device,Groups,Site,</contexts>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FA_L2VSN_Create.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FA_L2VSN_Create.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 

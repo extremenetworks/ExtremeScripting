@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="FA Server Create">
-    <version>0</version>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1528991181659</cacheDate>
+    <category>,Extreme Fabric Connect,</category>
     <comments>configure FA Server on BEBs (VOSS)</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
@@ -52,7 +54,7 @@ Several checks are performed to try to avoid mistakes.
 #                     value = "no"
 #                     )
 
-#@VariableFieldLabel (description = "MLT Id <1 - 256>",
+#@VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -164,7 +166,7 @@ def getVlanMember(inputString):
         vid_dict = {}
         parts = line.split()
         
-        if len(parts) > 1:
+        if len(parts) &gt; 1:
             if "/" not in parts[0]:
                 vid_dict["vid"] = parts[0]
                 vid_dict["portlist"] = parts[1]
@@ -283,10 +285,10 @@ def main():
         return
 
     if emc_vars["mgmt"] == "yes":
-        if int(emc_vars["vid"]) > 4094 or int(emc_vars["vid"]) < 2:
+        if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
             print "Error: Mgmt VLAN Id is out of range"
             return
-        if int(emc_vars["isid"]) > 16000000 or int(emc_vars["isid"]) < 1:
+        if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
             print "Error: Mgmt Service Id is out of range"
             return
         
@@ -358,24 +360,26 @@ def main():
         return
         
 main()</content>
-    <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>true</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
-    <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
     <creationDate>1523454373255</creationDate>
-    <category>,Extreme Fabric Connect,</category>
-    <vendor></vendor>
-    <scriptType>Python</scriptType>
-    <roles>,NetSight Administrator,</roles>
-    <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1523454950434</lastUpdateDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
+    <id>162</id>
+    <lastUpdateDate>1528991181615</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FA_Server_Create.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FA_Server_Create.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="FC Config">
-    <version>0</version>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1528991218940</cacheDate>
+    <category>,Extreme Fabric Connect,</category>
     <comments>configure Fabric Connect (VOSS)</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
@@ -139,7 +141,7 @@ def FabricConnect():
     spbmlines = output.splitlines()[:-1]
     spbminst = int(spbmlines[-1].split(": ")[1])
     
-    if spbminst > 0:
+    if spbminst &gt; 0:
         # if we do not have the same SPBM instance Id we return False and stop the script
         if spbminst != int(SPBMID):
             return False
@@ -156,7 +158,7 @@ def FabricConnect():
         # answer is no. We return False and stop the script
             return False
         
-        if len(spbminfo) > 2:
+        if len(spbminfo) &gt; 2:
             bvids = spbminfo[1].split('-')
             primary = spbminfo[2]
             
@@ -202,10 +204,10 @@ def main():
         print "Error: This script needs to run on VOSS"
         return
         
-    if int(emc_vars["bvlan1"]) > 4094 or int(emc_vars["bvlan1"]) < 2:
+    if int(emc_vars["bvlan1"]) &gt; 4094 or int(emc_vars["bvlan1"]) &lt; 2:
         print "Error: BVLAN 1 Id is out of range"
         return
-    if int(emc_vars["bvlan2"]) > 4094 or int(emc_vars["bvlan2"]) < 2:
+    if int(emc_vars["bvlan2"]) &gt; 4094 or int(emc_vars["bvlan2"]) &lt; 2:
         print "Error: BVLAN 2 Id is out of range"
         return
     if int(emc_vars["bvlan1"]) == int(emc_vars["bvlan2"]):
@@ -258,24 +260,26 @@ def main():
 
         
 main()</content>
-    <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>true</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
-    <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
     <creationDate>1523453954150</creationDate>
-    <category>,Extreme Fabric Connect,</category>
-    <vendor></vendor>
-    <scriptType>Python</scriptType>
-    <roles>,NetSight Administrator,</roles>
-    <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1523454608052</lastUpdateDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
+    <id>163</id>
+    <lastUpdateDate>1528991218920</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FC_Config.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FC_Config.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 

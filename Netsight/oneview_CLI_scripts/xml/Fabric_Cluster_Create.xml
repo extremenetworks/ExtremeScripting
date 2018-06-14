@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="Fabric Cluster Create">
-    <version>0</version>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1528991630805</cacheDate>
+    <category>,Extreme Fabric Connect,</category>
     <comments>configure cluster (vIST) between 2 BEBs (VOSS)</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
@@ -28,7 +30,7 @@ This script creates a VSP cluster (SMLT) with vIST.
 #######################################################################################
 #@DetailDescriptionEnd
 
-#@VariableFieldLabel (description = "vIST VLAN Id <1 - 4094>",
+#@VariableFieldLabel (description = "vIST VLAN Id &lt;1 - 4094&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -36,7 +38,7 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     value = "4000"
 #                     )
 
-#@VariableFieldLabel (description = "vIST Service Id <1 - 16000000>",
+#@VariableFieldLabel (description = "vIST Service Id &lt;1 - 16000000&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -118,7 +120,7 @@ def getVidVsn(inputString):
         parts = line.split()
         if parts == []:
             continue
-        if len(parts) > 1:
+        if len(parts) &gt; 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
         else:
@@ -187,10 +189,10 @@ def main():
         print "Error: This script needs to be run on a VSP switch"
         return
 
-    if int(emc_vars["vist"]) > 4094 or int(emc_vars["vist"]) < 2:
+    if int(emc_vars["vist"]) &gt; 4094 or int(emc_vars["vist"]) &lt; 2:
         print "Error: The VLAN Id is out of range"
         return
-    if int(emc_vars["visid"]) > 16000000 or int(emc_vars["visid"]) < 1:
+    if int(emc_vars["visid"]) &gt; 16000000 or int(emc_vars["visid"]) &lt; 1:
         print "Error: The Service Id is out of range"
         return
     if len(emc_vars["vbmac"].split(':')) != 6:
@@ -246,24 +248,26 @@ def main():
         
         
 main()</content>
+    <creationDate>1528991630785</creationDate>
     <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>true</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
     <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
-    <creationDate>1523453667032</creationDate>
-    <category>,Extreme Fabric Connect,</category>
-    <vendor></vendor>
-    <scriptType>Python</scriptType>
-    <roles>,NetSight Administrator,</roles>
-    <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1523455009759</lastUpdateDate>
+    <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
+    <id>165</id>
+    <lastUpdateDate>1528991630785</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Cluster_Create.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Cluster_Create.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 

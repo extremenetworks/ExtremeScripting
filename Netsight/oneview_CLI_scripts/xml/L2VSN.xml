@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="L2VSN">
-    <version>0</version>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1528991149066</cacheDate>
+    <category>,Extreme Fabric Connect,</category>
     <comments>configure L2VSN between BEBs.</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
@@ -43,7 +45,7 @@ for the single BEBs, providing the correct UNI port.
 #@DetailDescriptionEnd
 
 #@SectionStart (description = "Service Definition")
-#@VariableFieldLabel (description = "VLAN Id <1 - 4094>",
+#@VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -51,7 +53,7 @@ for the single BEBs, providing the correct UNI port.
 #                     value = "1"
 #                     )
 
-#@VariableFieldLabel (description = "SERVICE Id <1 - 16 000 000>",
+#@VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -80,7 +82,7 @@ for the single BEBs, providing the correct UNI port.
 #                     value = "no"
 #                     )
 
-#@VariableFieldLabel (description = "MLT Id <1 - 256>",
+#@VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -123,7 +125,7 @@ def getVidVsn(inputString):
         parts = line.split()
         if parts == []:
             continue
-        if len(parts) > 1:
+        if len(parts) &gt; 1:
             vid_dict["vid"] = parts[0]
             vid_dict["isid"] = parts[-1]
         else:
@@ -185,10 +187,10 @@ def CheckFAonPort(interface):
 def main():
     createVlan = True
 
-    if int(emc_vars["vid"]) > 4094 or int(emc_vars["vid"]) < 2:
+    if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
         print "Error: The VLAN Id is out of range"
         return
-    if int(emc_vars["isid"]) > 16000000 or int(emc_vars["isid"]) < 1:
+    if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
         print "Error: The Service Id is out of range"
         return
         
@@ -259,24 +261,26 @@ def main():
 
         
 main()</content>
-    <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>true</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
-    <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
     <creationDate>1523453025358</creationDate>
-    <category>,Extreme Fabric Connect,</category>
-    <vendor></vendor>
-    <scriptType>Python</scriptType>
-    <roles>,NetSight Administrator,</roles>
-    <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1523454740932</lastUpdateDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
+    <id>161</id>
+    <lastUpdateDate>1528991149046</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/L2VSN.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/L2VSN.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 

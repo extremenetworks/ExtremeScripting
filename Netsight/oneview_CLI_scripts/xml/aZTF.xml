@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="aZTF">
-    <version>0</version>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1528991013544</cacheDate>
+    <category>,Extreme Fabric Connect,</category>
     <comments>(almost) Zero Touch Fabric, dynamically creates a Fabric and configures it.</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
@@ -141,7 +143,7 @@ def findLLDPneighbors(mgmtPort):
     lldp_neighbor = []
     for line in lines:
         parts = line.split()
-        if len(parts) > 6:
+        if len(parts) &gt; 6:
             if parts[6].startswith("VSP") and parts[0] != mgmtPort:
                 lldp_neighbor.append(parts[0])
     
@@ -155,11 +157,11 @@ def createPortListInfo(inputString):
     for line in lines:
         ports_dict = {}
         parts = line.split()
-        if len(parts) >= 6:
+        if len(parts) &gt;= 6:
             ports_dict["port"] = parts[0]
             ports_dict["tag"] = parts[1]
             ports_dict["defaultvid"] = parts[4]
-            if len(parts[5].split(',')) > 1:
+            if len(parts[5].split(',')) &gt; 1:
                 ports_dict["vids"] = parts[5].split(',')
             else:
                 ports_dict["vids"] = parts[5]
@@ -198,7 +200,7 @@ def findMgmtVlan(myList, ip):
     
     for line in lines:
         parts = line.split()
-        if len(parts) >= 6:
+        if len(parts) &gt;= 6:
             if parts[2] == ip:
                 intf = parts[5]
         
@@ -232,7 +234,7 @@ def inbandMgmt(myList, active_port):
     
     if aport + 1 == lport:
         list1 = first_port + "-" + "1/" + str(aport - 1) + "," + "1/" + str(aport + 1)
-    elif aport + 1 > lport:
+    elif aport + 1 &gt; lport:
         list1 = first_port + "-" + "1/" + str(lport - 1)
     elif aport - 1 == fport:
         list1 = first_port + "," + "1/" + str(aport + 1) + "-" + last_port
@@ -261,14 +263,14 @@ def findNNIports():
     if VSP4K:
         mgmtPort, mgmtVlan = findMgmtVlan(myList, emc_vars["deviceIP"])
         # we accept a single mgmt port
-        if len(mgmtPort.split(',')) > 1 or len(mgmtPort.split('-')) > 1:
+        if len(mgmtPort.split(',')) &gt; 1 or len(mgmtPort.split('-')) &gt; 1:
             return None
         # check if all the ports are in default setting but the inband mgmt - we accept to find vlan 0 if the ports have been moved by habits
         # note: they will be back into vlan 1 after completion - but in shutdown state
         for row in myList:
             if row.get("port") == mgmtPort:
                 continue
-            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0", "1", mgmtVlan] or len(row.get("vids")) > 1:
+            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0", "1", mgmtVlan] or len(row.get("vids")) &gt; 1:
                 return None
             if len(row.get("vids")) == 1:
                 if row.get("vids") not in ["0", "1", mgmtVlan]:
@@ -277,7 +279,7 @@ def findNNIports():
         # check if all the ports are in default setting - we accept to find vlan 0 if the ports have been moved by habits
         # note: they will be back into vlan 1 after completion - but in shutdown state
         for row in myList:
-            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0","1"] or len(row.get("vids")) > 1:
+            if row.get("tag") != "disable" or row.get("defaultvid") not in ["0","1"] or len(row.get("vids")) &gt; 1:
                 return None
             if len(row.get("vids")) == 1:
                 if row.get("vids") not in ["0", "1"]:
@@ -329,10 +331,10 @@ def main():
         print "Error: This script needs to run on VOSS"
         return
         
-    if int(emc_vars["bvlan1"]) > 4094 or int(emc_vars["bvlan1"]) < 2:
+    if int(emc_vars["bvlan1"]) &gt; 4094 or int(emc_vars["bvlan1"]) &lt; 2:
         print "Error: BVLAN 1 Id is out of range"
         return
-    if int(emc_vars["bvlan2"]) > 4094 or int(emc_vars["bvlan2"]) < 2:
+    if int(emc_vars["bvlan2"]) &gt; 4094 or int(emc_vars["bvlan2"]) &lt; 2:
         print "Error: BVLAN 2 Id is out of range"
         return
     if int(emc_vars["bvlan1"]) == int(emc_vars["bvlan2"]):
@@ -381,24 +383,26 @@ def main():
 
         
 main()</content>
-    <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>true</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
-    <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
     <creationDate>1523452389536</creationDate>
-    <category>,Extreme Fabric Connect,</category>
-    <vendor></vendor>
-    <scriptType>Python</scriptType>
-    <roles>,NetSight Administrator,</roles>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,Groups,</contexts>
+    <id>159</id>
+    <lastUpdateDate>1528991013523</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1523454895611</lastUpdateDate>
-    <contexts>,Device,Groups,Site,</contexts>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/aZTF.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/aZTF.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 
