@@ -13,6 +13,7 @@ This does not ensure that the tagging on vlans matches across MLAG peers.
 
 ### Files
 * [mlag_config_check.py](mlag_config_check.py)
+* [mlag_chk_v1.lst](mlag_chk_v1.lst) - This file can be downloaded to the switch using the ```download url <url> <vr>``` command.
 * [README.md](README.md)
 
 ### Requirements
