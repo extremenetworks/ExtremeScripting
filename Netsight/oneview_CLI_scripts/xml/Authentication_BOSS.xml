@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Authentication BOSS">
+    <version>0</version>
+    <comments>Script will configure authentication and Radius on BOSS devices on ports</comments>
+    <content># @METADATASTART
+#@DetailDescriptionStart
+################################################################################
+# Community maintained CLI Scripting Library
+#
+# Script        : Configure RADIUS, configure MultiHost authentication
+# Revision      : 1.0
+# Last updated  : 12.6.2018
+# Purpose       : On selected ports will enable authentication
+# Devices	    : BOSS v7.5.0.007, v7.4.0.215
+#
+# Note:  This script does configure Authentication on ports.
+################################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "Basic script for AAA assignment. Please see Script View tab for details."
+
+# @SectionStart (description = Radius server configuration)
+
+# @VariableFieldLabel (description = "Radius Server 1 (optional)",
+#    type       = String,
+#    scope      = global)
+set var Radius1 127.0.0.1
+
+# @VariableFieldLabel (description = "Radius Server 2 (optional)",
+#    type       = String,
+#    scope      = global)
+set var Radius2 ""
+
+# @VariableFieldLabel (description = "Radius Shared Secret")
+set var SharedSecret ETS_TAG_SHARED_SECRET
+
+# @VariableFieldLabel (description = "Realm", validValues = [Network, Mgmt, Both])
+set var Realm Network
+
+# @VariableFieldLabel (description = "Configure Accounting", validValues = [Yes, No])
+set var Accounting Yes
+
+# @SectionEnd
+
+# @SectionStart (description = Authentication configuration)
+
+# @VariableFieldLabel (description = "802.1x or MACauth or Both?", validValues = [Dot1x, MACauth, Both])
+set var AuthType Both
+
+# @VariableFieldLabel (description = "Reauthenentication", validValues = [Yes, No])
+set var Reauthentication Yes
+
+# @VariableFieldLabel (description = "Reauth interval (seconds)")
+set var ReauthInterval 3600
+
+# @VariableFieldLabel (description = "Max end-systems behind port")
+set var MultiAuth 8
+
+# @SectionEnd
+
+# @SectionStart ( description = "Save?.")
+
+# @VariableFieldLabel (description   = "Save the config after?",
+#    type       = String,
+#    scope      = global,
+#    required   = yes,
+#    validValues=[yes,no]
+#    )
+set var SAVECONFIG "yes"
+
+# @SectionEnd
+# @MetaDataEnd
+
+################################################################################
+#    Here starts the magic
+################################################################################
+
+proc BOSSPortAuthConfig {VARportname VARauthtype VARreauthentication VARreauthinterval varMultiAuth} {
+    IF ($VARreauthentication == "Yes") THEN
+        set var REAUTH "on"
+    ELSE
+        set var REAUTH "off"
+    ENDIF
+
+    set bracket [string first ")" $VARportname 0]
+	IF ($bracket != -1) THEN
+	    incr bracket -1
+	    set varPORT [string range $VARportname 0 $bracket] 
+    ELSE
+        set varPORT $VARportname
+    ENDIF
+         
+    IF ($VARauthtype == "MACauth") THEN
+        CLI interface Ethernet ALL
+        CLI eapol multihost port $varPORT allow-non-eap-enable non-eap-mac-max $varMultiAuth radius-non-eap-enable mac-max $varMultiAuth
+        CLI exit
+    ENDIF
+    
+    IF ($VARauthtype == "Dot1x") THEN
+        CLI interface Ethernet ALL
+        CLI eapol port $varPORT status auto
+        CLI eapol multihost port $varPORT eap-protocol-enable mac-max $varMultiAuth
+        IF ($REAUTH == "on") THEN
+            CLI eapol port $varPORT re-authentication enable re-authentication-period $VARreauthinterval
+        ENDIF
+        CLI exit
+    ENDIF
+    
+    IF ($VARauthtype == "Both") THEN
+        CLI interface Ethernet ALL
+        CLI eapol port $varPORT status auto
+        CLI eapol multihost port $varPORT allow-non-eap-enable non-eap-mac-max $varMultiAuth radius-non-eap-enable eap-protocol-enable mac-max $varMultiAuth
+        IF ($REAUTH == "on") THEN
+            CLI eapol port $varPORT re-authentication enable re-authentication-period $VARreauthinterval
+        ENDIF
+        CLI exit
+    ENDIF
+
+}
+
+################################################################################
+#    Here starts the main procedure
+################################################################################
+
+IF ($family =="ERS Series" ) THEN
+    CLI enable
+    CLI configure terminal
+	
+    IF ($Radius1 != "") THEN
+        puts "### Lets configure primary radius server. ###"
+        CLI radius server host $Radius1 key
+		regexp {.*radius server host key LINE.*} ${CLI.OUT} foundWarning1
+        IF ([info exists foundWarning1]) THEN
+            puts "### Ok the old way. ###"
+            CLI radius server host $Radius1 key $SharedSecret
+            CLI radius dynamic-server client $Radius1 secret $SharedSecret enable
+            regexp {.*NTP client disabled*} ${CLI.OUT} foundWarning4
+            IF ([info exists foundWarning4]) THEN
+                CLI ntp server $serverIP enable
+                CLI ntp
+            ENDIF
+        ELSE
+			CLI $SharedSecret
+			CLI $SharedSecret
+            CLI radius dynamic-server client $Radius1 secret enable
+            CLI $SharedSecret
+            CLI $SharedSecret
+            regexp {.*NTP client disabled*} ${CLI.OUT} foundWarning4
+            IF ([info exists foundWarning4]) THEN
+                CLI ntp server $serverIP enable
+                CLI ntp
+            ENDIF
+        ENDIF
+        IF ($Accounting == "Yes") THEN
+            CLI radius server host $Radius1 acct-enable
+            CLI radius server host used-by eapol acct-enable
+            CLI radius server host used-by non-eapol acct-enable
+        ENDIF
+		IF ($Realm != "Mgmt") THEN
+            CLI radius dynamic-server client $Radius1 process-change-of-auth-requests
+            CLI radius dynamic-server client $Radius1 process-disconnect-requests
+            CLI radius dynamic-server client $Radius1 process-reauthentication-requests
+		ENDIF
+		IF ($Realm != "Network") THEN
+		    CLI cli password telnet radius
+		ENDIF
+    ENDIF
+
+    IF ($Radius2 != "") THEN
+        puts "### Lets configure secondary radius server. ###"
+        CLI radius server host $Radius2 secondary key
+		regexp {.*radius server host key LINE.*} ${CLI.OUT} foundWarning2
+        IF ([info exists foundWarning2]) THEN
+            puts "### Ok the old way. ###"
+            CLI radius server host $Radius2 key $SharedSecret
+            CLI radius dynamic-server client $Radius2 secret $SharedSecret enable
+        ELSE
+			CLI $SharedSecret
+			CLI $SharedSecret
+            CLI radius dynamic-server client $Radius2 secret enable
+            CLI $SharedSecret
+            CLI $SharedSecret
+        ENDIF
+        IF ($Accounting == "Yes") THEN
+            CLI radius server host $Radius2 secondary acct-enable
+        ENDIF
+		IF ($Realm != "Mgmt") THEN
+            CLI radius dynamic-server client $Radius2 process-change-of-auth-requests
+            CLI radius dynamic-server client $Radius2 process-disconnect-requests
+            CLI radius dynamic-server client $Radius2 process-reauthentication-requests
+		ENDIF
+		IF ($Realm != "Network") THEN
+		    CLI cli password telnet radius
+		ENDIF
+    ENDIF
+    
+    if {[catch {
+      set LENGTH [string length $port]
+    } result ]} {
+         puts "### You have not selected any port. ###"
+         set LENGTH 0
+         }
+    IF ($LENGTH &gt; 0) THEN
+		set I 0
+		set COMMA [string first "," $port $I]
+		while {$COMMA != -1 } {
+		 incr COMMA -1
+		 set UNIQUEPORT [string range $port $I $COMMA] 
+		 puts "### Lets configure the port $UNIQUEPORT for $AuthType ###"
+		 BOSSPortAuthConfig $UNIQUEPORT $AuthType $Reauthentication $ReauthInterval $MultiAuth
+		 set I $COMMA
+		 incr I 2
+		 set COMMA [string first "," $port $I]
+		}
+		set UNIQUEPORT [string range $port $I $LENGTH]
+		puts "### Lets configure the port $UNIQUEPORT for $AuthType ###"
+		BOSSPortAuthConfig $UNIQUEPORT $AuthType $Reauthentication $ReauthInterval $MultiAuth
+    ENDIF
+    
+	IF ($Realm != "Mgmt") THEN
+        IF ($AuthType == "Both")THEN
+            puts "### Lets configure both authentications. ###"
+            CLI eapol multihost allow-non-eap-enable
+            CLI eapol multihost radius-non-eap-enable
+            CLI eapol multihost auto-non-eap-mhsa-enable
+            CLI eapol multihost non-eap-use-radius-assigned-vlan
+            CLI eapol multihost non-eap-reauthentication-enable
+            CLI no eapol multihost non-eap-pwd-fmt ip-addr
+            CLI no eapol multihost non-eap-pwd-fmt port-number
+            CLI eapol multihost eap-packet-mode unicast
+            CLI eapol multihost use-radius-assigned-vlan
+            CLI eapol enable
+        ENDIF
+        IF ($AuthType == "MACauth")THEN
+            puts "### Lets configure MACauth. ###"
+            CLI eapol multihost allow-non-eap-enable
+            CLI eapol multihost radius-non-eap-enable
+            CLI eapol multihost auto-non-eap-mhsa-enable
+            CLI eapol multihost non-eap-use-radius-assigned-vlan
+            CLI eapol multihost non-eap-reauthentication-enable
+            CLI no eapol multihost non-eap-pwd-fmt ip-addr
+            CLI no eapol multihost non-eap-pwd-fmt port-number
+        ENDIF
+        IF ($AuthType == "Dot1x")THEN
+            puts "### Lets configure Dot1x. ###"
+            CLI eapol multihost eap-packet-mode unicast
+            CLI eapol multihost use-radius-assigned-vlan
+            CLI eapol multihost eap-protocol-enable
+            CLI eapol enable
+        ENDIF
+    ENDIF
+
+    IF ($SAVECONFIG == "yes" ) THEN
+      puts "### Lets save the config as was requested. ###"
+      CLI save config
+    ENDIF
+ELSE
+    puts $family
+ENDIF
+puts "### Have a nice day! Be Extreme! ###"
+</content>
+    <creator>root</creator>
+    <supprotedGroups></supprotedGroups>
+    <auditLogEnabled></auditLogEnabled>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <devicesRequired>true</devicesRequired>
+    <scriptTimeout>60</scriptTimeout>
+    <defaultCategory></defaultCategory>
+    <scriptOwner></scriptOwner>
+    <rollbackScript></rollbackScript>
+    <postprocessScript></postprocessScript>
+    <miscXMLData></miscXMLData>
+    <creationDate>1512512986642</creationDate>
+    <category>,Access Control,</category>
+    <vendor></vendor>
+    <scriptType>TCL</scriptType>
+    <roles>,NetSight Administrator,</roles>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1528758800824</lastUpdateDate>
+    <contexts>,Port,Device,</contexts>
+</script>
+
