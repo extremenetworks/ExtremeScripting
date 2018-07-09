@@ -91,6 +91,7 @@ def main():
     for line in line_data:
         try:
             f = open(("%s" % newstack), 'a') # opens the file
+            line = line.replace(', ', ',')
             sline = line.split( ) # splits the line into a table
 
             #configure stpd s0 ports bpdu-restrict enable 10 recovery-timeout 6
