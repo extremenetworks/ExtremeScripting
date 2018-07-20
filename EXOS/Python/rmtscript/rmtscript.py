@@ -167,7 +167,7 @@ def main():
 
     while True:
         # prompt the user for an EXOS command
-        cmd = raw_input('run script <file> [args]: ')
+        cmd = input('run script <file> [args]: ')
         if cmd in ['q','quit','exit']:
             break
 
