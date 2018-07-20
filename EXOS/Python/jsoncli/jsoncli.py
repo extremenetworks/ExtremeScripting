@@ -208,7 +208,7 @@ def main():
     # start a CLI prompt loop for the user to enter EXOS commands
     while True:
         # prompt the user for an EXOS command
-        cmd = raw_input('Enter EXOS cli: ')
+        cmd = input('Enter EXOS cli: ')
         if cmd in ['q','quit','exit']:
             break
 
