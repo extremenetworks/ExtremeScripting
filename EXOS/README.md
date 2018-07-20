@@ -2,7 +2,6 @@
 Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 
 # Categories
-* [Virtual EXOS](https://github.com/extremenetworks/Virtual_EXOS)
 * [Policies](Policies/README.md)
 * [CLI Scripting](CLI_Scripting/README.md)
 * [EXOS SDK](SDK/README.md)
