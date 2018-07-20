@@ -1,5 +1,5 @@
 # Documentation
-* [Python Getting Started Guide](http://www.extremenetworks.com/wp-content/uploads/2015/02/Python_Getting_Started_Guide.pdf)
+* [Python Getting Started Guide](https://documentation.extremenetworks.com/Python%20Getting%20Started%20Guide.pdf)
 * [The EXOS Python API](http://documentation.extremenetworks.com/python/)
 
 <!---
