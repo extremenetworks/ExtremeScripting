@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # Python Scripts provided by Extreme Networks.
 
 # This script is provided free of charge by Extreme.  We hope such scripts are

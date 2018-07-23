@@ -27,7 +27,7 @@ The rmtscript.py example script is intended to show a Python programmer how to i
 * [JSONRPC Release Notes](http://documentation.extremenetworks.com/app_notes/MMI/121152_MMI_Application_Release_Notes.pdf)
 
 ### Requirements
-- A python environment on the server
+- A python 2 environment on the server
 - The requests python module installed
 - ExtremeXOS 21.1.1.4 and later.
 - The web interface is enabled (default for EXOS 21.1 and later).
