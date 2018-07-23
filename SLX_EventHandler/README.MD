@@ -1,43 +1,57 @@
-SLX event-handler template
+# SLX event-handler template
+
 This is a template script for writing SLX event-handler scripts.
 
-Description
+## Description
+
 This script will register itself as an event-handler for the SLX. On the specified event, the SLX will pass the log message information to the script, and the script will do the requested actions.  
 
 Please review the scripts actions prior to usage.
 
-Files
-event_handler_template.py - This is a template file for the event handler script.
-README.md
-po_member.py - This is an example based off the template that enables or disables the port-channel members based on the port-channel state change log message.
+## Files
 
-Requirements
-Firmware: Extreme SLX OS 17r.1.00 or later, or Extreme SLX OS 17s.1.00 or later
-VDX may work, but has not been tested
+* [event_handler_template.py](event_handler_template.py) - This is a template file for the event handler script.
 
-Features
-This Script must be run on a Extreme SLX platform.
+* [po_member.py](po_member.py) - This is an example based off the template that enables or disables the port-channel members based on the port-channel state change log message.
 
-How to use
+## Requirements
+
+Firmware: Extreme SLX OS 17r.1.00 or later, or Extreme SLX OS 17s.1.00 or later.
+VDX may work, but has not been tested.
+
+## Features
+
+This script must be run on a Extreme SLX platform.
+
+## How to use
+
 1. Modify the template script for the desired action  it should do, and log message and information it should trigger on.
 2. Copy the script to the SLX device.
-3. Execute python <filename_of_script.py> --register
-4. verify that the script has registered as an event-handler by using 'show run event-handler'.
+3. Execute 'python <filename_of_script.py> --register'
+4. Verify that the script has registered as an event-handler by using 'show run event-handler'.
 5. Wait for the script to be activated.
 
-Usage Example:
-    slx8-1# copy scp://user:extreme@10.25.101.102//home/user//EventHandler/event_handler_template.py flash://event_handler.py
-    slx8-1# python event_handler.py -r                                                                                       
-    slx8-1# show run event-handler
-    event-handler event_handler
-     description test
-     trigger 1 raslog LOG-1001
-     trigger 2 raslog LOG-1002
-     action python-script event_handler.py
-    !
-    event-handler activate event_handler
+### Usage Example:
 
-License
+```
+slx8-1# copy scp://user:extreme@10.25.101.102//home/user//EventHandler/event_handler_template.py flash://event_handler.py
+
+slx8-1# python event_handler.py -r                                                                                       
+
+slx8-1# show run event-handler
+ event-handler event_handler
+ description test
+ trigger 1 raslog LOG-1001
+trigger 2 raslog LOG-1002
+action python-script event_handler.py
+!
+event-handler activate event_handler
+```
+
+
+
+## License
+
 Copyright� 2018, Extreme Networks All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
