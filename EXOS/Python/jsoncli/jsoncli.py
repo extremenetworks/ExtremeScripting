@@ -100,7 +100,8 @@
 
 import argparse
 import json
-import readline
+# import readline
+# readline is never used but imported. readline is a linux-library and prevents this script from running on a windows machine.
 
 #
 # This class contains the specifics of constructing a JSONRPC message and
@@ -217,9 +218,9 @@ def main():
             response = jsonrpc.send(cmd)
 
             # print headers
-            print 'JSONRPC Response for:', cmd
-            print '*' * 80
-            print json.dumps(response, indent=2, sort_keys=True)
+            print ('JSONRPC Response for:', cmd)
+            print ('*' * 80)
+            print (json.dumps(response, indent=2, sort_keys=True))
 
             # dump the JSONRPC response to the user in a pretty format
             # first the data stuctures
@@ -230,14 +231,14 @@ def main():
                 if result is not None:
                     cli_output = result[0].get('CLIoutput')
                     if cli_output is not None:
-                        print '\nFormatted CLIoutput Display'
-                        print '*' * 80
-                        print cli_output
-                        print '*' * 80
+                        print ('\nFormatted CLIoutput Display')
+                        print ('*' * 80)
+                        print (cli_output)
+                        print ('*' * 80)
             except:
                 pass
         except Exception as msg:
-            print msg
+            print (msg)
 
 try:
     main()
