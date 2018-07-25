@@ -1,0 +1,13 @@
+--- Use these scripts to manage Extreme WiNG devices
+name="WiNG startup-config - TFTP"
+desc="Extreme Networks WiNG startup-config SSH/TFTP Scripts"
+separator=UNIX_FILE_SEPARATOR
+timed_reset_delay_format="HH:mm:ss:SS"
+-----BEGIN SCRIPT "Configuration Upload"-----
+%LOGINUSER%
+%LOGINPSWD%
+enable
+copy startup-config %TFTP_URL%
+@RECEIVE 10
+exit
+-----END SCRIPT-----
