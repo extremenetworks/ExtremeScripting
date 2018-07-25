@@ -100,8 +100,10 @@
 
 import argparse
 import json
+import sys
 # import readline
 # readline is never used but imported. readline is a linux-library and prevents this script from running on a windows machine.
+
 
 #
 # This class contains the specifics of constructing a JSONRPC message and
@@ -189,17 +191,22 @@ def get_params():
     args = parser.parse_args()
     return args
 
-
+def version_independent_input( str ):
+	# This Script needs to keep support for Python 2 so this function will allways use the right input method
+	if sys.version_info[0] == 2 :
+		return raw_input(str)
+	else:
+		return input(str)
+	
 def main():
     import getpass
     args = get_params()
     if args.ipaddress is None:
         # prompt for ip address of the remote system
-        args.ipaddress = raw_input('Enter remote system IP address: ')
-
+        args.ipaddress = version_independent_input('Enter remote system IP address: ')
     if args.username is None:
         # prompt for username
-        args.username = raw_input('Enter remote system username: ')
+        args.username = version_independent_input('Enter remote system username: ')
         # also get password
         args.password = getpass.getpass('Remote system password: ')
 
@@ -209,7 +216,7 @@ def main():
     # start a CLI prompt loop for the user to enter EXOS commands
     while True:
         # prompt the user for an EXOS command
-        cmd = input('Enter EXOS cli: ')
+        cmd = version_independent_input('Enter EXOS cli: ')
         if cmd in ['q','quit','exit']:
             break
 
