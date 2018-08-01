@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Authentication Cisco Catalyst - unconfigure">
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1533111685735</cacheDate>
+    <category>,Access Control,</category>
+    <comments>Script will UNconfigure authentication and Radius on Catalyst devices on ports</comments>
+    <content>#@MetaDataStart
+#@DetailDescriptionStart
+##############################################################################
+# Purpose       : UnConfigure Cisco Catalyst from Authentication
+#
+# The 802.1X or MAB or Both is unconfigured on defined range of ports
+#
+# One or two radius servers are unconfigured based on selection
+#
+# Tested IOS versions 12.2(53), 12.2(55), 15.0(2)SE11
+##############################################################################
+#@DetailDescriptionEnd
+
+# @SectionStart (description = Radius server configuration)
+
+# @VariableFieldLabel (description = "Radius Shared Secret")
+set var SharedSecret ETS_TAG_SHARED_SECRET
+
+# @VariableFieldLabel (description = "How many Radius servers?", validValues = [1, 2])
+set var NumberOfRadius 1
+
+# @VariableFieldLabel (description = "Radius Server 1")
+set var Radius1 127.0.0.1
+
+# @VariableFieldLabel (description = "Radius Server 2 (optional)")
+set var Radius2 127.0.0.1
+# @SectionEnd
+
+# @SectionStart (description = Authentication configuration)
+
+# @VariableFieldLabel (description = "802.1x or MACauth or Both?", validValues = [Dot1x, MAB, Both])
+set var AuthType Both
+
+# @VariableFieldLabel (description = "First port", scope = device)
+set var FirstPort gi1/0/1
+
+# @VariableFieldLabel (description = "Last port", scope = device)
+set var LastPort 48
+# @SectionEnd
+
+#@MetaDataEnd
+IF (![string equal $vendor "Cisco"]) THEN
+   error "This script is only supported for Cisco switches. This device is $vendor."
+ENDIF
+CLI enable
+CLI terminal width 200
+CLI conf t
+CLI no aaa group server radius NAC
+CLI no aaa authentication dot1x default group NAC
+CLI no aaa authorization network default group NAC
+CLI no aaa accounting update periodic 5
+CLI no aaa accounting dot1x default start-stop group NAC
+CLI no radius-server vsa send accounting
+CLI no aaa server radius dynamic-author
+CLI no authentication mac-move permit
+CLI no ip device tracking
+CLI no dot1x system-auth-control
+IF ($NumberOfRadius == 2) THEN
+	CLI no radius-server host $Radius1 auth-port 1812 acct-port 1813 key $SharedSecret
+	CLI no radius-server host $Radius2 auth-port 1812 acct-port 1813 key $SharedSecret
+ELSE
+	CLI no radius-server host $Radius1 auth-port 1812 acct-port 1813 key $SharedSecret
+ENDIF
+CLI interface range $FirstPort - $LastPort
+sleep 1
+CLI  no authentication control-direction in
+sleep 1
+CLI  no authentication event fail action next-method
+sleep 1
+CLI  no authentication host-mode multi-domain
+sleep 1
+CLI  no authentication order mab dot1x
+sleep 1
+CLI  no authentication priority mab dot1x
+sleep 1
+CLI  no authentication port-control auto
+sleep 1
+CLI  no authentication periodic
+sleep 1
+CLI  no authentication timer reauthenticate server
+sleep 1
+CLI  no authentication violation replace
+sleep 1
+IF ($AuthType == "Both") THEN
+	CLI  no mab
+	CLI  no dot1x pae authenticator
+ENDIF
+IF ($AuthType == "MAB") THEN
+	CLI  no mab
+ENDIF
+IF ($AuthType == "Dot1x") THEN
+	CLI  no dot1x pae authenticator
+ENDIF
+CLI exit
+CLI exit
+</content>
+    <creationDate>1533111625701</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Groups,Device,</contexts>
+    <id>175</id>
+    <lastUpdateDate>1533111685713</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_Cisco_Catalyst_-_unconfigure.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_Cisco_Catalyst_-_unconfigure.tcl</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>TCL</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Authentication Cisco Catalyst">
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1533111148427</cacheDate>
+    <category>,Access Control,</category>
+    <comments>Script will configure authentication and Radius on Catalyst devices on ports</comments>
+    <content>#@MetaDataStart
+#@DetailDescriptionStart
+##############################################################################
+# Purpose       : Configure Cisco Catalyst for Authentication
+#
+# The 802.1X or MAB or Both is configured on defined range of ports
+#
+# One or two radius servers are configured based on selection
+#
+# Tested IOS versions 12.2(53), 12.2(55), 15.0(2)SE11
+##############################################################################
+#@DetailDescriptionEnd
+
+# @SectionStart (description = Radius server configuration)
+
+# @VariableFieldLabel (description = "Radius Shared Secret")
+set var SharedSecret ETS_TAG_SHARED_SECRET
+
+# @VariableFieldLabel (description = "How many Radius servers?", validValues = [1, 2])
+set var NumberOfRadius 1
+
+# @VariableFieldLabel (description = "Radius Server 1")
+set var Radius1 127.0.0.1
+
+# @VariableFieldLabel (description = "Radius Server 2 (optional)")
+set var Radius2 127.0.0.1
+# @SectionEnd
+
+# @SectionStart (description = Authentication configuration)
+
+# @VariableFieldLabel (description = "802.1x or MACauth or Both?", validValues = [Dot1x, MAB, Both])
+set var AuthType Both
+
+# @VariableFieldLabel (description = "First port", scope = device)
+set var FirstPort gi1/0/1
+
+# @VariableFieldLabel (description = "Last port", scope = device)
+set var LastPort 48
+# @SectionEnd
+
+#@MetaDataEnd
+IF (![string equal $vendor "Cisco"]) THEN
+   error "This script is only supported for Cisco switches. This device is $vendor."
+ENDIF
+CLI enable
+CLI terminal width 200
+CLI conf t
+CLI aaa new-model
+CLI aaa group server radius NAC
+IF ($NumberOfRadius == 2) THEN
+	CLI  server $Radius1 auth-port 1812 acct-port 1813
+	CLI  server $Radius2 auth-port 1812 acct-port 1813	
+ELSE
+	CLI  server $Radius1 auth-port 1812 acct-port 1813
+ENDIF
+CLI  exit
+CLI aaa authentication login default local
+CLI aaa authentication enable default enable none
+CLI aaa authentication dot1x default group NAC
+CLI aaa authorization network default group NAC
+CLI aaa accounting update periodic 5
+CLI aaa accounting dot1x default start-stop group NAC
+CLI no aaa accounting update
+CLI radius-server vsa send accounting
+CLI aaa server radius dynamic-author
+CLI  server-key $SharedSecret
+CLI  auth-type any
+CLI  exit
+CLI authentication mac-move permit
+CLI ip device tracking
+CLI dot1x system-auth-control
+IF ($NumberOfRadius == 2) THEN
+	CLI radius-server host $Radius1 auth-port 1812 acct-port 1813 key $SharedSecret
+	CLI radius-server host $Radius2 auth-port 1812 acct-port 1813 key $SharedSecret
+ELSE
+	CLI radius-server host $Radius1 auth-port 1812 acct-port 1813 key $SharedSecret
+ENDIF
+CLI interface range $FirstPort - $LastPort
+CLI  switchport mode access
+sleep 1
+CLI  authentication control-direction in
+sleep 1
+CLI  authentication event fail action next-method
+sleep 1
+CLI  authentication host-mode multi-domain
+sleep 1
+CLI  authentication order mab dot1x
+sleep 1
+CLI  authentication priority mab dot1x
+sleep 1
+CLI  authentication port-control auto
+sleep 1
+CLI  authentication periodic
+sleep 1
+CLI  authentication timer reauthenticate server
+sleep 1
+CLI  authentication violation replace
+IF ($AuthType == "Both") THEN
+	CLI  mab
+	CLI  dot1x pae authenticator
+ENDIF
+IF ($AuthType == "MAB") THEN
+	CLI  mab
+ENDIF
+IF ($AuthType == "Dot1x") THEN
+	CLI  dot1x pae authenticator
+ENDIF
+CLI exit
+CLI exit</content>
+    <creationDate>1533107779003</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,Groups,</contexts>
+    <id>167</id>
+    <lastUpdateDate>1533111148397</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_Cisco_Catalyst.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_Cisco_Catalyst.tcl</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>TCL</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
