@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # Python Scripts provided by Extreme Networks.
 
 # This script is provided free of charge by Extreme.  We hope such scripts are
@@ -58,10 +58,12 @@ import argparse
 import json
 import requests
 import getpass
-try:
-    import readline
-except:
-    pass
+import sys
+# Readline is never used.
+# try:
+#    import readline
+# except:
+#    pass
 
 #
 # This class contains the specifics of constructing a JSONRPC message and
@@ -149,16 +151,22 @@ def get_params():
     args = parser.parse_args()
     return args
 
+def version_independent_input( str ):
+	# This Script needs to keep support for Python 2 so this function will allways use the right input method
+	if sys.version_info[0] == 2 :
+		return raw_input(str)
+	else:
+		return input(str)
 
 def main():
     args = get_params()
     if args.ipaddress is None:
         # prompt for ip address of the remote system
-        args.ipaddress = raw_input('Enter remote system IP address: ')
+        args.ipaddress = version_independent_input('Enter remote system IP address: ')
 
     if args.username is None:
         # prompt for username
-        args.username = raw_input('Enter remote system username: ')
+        args.username = version_independent_input('Enter remote system username: ')
         # also get password
         args.password = getpass.getpass('Remote system password: ')
 
@@ -167,7 +175,7 @@ def main():
 
     while True:
         # prompt the user for an EXOS command
-        cmd = raw_input('run script <file> [args]: ')
+        cmd = version_independent_input('run script <file> [args]: ')
         if cmd in ['q','quit','exit']:
             break
 
