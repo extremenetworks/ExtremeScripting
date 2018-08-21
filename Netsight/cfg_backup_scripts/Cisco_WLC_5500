@@ -1,5 +1,5 @@
---- Use these scripts to manage Cisco devices
-name="WLC - TFTP"
+--- Use these scripts to manage Cisco WLC devices
+name="Cisco Systems - WLC - TFTP"
 desc="Cisco Systems SSH/TFTP Scripts"
 separator=WINDOWS_FILE_SEPARATOR
 timed_reset_delay_format="HH:mm:ss:SS"
