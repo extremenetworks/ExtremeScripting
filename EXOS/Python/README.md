@@ -45,6 +45,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[Watch Command](watch)|Simple script that repeats a CLI command every *n* seconds|
 |[JSONRPC CLI Example](jsoncli)| This python script is an example of how to interface with EXOS 21.1 using JSONRPC over HTTP/HTTPS.|
 |[Remote Script Example](rmtscript)| This python script is an example of how run scripts remotely on EXOS switches running 21.1 or later over HTTP/HTTPS.|
+|[EXOS Snmp DatetimeAPI](xosSnmpDatetimeAPI)| Python API that can converts EXOS last config change time to python datetime format.|
 
 ## ExtremeScripting .lst file
 This .lst file includes all of the switch .py scripts at the time of the file upload.  It can be downloaded directly to the switch with the ```download url <url> <vr>``` command.  The .lst will create a folder called gtac and add all the scripts into that folder.  Note: To run the scripts you need to cd into the gtac folder.
