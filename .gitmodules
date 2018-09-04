@@ -1,0 +1,3 @@
+[submodule "EXOS/Python/exoslib"]
+	path = EXOS/Python/exoslib
+	url = https://github.com/extremenetworks/exoslib
