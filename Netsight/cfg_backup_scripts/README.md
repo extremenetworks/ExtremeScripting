@@ -11,7 +11,8 @@
 |[Cisco WLC 5500](Cisco_WLC_5500)|Configuration backups of Cisco WLC 5500.|XMC Configuration backups of Cisco WLC 5500|
 |[Dell Force10](dell-force10)|XMC Configuration backups of Dell Force10|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backups of FortiGate|
-|[Juniper EX](juniper_EX)|XMC Configuration backups of Juniper EX|
+|[Juniper EX SCP](juniper_EX-SCP)|XMC Configuration backups of Juniper EX over SCP|
+|[Juniper EX TFTP](juniper_EX-TFTP)|XMC Configuration backups of Juniper EX over TFTP|
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups/restore & firmware upgrade of Comware|
 
 # Support

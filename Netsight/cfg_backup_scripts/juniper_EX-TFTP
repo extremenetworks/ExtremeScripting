@@ -1,0 +1,45 @@
+-- Use these scripts to manage Juniper EX devices
+name="Juniper EX - tftp"
+desc="Juniper SSH/TFTP Scripts"
+protocol=TFTP
+-- 
+separator=UNIX_FILE_SEPARATOR
+timed_reset_delay_format="HH:mm"
+perform_success_test_always=true
+-----BEGIN SCRIPT "Configuration Upload"-----
+cli
+configure
+save %TARGET_FILE_NAME%
+exit
+exit
+tftp %TFTP_IP%
+put %RELATIVE_TARGET_FILE_PATH%
+@receive 30
+@COMMANDDONE 20
+quit
+rm %TARGET_FILE_NAME%
+exit
+-----END SCRIPT-----
+
+-----BEGIN SCRIPT "Configuration Download"-----
+tftp %TFTP_IP%
+get %RELATIVE_TARGET_FILE_PATH%
+@receive 30
+@COMMANDDONE 20
+quit
+cli
+configure
+load override %TARGET_FILE_NAME%
+commit
+exit
+exit
+rm %TARGET_FILE_NAME%
+exit
+-----END SCRIPT-----
+
+-----BEGIN SUCCESS "Configuration Upload"-----
+Sent
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Configuration Download"-----
+commit complete
+-----END SUCCESS-----
