@@ -1,23 +1,47 @@
--- Use these scripts to manage Juniper EX devices 
+-- Use these scripts to manage Juniper EX devices
 name="Juniper EX - scp"
 desc="Juniper SSH/SCP Scripts"
 protocol=SCP
--- 
+
+-- the SCP does require "YES" to approve the fingerprint for the first time.
+-- ssh to your switch and execute the SCP against the XMC. once you answer "yes" there should be no issue
+
+--
 separator=UNIX_FILE_SEPARATOR
-timed_reset_delay_format="HH:mm" 
-perform_success_test_always=true 
------BEGIN SCRIPT "Configuration Upload"----- 
+timed_reset_delay_format="HH:mm"
+perform_success_test_always=true
+-----BEGIN SCRIPT "Configuration Upload"-----
 cli
 configure
 save %TARGET_FILE_NAME%
 exit
-file copy %TARGET_FILE_NAME% scp://%SCP_USER%@%SCP_IP%:%ABSOLUTE_TARGET_FILE_PATH% 
-@receive 2 
-%SCP_PSWD% 
-@receive 30 
-@COMMANDDONE 20 
-exit 
------END SCRIPT----- 
------BEGIN SUCCESS "Configuration Upload"----- 
-[OK] 
------END SUCCESS----- 
+file copy %TARGET_FILE_NAME% scp://%SCP_USER%@%SCP_IP%:%ABSOLUTE_TARGET_FILE_PATH%
+@receive 1
+%SCP_PSWD%
+@receive 20
+@COMMANDDONE 20
+exit
+rm %TARGET_FILE_NAME%
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+cli
+file copy scp://%SCP_USER%@%SCP_IP%:%ABSOLUTE_TARGET_FILE_PATH% %TARGET_FILE_NAME%
+@receive 1
+%SCP_PSWD%
+@receive 20
+@COMMANDDONE 20
+configure
+load override %TARGET_FILE_NAME%
+commit
+exit
+exit
+rm %TARGET_FILE_NAME%
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+100%
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Configuration Download"-----
+commit complete
+-----END SUCCESS-----
