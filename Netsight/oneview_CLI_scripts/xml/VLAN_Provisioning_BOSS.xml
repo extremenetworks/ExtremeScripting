@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="VLAN Provisioning BOSS">
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1539863634150</cacheDate>
+    <category>,Config,</category>
+    <comments>Provision VLANs on ERS switches</comments>
+    <content># @METADATASTART
+#@DetailDescriptionStart
+################################################################
+# Example script to create vlan on old ERS switches
+#
+# Created By    : Timo Leppiniemi / Extreme Networks
+# Email         : tleppini@extremenetworks.com
+# 
+# Script        : Demo script for creating vlan on old ERS switches
+# Revision      : 0.1
+# Last updated  : 17/04/2018
+# Purpose       : Example
+# Remarks       : Tested on ERS 2625T v4.4.3.004
+#
+# There is currently no support for TAGGED / Trunk ports.
+# Also security checks like valid VLAN ID checks are not there...
+# 
+################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "Script for creating a VLAN on old ERS switches"
+# @SectionStart ( description = "Script for creating a VLAN on old ERS switches")
+# @SectionEnd
+
+# @SectionStart ( description = "Section tagtype")
+# @VariableFieldLabel ( description = "Enter tag type",
+#                        type = String,
+#                        required = yes,
+#                        validValues = [tagged, untagged],
+#                        readonly = no
+#                        )
+set var tagtype untagged
+# @SectionEnd 
+
+# @SectionStart ( description = "Add IP-address?")
+# @VariableFieldLabel ( description = "select yes or no",
+#                        type = String,
+#                        required = yes,
+#                        validValues = [yes, no],
+#                        readonly = no
+#                        )
+set var addIpv4addr no
+# @SectionEnd 
+
+# @SectionStart ( description = "vlan IP address/netmask")
+# @VariableFieldLabel ( description = "IP-address and mask",
+#                        type = String,
+#                        required = yes,
+#                        readonly = no
+#                        )
+set var ipaddress 0.0.0.0/0
+# @SectionEnd 
+
+# @SectionStart ( description = "VLAN Id &lt;1 - 4094&gt;")
+# @VariableFieldLabel ( description = "vlan ID",
+#                        type = String,
+#                        required = yes,
+#                        readonly = no
+#                        )
+set var vlan_id 1-4095
+# @SectionEnd 
+
+# @SectionStart ( description = "VLAN Name &lt;string&gt;")
+# @VariableFieldLabel ( description = "vlan name",
+#                        type = String,
+#                        required = yes,
+#                        readonly = no
+#                        )
+set var vlan_name name
+# @SectionEnd 
+
+# @MetaDataEnd
+import re
+
+def getDebugData():
+    # Print user variables for debug purposes
+    # Get port list 
+    ports = emc_vars['port']
+    ports = ports.replace(")", "")
+    ports = ports.replace(" ", "")
+    print "selected ports = ",ports
+    print "do we want to have ipv4 address on vlan: ",emc_vars['addIpv4addr']
+    print "user input for ip address/mask: ",emc_vars['ipaddress']
+    print "user entered vlan id: ",emc_vars['vlan_id']
+    print "user entered vlan name: ",emc_vars['vlan_name']
+    print "should we trunk the VLAN or set as access?",emc_vars['tagtype']
+
+    # checks
+    isExos = emc_vars['isExos']
+    deviceName = emc_vars['deviceName']
+
+    print "device name == ",deviceName
+
+    if isExos == "true":
+        print "This is an EXOS device"
+    else:
+        print "This is not an EXOS device"
+
+
+def checkIfVlanExists():
+    # executes a show vlan command and prints the output
+    cli_results = emc_cli.send("enable")
+    cli_results = emc_cli.send("configure terminal")
+    cli_results = emc_cli.send("show vlan")
+    cli_output = cli_results.getOutput()
+
+    cli_output = cli_output.split("\n")
+
+    for row in cli_output:
+    
+        # print row
+        match = re.match('(^\d{1,4})', row)
+        if match:
+            vlan_id_on_switch = match.group(1)
+            
+            if emc_vars['vlan_id'] == vlan_id_on_switch:
+                print "========================================================================="
+                print "VLAN already exists, will not proceed"
+                print "========================================================================="
+                return
+            else:
+                print "VLAN is not it the switch, can continue"
+            
+        else:
+            print "no VLAN id found on the row"
+        
+
+def checkIfIpAddressExists():
+    # executes a show vlan command and prints the output
+    cli_results = emc_cli.send("show vlan ip")
+    cli_output = cli_results.getOutput()
+
+    cli_output = cli_output.split("\n")
+
+    for row in cli_output:
+        print "================================================="
+        print row
+        print "================================================="
+        # 2    10002   192.168.0.78    255.255.255.0   00:21:E1:91:E0:40 1      Enabled
+        match = re.match('\d{1,4}\s+\d+\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', row) 
+        if match:
+            vlan_ip_on_switch = match.group(1)
+            print "vlan_ip_on_switch: ",vlan_ip_on_switch
+            
+            if emc_vars['ipaddress'] == vlan_ip_on_switch:
+                print "========================================================================="
+                print "IP address exists, will not proceed"
+                print "========================================================================="
+                return
+            else:
+                print "IP-addreess is not it the switch, can continue"
+        else: 
+            print "no match found, continue"
+        
+def provisionVlan():
+    # get variables to local
+    vlan_id = emc_vars['vlan_id']
+    vlan_name = emc_vars['vlan_name']
+    ports = emc_vars['port']
+    ports = ports.replace(")", "")
+    ports = ports.replace(" ", "")
+    print "ports == ",ports
+    
+    cli_results = emc_cli.send("vlan create {0} name {1} type port".format(vlan_id,vlan_name))
+    cli_results = emc_cli.send("vlan members add {0} {1}".format(vlan_id,ports))
+    
+    # Save config
+    cli_results = emc_cli.send("save config")
+    
+    print "=============================================================================="
+    print " DONE    "
+    print "=============================================================================="
+    
+def main():
+
+    getDebugData()
+    checkIfVlanExists()
+    checkIfIpAddressExists()
+    provisionVlan()
+    
+main()</content>
+    <creationDate>1523953345364</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,Groups,</contexts>
+    <id>156</id>
+    <lastUpdateDate>1539863634116</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/VLAN_Provisioning_BOSS.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <nosIds></nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/VLAN_Provisioning_BOSS.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+

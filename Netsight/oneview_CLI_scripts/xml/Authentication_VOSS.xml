@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Authentication VOSS">
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1539770141167</cacheDate>
+    <category>,Access Control,</category>
+    <comments>Script will configure Radius on VOSS devices</comments>
+    <content># @METADATASTART
+#@DetailDescriptionStart
+################################################################################
+# Community maintained CLI Scripting Library
+#
+# Script        : Configure RADIUS
+# Revision      : 1.0
+# Last updated  : 17.10.2018
+# Purpose       : Will enable authentication to the switch
+# Devices	    : VOSS v7.0.0.0
+#
+# Note:  This script does configure Authentication
+################################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "Basic script for AAA assignment. Please see Script View tab for details."
+
+# @SectionStart (description = Radius server configuration)
+
+# @VariableFieldLabel (description = "Radius Server 1 (optional)",
+#    type       = String,
+#    scope      = global)
+set var Radius1 127.0.0.1
+
+# @VariableFieldLabel (description = "Radius Server 2 (optional)",
+#    type       = String,
+#    scope      = global)
+set var Radius2 ""
+
+# @VariableFieldLabel (description = "Radius Shared Secret")
+set var SharedSecret ETS_TAG_SHARED_SECRET
+
+# @VariableFieldLabel (description = "Configure Accounting", validValues = [Yes, No])
+set var Accounting Yes
+
+# @SectionEnd
+
+# @SectionStart ( description = "Save?.")
+
+# @VariableFieldLabel (description   = "Save the config after?",
+#    type       = String,
+#    scope      = global,
+#    required   = yes,
+#    validValues=[yes,no]
+#    )
+set var SAVECONFIG "yes"
+
+# @SectionEnd
+# @MetaDataEnd
+
+################################################################################
+#    Here starts the magic
+################################################################################
+
+
+IF ($family =="VSP Series" ) THEN
+    CLI enable
+    CLI configure terminal
+	
+    IF ($Radius1 != "") THEN
+        puts "### Lets configure primary radius server. ###"
+        CLI radius server host $Radius1 key $SharedSecret source-ip $deviceIP
+    ENDIF
+
+    IF ($Accounting == "Yes") THEN
+        CLI radius accounting enable
+    ENDIF
+
+    IF ($Radius2 != "") THEN
+        puts "### Lets configure secondary radius server. ###"
+        CLI radius server host $Radius2 key $SharedSecret source-ip $deviceIP
+    ENDIF
+    
+    IF ($SAVECONFIG == "yes" ) THEN
+      puts "### Lets save the config as was requested. ###"
+      CLI save config
+    ENDIF
+ELSE
+    puts $family
+ENDIF
+puts "### Have a nice day! Be Extreme! ###"
+</content>
+    <creationDate>1512512986642</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Port,Device,</contexts>
+    <id>165</id>
+    <lastUpdateDate>1539770141145</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_VOSS.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <nosIds></nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_VOSS.tcl</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>TCL</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+

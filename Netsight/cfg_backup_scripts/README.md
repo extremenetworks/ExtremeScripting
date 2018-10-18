@@ -5,15 +5,16 @@
 
 # Extreme Management Center (XMC) Scripts
 | Script name   | Description   |
-| ------------- |:-------------:|
-|[Ubiquiti EdgeRouter](EdgOS)|XMC Configuration backups of Ubiquiti EdgeRouter.|
-|[Palo Alto firewalls](Palo_Alto_SCP_Script)|XMC Configuration backups of Palo Alto firewall.|
-|[Cisco WLC 5500](Cisco_WLC_5500)|Configuration backups of Cisco WLC 5500.|XMC Configuration backups of Cisco WLC 5500|
+| ------------- | ------------- |
+|[Barracuda F-Series](Barracuda-SCP.txt)|XMC Configuration backups of Barracuda NG Firewall F-Series.|
+|[Cisco WLC 5500](Cisco_WLC_5500)|XMC Configuration backups of Cisco WLC 5500.|
 |[Dell Force10](dell-force10)|XMC Configuration backups of Dell Force10|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backups of FortiGate|
+|[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups/restore & firmware upgrade of Comware|
 |[Juniper EX SCP](juniper_EX-SCP)|XMC Configuration backups of Juniper EX over SCP|
 |[Juniper EX TFTP](juniper_EX-TFTP)|XMC Configuration backups of Juniper EX over TFTP|
-|[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backups/restore & firmware upgrade of Comware|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script)|XMC Configuration backups of Palo Alto firewall.|
+|[Ubiquiti EdgeRouter](EdgOS)|XMC Configuration backups of Ubiquiti EdgeRouter.|
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._

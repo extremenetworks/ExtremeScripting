@@ -1,0 +1,36 @@
+name="Barracuda - scp"
+desc="Barracuda SSH - SCP Script"
+protocol=SCP
+-- 
+separator=UNIX_FILE_SEPARATOR
+timed_reset_delay_format="HH:mm"
+perform_success_test_always=false
+-----BEGIN SCRIPT "Configuration Upload"-----
+cd /opt/phion/config/configroot/
+/opt/phion/bin/phionar cdl /root/%TARGET_FILE_NAME% *
+/usr/bin/scp /root/%TARGET_FILE_NAME% %SCP_USER%@%SCP_IP%:%ABSOLUTE_TARGET_FILE_PATH%
+@receive 2
+%SCP_PSWD%
+@receive 30
+@COMMANDDONE 20
+rm -f /root/%TARGET_FILE_NAME%
+exit 0
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+/usr/bin/scp %SCP_USER%@%SCP_IP%:%ABSOLUTE_TARGET_FILE_PATH% /opt/phion/update/%TARGET_FILE_NAME%
+@receive 2
+%SCP_PSWD%
+@receive 30
+@COMMANDDONE 20
+rm -f /opt/phion/update/box.par
+mv /opt/phion/update/%TARGET_FILE_NAME% /opt/phion/update/box.par
+/etc/rc.d/init.d/phion stop
+/etc/rc.d/init.d/phion start
+@receive 30
+@COMMANDDONE 20
+exit 0
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Configuration Download"-----
+-----END SUCCESS-----
