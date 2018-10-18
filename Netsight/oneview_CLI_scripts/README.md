@@ -26,7 +26,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | IOS |[Authentication Catalyst](xml/Authentication_Catalyst.xml?raw=true)|Script will configure Radius and authentication on Catalyst devices & ports.|TCL|
 | IOS |[Authentication Catalyst - unconfigure](xml/Authentication_Catalyst_unconfigure.xml?raw=true)|Script will UNconfigure Radius and authentication on Catalyst devices & ports.|TCL|
 | BOSS |[Authentication BOSS](xml/Authentication_BOSS.xml?raw=true)|Script does configure authentication on ports and configure Radius on BOSS based devices (ERS family). [Details](Authentication_BOSS.md)|TCL|
-| BOSS |[VLAN Provisioning BOSS](xml/VLAN_Provisioning_BOSS?raw=true)|Script does create vlans on  BOSS based devices (ERS family).|TCL|
+| BOSS |[VLAN Provisioning BOSS](xml/VLAN_Provisioning_BOSS.xml?raw=true)|Script does create vlans on  BOSS based devices (ERS family).|Python|
 | VOSS |[(almost) Zero Touch Fabric](xml/aZTF.xml?raw=true)|It finds automatically the NNI ports, Creates & configures the Fabric dynamically, No user input necessary, all automated, Takes ~1mn to execute (30’’ are spent for LLDP).|Python|
 | VOSS |[Automatic Fabric Creation](xml/FC_Config.xml?raw=true)|Select group of switches with the same NNI portlist, specify some basic parameters.|Python|
 | VOSS |[Configuration of a Cluster (vIST)](xml/Fabric_Cluster_Create.xml?raw=true)|Cluster is created. You need their system-id before executing the script. Script must be executed one unit at a time. This script will disable/enable ISIS = it can disrupt traffic!|Python|
