@@ -1,0 +1,94 @@
+<CLIRules>
+    <Rule name="Avaya (Rapid City)" connectTimeout="30">
+        <ShellPrompt>
+            <defaultPrompt>
+                <prompt>:([12356])(?:\((.+?)\))?[>#]$</prompt>
+            </defaultPrompt>
+        </ShellPrompt>
+        <TerminalOptions>
+           <autoLogin>true</autoLogin>
+        </TerminalOptions>
+        <LoginPrompt>
+           <defaultPrompt optional="true">
+              <prompt>(?i).*(login|username): ?$</prompt>
+           </defaultPrompt>
+           <defaultPrompt type="banner" optional="true">
+              <prompt>.*Ctrl-Y.*</prompt>
+              <reply>^Y</reply>
+           </defaultPrompt>
+            <defaultPrompt type="banner" optional="true">
+              <prompt>.*Use arrow keys.*</prompt>
+              <reply>c</reply>
+           </defaultPrompt>
+        </LoginPrompt>
+        <PasswordPrompt>
+           <defaultPrompt>
+              <prompt>(?i).*(password): ?$</prompt>
+           </defaultPrompt>
+           <defaultPrompt>
+                <prompt>.*Press ENTER.*</prompt>
+                <reply>\n</reply>
+            </defaultPrompt>
+        </PasswordPrompt>
+        <CommandPrompt command=".*">
+            <defaultPrompt>
+                <prompt>to quit:</prompt>
+                <reply>y</reply>
+            </defaultPrompt>
+            <defaultPrompt>
+                <prompt>--More--</prompt>
+                <reply>y</reply>
+            </defaultPrompt>
+            <defaultPrompt>
+                <prompt>(?i).*\(y/n\) \? $</prompt>
+                <reply>y\n</reply>
+            </defaultPrompt>
+        </CommandPrompt>
+    </Rule>
+    <Rule name="Avaya (SynOptics)">
+        <ShellPrompt>
+            <defaultPrompt>
+                <prompt>(?:\((.+?)\))?[>#]$</prompt>
+            </defaultPrompt>
+        </ShellPrompt>
+        <TerminalOptions>
+           <autoLogin>true</autoLogin>
+        </TerminalOptions>
+        <LoginPrompt>
+           <defaultPrompt optional="true">
+              <prompt>(?i).*(login|username): ?$</prompt>
+           </defaultPrompt>
+           <defaultPrompt type="banner" optional="true">
+              <prompt>.*Ctrl-Y.*</prompt>
+              <reply>^Y</reply>
+           </defaultPrompt>
+           <defaultPrompt type="banner" optional="true">
+              <prompt>.*Use arrow keys.*</prompt>
+              <reply>c</reply>
+           </defaultPrompt>
+        </LoginPrompt>
+        <PasswordPrompt>
+           <defaultPrompt>
+              <prompt>(?i).*(password): ?$</prompt>
+           </defaultPrompt>
+           <defaultPrompt>
+                <prompt>.*Press ENTER.*</prompt>
+                <reply>\n</reply>
+            </defaultPrompt>
+        </PasswordPrompt>
+        <CommandPrompt command=".*">
+            <defaultPrompt>
+                <prompt>to quit:</prompt>
+                <reply>y</reply>
+            </defaultPrompt>
+            <defaultPrompt>
+                <prompt>^----More.*</prompt>
+                <reply>y</reply>
+            </defaultPrompt>
+            <defaultPrompt>
+                <prompt>(?i).*\(y/n\) \? $</prompt>
+                <reply>y\n</reply>
+            </defaultPrompt>
+        </CommandPrompt>
+    </Rule>
+</CLIRules>
