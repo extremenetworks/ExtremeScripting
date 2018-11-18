@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script name="Configure Vlan on the Port - Extreme-Cisco-Comware">
-    <version>0</version>
+<script name="Configure Vlan on Port - Extreme-Cisco-Comware-Procurve">
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1542574059156</cacheDate>
+    <category>,VLAN,</category>
     <comments>Will create vlan (if does not exist) and assign the vlan to selected ports</comments>
     <content># @METADATASTART
 #@DetailDescriptionStart
@@ -14,6 +16,7 @@
 # Devices	    : Cisco Catalyst 12.2, XOS 15.7,
 # Devices       : XOS 21.3, XOS 22.2, XOS 15.3, 
 # Devices       : HPE Comware 7.1.045
+# Devices       : HPE Procurve H.10.119
 #
 # Note:  This script does configure VLAN on ports.
 ################################################################################
@@ -84,6 +87,15 @@ proc CiscoPortConfig {portname vlanid egress} {
     CLI exit
 }
 
+proc ProcurvePortConfig {portname vlanid egress} {
+    CLI vlan $vlanid
+	IF ($egress == "untagged" ) THEN
+		CLI untagged $portname
+	ELSE
+		CLI tagged $portname
+	ENDIF
+    CLI exit
+}
 proc EXOSPortConfig {portname vlanname egress} {
 	IF ($egress == "untagged" ) THEN
         puts "### Lets check if there is a vlan on the port already! ###"
@@ -303,25 +315,91 @@ IF ($vendor =="H3C" ) THEN
         ENDIF
         puts "### Have a nice day! Be Extreme! ###"
         PerformSync -scope VLAN
+ENDIF
+
+IF ($family =="Procurve" ) THEN
+
+        puts "### Does the vlan exist already? ###"
+        CLI show vlans
+        set records [split $CLI.OUT "\n"]
+        set var I 0
+        set var VLANEXISTS "NO"
+        foreach line $records {
+            IF ($I &gt; 0) THEN
+                IF ([string first " $VLANNAME " $line 0] != -1) THEN
+                    set VLANEXISTS "YES"
+                ENDIF
+            ENDIF
+            incr I
+        }
+        IF ($VLANEXISTS == "NO") THEN
+            IF ($VLANID == "") THEN
+               puts "### VLAN $VLANNAME does not exist but ID was not entered! ###"
+               puts "### Dying now. ###"
+               Die
+            ENDIF
+            puts "### VLAN $VLANNAME does not exist. Lets create the vlan! ###"
+            CLI configure
+            CLI vlan $VLANID name $VLANNAME
+            CLI exit
+            set VLANTAG $VLANID
+        ELSE
+            set content $CLI.OUT
+            set records [split $content "\n"]
+            foreach line $records {
+                IF ([string first " $VLANNAME " $line 0] != -1) THEN
+                    set LENGTH [string length $line]
+                    set SPACE [string first " " $line 2]
+                    set VLANTAG [string range $line 2 $SPACE] 
+                ENDIF
+            }
+            puts "### VLAN $VLANNAME does have tag $VLANTAG"
+        ENDIF
+
+		CLI configure
+		set LENGTH [string length $port]
+		set I 0
+		set COMMA [string first "," $port $I]
+		while {$COMMA != -1 } {
+		 incr COMMA -1
+		 set UNIQUEPORT [string range $port $I $COMMA] 
+         puts "### Lets configure vlan $VLANTAG on the port $UNIQUEPORT as $EGRESS ###"
+		 ProcurvePortConfig $UNIQUEPORT $VLANTAG $EGRESS
+		 set I $COMMA
+		 incr I 2
+		 set COMMA [string first "," $port $I]
+		}
+		set UNIQUEPORT [string range $port $I $LENGTH]
+        puts "### Lets configure vlan $VLANTAG on the port $UNIQUEPORT as $EGRESS ###"
+		ProcurvePortConfig $UNIQUEPORT $VLANTAG $EGRESS
+		CLI exit
+		IF ($SAVECONFIG == "yes" ) THEN
+          puts "### Lets save the config as was requested. ###"
+          CLI write memory
+        ENDIF
+        puts "### Have a nice day! Be Extreme! ###"
+        PerformSync -scope VLAN
 ENDIF</content>
-    <creator>root</creator>
-    <supprotedGroups></supprotedGroups>
-    <auditLogEnabled></auditLogEnabled>
-    <saveConfigOnExit>false</saveConfigOnExit>
-    <devicesRequired>true</devicesRequired>
-    <scriptTimeout>60</scriptTimeout>
-    <defaultCategory></defaultCategory>
-    <scriptOwner></scriptOwner>
-    <rollbackScript></rollbackScript>
-    <postprocessScript></postprocessScript>
-    <miscXMLData></miscXMLData>
     <creationDate>1524517949402</creationDate>
-    <category>,VLAN,</category>
-    <vendor></vendor>
-    <scriptType>TCL</scriptType>
-    <roles>,NetSight Administrator,</roles>
-    <lastUpdatedBy>root</lastUpdatedBy>
-    <lastUpdateDate>1524521328190</lastUpdateDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
     <contexts>,Port,Device,Groups,</contexts>
+    <id>206</id>
+    <lastUpdateDate>1542574059134</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Configure_Vlan_on_Port_-_Extreme-Cisco-Comware-Procurve.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Configure_Vlan_on_Port_-_Extreme-Cisco-Comware-Procurve.tcl</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>TCL</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
 </script>
 

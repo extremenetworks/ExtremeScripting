@@ -7,6 +7,7 @@
 | Script name   | Description   |
 | ------------- | ------------- |
 |[Barracuda F-Series](Barracuda-SCP.txt)|XMC Configuration backup/restore of Barracuda NG Firewall F-Series.|
+|[Cisco Catalyst](CiscoCatalyst-withRestore-TFTP.txt)|XMC Configuration backup/restore for Cisco Catalyst.|
 |[Cisco WLC 5500](Cisco_WLC_5500)|XMC Configuration backup of Cisco WLC 5500.|
 |[Dell Force10](dell-force10)|XMC Configuration backup of Dell Force10|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backup of FortiGate|

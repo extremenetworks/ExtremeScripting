@@ -1,0 +1,30 @@
+-- Use these scripts to manage Cisco devices
+name="Cisco Catalyst - TFTP"
+desc="Cisco Systems Catalyst TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+%ENABLEPSWD%
+copy running-config tftp:
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+@receive 40
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+bytes copied
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+%ENABLEPSWD%
+copy %TFTP_URL% startup-config
+startup-config
+@receive 60
+reload
+
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+bytes copied
+-----END SUCCESS-----

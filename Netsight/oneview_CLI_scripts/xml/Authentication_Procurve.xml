@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Authentication Procurve">
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1542571333525</cacheDate>
+    <category>,Access Control,</category>
+    <comments>Script will configure authentication and Radius on Procurve devices on ports</comments>
+    <content>#@MetaDataStart
+#@DetailDescriptionStart
+##############################################################################
+# Purpose       : Configure HP Procurve for Authentication
+#
+# The 802.1X or MACauth or Both is configured on defined range of ports
+#
+# One or two radius servers are configured based on selection
+#
+# Tested versions H.10.119
+##############################################################################
+#@DetailDescriptionEnd
+
+# @SectionStart (description = Radius server configuration)
+
+# @VariableFieldLabel (description = "Radius Shared Secret")
+set var SharedSecret ETS_TAG_SHARED_SECRET
+
+# @VariableFieldLabel (description = "How many Radius servers?", validValues = [1, 2])
+set var NumberOfRadius 1
+
+# @VariableFieldLabel (description = "Radius Server 1")
+set var Radius1 127.0.0.1
+
+# @VariableFieldLabel (description = "Radius Server 2 (optional)")
+set var Radius2 127.0.0.1
+# @SectionEnd
+
+# @SectionStart (description = Authentication configuration)
+
+# @VariableFieldLabel (description = "802.1x or MACauth or Both?", validValues = [Dot1x, MACauth, Both])
+set var AuthType Both
+# @SectionEnd
+
+#@MetaDataEnd
+
+################################################################################
+#    Here starts the magic
+################################################################################
+
+proc ProCurvePortAuthConfig {VARportname VARauthtype} {
+
+    set bracket [string first ")" $VARportname 0]
+	IF ($bracket != -1) THEN
+	    incr bracket -1
+	    set varPORT [string range $VARportname 0 $bracket] 
+    ELSE
+        set varPORT $VARportname
+    ENDIF
+    
+    CLI aaa port-access $varPORT controlled-direction     
+    
+    IF ($VARauthtype == "MACauth") THEN
+        CLI aaa port-access mac-based $varPORT
+    ENDIF
+    
+    IF ($VARauthtype == "Dot1x") THEN
+        CLI aaa port-access authenticator $varPORT
+    ENDIF
+    
+    IF ($VARauthtype == "Both") THEN
+        CLI aaa port-access mac-based $varPORT
+        CLI aaa port-access authenticator $varPORT
+        CLI aaa port-access $varPORT mixed
+    ENDIF
+
+}
+
+
+################################################################################
+#    Here starts the main procedure
+################################################################################
+
+IF ($family =="Procurve" ) THEN
+    CLI configure
+    CLI aaa authentication port-access eap-radius
+    CLI aaa accounting network start-stop radius
+    CLI radius-server host $Radius1 key $SharedSecret
+    IF ($NumberOfRadius == 2) THEN
+	    CLI  CLI radius-server host $Radius2 key $SharedSecret
+    ENDIF
+    if {[catch {
+      set LENGTH [string length $port]
+    } result ]} {
+         puts "### You have not selected any port. ###"
+         set LENGTH 0
+         }
+    IF ($LENGTH &gt; 0) THEN
+		set I 0
+		set COMMA [string first "," $port $I]
+		while {$COMMA != -1 } {
+		 incr COMMA -1
+		 set UNIQUEPORT [string range $port $I $COMMA] 
+		 puts "### Lets configure the port $UNIQUEPORT for $AuthType ###"
+		 ProCurvePortAuthConfig $UNIQUEPORT $AuthType
+		 set I $COMMA
+		 incr I 2
+		 set COMMA [string first "," $port $I]
+		}
+		set UNIQUEPORT [string range $port $I $LENGTH]
+		puts "### Lets configure the port $UNIQUEPORT for $AuthType ###"
+		ProCurvePortAuthConfig $UNIQUEPORT $AuthType
+        CLI aaa port-access gvrp-vlans
+        IF ($AuthType == "Dot1X") THEN
+            CLI aaa port-access authenticator active
+        ENDIF
+        IF ($AuthType == "MACauth") THEN
+            CLI aaa port-access mac-based addr-format multi-colon
+        ENDIF
+        IF ($AuthType == "Both") THEN
+            CLI aaa port-access mac-based addr-format multi-colon
+            CLI aaa port-access authenticator active
+        ENDIF
+        
+    ENDIF
+
+ELSE
+    error "This script is only supported for HP Procurve switches. This device is $vendor."
+    puts "This script is only supported for HP Procurve switches. This device is $vendor."
+ENDIF
+
+puts "####################################"
+puts "### Have a nice day! Be Extreme! ###"
+puts "####################################"
+</content>
+    <creationDate>1542571333510</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,Groups,</contexts>
+    <id>192</id>
+    <lastUpdateDate>1542571333510</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_Procurve.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Authentication_Procurve.tcl</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>TCL</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>

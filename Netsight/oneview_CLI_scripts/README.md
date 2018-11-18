@@ -19,7 +19,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
 | EXOS, IOS |[Configure Vlan on the Port Cisco-Extreme](xml/Configure_Vlan_on_the_Port-Cisco-Extreme.xml?raw=true)|Configure vlan on ports - tagged or untagged based on request. The script check if the VLAN exists. If the vlan does not exist then the script does create the vlan. Tested on EXOS 15.3 and newer. Tested on Catalyst 12.2|TCL|
-| EXOS, IOS, Comware OS |[Configure Vlan on the Port Extreme-Cisco-Comware](xml/Configure_Vlan_on_the_Port-Extreme-Cisco-Comware.xml?raw=true)|Configure vlan on ports - tagged or untagged based on request. The script check if the VLAN exists. If the vlan does not exist then the script does create the vlan. Tested on EXOS 15.3 and newer. Tested on Catalyst 12.2. Tested on Comware 7.1.045|TCL|
+| EXOS, IOS, Comware OS, Procurve |[Configure Vlan on the Port Extreme-Cisco-Comware-Procurve](xml/Configure_Vlan_on_the_Port-Extreme-Cisco-Comware-Procurve.xml.xml?raw=true)|Configure vlan on ports - tagged or untagged based on request. The script check if the VLAN exists. If the vlan does not exist then the script does create the vlan. Tested on EXOS 15.3 and newer. Tested on Catalyst 12.2. Tested on Comware 7.1.045. Tested on Procurve H.10.119|TCL|
 | BOSS, EXOS |[L2VSN between FA Proxy](xml/FA_L2VSN_Create.xml?raw=true)|Provisioning a L2VSN between FA Proxy|Python|
 | EXOS |[Create EAPS ](xml/Create_EAPS.xml?raw=true)|Creates the ring, assign selected ports as ring ports, confirue one switch as master and all other switches are transit nodes.|TCL|
 | EXOS |[Create EAPS control VLAN](xml/Create_EAPS_control_VLAN.xml?raw=true)| If the vlan does not exist it does create the vlan, it add the vlan to the EAPS as control. Control vlan is configured as tagged on all EAPS ring ports.|TCL|
@@ -35,6 +35,8 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[Configuring FA Server on BEBs](xml/FAServer_Create.xml?raw=true)|FA Server configuration|Python|
 | VOSS |[L2VSN between BEBs](xml/L2VSN.xml?raw=true)|Provisioning a L2VSN between BEBs. It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary checks (FA enabled on it or not) but it doesn't create the MLT itself.|Python|
 | VOSS |[Authentication VOSS](xml/Authentication_VOSS.xml?raw=true)|Configure radius server and accounting for management access.|TCL|
+| Procurve |[Authentication Procurve](xml/Authentication_Procurve.xml?raw=true)|Script will configure Radius and authentication on Procurve devices & ports.|TCL|
+
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
