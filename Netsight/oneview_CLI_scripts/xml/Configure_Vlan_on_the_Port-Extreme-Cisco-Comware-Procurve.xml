@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="Configure Vlan on Port - Extreme-Cisco-Comware-Procurve">
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1542574059156</cacheDate>
+    <cacheDate>1546553746585</cacheDate>
     <category>,VLAN,</category>
     <comments>Will create vlan (if does not exist) and assign the vlan to selected ports</comments>
     <content># @METADATASTART
@@ -10,8 +10,8 @@
 # Community maintained CLI Scripting Library
 #
 # Script        : Configure vlan on ports - tagged or untagged based on request
-# Revision      : 1.2
-# Last updated  : 23.04.2018
+# Revision      : 1.3
+# Last updated  : 4.01.2019
 # Purpose       : Configure PVID on selected ports
 # Devices	    : Cisco Catalyst 12.2, XOS 15.7,
 # Devices       : XOS 21.3, XOS 22.2, XOS 15.3, 
@@ -173,7 +173,9 @@ IF ($vendor =="Cisco" ) THEN
             foreach line $records {
                 set LENGTH [string length $line]
                 set SPACE [string first " " $line 0]
-                set VLANTAG $TEMP
+                IF ($TEMP != "") THEN
+                    set VLANTAG $TEMP
+                ENDIF
                 set TEMP [string range $line 0 $SPACE] 
             }
             puts "### VLAN $VLANNAME does have tag $VLANTAG"
@@ -385,11 +387,12 @@ ENDIF</content>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Port,Device,Groups,</contexts>
-    <id>206</id>
-    <lastUpdateDate>1542574059134</lastUpdateDate>
-    <lastUpdatedBy>root</lastUpdatedBy>
+    <id>7044</id>
+    <lastUpdateDate>1546553746527</lastUpdateDate>
+    <lastUpdatedBy>zpala</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Configure_Vlan_on_Port_-_Extreme-Cisco-Comware-Procurve.xml</metaDataPath>
     <miscXMLData></miscXMLData>
+    <nosIds></nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
