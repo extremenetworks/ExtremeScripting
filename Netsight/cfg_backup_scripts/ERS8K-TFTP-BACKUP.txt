@@ -1,0 +1,34 @@
+-- Use these scripts to manage ERS8800 devices
+name="ERS8800 - TFTP"
+desc="ERS8800 TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+save config file config.xmc
+y
+copy config.xmc %TFTP_IP%:%RELATIVE_TARGET_FILE_PATH%
+@receive 10
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+copy config.cfg config.bak -y
+copy %TFTP_IP%:%RELATIVE_TARGET_FILE_PATH% config.cfg
+y
+boot -y
+@receive 10
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+-----END SUCCESS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Upload"-----
+.*ERROR: Trying to TFTP file
+.*Can't open
+-----END FAILURE MAPPINGS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Download"-----
+.*ERROR: Trying to TFTP file
+.*Can't open
+-----END FAILURE MAPPINGS-----

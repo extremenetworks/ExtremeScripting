@@ -1,0 +1,54 @@
+-- Use these scripts to manage Cisco devices
+name="Cisco Firmware 2k TAR - TFTP"
+desc="Cisco Systems 2xx0 SSH/TFTP Scripts. Firmware upgrade from TAR not BIN"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+%ENABLEPSWD%
+copy running-config tftp:
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+@receive 40
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+bytes copied
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+%ENABLEPSWD%
+copy %TFTP_URL% startup-config
+startup-config
+@receive 60
+reload
+
+
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+bytes copied
+-----END SUCCESS-----
+
+-----BEGIN PRE-SCRIPT "Firmware Download"-----
+-----END PRE-SCRIPT-----
+-----BEGIN SCRIPT "Firmware Download"-----
+enable
+%ENABLEPSWD%
+write
+@receive 10
+archive download-sw /overwrite tftp://%TFTP_IP%/firmware/images/%TARGET_FILE_NAME%
+@RECEIVEUNTIL 1800 "All software images installed"
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+All software images installed.
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Reset"-----
+enable
+%ENABLEPSWD%
+reload
+
+
+exit
+-----END SCRIPT-----
