@@ -1,0 +1,43 @@
+-- Use these scripts to manage Cisco devices
+name="Brocade BR69xx - TFTP"
+desc="Extreme - Brocade BR69xx TFTP Scripts."
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config tftp
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+@RECEIVEUNTIL 40 "Success."
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+Success.
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+copy tftp running-config
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+
+@SLEEP 30
+
+copy running-config startup-config
+
+
+@RECEIVEUNTIL 10 "Success."
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+Success.
+-----END SUCCESS-----
+
+-----BEGIN PRE-SCRIPT "Firmware Download"-----
+-----END PRE-SCRIPT-----
+-----BEGIN SCRIPT "Firmware Download"-----
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Reset"-----
+reload
+y
+exit
+-----END SCRIPT-----

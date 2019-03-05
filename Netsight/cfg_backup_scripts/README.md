@@ -6,12 +6,13 @@
 # Extreme Management Center (XMC) Scripts
 | Script name   | Description   |
 | ------------- | ------------- |
+|[Avaya ERS8xxx](ERS8K-TFTP-BACKUP.txt)|XMC Configuration backup and restore of Nortel/Avaya ERS8000 family. Restore works only single CPU platforms.|
 |[Barracuda F-Series](Barracuda-SCP.txt)|XMC Configuration backup/restore of Barracuda NG Firewall F-Series.|
 |[Cisco Catalyst](CiscoCatalyst-withRestore-TFTP.txt)|XMC Configuration backup/restore for Cisco Catalyst.|
 |[Cisco Firmware 2xxx TAR](CiscoCatalyst2xxx_firmware_from_tar.txt)|XMC Configuration backup and restore and FW upgrade and reset for Cisco Catalyst 2xxx. TAR file not BIN. Can take 30 minutes based on platform. Be patient.|
 |[Cisco WLC 5500](Cisco_WLC_5500)|XMC Configuration backup of Cisco WLC 5500.|
 |[Dell Force10](dell-force10)|XMC Configuration backup of Dell Force10|
-|[Avaya ERS8xxx](ERS8K-TFTP-BACKUP.txt)|XMC Configuration backup and restore of Nortel/Avaya ERS8000 family. Restore works only single CPU platforms.|
+|[Extreme BR69xx](BR69xx.txt)|XMC Configuration backup and restore and restart of Brocade/Extreme BR69xx|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backup of FortiGate|
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backup/restore & firmware upgrade of Comware|
 |[Juniper EX SCP](juniper_EX-SCP)|XMC Configuration backup/restore of Juniper EX over SCP|
