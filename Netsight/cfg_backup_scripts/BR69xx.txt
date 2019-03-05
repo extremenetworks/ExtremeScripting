@@ -1,4 +1,4 @@
--- Use these scripts to manage Cisco devices
+-- Use these scripts to manage Extreme/Brocade BR69xx devices
 name="Brocade BR69xx - TFTP"
 desc="Extreme - Brocade BR69xx TFTP Scripts."
 protocol=TFTP
