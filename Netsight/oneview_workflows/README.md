@@ -10,6 +10,8 @@
 |[Uptime and Tech Support](xwf/Uptime_and_Tech_Support-8.2.3.67v84.xwf)|Does check the uptime of each device. If the uptime is lower then configured value and the device is not in maintenance then the workflow does gather tech support information and send email|Configure the variable and email destination.|
 |[Gather Show Support based on alarm](xwf/Gather_Show_Support-8.2.3.67v11.xwf)|Gather show support information based on information from alarm. Generate alarm with details|Configure the email destination. Create Alarm to execute this workflow|
 |[Update Device Notes - Group Membership](xwf/Update_Device_Notes-Group_Membership-8.2.4.24v13.xwf)|The workflow does modify device property to reflect groups the device belong to.|Modify the Inputs to define what property you want to modify and what prefix you want to use. Run the workflow and save it as task. Schedule the task for periodic execution.|
+|[GDPR - Delete end-system from ExtremeControl](xwf/GDPR-Delete_End-System-8.2.4.41v6.xwf)|This workflow does delete End-System with specified MAC from the database.|Various MAC address formats are accepted: lowercase, uppercase, dot delimited, column delimited, dash delimited, not delimited|
+
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
