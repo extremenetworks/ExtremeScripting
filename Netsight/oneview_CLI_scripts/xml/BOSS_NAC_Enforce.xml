@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="ERS NAC Enforce">
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1549886391260</cacheDate>
+    <cacheDate>1553502550396</cacheDate>
     <category>,Config,</category>
-    <comments>Enforce XMC NAC switch config to ERS switch - v1.1</comments>
+    <comments>Enforce XMC NAC switch config to ERS switch - v1.3</comments>
     <content>##########################################################
-# Ludo Standard library; Version 1.5                     #
+# Ludo Standard library; Version 1.7                     #
 # Written by Ludovico Stevens, CSE Extreme Networks      #
 ##########################################################
 try:
@@ -17,6 +17,7 @@ except: # If not running on XMC Jython...
     import java.util
     import emc_cli
     import emc_nbi
+    import emc_results
     import json
     import sys
     execution = 'dev'
@@ -118,11 +119,13 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a 
     else:
         raise RuntimeError(resultObj.getError())
 
-def sendCLI_configChain(chainStr): # Send a semi-colon separated list of config commands
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
     cmds = map(str.strip, re.split(r'[;\n]', chainStr))
     for cmd in cmds:
         if len(cmd): # Skip empty lines
-            sendCLI_configCommand(cmd)
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
     return True
 
 def sendCLI_showRegex(cmdRegexStr): # Send show command and extract values from output using regex
@@ -168,6 +171,7 @@ def xmcLinuxCommand(cmdRegexStr): # Execute a command on XMC and recover the out
     cmdList = cmd.split(' ')
     if execution == 'dev': # I develop on my Windows laptop...
         cmdList[0] += '.bat'
+    debug("xmcLinuxCommand about to execute : {}".format(cmd))
     outputStr = subprocess.check_output(cmdList)
     # We return a list of captured output; if nothing was matched an empty list is returned
     return re.findall(regex, outputStr, re.MULTILINE)
@@ -304,7 +308,7 @@ def printConfigSummary(): # Print summary of all config commands executed with c
 ##########################################################
 # Push NAC configuration to ERS switch
 
-__version__ = '1.1'
+__version__ = '1.3'
 
 # 1.0 - Initial
 # 1.1 - Was failing to set auto-non-eap-mhsa-enable on port in MHSA mode
@@ -312,7 +316,10 @@ __version__ = '1.1'
 #     - FA Client ports are not only filtered out from port selection, but are also disabled for eapol
 #     - ERS in FA server mode, now also filters out downlink FA Proxy ports
 #     - More paging is now disabled on ERS; terminal length is recorded upon connection and restored on exit
-
+# 1.2 - Script was failing if run on XMC with no NTP server configured; now the script will work but if no
+#       NTP server is configured on XMC then no NTP/SNTP configuration will be performed on ERS either
+#     - Script was failing with telnet as it was not executing "enable" upon CLI connection 
+# 1.3 - Some Cleanup; script version printed in output
 
 #
 # XMC Metadata
@@ -329,7 +336,7 @@ __version__ = '1.1'
 #  1 - Add the switch under XMC Access Control Engine Group
 #  2 - And, still under XMC Access Control, configure the switch for:
 #      - Primary/Secondary engine
-#      - Auth. Access type (Manual RADIUS Configuration)
+#      - Authentication Access type (Manual RADIUS Configuration)
 #      - RADIUS Attributes to Send (Fabric Attach attributes)
 #      - RADIUS accounting (enabled or disabled)
 #      - Advanced settings / RADIUS shared secret key
@@ -374,6 +381,8 @@ __version__ = '1.1'
 # - RADIUS dynamic-client (RFC3576 Change-of-Authorization)
 # - NTP or SNTP configuration to match that of the XMC Server, including the right timezone
 #   (RFC3576 Change-of-Authorization requires the switch and server to have the same time)
+#   Note: if XMC has no NTP server configured, then no NTP/SNTP config will be applied to the
+#   ERS and in this case RADIUS CoA replay-protection will be disabled, otherwise CoA won't work
 # - RADIUS reachability, if specified by user
 # - EAPoL global and port level configuration
 # - If the port selection included FA Client ports and these are to be filtered out,
@@ -392,6 +401,8 @@ __version__ = '1.1'
 # in this case the script will execute even if the ERS switch has already been deleted
 # from the XMC Access Control configuration
 #
+# Limitations: This script will only work on XMC Linux based VM installations.
+#              Running this script on a Windows based XMC installation will fail.
 #######################################################################################
 #@DetailDescriptionEnd
 
@@ -483,8 +494,9 @@ NBI_Query = { # GraphQl query used to obtain NAC config for switch with IP = {0}
     '''
 }
 
-CLI_Dict = { # {0} = i-sid; {1} = vlan; {2} = port-list
-    'config_context'             : 'enable; config term',
+CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
+    'enable_context'             : 'enable',
+    'config_context'             : 'config term',
     'port_config_context'        : 'interface Ethernet {}', # List of ports
     'exit_config_context'        : 'exit',
     'end_config'                 : 'end',
@@ -524,6 +536,8 @@ CLI_Dict = { # {0} = i-sid; {1} = vlan; {2} = port-list
                                    },
     'list_mlt_ports'             : 'show mlt|^\d[\d ] .{16} ([\d\/,-]+)',
     'set_timezone'               : 'clock time-zone {} {} {}', # Zone, hours-offset, minutes
+    'enable_coa_replay_protect'  : 'radius dynamic-server replay-protection',
+    'disable_coa_replay_protect' : 'no radius dynamic-server replay-protection',
     'set_radius_encap'           : 'radius-server encapsulation {}', # pap|ms-chap-v2 ; this command does not exist on lower end ERS models (3600,3500)
     'list_radius_coa_clients'    : 'show radius dynamic-server|^(\d+\.\d+\.\d+\.\d+)',
     'delete_radius_coa_client'   : 'no radius dynamic-server client {}', # Client IP
@@ -595,11 +609,16 @@ CLI_Dict = { # {0} = i-sid; {1} = vlan; {2} = port-list
     'port_config_reauth_timer'   : 'eapol re-authentication-period {}', # Value
 }
 
+Shell_Dict = { # Dictionary of all Linux shell commands used by this script
+    'list_ntp_servers'           : 'ntpq -pn |^[*+](\d+\.\d+\.\d+\.\d+)',
+    'get_time_zone'              : 'date +%Z%z |^(\w+)([-+]\d\d)(\d\d)',
+}
 
 #
 # Main:
 #
 def main():
+    print "ERS-NAC-Enforce version {}".format(__version__)
 
     #
     # Obtain Info on switch and from XMC
@@ -668,18 +687,27 @@ def main():
         else:
             ersRadiusAcct = ''
 
-        xmcNtpList = xmcLinuxCommand('ntpq -pn |^[*+](\d+\.\d+\.\d+\.\d+)')
-        print " - XMC NTP Server 1 = {}".format(xmcNtpList[0])
-        if len(xmcNtpList) &gt; 1:
-            print " - XMC NTP Server 2 = {}".format(xmcNtpList[1])
+        xmcNtpList = xmcLinuxCommand(Shell_Dict['list_ntp_servers'])
+        debug("xmcNtpList = {}".format(xmcNtpList))
+        if xmcNtpList:
+            print " - XMC NTP Server 1 = {}".format(xmcNtpList[0])
+            if len(xmcNtpList) &gt; 1:
+                print " - XMC NTP Server 2 = {}".format(xmcNtpList[1])
 
-        xmcTimeZone = xmcLinuxCommand('date +%Z%z |^(\w+)([-+]\d\d)(\d\d)')
-        print " - XMC Time Zone = {} {}:{}".format(xmcTimeZone[0][0], xmcTimeZone[0][1], xmcTimeZone[0][2])
+            xmcTimeZone = xmcLinuxCommand(Shell_Dict['get_time_zone'])
+            debug("xmcTimeZone = {}".format(xmcTimeZone))
+            print " - XMC Time Zone = {} {}:{}".format(xmcTimeZone[0][0], xmcTimeZone[0][1], xmcTimeZone[0][2])
+
+        else:
+            print " - XMC has no NTP Server configured"
 
     # First off, determine the terminal length (this is not per session on ERS), so that we can restore it on exit
     morePaging = sendCLI_showRegex(CLI_Dict['get_terminal_length'])[0]
-    # Then disable --more-- paging; this will make the script considerably faster
-    sendCLI_configCommand(CLI_Dict['disable_more_paging'])
+    if int(morePaging) &gt; 0: # If not already disabled, disable --more-- paging; this will make the script considerably faster
+        sendCLI_configCommand(CLI_Dict['disable_more_paging'])
+
+    # Enter privExec mode (required with Telnet..)
+    sendCLI_configCommand(CLI_Dict['enable_context'])
 
     # Establish the Stacking mode
     stackingMode = sendCLI_showRegex(CLI_Dict['get_stacking_mode'])[0]
@@ -694,7 +722,7 @@ def main():
         print "Extracted information from ERS switch via CLI:"
         print " - ERS Stacking mode = {}".format(stackingMode)
         print " - ERS access ports where to disable NAC = {}".format(enteredNacPortList)
-        sendCLI_configChain(CLI_Dict['config_context'])
+        sendCLI_configCommand(CLI_Dict['config_context'])
         sendCLI_configCommand(CLI_Dict['port_config_context'].format(enteredNacPortList))
         sendCLI_configCommand(CLI_Dict['port_disable_eap'])
         sendCLI_configCommand(CLI_Dict['end_config'])
@@ -768,17 +796,18 @@ def main():
     # Overwriting radius dynamic clients is not possible, so need to see what's already configured
     ersCoaClients = sendCLI_showRegex(CLI_Dict['list_radius_coa_clients'])
 
-    # Check if this ERS supports NTP (some dont; ERS3500 &amp; 3600 currently only support SNTP)
-    sendCLI_showCommand(CLI_Dict['check_ntp_support'], True, 'we deduce from it that NTP is not supported on this ERS model') # We expect an error message from an ERS which does not support NTP
-    if LastError:
-        switchNtpSupport = False
-    else:
-        switchNtpSupport = True
-    # Get NTP/SNTP servers already configured on switch, if any
-    if switchNtpSupport: # If the ERS supports NTP
-        switchNtpList = sendCLI_showRegex(CLI_Dict['list_ntp_servers'])
-    else: # The ERS supports only SNTP (currently ERS3600 &amp; ERS3500)
-        switchNtpList = sendCLI_showRegex(CLI_Dict['list_sntp_servers'])
+    if xmcNtpList: # Only if XMC is configured with NTP server(s)
+        # Check if this ERS supports NTP (some dont; ERS3500 &amp; 3600 currently only support SNTP)
+        sendCLI_showCommand(CLI_Dict['check_ntp_support'], True, 'we deduce from it that NTP is not supported on this ERS model') # We expect an error message from an ERS which does not support NTP
+        if LastError:
+            switchNtpSupport = False
+        else:
+            switchNtpSupport = True
+        # Get NTP/SNTP servers already configured on switch, if any
+        if switchNtpSupport: # If the ERS supports NTP
+            switchNtpList = sendCLI_showRegex(CLI_Dict['list_ntp_servers'])
+        else: # The ERS supports only SNTP (currently ERS3600 &amp; ERS3500)
+            switchNtpList = sendCLI_showRegex(CLI_Dict['list_sntp_servers'])
 
     print "Extracted information from ERS switch via CLI:"
     print " - ERS Terminal length which will be restored on exit = {}".format(morePaging)
@@ -795,40 +824,47 @@ def main():
     else:
         print " - Ports where to config NAC after pruning uplink &amp; MLT ports = {}".format(nacPortList)
     print " - Existing RADIUS dynamic CoA clients = {}".format(', '.join(ersCoaClients))
-    print " - ERS supports NTP = {}".format(str(switchNtpSupport))
-    if switchNtpSupport:
-        print " - Existing NTP Servers = {}".format(', '.join(switchNtpList))
-    else:
-        print " - Existing SNTP Servers = {}".format(', '.join(switchNtpList))
+    if xmcNtpList: # Only if XMC is configured with NTP server(s)
+        print " - ERS supports NTP = {}".format(str(switchNtpSupport))
+        if switchNtpSupport:
+            print " - Existing NTP Servers = {}".format(', '.join(switchNtpList))
+        else:
+            print " - Existing SNTP Servers = {}".format(', '.join(switchNtpList))
 
     #
     # Now configure the switch
     #
     # Enter config mode
-    sendCLI_configChain(CLI_Dict['config_context'])
+    sendCLI_configCommand(CLI_Dict['config_context'])
 
     # Before configuring RADIUS server or configuring NTP/SNTP, make sure we delete any pre-existing radius dynamic clients, as this will prevent setting the clock-source and this config cannot be over-written anyway
     if ersCoaClients: # Residual config exists
         for clientIp in ersCoaClients:
             sendCLI_configCommand(CLI_Dict['delete_radius_coa_client'].format(clientIp))
 
-    # If switch configured NTP/SNTP servers are not the XMC ones, delete them all
-    if xmcNtpList[0] not in switchNtpList or (len(xmcNtpList) == 2 and xmcNtpList[1] not in switchNtpList):
-        if switchNtpSupport: # We always prefer NTP if the ERS supports it
-            for ntpIp in switchNtpList:
-                sendCLI_configCommand(CLI_Dict['delete_ntp_server'].format(ntpIp))
-            for ntpIp in xmcNtpList:
-                sendCLI_configCommand(CLI_Dict['create_ntp_server'].format(ntpIp))
-            sendCLI_configChain(CLI_Dict['enable_ntp'])
-        else: # We fall back to SNTP only if ERS does not support SNTP
-            sendCLI_configChain(CLI_Dict['delete_sntp_servers'])
-            sendCLI_configCommand(CLI_Dict['create_sntp_server1'].format(xmcNtpList[0]))
-            if len(xmcNtpList) == 2:
-                sendCLI_configCommand(CLI_Dict['create_sntp_server2'].format(xmcNtpList[1]))
-            sendCLI_configChain(CLI_Dict['enable_sntp'])
-
-    # Set the time-zone
-    sendCLI_configCommand(CLI_Dict['set_timezone'].format(xmcTimeZone[0][0], xmcTimeZone[0][1], xmcTimeZone[0][2]))
+    if xmcNtpList: # Only if XMC is configured with NTP server(s)
+        # If switch configured NTP/SNTP servers are not the XMC ones, delete them all
+        if xmcNtpList[0] not in switchNtpList or (len(xmcNtpList) == 2 and xmcNtpList[1] not in switchNtpList):
+            if switchNtpSupport: # We always prefer NTP if the ERS supports it
+                for ntpIp in switchNtpList:
+                    sendCLI_configCommand(CLI_Dict['delete_ntp_server'].format(ntpIp))
+                for ntpIp in xmcNtpList:
+                    sendCLI_configCommand(CLI_Dict['create_ntp_server'].format(ntpIp))
+                sendCLI_configChain(CLI_Dict['enable_ntp'])
+            else: # We fall back to SNTP only if ERS does not support SNTP
+                sendCLI_configChain(CLI_Dict['delete_sntp_servers'])
+                sendCLI_configCommand(CLI_Dict['create_sntp_server1'].format(xmcNtpList[0]))
+                if len(xmcNtpList) == 2:
+                    sendCLI_configCommand(CLI_Dict['create_sntp_server2'].format(xmcNtpList[1]))
+                sendCLI_configChain(CLI_Dict['enable_sntp'])
+    
+        # Set the time-zone
+        sendCLI_configCommand(CLI_Dict['set_timezone'].format(xmcTimeZone[0][0], xmcTimeZone[0][1], xmcTimeZone[0][2]))
+        # Make sure RADIUS CoA replay-protection is enabled
+        sendCLI_configCommand(CLI_Dict['enable_coa_replay_protect'])
+    else:
+        # In this case we disable RADIUS CoA replay-protection, otherwise CoA will not work if ERS and XMC clocks are not in synch
+        sendCLI_configCommand(CLI_Dict['disable_coa_replay_protect'])
 
     # Set the RADIUS encap (for MAC based auth)
     if radiusEncap: # Only if user set a value for this
@@ -924,8 +960,8 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <id>437</id>
-    <lastUpdateDate>1549886391211</lastUpdateDate>
+    <id>923</id>
+    <lastUpdateDate>1553502550318</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/ERS_NAC_Enforce.xml</metaDataPath>
     <miscXMLData></miscXMLData>
@@ -938,7 +974,7 @@ main()
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,NetSight Administrator,</roles>
+    <roles>,CSE,NetSight Administrator,SE,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>
