@@ -12,6 +12,9 @@
 |[Update Device Notes - Group Membership](xwf/Update_Device_Notes-Group_Membership-8.2.4.24v13.xwf?raw=true)|The workflow does modify device property to reflect groups the device belong to.|Modify the Inputs to define what property you want to modify and what prefix you want to use. Run the workflow and save it as task. Schedule the task for periodic execution.|
 |[GDPR - Delete end-system from ExtremeControl](xwf/GDPR-Delete_End-System-8.2.4.41v6.xwf?raw=true)|This workflow does delete End-System with specified MAC from the database.|Various MAC address formats are accepted: lowercase, uppercase, dot delimited, colon delimited, dash delimited, not delimited|
 |[GDPR - Delete from ExtremeControl](xwf/GDPR-Delete-8.2.4.41v4.xwf?raw=true)|This workflow does delete End-System with specified MAC or Username from the database.|Various MAC address formats are accepted: lowercase, uppercase, dot delimited, colon delimited, dash delimited, not delimited. Domain is not mandatory in the username.|
+|[Synchronize Vlans on the VTP master](xwf/Synchronize_Vlans_on_Catalyst-8.2.5.46v13.xwf?raw=true)|This workflow does create VLANs on the Cisco Catalyst switch based on Site vlan configuration. The workflow does delete VLANs from Cisco Catalyst if the VLAN does not exist in the Site. The workflow does rename VLAN name to match the SITE.|If there was change done then the event is generated.|
+|[Refresh Neighbor Devices](xwf/Refresh_Neighbor_Devices-8.2.4.55v2.xwf?raw=true)|This workflow does check neighbor devices based on XMC link database and does execute refresh of each neighbor. If the device goes down or up then the map is automatically updated.|Create Status Change Alarm and for both contact lost and contact established add action run task with this workflow. |
+
 
 
 # Support

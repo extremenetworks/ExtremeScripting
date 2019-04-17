@@ -37,7 +37,7 @@ enable
 %ENABLEPSWD%
 write
 @receive 10
-archive download-sw /overwrite tftp://%TFTP_IP%/firmware/images/%TARGET_FILE_NAME%
+archive download-sw /overwrite /allow-feature-upgrade tftp://%TFTP_IP%/firmware/images/%TARGET_FILE_NAME%
 @RECEIVEUNTIL 1800 "All software images installed"
 exit
 -----END SCRIPT-----
