@@ -3,7 +3,7 @@ Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 
 # Platforms
 * [EXOS Switches](https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/README.md)
-* [Netsight Scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/README.md)
+* [XMC (Netsight) Scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/README.md)
 
 #### Quick links
 * [EXOS Python Scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/EXOS/Python/README.md)
