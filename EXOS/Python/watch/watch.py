@@ -26,7 +26,7 @@ from exsh import clicmd
 from time import sleep
 import sys
 import re
-
+import signal
 
 class ArgParser(argparse.ArgumentParser):
    def error(self, message):
