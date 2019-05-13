@@ -1,3 +1,5 @@
+# Comma delimited values.
+# SyObjectID or substring of SysObjectID, Device User Group name, Note
 1.3.6.1.4.1.4329.15.1.1.13, Wireless Controller, super note
-1.3.6.1.4.1.1916.2., EXOS, switch
+1.3.6.1.4.1.1916.2., EXOS, switches
 1.3.6.1.4.1.6876.4.1, VMware

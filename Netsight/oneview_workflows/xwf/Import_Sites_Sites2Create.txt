@@ -1,0 +1,11 @@
+# Simple text file with sites to create
+# The full site name is expected starting with /World 
+# The parent site must exist.
+/World/Earth
+/World/Earth/EMEA
+/World/Earth/EMEA/Europe
+/World/Earth/EMEA/Africa
+/World/Earth/APAC
+/World/Earth/APAC/Asia
+/World/DeepSpace
+
