@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script name="L2VSN">
+<script name="Fabric L2VSN">
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1528991149066</cacheDate>
-    <category>,Extreme Fabric Connect,</category>
-    <comments>configure L2VSN between BEBs.</comments>
+    <cacheDate>1557733630922</cacheDate>
+    <category>,Fabric Connect,</category>
+    <comments>This script provisions a L2VSN between several BEBs running VOSS (VSP switches) and/or # FA switches (EXOS/BOSS).</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
 
@@ -18,34 +18,158 @@ THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
 
-This script provisions a L2VSN between several BEBs running VOSS (VSP switches).
+This script provisions a L2VSN between several BEBs running VOSS (VSP switches)
+and/or FA switches (EXOS/BOSS)
+
+It only manages C-UNI type of services
 
 It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary
 checks (FA enabled on it or not) but it doesn't create the MLT itself.
 
-If you need to create a L2VSN between a cluster of BEBs (SMLT) and single BEBs, you MUST
-run this script twice. Once on the cluster of BEBs, providing the correct MLT Id, and once 
-for the single BEBs, providing the correct UNI port.
 '''
+
+try:
+    emc_vars
+except: # If not running on XMC Jython...
+    raise RuntimeError('This script must be used with XMC')
+
+# IMPORTS
+import re
+import json
+
+# VARIABLES:
+Debug = False
+Sanity = False
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|already exist|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexPort = re.compile('^(?:[1-9]\d?[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d?)([/:]))?(\d+)-(?:([1-9]\d?)[/:])?(\d+)$')
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+
+def cleanOutput(outputStr): # Remove echoed command and final prompt from output
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def sendCLI_jsonrpc(cmd, jsonrpc): # Send a CLI command using jsonrpc and return all the data
+    response = jsonrpc.cli(cmd)
+    return response.get('result')
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            raise RuntimeError(outputStr)
+        else:
+            LastError = None
+            return outputStr
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI config command
+    global LastError
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmd)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            raise RuntimeError(outputStr)
+        else:
+            ConfigHistory.append(cmd)
+            LastError = None
+            return True
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
+    cmds = map(str.strip, re.split(r'[;\n]', chainStr))
+    for cmd in cmds:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+def sendCLI_showRegex(cmdRegexStr): # Send show command and extract values from output using regex
+    cmd, regex = map(str.strip, cmdRegexStr.split('|', 1))
+    outputStr = sendCLI_showCommand(cmd)
+    # We return a list of captured output; if nothing was matched an empty list is returned
+    return re.findall(regex, outputStr, re.MULTILINE)
+
+def sendConfigCmds(cmds, returnCliError=False, msgOnError=None): # Send a list of config commands
+    for cmd in cmds:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+##########################################################
+# XMC Script: Creates a Fabric Connect                   #
+# Written by Stephane Grosjean, PSE Extreme Networks     #
+##########################################################
+
+__version__ = '0.2'
+
+#
+# XMC Metadata
+#
+
 
 #@MetaDataStart
 #@DetailDescriptionStart
 ######################################################################################
 # 
-# This script provisions a L2VSN between several BEBs running VOSS (VSP switches).
+# This script provisions a L2VSN between several BEBs running VOSS (VSP switches) and/or
+# FA switches (EXOS/BOSS).
 # 
 # It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary
 # checks (FA enabled on it or not) but it doesn't create the MLT itself.
 # 
-# If you need to create a L2VSN between a cluster of BEBs (SMLT) and single BEBs, you MUST
-# run this script twice. Once on the cluster of BEBs, providing the correct MLT Id, and once 
-# for the single BEBs, providing the correct UNI port.
-#
 #######################################################################################
 #@DetailDescriptionEnd
 
 #@SectionStart (description = "Service Definition")
-#@VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
+#    @VariableFieldLabel (description = "VLAN Id &lt;1 - 4094&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -53,7 +177,7 @@ for the single BEBs, providing the correct UNI port.
 #                     value = "1"
 #                     )
 
-#@VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
+#    @VariableFieldLabel (description = "SERVICE Id &lt;1 - 16 000 000&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -62,114 +186,67 @@ for the single BEBs, providing the correct UNI port.
 #                     )
 #@SectionEnd
 
-#@SectionStart (description = "Single BEB Port Assignment")
-#@VariableFieldLabel (description = "UNI Port",
+#@SectionStart (description = "Interface Specific Configuration")
+#    @VariableFieldLabel (description = "UNI Port",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
 #                     name = "portlist",
-#                     value = "1/1"
+#                     value = "1/1",
+#                     scope = device
 #                     )
-#@SectionEnd
 
-#@SectionStart (description = "Cluster BEBs MLT Assignment")
-#@VariableFieldLabel (description = "MLT",
+#    @VariableFieldLabel (description = "MLT",
 #                     type = string,
 #                     required = yes,
 #                     validValues = [yes,no],
 #                     readOnly = no,
 #                     name = "mlt",
-#                     value = "no"
+#                     value = "no",
+#                     scope = device
 #                     )
 
-#@VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
+#    @VariableFieldLabel (description = "MLT Id &lt;1 - 256&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
 #                     name = "mltid",
-#                     value = "1"
+#                     value = "1",
+#                     scope = device
 #                     )
-#@SectionEnd
 
-#@SectionStart (description = "UNI Port/MLT 802.1Q Tagging")
-#@VariableFieldLabel (description = "802.1Q Tagging",
+#    @VariableFieldLabel (description = "802.1Q Tagging",
 #                     type = string,
 #                     required = yes,
 #                     validValues = [yes,no],
 #                     readOnly = no,
 #                     name = "tag",
-#                     value = "yes"
+#                     value = "yes",
+#                     scope = device
 #                     )
 #@SectionEnd
 #@MetaDataEnd
 
 
-def getOutputOnly(inputStrings):
-    try:
-        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
-        pivotVersion = ''.join("8.1.2".split('.'))
-        if int(version) == int(pivotVersion):
-            lines = inputStrings.splitlines()[1:]
-        else:
-            lines = inputStrings.splitlines()[1:-1]
-        return '\n'.join(lines)
-    except:
-        return None
-
-def getVidVsn(inputString):
-    myList = []
-    lines = inputString.splitlines()[6:-2]
-    
-    for line in lines:
-        vid_dict = {}
-        parts = line.split()
-        if parts == []:
-            continue
-        if len(parts) &gt; 1:
-            vid_dict["vid"] = parts[0]
-            vid_dict["isid"] = parts[-1]
-        else:
-            vid_dict["vid"] = parts[0]
-
-        myList.append(vid_dict) 
-        
-    return myList
-    
-def sendConfigCmds(cmds):
-    for cmd in cmds:
-        cli_results = emc_cli.send(cmd)
-        if cli_results.isSuccess() is False:
-            print cli_results.getError()
-            return None
-    return True
-
+# On VSP we retrieve the actual interface list in FA mode - both MLT and Port
+# we format the result so that it can be used directly as the interface name in a CLI command
 def CreateFAList():
     myList = []
+    info = sendCLI_showRegex('show fa interface|^([a-zA-Z]+\d+/?\d?\d?\d?)\s+(\w+)\s+\d+\s+\w+\s+(\w+)')
     
-    cli_results = emc_cli.send('show fa interface')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    lines = cli_output.splitlines()[7:-4]
-    
-    for line in lines:
+    for row in info:
         fa_dict = {}
-        parts = line.split()
-        if parts == []:
-            continue
-        if parts[0].startswith("Port"):
-            fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
+        if row[0].startswith("Port"):
+            fa_dict["intf"] = ''.join( c for c in row[0] if c not in 'Port' )
         else:
-            fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
-        fa_dict["status"] = parts[1]
-        fa_dict["auth"] = parts[4]
+            fa_dict["intf"] = row[0].replace("Mlt","mlt ")
+        fa_dict["status"] = row[1]
+        fa_dict["auth"] = row[2]
         myList.append(fa_dict)
         
     return myList
 
+# we check the FA interface list to see if the interface is already in FA or not
 def CheckFAonPort(interface):
     fa = CreateFAList()
     if fa is None:
@@ -182,53 +259,90 @@ def CheckFAonPort(interface):
         if entry["intf"] == interface:
             if entry["status"] == "enabled":
                 return None
-    return True
+    return True 
+
+# we list the vlans associated to an ISID
+def getVidVsn():
+    myList = []
     
+    isids = sendCLI_showRegex('show i-sid|(^\d+)\s+(\w+)\s+(\d+|\w/\w)')
+
+    for row in isids:
+        visid = {}
+        visid["isid"] = row[0]
+        if "/" not in row[2]:
+            visid["vid"] = row[2]
+        else:
+            visid["vid"] = None
+        myList.append(visid)
+    
+    return myList
+
+# using the json capability of EXOS to easily retrieve the VLAN list
+def getVlanList(reply):
+    reply_json = json.loads(str(reply))
+    data = reply_json.get('data')
+    vlanList = []
+    if data:
+        for row in data:
+            vlanList.append(row.get('tag'))
+        return vlanList
+    return None
+
+# we are using the json capability of EXOS to obtain the data
+# this is a way better and more elegant way than screen scraping
+# this command returns the list of vlan and ISID
+def exosCheckNSI(vid, isid):
+    reply = sendCLI_showCommand('debug cfgmgr show next lldp.faMapping')
+    reply_json = json.loads(reply)
+    data = reply_json.get("data")
+    if data:
+        for row in data:
+            if isid == row.get("nsi"):
+                if vid == row.get("vlanId"):
+                    return 1,vid 
+                return 0,row.get("vlanId")
+    return 2,isid
+
+
+
 def main():
     createVlan = True
 
+    # some basic sanity checks
     if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
-        print "Error: The VLAN Id is out of range"
-        return
+        raise RuntimeError('VLAN Id is out of range')
     if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
-        print "Error: The Service Id is out of range"
-        return
-        
+        raise RuntimeError('Service Id is out of range')
+    
+    # are we running the script on a supported device?    
     family = emc_vars["family"]
-    if family != "VSP Series":
-        print "Error: This script needs to be run on a VSP switch"
-        return
+    if family not in ["VSP Series", "Summit Series", "ERS Series"]:
+        raise RuntimeError('This script requires to be ran on VSP, EXOS or ERS switches')
 
-    if CheckFAonPort((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"]) is None:
-        print "Error: Cannot create a VLAN on interface {} as Fabric Attach is configured on it already!".format((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"])
-        return
-    
-    if emc_vars["mlt"] == "yes":
-        ports = "MLT"
-    else:
-        ports = emc_vars["portlist"]
+    if family == "VSP Series": # we are on a VSP switch
+        # do we have FA already on the port?
+        if CheckFAonPort((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"]) is None:
+            raise RuntimeError('Error: Cannot create a VLAN on interface {} as Fabric Attach is configured on it already!'.format((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"]))
         
-    cli_results = emc_cli.send('show vlan i-sid')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    if cli_output:
-        myList = getVidVsn(cli_output)
+        # are we configuring an MLT or not?
+        if emc_vars["mlt"] == "yes":
+            ports = "MLT"
+        else:
+            ports = emc_vars["portlist"]
+        
+        # we want to check if either the vlan or the i-sid is already in use
+        myList = getVidVsn()
         
         for row in myList:
             if row.get("vid") == emc_vars["vid"]:
                 createVlan = False
                 if row.get("isid"):
-                    print "Error: The VLAN {} is already associated to the Service {}".format(emc_vars["vid"], row.get("isid"))
-                    return
+                    raise RuntimeError('Error: The VLAN {} is already associated to the Service {}'.format(emc_vars["vid"], row.get("isid")))
             if row.get("isid"):
                 if row.get("isid") == emc_vars["isid"]:
-                    print "Error: The Service Id {} is already associated to VLAN {}".format(emc_vars["isid"], row.get("vid"))
-                    return
-        
+                    raise RuntimeError('Error: The Service Id {} is already associated to VLAN {}'.format(emc_vars["isid"], row.get("vid")))
+                            
         cmds = ["enable", "configure terminal"]
         result = sendConfigCmds(cmds)
         if result is None:
@@ -256,26 +370,87 @@ def main():
         if result is None:
             return   
         
-    else:
-        print "Ooops"
+    elif family == "Summit Series": # we are on EXOS
+        # FA is supported on EXOS starting with release 22.4
+        minExos = ''.join("22.4".split('.'))
+        version = ''.join(emc_vars["deviceSoftwareVer"].split('.')[:2])
+        if int(minExos) &gt; int(version):
+            raise RuntimeError('Error: EXOS version must be 22.4 or greater')
+        
+        # do we have to create the vlan or not? are there any problems such as vlan is already present and already associated to a different ISID?      
+        status,id = exosCheckNSI(emc_vars["vid"], emc_vars["isid"])
+        if status == 1: # we found the isid and the vlan is already associated to it
+            createVlan = False
+        elif status == 0: # we found the isid but it is associated to a different vlan
+            raise RuntimeError('Error: The Service Id {} is already used for VLAN {} on device {}'.format(emc_vars["isid"], id, emc_vars["deviceIP"]))
+        else: # we didn't find the isid
+            # let's see if the vlan exist already or not        
+            cli_output = sendCLI_showCommand('debug cfgmgr show next vlan.vlan')
+            
+            if cli_output:
+                vlanList = getVlanList(cli_output)
+                if vlanList:
+                    if emc_vars["vid"] in vlanList: # vlan already exists no need to create it
+                        createVlan = False
+                else:
+                    raise RuntimeError("Error: No VLAN found on device {}".format(emc_vars["deviceIP"]))
+            else:
+                raise RuntimeError("Error: Cannot access VLAN database on device {}".format(emc_vars["deviceIP"]))
+        
+        if createVlan:
+            cmds = ["create vlan {}".format(emc_vars["vid"])]
+        else:
+            cmds = []
+        
+        if emc_vars["portlist"]:
+            tag = "tag" if emc_vars["tag"] == 'yes' else "untag"
+            cmds.append("config vlan {} add port {} {}".format(emc_vars["vid"], emc_vars["portlist"], tag))
+        
+        cmds.append("config vlan {} add nsi {}".format(emc_vars["vid"], emc_vars["isid"]))
+            
+        result = sendConfigCmds(cmds)
+        if result is None:
+            return
+        
+    elif family == 'ERS Series': # we are on an ERS
+        myList = getVidVsn()
+        
+        for row in myList:
+            if row["vid"] == emc_vars["vid"]:
+                createVlan = False
+                if row["isid"]:
+                    raise RuntimeError('Error: The VLAN {} is already associated to the Service {}'.format(emc_vars["vid"], row.get("isid")))
+            if row["isid"]:
+                if row["isid"] == emc_vars["isid"]:
+                    raise RuntimeError('Error: The Service Id {} is already associated to VLAN {}'.format(emc_vars["isid"], row.get("vid")))
+            
+        cmds = ["enable", "configure terminal"]
+        if createVlan:
+            cmds.append("vlan create {} type port".format(emc_vars["vid"]))
+            
+        cmds.append("i-sid {} vlan {}".format(emc_vars["isid"], emc_vars["vid"]))
+        result = sendConfigCmds(cmds)
+        if result is None:
+            return
 
         
 main()</content>
-    <creationDate>1523453025358</creationDate>
+    <creationDate>1557733630912</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
-    <contexts>,Device,Groups,</contexts>
-    <id>161</id>
-    <lastUpdateDate>1528991149046</lastUpdateDate>
+    <contexts>,Device,</contexts>
+    <id>170</id>
+    <lastUpdateDate>1557733630912</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
-    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/L2VSN.xml</metaDataPath>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_L2VSN.xml</metaDataPath>
     <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-exos,nos-id-voss,nos-id-boss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
     <scriptOwner></scriptOwner>
-    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/L2VSN.py</scriptPath>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_L2VSN.py</scriptPath>
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>

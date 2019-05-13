@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="Fabric Cluster Create">
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1528991630805</cacheDate>
-    <category>,Extreme Fabric Connect,</category>
-    <comments>configure cluster (vIST) between 2 BEBs (VOSS)</comments>
+    <cacheDate>1557733140331</cacheDate>
+    <category>,Fabric Connect,</category>
+    <comments>Creates a VSP cluster (SMLT) with vIST</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
 
@@ -18,8 +18,132 @@ THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
 
+This script vastly uses functions and logic taken from Ludo Standard Library v1.7
+
 This script creates a VSP cluster (SMLT) with vIST.
 '''
+
+try:
+    emc_vars
+except: # If not running on XMC Jython...
+    raise RuntimeError('This script must be used with XMC')
+
+# IMPORTS
+import re
+
+# VARIABLES:
+Debug = False
+Sanity = False
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|already exist|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexPort = re.compile('^(?:[1-9]\d?[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d?)([/:]))?(\d+)-(?:([1-9]\d?)[/:])?(\d+)$')
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+
+def cleanOutput(outputStr): # Remove echoed command and final prompt from output
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            raise RuntimeError(outputStr)
+        else:
+            LastError = None
+            return outputStr
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI config command
+    global LastError
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmd)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            raise RuntimeError(outputStr)
+        else:
+            ConfigHistory.append(cmd)
+            LastError = None
+            return True
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
+    cmds = map(str.strip, re.split(r'[;\n]', chainStr))
+    for cmd in cmds:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+def sendCLI_showRegex(cmdRegexStr): # Send show command and extract values from output using regex
+    cmd, regex = map(str.strip, cmdRegexStr.split('|', 1))
+    outputStr = sendCLI_showCommand(cmd)
+    # We return a list of captured output; if nothing was matched an empty list is returned
+    return re.findall(regex, outputStr, re.MULTILINE)
+
+def sendConfigCmds(cmds, returnCliError=False, msgOnError=None): # Send a list of config commands
+    for cmd in cmds:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+##########################################################
+# XMC Script: Creates a VSP cluster (SMLT) with vIST     #
+# Written by Stephane Grosjean, PSE Extreme Networks     #
+##########################################################
+
+__version__ = '0.2'
+
+#
+# XMC Metadata
+#
+
 
 #@MetaDataStart
 #@DetailDescriptionStart
@@ -30,7 +154,8 @@ This script creates a VSP cluster (SMLT) with vIST.
 #######################################################################################
 #@DetailDescriptionEnd
 
-#@VariableFieldLabel (description = "vIST VLAN Id &lt;1 - 4094&gt;",
+#@SectionStart (description = "Service Definition to create")
+#    @VariableFieldLabel (description = "vIST VLAN Id &lt;1 - 4094&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -38,7 +163,7 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     value = "4000"
 #                     )
 
-#@VariableFieldLabel (description = "vIST Service Id &lt;1 - 16000000&gt;",
+#    @VariableFieldLabel (description = "vIST Service Id &lt;1 - 16000000&gt;",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -46,23 +171,7 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     value = "10004000"
 #                     )
 
-#@VariableFieldLabel (description = "vIST Local IP",
-#                     type = string,
-#                     required = yes,
-#                     readOnly = no,
-#                     name = "localip",
-#                     value = "10.1.1.1/30"
-#                     )
-
-#@VariableFieldLabel (description = "vIST Peer IP",
-#                     type = string,
-#                     required = yes,
-#                     readOnly = no,
-#                     name = "peerip",
-#                     value = "10.1.1.2"
-#                     )
-
-#@VariableFieldLabel (description = "SMLT Virtual BMAC",
+#    @VariableFieldLabel (description = "SMLT Virtual BMAC",
 #                     type = string,
 #                     required = yes,
 #                     readOnly = no,
@@ -70,15 +179,7 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     value = "02:51:00:79:58:81"
 #                     )
 
-#@VariableFieldLabel (description = "SMLT Peer System Id",
-#                     type = string,
-#                     required = yes,
-#                     readOnly = no,
-#                     name = "peersysid",
-#                     value = "0051.00d2.8084"
-#                     )
-
-#@VariableFieldLabel (description = "SMLT LACP",
+#    @VariableFieldLabel (description = "SMLT LACP",
 #                     type = string,
 #                     required = yes,
 #                     validValues = [yes,no],
@@ -86,141 +187,104 @@ This script creates a VSP cluster (SMLT) with vIST.
 #                     name = "lacp",
 #                     value = "no"
 #                     )
+#@SectionEnd
+
+#@SectionStart (description = "vIST Peer specific data")
+#    @VariableFieldLabel (description = "vIST Local IP",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "localip",
+#                     value = "10.1.1.1/30",
+#                     scope = device
+#                     )
+
+#    @VariableFieldLabel (description = "vIST Peer IP",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "peerip",
+#                     value = "10.1.1.2",
+#                     scope = device
+#                     )
+
+#    @VariableFieldLabel (description = "SMLT Peer System Id",
+#                     type = string,
+#                     required = yes,
+#                     readOnly = no,
+#                     name = "peersysid",
+#                     value = "0051.00d2.8084",
+#                     scope = device
+#                     )
+#@SectionEnd
 #@MetaDataEnd
 
 SPBMID = "1"
 
+def checkSysId():
+    localsysid = sendCLI_showRegex('show isis system-id|^\w+\.\w+\.\w+')
 
-def getOutputOnly(inputStrings):
-    try:
-        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
-        pivotVersion = ''.join("8.1.2".split('.'))
-        if int(version) == int(pivotVersion):
-            lines = inputStrings.splitlines()[1:]
-        else:
-            lines = inputStrings.splitlines()[1:-1]
-        return '\n'.join(lines)
-    except:
-        return None
-    
-def sendConfigCmds(cmds):
-    for cmd in cmds:
-        cli_results = emc_cli.send(cmd)
-        if cli_results.isSuccess() is False:
-            print cli_results.getError()
-            return None
+    if localsysid[0] == emc_vars["peersysid"]:
+        return False
+        
     return True
 
-def getVidVsn(inputString):
-    myList = []
-    lines = inputString.splitlines()[6:-2]
-    
-    for line in lines:
-        vid_dict = {}
-        parts = line.split()
-        if parts == []:
-            continue
-        if len(parts) &gt; 1:
-            vid_dict["vid"] = parts[0]
-            vid_dict["isid"] = parts[-1]
-        else:
-            vid_dict["vid"] = parts[0]
-
-        myList.append(vid_dict) 
-        
-    return myList
-
 def checkVlanNsi(vid, nsi):
-    cli_results = emc_cli.send('show vlan i-sid')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    myList = getVidVsn(cli_output)
-        
-    for row in myList:
-        if row.get("vid") == vid:
+    sendCLI_showCommand('enable')
+    vlans = sendCLI_showRegex('show running-config module vlan|^vlan\screate\s(\d+)\s')
+    isids = sendCLI_showRegex('show running-config module vlan|^vlan\si-sid\s\d+\s(\d+)')
+
+    for vlan in vlans:
+        if vlan == vid:
             return None
-        if row.get("isid") == nsi:
+    for isid in isids:
+        if isid == nsi:
             return None
  
     return True
 
 def isISISenable():
-    emc_cli.send('terminal more disable')
-    cli_results = emc_cli.send('show isis')
-    emc_cli.send('terminal more enable')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    line = cli_output.splitlines()[4:5]
-    entry = line[0].split(': ')
-    entry[1] = entry[1].replace(" ","")
-    if entry[1] == "enabled":
+    isis_state = sendCLI_showRegex('show isis|AdminState\s:\s(\w+)')
+
+    if isis_state[0] == "enabled":
         return True
         
     return False
 
-def checkSysId():
-    cli_results = emc_cli.send('show isis system-id')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    line = cli_output.splitlines()[6:]
-    entry = line[0].split()
-    if entry[0] == emc_vars["peersysid"]:
-        return False
-        
-    return True
-    
+
+
 def main():
     routerISIS = False
 
     family = emc_vars["family"]
     if family != "VSP Series":
-        print "Error: This script needs to be run on a VSP switch"
-        return
+        raise RuntimeError('Error: This script needs to be executed on a VSP switch')
 
     if int(emc_vars["vist"]) &gt; 4094 or int(emc_vars["vist"]) &lt; 2:
-        print "Error: The VLAN Id is out of range"
-        return
+        raise RuntimeError('Error: VLAN Id is out of range')
     if int(emc_vars["visid"]) &gt; 16000000 or int(emc_vars["visid"]) &lt; 1:
-        print "Error: The Service Id is out of range"
-        return
+        raise RuntimeError('Error: Service Id is out of range')
     if len(emc_vars["vbmac"].split(':')) != 6:
-        print "Error: The virtual BMac is not valid. It must be in the form of aa:bb:cc:dd:ee:ff"
-        return
+        raise RuntimeError('Error: The virtual BMac is not valid. It must be in the form of aa:bb:cc:dd:ee:ff')
     if '/' not in emc_vars["localip"]:
-        print "Error: The vIST Local IP must have a netmask defined in the form /xx"
-        return
+        raise RuntimeError('Error: The vIST Local IP must have a netmask defined in the form /xx')
     
     if '/' in emc_vars["peerip"]:
         s = emc_vars["peerip"].split('/')
         if len(s.split('.')) != 4:
-            print "Error: The Peer IP address is invalid"
-            return
+            raise runtimeError('Error: The Peer IP address is invalid')
         emc_vars["peerip"] = s[0]
 
     if checkSysId() is False:
-        print "Error: The Peer System-Id cannot be the same than the local System-Id"
-        return
+        raise RuntimeError('Error: The Peer System-Id cannot be the same than the local System-Id')
         
     if checkVlanNsi(emc_vars["vist"], emc_vars["visid"]) is None:
-        print "Error: The Vlan Id or Service Id for the vIST vlan already exists"
-        return
+        raise RuntimeError('Error: The Vlan Id or Service Id for the vIST vlan already exists')
     
     cmds = ["enable", "configure terminal"]
     
     if isISISenable():
-        cmds.append("no router isis enable")
+        cmds.append("no router isis enable\ny")
         routerISIS = True
     
     cmds.append("router isis")
@@ -240,7 +304,7 @@ def main():
         cmds.append("lacp enable")
     
     if routerISIS:
-        cmds.append("router isis enable")
+        cmds.append("router isis enable\ny")
     
     result = sendConfigCmds(cmds)
     if result is None:
@@ -248,16 +312,17 @@ def main():
         
         
 main()</content>
-    <creationDate>1528991630785</creationDate>
+    <creationDate>1557733140318</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
-    <contexts>,Device,Groups,</contexts>
-    <id>165</id>
-    <lastUpdateDate>1528991630785</lastUpdateDate>
+    <contexts>,Device,</contexts>
+    <id>168</id>
+    <lastUpdateDate>1557733140318</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Cluster_Create.xml</metaDataPath>
     <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>

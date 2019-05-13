@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script name="FA Server Create">
+<script name="Fabric Attach Server Config">
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1528991181659</cacheDate>
-    <category>,Extreme Fabric Connect,</category>
-    <comments>configure FA Server on BEBs (VOSS)</comments>
+    <cacheDate>1557731994174</cacheDate>
+    <category>,Fabric Connect,</category>
+    <comments>Creates and Configures FA on a BEB</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
 
@@ -20,8 +20,145 @@ IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
 
 This script creates and configures Fabric Attach on an FA Server (VOSS).
 
+This script vastly uses functions and logic taken from Ludo Standard Library v1.7
+
 Several checks are performed to try to avoid mistakes.
 '''
+
+try:
+    emc_vars
+except: # If not running on XMC Jython...
+    raise RuntimeError('This script must be used with XMC')
+
+# IMPORTS
+import re
+
+# VARIABLES:
+Debug = False
+Sanity = False
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|already exist|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexPort = re.compile('^(?:[1-9]\d?[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d?)([/:]))?(\d+)-(?:([1-9]\d?)[/:])?(\d+)$')
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+
+def cleanOutput(outputStr): # Remove echoed command and final prompt from output
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            raise RuntimeError(outputStr)
+        else:
+            LastError = None
+            return outputStr
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_NoError_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        return outputStr
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI config command
+    global LastError
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmd)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            raise RuntimeError(outputStr)
+        else:
+            ConfigHistory.append(cmd)
+            LastError = None
+            return True
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
+    cmds = map(str.strip, re.split(r'[;\n]', chainStr))
+    for cmd in cmds:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+def sendCLI_showRegex(cmdRegexStr): # Send show command and extract values from output using regex
+    cmd, regex = map(str.strip, cmdRegexStr.split('|', 1))
+    outputStr = sendCLI_showCommand(cmd)
+    # We return a list of captured output; if nothing was matched an empty list is returned
+    return re.findall(regex, outputStr, re.MULTILINE)
+
+def sendCLI_NoError_showRegex(cmdRegexStr): # Send show command and extract values from output using regex
+    cmd, regex = map(str.strip, cmdRegexStr.split('|', 1))
+    outputStr = sendCLI_NoError_showCommand(cmd)
+    # We return a list of captured output; if nothing was matched an empty list is returned
+    return re.findall(regex, outputStr, re.MULTILINE)
+
+def sendConfigCmds(cmds, returnCliError=False, msgOnError=None): # Send a list of config commands
+    for cmd in cmds:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+##########################################################
+# XMC Script: Creates and Configures FA on a BEB         #
+# Written by Stephane Grosjean, PSE Extreme Networks     #
+##########################################################
+
+__version__ = '0.2'
+
+#
+# XMC Metadata
+#
 
 #@MetaDataStart
 #@DetailDescriptionStart
@@ -146,170 +283,126 @@ Several checks are performed to try to avoid mistakes.
 #@MetaDataEnd
 
 
-def getOutputOnly(inputStrings):
-    try:
-        version = ''.join(emc_vars["serverVersion"].split('.')[:3])
-        pivotVersion = ''.join("8.1.2".split('.'))
-        if int(version) == int(pivotVersion):
-            lines = inputStrings.splitlines()[1:]
-        else:
-            lines = inputStrings.splitlines()[1:-1]
-        return '\n'.join(lines)
-    except:
-        return None
+# Variables:
+CLI_Dict = {
+    'VSP Series'    : {
+        'enable_context'        : 'enable',
+        'config_context'        : 'config term',
+        'end_config'            : 'end',
+        'save_config'           : 'save config',
+        'get_flex_uni'          : 'show interfaces gigabitEthernet config {}|^(\d\/\d+)\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+(Enable|Disable)', # Port
+        'create_flex_uni'       : 'interface gigabitEthernet {}; flex-uni enable; exit', # Port
+        'check_cvlan_exists'    : 'show vlan basic {0}|^({0})\s', # Vlan
+        'create_cvlan'          : 'vlan create {0} type port-mstprstp 0', # {0} = vlan
+        'get_cvlan_isid'        : 'show vlan i-sid {0}|^{0}\s+(\d+)', # Vlan
+        'set_cvlan_isid'        : 'vlan i-sid {0} {1}', # {0} = vlan; {1} = i-sid
+        'is_port_in_vlan'       : 'show vlan members port {0}|^(\d+)', # {0} = port     
+        'create_cvlan_uni'      : { # {0} = vlan; {1} = port-list
+            'tag'               : 'interface gigabitEthernet {1}; encapsulation dot1q; exit; vlan members add {0} {1}',
+            'untag'             : 'interface gigabitEthernet {1}; no encapsulation dot1q; exit; vlan members add {0} {1}',
+                                  },
+        'get_swithed_uni_ports' : 'show running-config module i-sid | begin "i-sid {}"', # Isid
+        'create_switched_uni'   : { # {0} = i-sid; {1} = vlan; {2} = port-list
+            'tag'               : 'i-sid {0}; c-vid {1} port {2}; exit',
+            'untag'             : 'i-sid {0}; untagged-traffic port {2}; exit',
+            'noport'            : 'i-sid {0}; exit',
+                                  },
+        'delete_switched_uni'   : { # {0} = i-sid; {1} = vlan; {2} = port-list
+            'tag'               : 'i-sid {0}; no c-vid {1} port {2}; exit',
+            'untag'             : 'i-sid {0}; no untagged-traffic port {2}; exit',
+            'transparent'       : 'i-sid {0}; no port {2}; exit'
+                                  },
+    },
+    'Summit Series'    : {
+        'save_config'           : 'save configuration',
+        'check_cvlan_exists'    : 'show vlan|^\S+\s+({0})\s', # Vlan
+        'create_cvlan'          : 'create vlan {0}', # {0} = vlan
+        'get_cvlan_isid'        : 'show vlan {0} fabric attach assignments|^\s+{0}\s+\S+\s+Static\s+(\d+)', # Vlan
+        'set_cvlan_isid'        : 'configure vlan {0} add isid {1}', # {0} = vlan; {1} = i-sid 
+        'create_cvlan_uni'      : { # {0} = vlan; {1} = port-list
+            'tag'               : 'configure vlan {0} add ports {1} tagged',
+            'untag'             : 'configure vlan {0} add ports {1} untagged',
+                                  },
+    },
+    'ERS Series'    : {
+        'enable_context'        : 'enable',
+        'config_context'        : 'config term',
+        'end_config'            : 'end',
+        'save_config'           : 'copy config nvram',
+        'check_cvlan_exists'    : 'show vlan id {0}|^({0})\s', # Vlan
+        'create_cvlan'          : 'vlan create {0} type port', # {0} = vlan
+        'get_cvlan_isid'        : 'show vlan i-sid {0}|^{0}\s+(\d+)', # Vlan
+        'set_cvlan_isid'        : 'i-sid {1} vlan {0}', # {0} = vlan; {1} = i-sid 
+        'create_cvlan_uni'      : { # {0} = vlan; {1} = port-list
+            'tag'               : 'vlan ports {1} tagging tagAll; vlan members add {0} {1}',
+            'untag'             : 'vlan ports {1} tagging untagAll; vlan members add {0} {1}',
+                                  },
+    },
+}
 
-def getVlanMember(inputString):
-    myList = []
-    lines = inputString.splitlines()[7:-2]
-    
-    for line in lines:
-        vid_dict = {}
-        parts = line.split()
-        
-        if len(parts) &gt; 1:
-            if "/" not in parts[0]:
-                vid_dict["vid"] = parts[0]
-                vid_dict["portlist"] = parts[1]
-                myList.append(vid_dict) 
-        
-    return myList
 
-def portIsInVLAN(ports):
-    cli_results = emc_cli.send('show vlan members port {}'.format(ports))
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    if cli_output:
-        myList = getVlanMember(cli_output)
-        
+def portIsInVLAN(ports):  
+    myList = sendCLI_showRegex(CLI_Dict['VSP Series']['is_port_in_vlan'].format(ports))
+
+    if myList:
         for row in myList:
-            if row.get("vid") != "1":
+            if row != "1":
                 return None
-        
         return True
     
     return None
-    
-def sendConfigCmds(cmds):
-    for cmd in cmds:
-        cli_results = emc_cli.send(cmd)
-        if cli_results.isSuccess() is False:
-            print cli_results.getError()
-            return None
-    return True
-
-def CreateFAList():
-    myList = []
-    
-    cli_results = emc_cli.send('show fa interface')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    lines = cli_output.splitlines()[7:-4]
-    
-    for line in lines:
-        fa_dict = {}
-        parts = line.split()
-        if parts == []:
-            continue
-        if parts[0].startswith("Port"):
-            fa_dict["intf"] = ''.join( c for c in parts[0] if c not in 'Port' )
-        else:
-            fa_dict["intf"] = parts[0].replace("Mlt","mlt ")
-        fa_dict["status"] = parts[1]
-        fa_dict["auth"] = parts[4]
-        myList.append(fa_dict)
-        
-    return myList
 
 def CheckFAonPort(interface):
-    fa = CreateFAList()
-    if fa is None:
+    if "/" in interface:
+        portFAenabled = sendCLI_showRegex('show fa interface port {0}|^Port({0})\s'.format(interface))
+    else:
+        portFAenabled = sendCLI_showRegex('show fa interface mlt {0}|^Mlt({0})\s'.format(interface))
+    
+    if portFAenabled:
         return None
 
-    if fa == []:
-        return True
-    
-    for entry in fa:
-        if entry["intf"] == interface:
-            if entry["status"] == "enabled":
-                return None
     return True
-    
-def CreateMLTList():
-    myList = []
-    
-    cli_results = emc_cli.send('show mlt')
-    if cli_results.isSuccess() is False:
-        print cli_results.getError()
-        return None
-    cli_output = cli_results.getOutput()
-    cli_output = getOutputOnly(cli_output)
-    
-    lines = cli_output.splitlines()[7:]
-    
-    for line in lines:
-        mlt_dict = {}
-        parts = line.split()
-        if parts == []:
-            continue
-        mlt_dict["mltid"] = parts[0]
-        mlt_dict["portmember"] = parts[6]
-        mlt_dict["mltcurrent"] = parts[5]
-        myList.append(mlt_dict) 
-        
-    return myList
-    
+
 def CheckMLT(mltid, portmember):
-    mlt = CreateMLTList()
-    if mlt == []:
-        return True
+    MltObj = sendCLI_NoError_showRegex('show mlt {0}|^({0})\s+\w+\s+(\d+/\d+)\s'.format(mltid))
     
-    for entry in mlt:
-        if entry["mltid"] == mltid:
-            if entry["portmember"] != portmember:
-                return None
+    if MltObj:
+        port = MltObj[1]
+        if port != portmember:
+            return None
+    
     return True
-    
-    
+ 
+
+
 def main():
     family = emc_vars["family"]
     if family != "VSP Series":
-        print "Error: This script needs to be run on a VSP switch"
-        return
+        raise RuntimeError('Error: This script needs to be executed on a VSP switch')
 
     if emc_vars["mgmt"] == "yes":
         if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:
-            print "Error: Mgmt VLAN Id is out of range"
-            return
+            raise RuntimeError('Error: Mgmt VLAN Id is out of range')
         if int(emc_vars["isid"]) &gt; 16000000 or int(emc_vars["isid"]) &lt; 1:
-            print "Error: Mgmt Service Id is out of range"
-            return
+            raise RuntimeError('Error: Mgmt Service Id is out of range')
         
-    if CheckFAonPort((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"]) is None:
-        print "Error: Fabric Attach is already configured on interface {}".format((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"])
-        return
-    
+    if CheckFAonPort((emc_vars["portlist"], emc_vars["mltid"])[emc_vars["mlt"] == "yes"]) is None:
+        raise RuntimeError('Error: Fabric Attach is already configured on interface {}'.format((emc_vars["portlist"], "mlt "+emc_vars["mltid"])[emc_vars["mlt"] == "yes"]))
+        
     if emc_vars["mlt"] == "yes":
         # check if MLT already exists and what port is in it
         if CheckMLT(emc_vars["mltid"], emc_vars["portmember"]) is None:
-            print "Error: MLT {} already exists and has a different port member than port {}".format(emc_vars["mltid"], emc_vars["portmember"])
-            return
+            raise RuntimeError('Error: MLT {} already exists and has a different port member than port {}'.format(emc_vars["mltid"], emc_vars["portmember"]))
+            
     else:
         # check if the port is already a member of a VLAN
         if portIsInVLAN(emc_vars["portlist"]) is None:
-           print "Error: Port {} is already part of a VLAN and cannot be configured for FA".format(emc_vars["portlist"])
-           return
+           raise RuntimeError('Error: Port {} is already part of a VLAN and cannot be configured for FA'.format(emc_vars["portlist"]))
+           
         
     cmds = ["enable", "configure terminal"]
     result = sendConfigCmds(cmds)
-    if result is None:
+    if result is False:
         return
     
     cmds = []
@@ -356,25 +449,26 @@ def main():
         cmds.append("exit")
         
     result = sendConfigCmds(cmds)
-    if result is None:
+    if result is False:
         return
         
 main()</content>
-    <creationDate>1523454373255</creationDate>
+    <creationDate>1557731994162</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
-    <contexts>,Device,Groups,</contexts>
-    <id>162</id>
-    <lastUpdateDate>1528991181615</lastUpdateDate>
+    <contexts>,Device,</contexts>
+    <id>160</id>
+    <lastUpdateDate>1557731994162</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
-    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FA_Server_Create.xml</metaDataPath>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Attach_Server_Config.xml</metaDataPath>
     <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
     <scriptOwner></scriptOwner>
-    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/FA_Server_Create.py</scriptPath>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Attach_Server_Config.py</scriptPath>
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
