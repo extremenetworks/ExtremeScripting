@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <script name="ERS NAC Enforce">
+    <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1553502550396</cacheDate>
+    <cacheDate>1560438588016</cacheDate>
     <category>,Config,</category>
-    <comments>Enforce XMC NAC switch config to ERS switch - v1.3</comments>
+    <comments>Enforce XMC NAC switch config to ERS switch - v1.4</comments>
     <content>##########################################################
-# Ludo Standard library; Version 1.7                     #
+# Ludo Standard library; Version 2.2                     #
 # Written by Ludovico Stevens, CSE Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+
 ##########################################################
 try:
     emc_vars
@@ -14,12 +19,12 @@ try:
 except: # If not running on XMC Jython...
     # These lines only needed to run XMC Python script locally
     # They can also be pasted to XMC, but will not execute
-    import java.util
-    import emc_cli
-    import emc_nbi
-    import emc_results
-    import json
     import sys
+    import json
+    import java.util
+    import emc_cli      # Own local replica
+    import emc_nbi      # Own local replica
+    import emc_results  # Own local replica
     execution = 'dev'
     if len(sys.argv) &gt; 1: # Json file as 1st argv
         emc_vars = json.load(open(sys.argv[1]))
@@ -37,11 +42,9 @@ from java.util import LinkedHashMap
 #
 # VARIABLES:
 #
-Debug = False
-Sanity = False
 RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
 RegexError  = re.compile(
-    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|already exist|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
     re.IGNORECASE
 )
 RegexPort = re.compile('^(?:[1-9]\d?[/:])?\d+$')
@@ -61,6 +64,8 @@ RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
 Indent = 3 # Number of space characters for each indentation
 LastError = None
 ConfigHistory = []
+RollbackStack = []
+
 
 #
 # FUNCTIONS:
@@ -77,18 +82,34 @@ def cleanOutput(outputStr): # Remove echoed command and final prompt from output
         lines = outputStr.splitlines()[1:]
     return '\n'.join(lines)
 
+def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    if RollbackStack:
+        print "Applying rollback commands to undo partial config and return device to initial state"
+        while RollbackStack:
+            sendCLI_configChain(RollbackStack.pop(), returnCliError=True)
+    print "Aborting because this command failed: {}".format(cmd)
+    raise RuntimeError(errorOutput)
+
+def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
+    RollbackStack.append(cmd)
+    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
+    cmdList = [x for x in cmdList if x] # Weed out empty elements 
+    cmdOneLiner = " / ".join(cmdList)
+    print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
+
 def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
     global LastError
     resultObj = emc_cli.send(cmd)
     if resultObj.isSuccess():
         outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
             if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
                 LastError = outputStr
                 if msgOnError:
                     print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
                 return None
-            raise RuntimeError(outputStr)
+            abortError(cmd, outputStr)
         else:
             LastError = None
             return outputStr
@@ -97,9 +118,10 @@ def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CL
 
 def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI config command
     global LastError
+    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
     if Sanity:
         print "SANITY&gt; {}".format(cmd)
-        ConfigHistory.append(cmd)
+        ConfigHistory.append(cmdStore)
         LastError = None
         return True
     resultObj = emc_cli.send(cmd)
@@ -111,17 +133,19 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a 
                 if msgOnError:
                     print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
                 return False
-            raise RuntimeError(outputStr)
+            abortError(cmd, outputStr)
         else:
-            ConfigHistory.append(cmd)
+            ConfigHistory.append(cmdStore)
             LastError = None
             return True
     else:
         raise RuntimeError(resultObj.getError())
 
 def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
-    cmds = map(str.strip, re.split(r'[;\n]', chainStr))
-    for cmd in cmds:
+    chainStr = re.sub(r'\n(\w)(\n|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    for cmd in cmdList:
         if len(cmd): # Skip empty lines
             success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
             if not success:
@@ -129,7 +153,7 @@ def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send
     return True
 
 def sendCLI_showRegex(cmdRegexStr): # Send show command and extract values from output using regex
-    cmd, regex = map(str.strip, cmdRegexStr.split('|', 1))
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
     outputStr = sendCLI_showCommand(cmd)
     # We return a list of captured output; if nothing was matched an empty list is returned
     return re.findall(regex, outputStr, re.MULTILINE)
@@ -144,7 +168,7 @@ def dvrLeaf(family): # Determine whether node is a DVR Leaf
 def nbiQuery(jsonQuery, returnKey): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
     response = emc_nbi.query(jsonQuery)
     if 'errors' in response: # Query response contains errors
-        raise RuntimeError(response['errors'][0].message)
+        abortError("nbiQuery for {}".format(returnKey), response['errors'][0].message)
 
     if returnKey: # If a specific key requested, we find it
         def recursionKeySearch(nestedDict):
@@ -161,13 +185,13 @@ def nbiQuery(jsonQuery, returnKey): # Makes a GraphQl query of XMC NBI; if retur
             return returnValue
 
         # If requested key not found, raise error
-        raise RuntimeError('Key "{}" was not found in query response'.format(returnKey))
+        abortError("nbiQuery for {}".format(returnKey), 'Key "{}" was not found in query response'.format(returnKey))
 
     # Else, return the full response
     return response
 
 def xmcLinuxCommand(cmdRegexStr): # Execute a command on XMC and recover the output
-    cmd, regex = map(str.strip, cmdRegexStr.split('|', 1))
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
     cmdList = cmd.split(' ')
     if execution == 'dev': # I develop on my Windows laptop...
         cmdList[0] += '.bat'
@@ -176,7 +200,7 @@ def xmcLinuxCommand(cmdRegexStr): # Execute a command on XMC and recover the out
     # We return a list of captured output; if nothing was matched an empty list is returned
     return re.findall(regex, outputStr, re.MULTILINE)
 
-def generatePortList(portStr): # Given a port list/range, validates it and returns an ordered port list with no duplicates
+def generatePortList(portStr): # Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
     # This version of this function will not handle port ranges which span slots; also does not handle VSP channelized ports
     debug("generatePortList IN = {}".format(portStr))
     portDict = {} # Use a dict, will ensure no port duplicate keys
@@ -209,7 +233,7 @@ def generatePortList(portStr): # Given a port list/range, validates it and retur
 
     # Sort and return the list as a comma separated string
     def portValue(port): # Function to pass to sorted(key)
-        slotPort = port.split('/')
+        slotPort = re.split('[/:]', port)
         if len(slotPort) == 2: # slot/port format
             idx = int(slotPort[0])*100 + int(slotPort[1])
         else: # standalone port (no slot)
@@ -281,22 +305,47 @@ def generatePortRange(portList): # Given an ordered list of ports, generates a c
     return portStr                
 
 def printConfigSummary(): # Print summary of all config commands executed with context indentation
+    emc_cli.close()
     print "The following configuration was successfully performed on switch:"
     indent = ''
     level = 0
-    maxLevel = len(RegexContextPatterns[emc_vars['family']])
+    if emc_vars['family'] in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[emc_vars['family']])
     for cmd in ConfigHistory:
-        if RegexContextPatterns[emc_vars['family']][level].match(cmd):
-            print "-&gt; {}{}".format(indent, cmd)
-            if level + 1 &lt; maxLevel:
-                level += 1
-            indent = ' ' * Indent * level
-            continue
-        elif RegexExitInstance.match(cmd):
-            if level &gt; 0:
-                level -= 1
-            indent = ' ' * Indent * level
+        if emc_vars['family'] in RegexContextPatterns:
+            if RegexContextPatterns[emc_vars['family']][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
         print "-&gt; {}{}".format(indent, cmd)
+
+
+#
+# INIT: Init code
+#
+try:
+    if emc_vars['userInput_sanity'] == 'Enable':
+        Sanity = True
+    elif emc_vars['userInput_sanity'] == 'Disable':
+        Sanity = False
+except:
+    pass
+try:
+    if emc_vars['userInput_debug'] == 'Enable':
+        Debug = True
+    elif emc_vars['userInput_debug'] == 'Disable':
+        Debug = False
+except:
+    pass
+
+
+# --&gt; Insert Ludo Threads library here if required &lt;--
 
 
 # --&gt; XMC Python script actually starts here &lt;--
@@ -308,7 +357,7 @@ def printConfigSummary(): # Print summary of all config commands executed with c
 ##########################################################
 # Push NAC configuration to ERS switch
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 # 1.0 - Initial
 # 1.1 - Was failing to set auto-non-eap-mhsa-enable on port in MHSA mode
@@ -320,6 +369,7 @@ __version__ = '1.3'
 #       NTP server is configured on XMC then no NTP/SNTP configuration will be performed on ERS either
 #     - Script was failing with telnet as it was not executing "enable" upon CLI connection 
 # 1.3 - Some Cleanup; script version printed in output
+# 1.4 - Added ability to specify whether port should allow 802.1X + NEAP or one or the other
 
 #
 # XMC Metadata
@@ -363,17 +413,25 @@ __version__ = '1.3'
 #      - MHSA: Multiple Host Single Authentication - AP aware
 #              (mhsa is globally enabled and
 #              mhsa-no-limit is enabled on the port)
-#  7 - Verify the desired port filtering of the port selection already made
+#  7 - Select the authentication types to allow on the port:
+#      - Both: 802.1X EAPoL and/or MAC/NEAP will be allowed
+#      - 802X: Only 802.1X EAPoL will be allowed
+#      - NEAP: Only MAC/NEAP will be allowed
+#  8 - Verify the desired port filtering of the port selection already made
 #      (If it is desired to have NAC disabled on access ports where FA Clients are detected
 #      select the second option; otherwise leave the default option)
-#  8 - Modify the default re-authentication timer if necessary
-#  9 - Optionally select whether to use pap or ms-chap-v2 for MAC based authentication
+#  9 - Modify the default re-authentication timer if necessary
+# 10 - Optionally select whether to use pap or ms-chap-v2 for MAC based authentication
 #      (this setting is required only for MAC based authentication (NEAP) and will need
 #      to be consistent with what configured under XMC Access Control AAA configuration)
-# 10 - Optionally select the type of RADIUS reachability to use on the ERS (use-icmp or use-radius)
-# 11 - If use-radius was selected above, provide dummy RADIUS username and password
-# 12 - Optionally enable EAPoL allow port mirroring if this will be required
-# 13 - Finally, RUN the script
+# 11 - Optionally select the type of RADIUS reachability to use on the ERS (use-icmp or use-radius)
+# 12 - If use-radius was selected above, provide dummy RADIUS username and password
+# 13 - Optionally enable EAPoL allow port mirroring if this will be required
+# 14 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
+#      running but config commands will not be executed on the switch; useful to see what the script
+#      does without it actually changing any switch settings. Debug can be enabled when/if reporting
+#      problems
+# 15 - Finally, RUN the script
 #
 # The script will automatically configure all of the following:
 # - Primary and Secondary RADIUS Servers, including shared secret
@@ -399,7 +457,10 @@ __version__ = '1.3'
 # In particular, if running the script to disable NAC on some ports then only the first
 # EAP port config dialogue needs to be set (to None) and then the script can be executed;
 # in this case the script will execute even if the ERS switch has already been deleted
-# from the XMC Access Control configuration
+# from the XMC Access Control configuration.
+# This scripts uses the XMC North Bound interface API to extract the Access Control switch
+# configuration; therefore the XMC user running this script must have authorization rights
+# under "Northbound API / Access Control Northbound Interface Read Access"
 #
 # Limitations: This script will only work on XMC Linux based VM installations.
 #              Running this script on a Windows based XMC installation will fail.
@@ -408,11 +469,19 @@ __version__ = '1.3'
 
 #@SectionStart (description = "Switch EAP port configuration")
 #    @VariableFieldLabel (
-#        description = "EAP port config. If simply disabling NAC on selected ports can skip all other inputs below",
+#        description = "EAP port config mode. If simply disabling NAC on selected ports can skip all other inputs below",
 #        type = string,
 #        required = yes,
 #        validValues = [None: NAC disabled -&gt; force-authorized, SHSA: Single Host Single Authenticaton, MHMA: Multiple Host Multiple Authentication, MHSA: Multiple Host Single Authentication - AP aware],
 #        name = "userInput_eapPortMode",
+#    )
+#    @VariableFieldLabel (
+#        description = "EAP port authentication",
+#        type = string,
+#        required = yes,
+#        validValues = [Both: EAPoL 802.1X and/or MAC/NEAP, 802X: EAPoL 802.1X only, NEAP: MAC/NEAP only],
+#        name = "userInput_eapPortAuth",
+#        value = "Both: EAPoL 802.1X and/or MAC/NEAP"
 #    )
 #    @VariableFieldLabel (
 #        description = "If enabling NAC\, automatically filter out from port selection these ports",
@@ -467,6 +536,22 @@ __version__ = '1.3'
 #    )
 #@SectionEnd
 
+#@SectionStart (description = "Sanity / Debug")
+#    @VariableFieldLabel (
+#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_sanity",
+#    )
+#    @VariableFieldLabel (
+#        description = "Debug: enable if you need to report a problem to the script author",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_debug",
+#    )
+#@SectionEnd
 #@MetaDataEnd
 '''
 
@@ -501,45 +586,45 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
     'exit_config_context'        : 'exit',
     'end_config'                 : 'end',
     'save_config'                : 'copy config nvram',
-    'get_terminal_length'        : 'show terminal|Terminal length: (\d+)',
+    'get_terminal_length'        : 'show terminal ||Terminal length: (\d+)',
     'disable_more_paging'        : 'terminal length 0',
     'enable_more_paging'         : 'terminal length {}', # Terminal length, usually 23
-    'get_autosave'               : 'show autosave|(Enabled|Disabled)',
-    'get_password_security'      : 'show password security|(enabled|disabled)',
+    'get_autosave'               : 'show autosave ||(Enabled|Disabled)',
+    'get_password_security'      : 'show password security ||(enabled|disabled)',
     'disable_password_security'  : 'no password security',
     'enable_password_security'   : 'password security',
     'check_ntp_support'          : 'show ntp', # Used to check if NTP is supported; on ERS models which do not support NTP we expect to get an error
-    'list_sntp_servers'          : 'show sntp |server address:\s+([1-9]\d*\.\d+\.\d+\.\d+)',
+    'list_sntp_servers'          : 'show sntp ||server address:\s+([1-9]\d*\.\d+\.\d+\.\d+)',
     'delete_sntp_servers'        : 'no sntp enable; no sntp server primary; no sntp server secondary',
     'create_sntp_server1'        : 'sntp server primary address {}', # IP
     'create_sntp_server2'        : 'sntp server secondary address {}', # IP
     'enable_sntp'                : 'sntp enable; clock source sntp',
-    'list_ntp_servers'           : 'show ntp server |^(\d+\.\d+\.\d+\.\d+)',
+    'list_ntp_servers'           : 'show ntp server ||^(\d+\.\d+\.\d+\.\d+)',
     'delete_ntp_server'          : 'no ntp server {}', # IP
     'create_ntp_server'          : 'ntp server {} enable', # IP
     'enable_ntp'                 : 'ntp; clock source ntp',
-    'get_spanning_tree_mode'     : 'show spanning-tree mode|^Current STP Operation Mode: (\w+)',
-    'get_fabric_mode'            : 'show fa agent|(?:Fabric Attach Element Type: (Server|Proxy)|Fabric Attach Provision Mode: VLAN \((Standalone)\))',
-    'get_stacking_mode'          : 'show sys-info|^Operation Mode:\s+(Switch|Stack)',
+    'get_spanning_tree_mode'     : 'show spanning-tree mode ||^Current STP Operation Mode: (\w+)',
+    'get_fabric_mode'            : 'show fa agent ||(?:Fabric Attach Element Type: (Server|Proxy)|Fabric Attach Provision Mode: VLAN \((Standalone)\))',
+    'get_stacking_mode'          : 'show sys-info ||^Operation Mode:\s+(Switch|Stack)',
     'list_uplink_ports'          : {
-        'Server'                 : 'show isis interface|^Port: ((?:\d\/)?\d+)',
-        'Proxy'                  : 'show fa elements|^(\d\/(\d+))\s+Server',
-        'StandaloneProxy'        : 'show fa uplink|^  Port - ((?:\d\/)?\d+)',
+        'Server'                 : 'show isis interface ||^Port: ((?:\d\/)?\d+)',
+        'Proxy'                  : 'show fa elements ||^(\d\/(\d+))\s+Server',
+        'StandaloneProxy'        : 'show fa uplink ||^  Port - ((?:\d\/)?\d+)',
                                    },
     'list_faproxy_ports'         : {
-        'Switch'                 : 'show fa elements|^1\/(\d+)\s+Proxy',
-        'Stack'                  : 'show fa elements|^(\d\/\d+)\s+Proxy',
+        'Switch'                 : 'show fa elements ||^1\/(\d+)\s+Proxy',
+        'Stack'                  : 'show fa elements ||^(\d\/\d+)\s+Proxy',
                                    },
     'list_faclient_ports'        : {
-        'Switch'                 : 'show fa elements|^1\/(\d+)\s+Client',
-        'Stack'                  : 'show fa elements|^(\d\/\d+)\s+Client',
+        'Switch'                 : 'show fa elements ||^1\/(\d+)\s+Client',
+        'Stack'                  : 'show fa elements ||^(\d\/\d+)\s+Client',
                                    },
-    'list_mlt_ports'             : 'show mlt|^\d[\d ] .{16} ([\d\/,-]+)',
+    'list_mlt_ports'             : 'show mlt ||^\d[\d ] .{16} ([\d\/,-]+)',
     'set_timezone'               : 'clock time-zone {} {} {}', # Zone, hours-offset, minutes
     'enable_coa_replay_protect'  : 'radius dynamic-server replay-protection',
     'disable_coa_replay_protect' : 'no radius dynamic-server replay-protection',
     'set_radius_encap'           : 'radius-server encapsulation {}', # pap|ms-chap-v2 ; this command does not exist on lower end ERS models (3600,3500)
-    'list_radius_coa_clients'    : 'show radius dynamic-server|^(\d+\.\d+\.\d+\.\d+)',
+    'list_radius_coa_clients'    : 'show radius dynamic-server ||^(\d+\.\d+\.\d+\.\d+)',
     'delete_radius_coa_client'   : 'no radius dynamic-server client {}', # Client IP
     'config_radius_primary'      : # {0} = Primary Radius Server IP, {1} = Radius secret, {2} = 'acct-enable' or ''
                                    '''
@@ -567,7 +652,8 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
     'disable_dhcp_relay'         : 'no ip dhcp-relay', # We only do this on ERS3500, to free up resources to enable eapol
     'disable_eapol_global'       : 'eapol disable',
     'config_eapol_multivlan'     : 'eapol multihost multivlan enable', # This command may be obsolete on recent ERS models/software
-    'config_eapol_global'        : '''
+    'config_eapol_global'        : # (do not config multihost allow-non-eap-enable; it is for switch local MAC based authentication without RADIUS)
+                                   '''
                                    eapol multihost radius-non-eap-enable
                                    eapol multihost use-radius-assigned-vlan
                                    eapol multihost non-eap-use-radius-assigned-vlan
@@ -587,15 +673,26 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
     'port_config_multihost'      : 'eapol multihost enable', # This command may be obsolete on recent ERS models/software
     'port_config_eap_common'     : '''
                                    default eapol multihost
-                                   eapol multihost allow-non-eap-enable
-                                   eapol multihost radius-non-eap-enable
                                    eapol multihost use-radius-assigned-vlan
-                                   eapol multihost non-eap-use-radius-assigned-vlan
                                    eapol multihost eap-packet-mode unicast
                                    eapol status auto re-authentication enable
                                    eapol radius-dynamic-server enable
                                    fa port-enable
                                    ''',
+    'port_config_eap_type'       : {
+        'Both'                   : # (do not config multihost allow-non-eap-enable; it is for switch local MAC based authentication without RADIUS)
+                                   '''
+                                   eapol multihost radius-non-eap-enable
+                                   eapol multihost non-eap-use-radius-assigned-vlan
+                                   ''',
+        '802X'                   : '', # port_config_eap_common above covers for 802X already
+        'NEAP'                   : # (do not config multihost allow-non-eap-enable; it is for switch local MAC based authentication without RADIUS)
+                                   '''
+                                   eapol multihost radius-non-eap-enable
+                                   eapol multihost non-eap-use-radius-assigned-vlan
+                                   no eapol multihost eap-protocol-enable	
+                                   ''',
+                                   },
     'port_config_eap_mode'       : {
         'SHSA'                   : 'eapol multihost mac-max 1',
         'MHMA'                   : '', # port_config_eap_common above covers for MHMA already
@@ -603,15 +700,15 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
                                    },
     'port_config_faststart'      : {
         'STPG'                   : 'spanning-tree learning fast',
-        'RSTP'                   : 'spanning-tree rstp edge-port true',
-        'MSTP'                   : 'spanning-tree mstp edge-port true',
+        'RSTP'                   : 'spanning-tree rstp learning enable; spanning-tree rstp edge-port true',
+        'MSTP'                   : 'spanning-tree mstp learning enable; spanning-tree mstp edge-port true',
                                    },
     'port_config_reauth_timer'   : 'eapol re-authentication-period {}', # Value
 }
 
 Shell_Dict = { # Dictionary of all Linux shell commands used by this script
-    'list_ntp_servers'           : 'ntpq -pn |^[*+](\d+\.\d+\.\d+\.\d+)',
-    'get_time_zone'              : 'date +%Z%z |^(\w+)([-+]\d\d)(\d\d)',
+    'list_ntp_servers'           : 'ntpq -pn ||^[*+](\d+\.\d+\.\d+\.\d+)',
+    'get_time_zone'              : 'date +%Z%z ||^(\w+)([-+]\d\d)(\d\d)',
 }
 
 #
@@ -638,6 +735,7 @@ def main():
     debug("portListVetted = {}".format(portListVetted))
     enteredNacPortList = generatePortRange(portListVetted)
     eapPortMode = emc_vars['userInput_eapPortMode'][:4]
+    eapPortType = emc_vars['userInput_eapPortAuth'][:4]
     portFilteringMode = emc_vars['userInput_filterPorts'][:1]
     eapPortReauthTimer = emc_vars['userInput_eapReauthTimer']
     radiusEncap = emc_vars['userInput_radiusEncap']
@@ -649,6 +747,7 @@ def main():
     print "Information provided by User:"
     print " - Switch access ports where to configure NAC/EAPoL = {}".format(enteredNacPortList)
     print " - EAPoL Port Mode = {}".format(eapPortMode)
+    print " - EAPoL Port Type = {}".format(eapPortType)
     print " - EAPoL Port Filtering mode = {}".format(portFilteringMode)
     print " - EAPoL Re-auth timer = {}".format(eapPortReauthTimer)
     print " - RADIUS Encapsulation = {}".format(radiusEncap)
@@ -704,10 +803,10 @@ def main():
     # First off, determine the terminal length (this is not per session on ERS), so that we can restore it on exit
     morePaging = sendCLI_showRegex(CLI_Dict['get_terminal_length'])[0]
     if int(morePaging) &gt; 0: # If not already disabled, disable --more-- paging; this will make the script considerably faster
-        sendCLI_configCommand(CLI_Dict['disable_more_paging'])
+        sendCLI_showCommand(CLI_Dict['disable_more_paging'])
 
     # Enter privExec mode (required with Telnet..)
-    sendCLI_configCommand(CLI_Dict['enable_context'])
+    sendCLI_showCommand(CLI_Dict['enable_context'])
 
     # Establish the Stacking mode
     stackingMode = sendCLI_showRegex(CLI_Dict['get_stacking_mode'])[0]
@@ -917,11 +1016,14 @@ def main():
         # Enter port config context
         sendCLI_configCommand(CLI_Dict['port_config_context'].format(nacPortList))
 
+        # Configure port common eapol configuration
+        sendCLI_configChain(CLI_Dict['port_config_eap_common'])
+
         # Enable port multihost, on older ERS models; the command is no longer recognized on newer ERS models/software, so we accept to get an error on this command
         sendCLI_configCommand(CLI_Dict['port_config_multihost'], True, 'this indicates that this ERS model/software version has obsoleted this command')
 
-        # Configure port common eapol configuration
-        sendCLI_configChain(CLI_Dict['port_config_eap_common'])
+        # Configure port authentication type allowed
+        sendCLI_configChain(CLI_Dict['port_config_eap_type'][eapPortType])
 
         # Configure port mode specific configuration
         sendCLI_configChain(CLI_Dict['port_config_eap_mode'][eapPortMode])
@@ -960,8 +1062,8 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <id>923</id>
-    <lastUpdateDate>1553502550318</lastUpdateDate>
+    <id>206</id>
+    <lastUpdateDate>1559118820931</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/ERS_NAC_Enforce.xml</metaDataPath>
     <miscXMLData></miscXMLData>

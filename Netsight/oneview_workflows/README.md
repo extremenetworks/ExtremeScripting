@@ -17,6 +17,8 @@
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.2.5.50v6.xwf?raw=true)|This workflow does create aggregated report over the time. Instead of 300 emails if 300 devices goes down, you will get one email with list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. In the workflow you can define the aggregation time in minutes. Define email recepients.|
 |[Assign Device to User Device Group](xwf/Assign_Device_to_UserGroup-8.2.5.50v4.xwf?raw=true)|Automatically does assign device to the user device group based on SysObjectID|Inputs:[File with mapping](xwf/Assign_Device_to_UserGroup_SysObjectID2Group.csv?raw=true), SOAP credentials. User device group must exist. Workflow can be executed automatically by Alarm (new device added). Workflow can be executed manually or scheduled.|
 |[Import Site Structure](xwf/Import_Sites-8.2.5.50v2.xwf?raw=true)|Automatically does create sites and subsites based on input file|Inputs:[File site names](xwf/Import_Sites_Sites2Create.txt?raw=true). Parent site must exist.|
+|[Investigate End-System History](xwf/Investigate_End-System_history-8.2.5.50v48.xwf?raw=true)|Workflow does generate email with details from end-system history based on defined criteria.|Input:MAC or Username, Date range. Define email recepients before use.|
+
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
