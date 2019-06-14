@@ -12,7 +12,6 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | Device        | myCLIRules.xml | CLI Rules File Name |
 |:-------------:| -------------- | ------------------- |
 |HPE Comware/H3C|[myCLIRules.xml](xml/comware/myCLIRules.xml?raw=true)|[comware](xml/comware/VendorProfilesComware.png?raw=true)|
-|VSP|[myCLIRules.xml](xml/VOSS/myCLIRules.xml?raw=true)|Avaya (Rapid City)|
 
 
 # Extreme Management Center version 8.0+ Scripts
@@ -20,7 +19,6 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | -- | ------------- | ------------- |:------:|
 | EXOS, IOS |[Configure Vlan on the Port Cisco-Extreme](xml/Configure_Vlan_on_the_Port-Cisco-Extreme.xml?raw=true)|Configure vlan on ports - tagged or untagged based on request. The script check if the VLAN exists. If the vlan does not exist then the script does create the vlan. Tested on EXOS 15.3 and newer. Tested on Catalyst 12.2|TCL|
 | EXOS, IOS, Comware OS, Procurve |[Configure Vlan on the Port Extreme-Cisco-Comware-Procurve](xml/Configure_Vlan_on_the_Port-Extreme-Cisco-Comware-Procurve.xml?raw=true)|Configure vlan on ports - tagged or untagged based on request. The script check if the VLAN exists. If the vlan does not exist then the script does create the vlan. Tested on EXOS 15.3 and newer. Tested on Catalyst 12.2. Tested on Comware 7.1.045. Tested on Procurve H.10.119|TCL|
-| BOSS, EXOS |[L2VSN between FA Proxy](xml/FA_L2VSN_Create.xml?raw=true)|Provisioning a L2VSN between FA Proxy|Python|
 | EXOS |[Create EAPS ](xml/Create_EAPS.xml?raw=true)|Creates the ring, assign selected ports as ring ports, confirue one switch as master and all other switches are transit nodes.|TCL|
 | EXOS |[Create EAPS control VLAN](xml/Create_EAPS_control_VLAN.xml?raw=true)| If the vlan does not exist it does create the vlan, it add the vlan to the EAPS as control. Control vlan is configured as tagged on all EAPS ring ports.|TCL|
 | EXOS |[Create EAPS protected VLAN](xml/Create_EAPS_protected_VLAN.xml?raw=true)|Add vlan to the EAPS as protected. If the vlan does not exits then it creates it. Selected ports are added as tagged or untagged. If there is only one EAPS ring then you do not need to specify the EAPS ring name. Ring ports are added as tagged automatically.|TCL|
@@ -30,11 +28,10 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | BOSS |[Authentication BOSS](xml/Authentication_BOSS.xml?raw=true)|Script does configure authentication on ports and configure Radius on BOSS based devices (ERS family). [Details](Authentication_BOSS.md)|TCL|
 | BOSS |[VLAN Provisioning BOSS](xml/VLAN_Provisioning_BOSS.xml?raw=true)|Script does create vlans on  BOSS based devices (ERS family).|Python|
 | BOSS |[ERS NAC Enforce](xml/BOSS_NAC_Enforce.xml?raw=true)|This script allows the XMC operator to easily configure an ERS switch based on the ExtremeControl NAC configuration. The script will automatically configure all of the following: Primary and Secondary RADIUS Servers, including shared secret.RADIUS accounting, if enabled in XMC switch config. RADIUS dynamic-client (RFC3576 Change-of-Authorization). NTP or SNTP configuration to match that of the XMC Server, including the right timezone. (RFC3576 Change-of-Authorization requires the switch and server to have the same time). RADIUS reachability, if specified by user. EAPoL global and port level configuration. If the port selection included FA Client ports and these are to be filtered out, these ports will have EAPoL expressly disabled on them. Fabric Attach is always enabled on the ports. Spanning Tree FastStart or Edge configuration is always set on the ports|Python|
-| VOSS |[(almost) Zero Touch Fabric](xml/aZTF.xml?raw=true)|It finds automatically the NNI ports, Creates & configures the Fabric dynamically, No user input necessary, all automated, Takes ~1mn to execute (30’’ are spent for LLDP).|Python|
 | VOSS |[Automatic Fabric Creation](xml/FC_Config.xml?raw=true)|Select group of switches with the same NNI portlist, specify some basic parameters.|Python|
-| VOSS |[Configuration of a Cluster (vIST)](xml/Fabric_Cluster_Create.xml?raw=true)|Cluster is created. You need their system-id before executing the script. Script must be executed one unit at a time. This script will disable/enable ISIS = it can disrupt traffic! [myCLIRules.xml](xml/VOSS/myCLIRules.xml?raw=true) is needed for XMC 8.0 - 8.1|Python|
+| VOSS |[Configuration of a Cluster (vIST)](xml/Fabric_Cluster_Create.xml?raw=true)|Cluster is created. You need their system-id before executing the script. Script must be executed one unit at a time. This script will disable/enable ISIS = it can disrupt traffic!|Python|
 | VOSS |[Configuring FA Server on BEBs](xml/FAServer_Create.xml?raw=true)|FA Server configuration|Python|
-| VOSS |[L2VSN between BEBs](xml/L2VSN.xml?raw=true)|Provisioning a L2VSN between BEBs. It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary checks (FA enabled on it or not) but it doesn't create the MLT itself.|Python|
+| VOSS, EXOS, BOSS |[L2VSN](xml/L2VSN.xml?raw=true)|This script provisions a L2VSN between several BEBs running VOSS (VSP switches) and/or FA switches (EXOS/BOSS). It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary checks (FA enabled on it or not) but it doesn't create the MLT itself.|Python|
 | VOSS |[Authentication VOSS](xml/Authentication_VOSS.xml?raw=true)|Configure radius server and accounting for management access.|TCL|
 | Procurve |[Authentication Procurve](xml/Authentication_Procurve.xml?raw=true)|Script will configure Radius and authentication on Procurve devices & ports.|TCL|
 
