@@ -18,6 +18,7 @@
 |[Assign Device to User Device Group](xwf/Assign_Device_to_UserGroup-8.2.5.50v4.xwf?raw=true)|Automatically does assign device to the user device group based on SysObjectID|Inputs:[File with mapping](xwf/Assign_Device_to_UserGroup_SysObjectID2Group.csv?raw=true), SOAP credentials. User device group must exist. Workflow can be executed automatically by Alarm (new device added). Workflow can be executed manually or scheduled.|
 |[Import Site Structure](xwf/Import_Sites-8.2.5.50v2.xwf?raw=true)|Automatically does create sites and subsites based on input file|Inputs:[File site names](xwf/Import_Sites_Sites2Create.txt?raw=true). Parent site must exist.|
 |[Investigate End-System History](xwf/Investigate_End-System_history-8.2.5.50v48.xwf?raw=true)|Workflow does generate email with details from end-system history based on defined criteria.|Input:MAC or Username, Date range. Define email recepients before use.|
+|[Import Devices](xwf/Import_Devices-8.2.6.5v3.xwf?raw=true)|Import devices to the database based on input file|Inputs:[File with devices](xwf/Import_Devices.txt?raw=true). The file contains IP,NickName,Site,Profile. The workflow does finish quickly, added devices will start to appear in the XMC sequentially.|
 
 
 # Support

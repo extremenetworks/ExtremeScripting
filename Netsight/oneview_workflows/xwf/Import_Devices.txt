@@ -1,0 +1,5 @@
+# IP address, Nick Name, Site name, Admin Profile
+1.1.1.1,Nick1,/World,snmp_v3_profile
+1.1.1.2,Nick2,/World,snmp_v3_profile
+1.1.1.3,Nick3,/World,SNMPv3-password
+1.1.1.4,Nick4,/World,VOSS_v3_Profile

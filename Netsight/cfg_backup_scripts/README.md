@@ -14,7 +14,8 @@
 |[Dell Force10](dell-force10)|XMC Configuration backup of Dell Force10|
 |[Extreme BR69xx](BR69xx.txt)|XMC Configuration backup and restore and restart of Brocade/Extreme BR69xx|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backup of FortiGate|
-|[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backup/restore & firmware upgrade of Comware|
+|[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backup/restore & firmware upgrade of Comware 5100|
+|[HP Aruba Comware](HPE_H3C_Comware_5_Switch.txt)|Backup and restore HPE H3C Comware 5.x switches.|
 |[Juniper EX SCP](juniper_EX-SCP)|XMC Configuration backup/restore of Juniper EX over SCP|
 |[Juniper EX TFTP](juniper_EX-TFTP)|XMC Configuration backup/restore of Juniper EX over TFTP|
 |[Palo Alto firewalls](Palo_Alto_SCP_Script)|XMC Configuration backup of Palo Alto firewall.|
