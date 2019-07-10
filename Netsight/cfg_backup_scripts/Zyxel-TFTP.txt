@@ -1,0 +1,33 @@
+-- Use these scripts to manage Zyxel devices
+name="Zyxel - TFTP"
+desc="Zyxel switches SSH/TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config tftp %TFTP_IP% %RELATIVE_TARGET_FILE_PATH%
+@RECEIVEUNTIL 60 Done!
+exit
+@receive 10
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+Bytes Done!
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+copy tftp config 1 %TFTP_IP% %RELATIVE_TARGET_FILE_PATH%
+@receive 60
+configure
+@receive 5
+snmp-server username snmpuser sec-level priv auth md5 auth-password snmpauthcred priv des priv-password snmpprivcred group admin
+@receive 5
+admin-password MySecretPassword
+@receive 5
+exit
+@receive 5
+write memory
+@receive 2
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Reset"-----
+reload config 1
+@receive 2
+@key y
+-----END SCRIPT-----

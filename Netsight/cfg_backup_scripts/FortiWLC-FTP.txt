@@ -1,0 +1,46 @@
+-- Use these scripts to manage Meru/Fortinet controllers
+name="Meru/Fortiwlc - FTP"
+desc="Meru/Fortinet controller SSH/FTP Scripts"
+protocol=FTP
+--
+perform_success_test_always=true
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config backupconfig
+@receive 20
+copy backupconfig ftp://%FTP_USER%@%FTP_IP%/%ABSOLUTE_TARGET_FILE_PATH%
+@RECEIVEUNTIL 20 Password:
+%FTP_PSWD%
+@RECEIVEUNTIL 30 Goodbye.
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+Transfer complete.
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+copy ftp://%FTP_USER%:%FTP_PSWD%@%FTP_IP%/%ABSOLUTE_TARGET_FILE_PATH% backupconfig
+@RECEIVEUNTIL 30 Goodbye.
+copy backupconfig running-config
+@receive 20
+copy running-config startup-config
+@receive 20
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+Please wait ...
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Reset"-----
+reload controller
+@receive 5
+y
+@receive 5
+y
+@receive 10
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Reset"-----
+The system is going down for reboot NOW!
+-----END SUCCESS---- 
+
+
+
+

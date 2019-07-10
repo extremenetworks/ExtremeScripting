@@ -1,0 +1,45 @@
+-- Use these scripts to manage a Microsens device
+name="Microsens G6 - TFTP"
+desc="Microsens SSH/TFTP Scripts"
+protocol=TFTP
+--
+-- When logging in, CLI asks -> Press any key to continue
+--    so need to have a return as the first line of the script.
+-- When logging out, 
+-- the y answers the question -> Do you want to log out [y/n]?
+-- the n answers the question -> Do you want to save current configuration [y/n]?    
+-- (this second question doesn't always show, so it is left out for now.  Otherwise an error occurs when it is sent because the session is closed.)  
+--     
+-----BEGIN SCRIPT "Configuration Upload"-----
+M F co u = running tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+@receive 3
+y
+quit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+M F co do = emc %TFTP_URL%
+@receive 3
+y
+@receive 30
+M F co r = emc
+Y
+@receive 3
+quit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Firmware Download"-----
+delete flash:/%TARGET_FILE_NAME%
+Y
+copy %TFTP_URL% flash:/
+Y
+@receive 1080
+boot-loader file flash:/%TARGET_FILE_NAME% all main
+Y
+@receive 20
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Reset"-----
+reboot
+Y
+
+Y
+Y
+-----END SCRIPT-----
