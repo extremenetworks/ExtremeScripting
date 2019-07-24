@@ -14,15 +14,15 @@
 |[Dell Force10](dell-force10)|XMC Configuration backup of Dell Force10.|
 |[Extreme BR69xx](BR69xx.txt)|XMC Configuration backup and restore and restart of Brocade/Extreme BR69xx.|
 |[FortiGate Firewall](FortiGate)|XMC Configuration backup of FortiGate.|
-|[FortiWLC controller](FortiWLC-FTP.txt)|XMC Configuration backup/restore/reboot/upgrade of FortiWLC / Meru wireless controller. If your FTP server does support chroot then you may need to change %ABSOLUTE_TARGET_FILE_PATH% with %RELATIVE_TARGET_FILE_PATH%.|
+|[FortiWLC controller](FortiWLC-FTP.txt)|XMC Configuration backup/restore over FTP of FortiWLC / Meru wireless controller. If your FTP server does support chroot then you may need to change %ABSOLUTE_TARGET_FILE_PATH% with %RELATIVE_TARGET_FILE_PATH%.|
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP)|XMC Configuration backup/restore & firmware upgrade of Comware 5100.|
 |[HP Aruba Comware](HPE_H3C_Comware_5_Switch.txt)|Backup and restore HPE H3C Comware 5.x switches.|
 |[Juniper EX SCP](juniper_EX-SCP)|XMC Configuration backup/restore of Juniper EX over SCP.|
 |[Juniper EX TFTP](juniper_EX-TFTP)|XMC Configuration backup/restore of Juniper EX over TFTP.|
-|[Microsens G6](Microsens_G6-TFTP.txt)|XMC Configuration backup/restore/reboot of Microsens G6 over TFTP.|
+|[Microsens G6](Microsens_G6-TFTP.txt)|XMC Configuration backup/restore over TFTP, firmware upgrade & reboot of Microsens G6.|
 |[Palo Alto firewalls](Palo_Alto_SCP_Script)|XMC Configuration backup of Palo Alto firewall over SCP.|
 |[Ubiquiti EdgeRouter](EdgOS)|XMC Configuration backup of Ubiquiti EdgeRouter over TFTP.|
-|[Zyxel switch](Zyxel-TFTP.txt)|XMC Configuration backup/restore/reboot of Zyxel switch over TFTP. CLI and SNMP credentials are not part of the backup, update the script with your credentials.|
+|[Zyxel switch](Zyxel-TFTP.txt)|XMC Configuration backup/restore of Zyxel switch over TFTP. CLI and SNMP credentials are not part of the backup, update the script with your credentials.|
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._

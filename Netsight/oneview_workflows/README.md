@@ -19,6 +19,8 @@
 |[Import Site Structure](xwf/Import_Sites-8.2.5.50v2.xwf?raw=true)|Automatically does create sites and subsites based on input file|Inputs:[File site names](xwf/Import_Sites_Sites2Create.txt?raw=true). Parent site must exist.|
 |[Investigate End-System History](xwf/Investigate_End-System_history-8.2.5.50v48.xwf?raw=true)|Workflow does generate email with details from end-system history based on defined criteria.|Input:MAC or Username, Date range. Define email recepients before use.|
 |[Import Devices](xwf/Import_Devices-8.2.6.5v3.xwf?raw=true)|Import devices to the database based on input file|Inputs:[File with devices](xwf/Import_Devices.txt?raw=true). The file contains IP,NickName,Site,Profile. The workflow does finish quickly, added devices will start to appear in the XMC sequentially.|
+|[Import VLANs](xwf/Import_VLANs_to_Site-8.3.0.106v3.xwf?raw=true)|Import VLANs to the Site based on input file|Inputs:[File with VLANs](xwf/Import_VLANs_to_Site.txt?raw=true). The file contains VlanID,VlanName. Chose method ADD (fails if the vlan exist) or REPLACE (if does not exist then it does create the vlan). Specify the Site.|
+|[Synchronize Vlans on the ERS](xwf/Synchronize_Vlans_on_ERS-8.3.0.111v16.xwf?raw=true)|This workflow does create VLANs on the ERS switch based on Site vlan configuration. The workflow does delete VLANs from ERS if the VLAN does not exist in the Site. The workflow does rename VLAN name to match the SITE.|If there was change done then the event is generated.|
 
 
 # Support
