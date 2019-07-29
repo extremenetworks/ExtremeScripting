@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="NAC Daemon Commands">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1564405553337</cacheDate>
+    <category>,NAC-DEBUG,</category>
+    <comments></comments>
+    <content>#@MetaDataStart
+#@DetailDescriptionStart
+#############################################################################
+# UI based NAC Daemon Control
+#
+# Script        : NAC Daemon Control
+# Revision      : 1.0
+# History #1	: make script running			
+# Last Updated  : 28.07.20189
+# Author		: M.Nees (BELL)
+#
+#####################################################################
+#@DetailDescriptionEnd
+
+# @ScriptDescription "UI based NAC Daemon Control"
+
+# @SectionStart (description = Change Port Auto-Negotiation Settings
+# @VariableFieldLabel (description     = "Control NAC Daemon"
+#    type            = String, validValues=[stop,start,restart,status],
+#    scope           = global,
+#    required = yes
+#    )
+set var NAC_daemon status
+
+# @SectionEnd
+#@MetaDataEnd
+
+########################################################################################
+
+# Checking valid System-Type 
+
+IF ($family != "Extreme Control") THEN
+       error "This Task is only valid on NAC Control Appliances"
+ELSE
+
+# Control NAC Daemon
+
+CLI sudo nacctl $NAC_daemon
+# CLI $deviceEnablePwd  
+# above is needed, if sudo needs password. scripting running into timeout issue, because CLI prompt is not recognized by XMC
+# append this into sudoers   // cli-admin ALL=(ALL) NOPASSWD: ALL //
+
+
+ENDIF</content>
+    <creationDate>1549569302200</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,</contexts>
+    <id>281</id>
+    <lastUpdateDate>1564405553325</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/NAC_Daemon_Commands.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-unknown,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/NAC_Daemon_Commands.tcl</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>TCL</scriptType>
+    <supprotedGroups>,My Network/Grouped By/Device Type/Summit Series/,</supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
