@@ -27,7 +27,7 @@ def get_mlag_peers():
     dup = False
     for peerRow in mlagpeerRslt['data']:
         for peer in mlag_peer:
-            if peer['peerName'] == peerRow['peerName']:
+            if peer['peerName'] == peerRow['peerName'] or peerRow['peerName'] == None:
                 dup = True
         if dup is True:
             pass
@@ -45,6 +45,8 @@ def get_mlag_ports():
     dup = False
     for mportRow in mlagportRslt['data']:
         for peer in mlag_ports:
+            if mportRow['peerName'] == None:
+                dup = True
             if peer['peerName'] == mportRow['peerName'] and peer['idx'] == mportRow['idx']:
                 dup = True
         if dup is True:
