@@ -56,7 +56,7 @@ def main():
     parser.add_argument('-v', '--vlan-name',
                             help='VLAN to configure option 43 on. If this is included, the option 43 config will be added to the DHCP '
                                  'server configuration on this switch for this VLAN. If not, the config command will simply be printed.', 
-                            type=str, default="")
+                            type=str, default="<vlan_name>")
     parser.add_argument('files', 
                             help='File(s) to be downloaded. If the \'-s\' option is used, this may be simply be a file name. '
                                  'If multiple files are given, they should be separated by spaces. '
@@ -92,17 +92,15 @@ def main():
     hex = ':'.join(hex[i:i+2] for i in range(0, len(hex), 2)) #delimit the bytes with ':', like EXOS expects
 
     
-    if len(vlan): #if a vlan was given, create the command 
-        cmd = 'configure vlan {0} dhcp-options code 43 hex {1}'.format(vlan, hex)
-        if env_is_exos: #execute it if running in EXOS
-            clicmd(cmd)
-        else: #otherwise print it
-            print cmd
-    else:         #otherwise print the command
-        vlan = '<vlan_name>'
-        cmd = 'configure vlan {0} dhcp-options code 43 hex {1}'.format(vlan, hex)
-        print cmd        
-    
+    #Create the command
+    cmd = 'configure vlan {0} dhcp-options code 43 hex {1}'.format(vlan, hex)
+
+    #execute it if running on EXOS and a VLAN name was given, otherwise print it
+    if env_is_exos and vlan is not "<vlan_name>":
+        clicmd(cmd)
+    else:
+        print cmd
+  
 
 if __name__ == '__main__':
     try:
