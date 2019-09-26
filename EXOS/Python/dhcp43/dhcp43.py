@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # usage: dhcp43.py [-h] [-s SERVER_ADDRESS] [-v VLAN_NAME] files [files ...]
 # 
 # This script will generate the hex needed to configure EXOS's built-in DHCP
@@ -25,8 +26,14 @@
 
 import binascii
 import argparse
-from exsh import clicmd
 import sys
+
+try:
+    from exsh import clicmd
+    env_is_exos = True
+except ImportError:
+    env_is_exos = False
+    pass
 
 class ArgParser(argparse.ArgumentParser):
    def error(self, message):
@@ -39,18 +46,20 @@ def main():
 
     parser = ArgParser(prog='dhcp43.py', 
                        description="This script will generate the hex needed to configure EXOS's built-in DHCP server with option 43 for ZTP. "
-                                   "It will also either provide the command to use, or configure the option on the specified VLAN.")
+                                   "It will also either provide the command to use, or configure the option on the specified VLAN.",
+                        usage="%(prog)s [-h] [-s SERVER_ADDRESS] [-v VLAN_NAME] files")
 
-    parser.add_argument('-s', '--server_address', 
+    parser.add_argument('-s', '--server-address', 
                             help='IP Address of TFTP server for sub-option 100. May be omitted if a URL is used for sub-option 101.', 
                             type=str, default="")
 
-    parser.add_argument('-v', '--vlan_name',
+    parser.add_argument('-v', '--vlan-name',
                             help='VLAN to configure option 43 on. If this is included, the option 43 config will be added to the DHCP '
                                  'server configuration on this switch for this VLAN. If not, the config command will simply be printed.', 
                             type=str, default="")
     parser.add_argument('files', 
-                            help='Files to be downloaded. If the \'-s\' option is used, this may be simply be a file name. '
+                            help='File(s) to be downloaded. If the \'-s\' option is used, this may be simply be a file name. '
+                                 'If multiple files are given, they should be separated by spaces. '
                                  'If the \'-s\' option is not used, this should be a full URL. (IE, tftp://192.168.1.10/config.xsf)',
                             type=str, nargs='+')
 
@@ -83,9 +92,12 @@ def main():
     hex = ':'.join(hex[i:i+2] for i in range(0, len(hex), 2)) #delimit the bytes with ':', like EXOS expects
 
     
-    if len(vlan): #if a vlan was give do the configuration
+    if len(vlan): #if a vlan was given, create the command 
         cmd = 'configure vlan {0} dhcp-options code 43 hex {1}'.format(vlan, hex)
-        clicmd(cmd)
+        if env_is_exos: #execute it if running in EXOS
+            clicmd(cmd)
+        else: #otherwise print it
+            print cmd
     else:         #otherwise print the command
         vlan = '<vlan_name>'
         cmd = 'configure vlan {0} dhcp-options code 43 hex {1}'.format(vlan, hex)
