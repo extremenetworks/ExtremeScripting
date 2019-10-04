@@ -1,0 +1,921 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Delete L2VSN Range">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <cacheDate>1570091134223</cacheDate>
+    <category>,Config,</category>
+    <comments>Delete L2VSN Range on VSP - v1.3</comments>
+    <content>'''
+This script is provided free of charge by Extreme. We hope such scripts are
+helpful when used in conjunction with Extreme products and technology and can
+be used as examples to modify and adapt for your ultimate requirements.
+Extreme will not provide any official support for these scripts. If you do
+have any questions or queries about any of these scripts you may post on
+Extreme's community website "The Hub" (https://community.extremenetworks.com/)
+under the scripting category.
+
+ANY SCRIPTS PROVIDED BY EXTREME ARE HEREBY PROVIDED "AS IS", WITHOUT WARRANTY
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL EXTREME OR ITS THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
+SCRIPTS.
+'''
+##########################################################
+# Ludo Standard library; Version 2.7                     #
+# Written by Ludovico Stevens, CSE Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+
+##########################################################
+try:
+    emc_vars
+    execution = 'xmc'
+except: # If not running on XMC Jython...
+    # These lines only needed to run XMC Python script locally
+    # They can also be pasted to XMC, but will not execute
+    import sys
+    import json
+    import java.util
+    import emc_cli      # Own local replica
+    import emc_nbi      # Own local replica
+    import emc_results  # Own local replica
+    execution = 'dev'
+    if len(sys.argv) &gt; 1: # Json file as 1st argv
+        emc_vars = json.load(open(sys.argv[1]))
+    else:
+        emc_vars = json.load(open('emc_vars.json'))
+##########################################################
+
+#
+# IMPORTS:
+#
+import re
+import subprocess
+from java.util import LinkedHashMap
+
+#
+# VARIABLES:
+#
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
+RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+RollbackStack = []
+SlotPortRange = None # Gets set to dict by getSlotPortRanges()
+
+
+#
+# FUNCTIONS:
+#
+def debug(debugOutput): # Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if Debug:
+        print debugOutput
+
+def cleanOutput(outputStr): # Remove echoed command and final prompt from output
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def configChain(chainStr): # Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\n|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
+        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
+    else:
+        mode = None
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
+    return mode, cmd, regex
+
+def formatOutputData(data, mode): # Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+    if not mode                 : value = data                                   # Legacy behaviour same as list
+    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
+    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
+    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
+    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
+    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
+    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
+    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
+    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
+    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets, returns 1st tuple
+    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
+    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    else:
+        RuntimeError("sendCLI_showRegex: invalid scheme type '{}'".format(mode))
+    return value
+
+def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    if RollbackStack:
+        print "Applying rollback commands to undo partial config and return device to initial state"
+        while RollbackStack:
+            sendCLI_configChain(RollbackStack.pop(), returnCliError=True)
+    print "Aborting because this command failed: {}".format(cmd)
+    raise RuntimeError(errorOutput)
+
+def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
+    RollbackStack.append(cmd)
+    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
+    cmdList = [x for x in cmdList if x] # Weed out empty elements 
+    cmdOneLiner = " / ".join(cmdList)
+    print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            abortError(cmd, outputStr)
+        else:
+            LastError = None
+            return outputStr
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI config command
+    global LastError
+    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            abortError(cmd, outputStr)
+        else:
+            ConfigHistory.append(cmdStore)
+            LastError = None
+            return True
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        if len(cmd): # Skip empty lines
+            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+            if not success:
+                return False
+    return True
+
+def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+    cmdList = configChain(chainStr)
+    if emc_vars['family'] != 'VSP Series':
+        raise RuntimeError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    if Sanity:
+        for cmd in cmdList:
+            print "SANITY - Appended to config.cfg&gt; {}".format(cmd)
+        ConfigHistory.append(cmd + ' [after reboot]')
+        LastError = None
+        return True
+    # Edit config.cfg
+    emc_cli.send('edit config.cfg', False) # We get no prompt back..
+    emc_cli.send("?end\nO", False) # Search backwards for last end statement, then edit above it
+    for cmd in cmdList:
+        emc_cli.send(cmd + "\n", False) # Insert each command
+    resultObj = emc_cli.send("\eZZ\n")
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            abortError(cmd, outputStr)
+        else:
+            for cmd in cmdList:
+                ConfigHistory.append(cmd + ' [after reboot]')
+            LastError = None
+            return True
+    else:
+        raise RuntimeError(resultObj.getError())
+
+def sendCLI_showRegex(cmdRegexStr, debugKey=None): # Send show command and extract values from output using regex
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
+    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
+    mode, cmd, regex = parseRegexInput(cmdRegexStr)
+    outputStr = sendCLI_showCommand(cmd)
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("sendCLI_showRegex OUT = {}".format(value))
+    return value
+
+def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+    response = emc_nbi.query(jsonQuery)
+    if 'errors' in response: # Query response contains errors
+        abortError("nbiQuery for {}".format(returnKey), response['errors'][0].message)
+
+    if returnKey: # If a specific key requested, we find it
+        def recursionKeySearch(nestedDict):
+            for key, value in nestedDict.iteritems():
+                if key == returnKey:
+                    return True, value
+                elif isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+                    foundKey, foundValue = recursionKeySearch(value)
+                    if foundKey:
+                        return True, foundValue
+
+        foundKey, returnValue = recursionKeySearch(response)
+        if foundKey:
+            if Debug:
+                if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+            return returnValue
+
+        # If requested key not found, raise error
+        abortError("nbiQuery for {}".format(returnKey), 'Key "{}" was not found in query response'.format(returnKey))
+
+    # Else, return the full response
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, response))
+        else: debug("nbiQuery response = {}".format(response))
+    return response
+
+def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and recover the output
+    mode, cmd, regex = parseRegexInput(cmdRegexStr)
+    cmdList = cmd.split(' ')
+    if execution == 'dev': # I develop on my Windows laptop...
+        cmdList[0] += '.bat'
+    debug("xmcLinuxCommand about to execute : {}".format(cmd))
+    outputStr = subprocess.check_output(cmdList)
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("xmcLinuxCommand OUT = {}".format(value))
+    return value
+
+def getSlotPortRanges(): # Populates the SlotPortRange dict
+    global SlotPortRange
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+)\s+\S+\s+\S+\s+\S+\s+(\d+)'} # Only XOS supported
+    if emc_vars['family'] not in slotCommand:
+        SlotPortRange = {}
+        return
+    SlotPortRange = sendCLI_showRegex(slotCommand[emc_vars['family']])
+    debug("getSlotPortRanges = {}".format(SlotPortRange))
+
+def generatePortList(portStr, debugKey=None): # Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
+    # This version of this function will not handle port ranges which span slots; also does not handle VSP channelized ports
+    debug("generatePortList IN = {}".format(portStr))
+    portDict = {} # Use a dict, will ensure no port duplicate keys
+    for port in portStr.split(','):
+        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
+        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
+        if not len(port): # Skip empty string
+            continue
+        rangeMatch = RegexPortRange.match(port)
+        starMatch = RegexStarRange.match(port)
+        if rangeMatch: # We have a range of ports
+            startSlot = rangeMatch.group(1)
+            separator = rangeMatch.group(2)
+            startPort = int(rangeMatch.group(3))
+            endSlot = rangeMatch.group(4)
+            endPort = int(rangeMatch.group(5))
+            if endSlot and startSlot != endSlot:
+                print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
+            elif startPort &gt;= endPort:
+                print "ERROR! generatePortList invalid range: {}".format(port)
+            else: # WE are good
+                for portCount in range(startPort, endPort + 1):
+                    if startSlot: # slot-based range
+                        portDict[startSlot + separator + str(portCount)] = 1
+                    else: # simple port range (no slot info)
+                        portDict[str(portCount)] = 1
+        elif starMatch: # We have a slot/* range
+            slot = starMatch.group(1)
+            separator = starMatch.group(2)
+            if SlotPortRange == None: # Structure not populated
+                getSlotPortRanges()
+            if SlotPortRange:
+                if slot in SlotPortRange:
+                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
+                        portDict[slot + separator + str(portCount)] = 1
+                else:
+                    print "Warning: no range for slot {}; skipping: {}".format(slot, port)
+            else:
+                print "Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port)
+        elif RegexPort.match(port): # Port is in valid format
+            portDict[port] = 1
+        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
+            print "Warning: generatePortList skipping unexpected port format: {}".format(port)
+
+    # Sort and return the list as a comma separated string
+    def portValue(port): # Function to pass to sorted(key)
+        slotPort = re.split('[/:]', port)
+        if len(slotPort) == 2: # slot/port format
+            idx = int(slotPort[0])*100 + int(slotPort[1])
+        else: # standalone port (no slot)
+            idx = int(slotPort[0])
+        return idx
+    portList = sorted(portDict, key=portValue)
+
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portList))
+        else: debug("generatePortList OUT = {}".format(portList))
+    return portList
+
+def generatePortRange(portList, debugKey=None): # Given an ordered list of ports, generates a compacted port list/range string for use on CLI commands
+    # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
+    debug("generatePortRange IN = {}".format(portList))
+    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
+    elementList = []
+    elementBuild = None
+    currentType = None
+    currentSlot = None
+    currentPort = None
+    rangeLast = None
+    for port in portList:
+        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
+        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
+        if len(slotPort) == 3: # slot/port
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
+                    currentPort = slotPort[2]
+                    if rangeMode[emc_vars['family']] == 1:
+                        rangeLast = currentPort
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            elementBuild = port
+
+        if len(slotPort) == 1: # simple port (no slot)
+            if elementBuild:
+                if currentType == 'p' and port == str(int(currentPort)+1):
+                    currentPort = port
+                    rangeLast = currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 'p'
+            currentPort = port
+            elementBuild = port
+
+    if elementBuild: # Close off last element we were holding
+        if rangeLast:
+            elementBuild += '-' + rangeLast
+        elementList.append(elementBuild)
+
+    portStr = ','.join(elementList)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portStr))
+        else: debug("generatePortRange OUT = {}".format(portStr))
+    return portStr                
+
+def ipToNumber(dottedDecimalStr): # Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
+    try: # bytearray ensures that IP bytes are valid (1-255)
+        ipByte = list(bytearray([int(byte) for byte in dottedDecimalStr.split('.')]))
+    except:
+        return None
+    if len(ipByte) != 4:
+        return None
+    debug("ipByte = {}".format(ipByte))
+    ipNumber = (ipByte[0]&lt;&lt;24) + (ipByte[1]&lt;&lt;16) + (ipByte[2]&lt;&lt;8) + ipByte[3]
+    debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
+    return ipNumber
+
+def numberToIp(ipNumber): # Method to convert a long number into an IP/Mask dotted decimal address
+    dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
+    debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
+    return dottedDecimalStr
+
+def maskToNumber(mask): # Method to convert a mask (dotted decimal or Cidr number) into a long number
+    if re.match(r'^\d+$', mask): # Mask as number
+        maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
+    else:
+        maskNumber = ipToNumber(mask)
+    debug("maskNumber = {}".format(hex(maskNumber)))
+    return maskNumber
+
+def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    ipSubnet = numberToIp(subnetNumber)
+    ipDottedMask = numberToIp(maskNumber)
+    ipCidrMask = bin(maskNumber).count('1')
+    debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
+    return ipSubnet, ipDottedMask, ipCidrMask
+
+def ipGateway(ip, mask, gw): # Return the gateway IP address, as first or last IP in subnet, based on own IP/mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    if gw == 'first':
+        gwNumber = subnetNumber + 1
+        ip1numb = gwNumber + 1
+        ip2numb = gwNumber + 2
+    elif gw == 'last':
+        gwNumber = subnetNumber + 2**(32-int(mask)) - 2
+        ip1numb = gwNumber - 2
+        ip2numb = gwNumber - 1
+    else: # Error condition
+        raise RuntimeError('ipGateway(): invalid gw type {}'.format(gw))
+    debug("gwNumber = {} / ip1numb = {} / ip2numb = {}".format(hex(gwNumber), hex(ip1numb), hex(ip2numb)))
+    gatewayIP = numberToIp(gwNumber)
+    ip1 = numberToIp(ip1numb)
+    ip2 = numberToIp(ip2numb)
+    debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
+    return gatewayIP, ip1, ip2
+
+def printConfigSummary(): # Print summary of all config commands executed with context indentation
+    emc_cli.close()
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if emc_vars['family'] in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[emc_vars['family']])
+    for cmd in ConfigHistory:
+        if emc_vars['family'] in RegexContextPatterns:
+            if RegexContextPatterns[emc_vars['family']][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+
+
+#
+# INIT: Init code
+#
+try:
+    if emc_vars['userInput_sanity'] == 'Enable':
+        Sanity = True
+    elif emc_vars['userInput_sanity'] == 'Disable':
+        Sanity = False
+except:
+    pass
+try:
+    if emc_vars['userInput_debug'] == 'Enable':
+        Debug = True
+    elif emc_vars['userInput_debug'] == 'Disable':
+        Debug = False
+except:
+    pass
+
+
+# --&gt; Insert Ludo Threads library here if required &lt;--
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+############################################################
+# XMC Script: Delete L2VSN Range (for device context menu) #
+# Written by Ludovico Stevens, CSE Extreme Networks        #
+############################################################
+# Delete multiple L2VSNs using VLAN list/ranges on VOSS
+# Written by Ludovico Stevens, CSE Extreme Networks
+
+__version__ = '1.3'
+
+#
+# XMC Metadata
+#
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+######################################################################################
+#
+# This script deletes existing L2VSN services.
+# It works across with VOSS VSPs in Switched-UNI mode only.
+#
+# An I-SID range/offset must be provided.
+#
+# A VLAN-id list or range must also be provided, either at the global level or at the
+# device level (when a value is provided at both global and device level, the device
+# level value will be used).
+#
+# If a Port list or MLT list is provided, than the interfaces specified will simply be
+# removed from the VSN services without actually deleting the VSN I-SID from the switch.
+#
+# If the Port list and MLT list fields are left empty, then the services will be
+# deleted on the switch.
+#
+#######################################################################################
+#@DetailDescriptionEnd
+
+#@SectionStart (description = "Service Definition to delete")
+#    @VariableFieldLabel (
+#        description = "L2 SERVICE Domain &amp;#40;I-SID offset applied to VLAN-ids&amp;#41;",
+#        type = string,
+#        required = yes,
+#        validValues = [Range0: I-SIDs 2000000, Range1: I-SIDs 2010000, Range2: I-SIDs 2020000, Range3: I-SIDs 2030000, Range4: I-SIDs 2040000],
+#        name = "userInput_l2domain",
+#    )
+#    @VariableFieldLabel (
+#        description = "VLAN-id &amp;#40;list or range&amp;#41;&amp;#44; except if overridden below at device level",
+#        type = string,
+#        required = no,
+#        name = "userInput_vlanGlobal",
+#    )
+#    @VariableFieldLabel (
+#        description = "Port list&amp;#44; if provided service will not be deleted but only removed from ports&amp;#59; can be overridden below at device level",
+#        type = string,
+#        required = no,
+#        name = "userInput_portsGlobal",
+#    @VariableFieldLabel (
+#        description = "MLT id list&amp;#44; can be overridden below at device level",
+#        type = string,
+#        required = no,
+#        name = "userInput_mltsGlobal",
+#    )
+#@SectionEnd
+
+#@SectionStart (description = "Device level Port and VLAN assignment to overrides above global values")
+#    @VariableFieldLabel (
+#        description = "Port&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_ports",
+#        scope = device
+#    )
+#    @VariableFieldLabel (
+#        description = "MLT id&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_mlts",
+#        scope = device
+#    )
+#    @VariableFieldLabel (
+#        description = "VLAN&amp;#40;list&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_vlan",
+#        scope = device
+#    )
+#@SectionEnd
+
+#@SectionStart (description = "Sanity / Debug")
+#    @VariableFieldLabel (
+#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_sanity",
+#    )
+#    @VariableFieldLabel (
+#        description = "Debug: enable if you need to report a problem to the script author",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_debug",
+#    )
+#@SectionEnd
+#@MetaDataEnd
+'''
+
+#
+# Imports:
+#
+
+
+#
+# Variables:
+#
+CLI_Dict = {
+    'VSP Series'    : {
+        'disable_more_paging'        : 'terminal more disable',
+        'enable_context'             : 'enable',
+        'config_context'             : 'config term',
+        'isid_config_context'        : 'i-sid {0}', # {0} = i-sid
+        'exit_config_context'        : 'exit',
+        'end_config'                 : 'end',
+        'save_config'                : 'save config',
+        'get_isid_port_uni_data'     : 'show running-config module i-sid | begin i-sid',
+        'delete_switched_uni'        : { # {0} = vlan; {1} = port-list
+            'tag'                    : 'no c-vid {0} port {1}',
+            'untag'                  : 'no untagged-traffic port {1}',
+            'transparent'            : 'no port {1}'
+                                       },
+        'delete_mlt_switched_uni'    : { # {0} = VLAN id; {1} = MLT id
+            'tag'                    : 'no c-vid {0} mlt {1}',
+            'untag'                  : 'no untagged-traffic mlt {1}',
+            'transparent'            : 'no mlt {1}'
+                                       },
+        'delete_switched_isid'       : 'no i-sid {}', # Isid
+    },
+}
+
+
+#
+# Functions:
+#
+def getIsidUniStruct(): # Extract all switched-uni/transparent-uni I-SIDs and port data
+    # the "show i-sid" command is too fiddly to scrape...
+    # the "show interfaces gigabitEthernet i-sid" command does not show I-SIDs with no ports assigned...
+    # so we use "show run module i-sid" instead...
+    cliOutput = sendCLI_showCommand(CLI_Dict['VSP Series']['get_isid_port_uni_data'])
+    isidUniPortDict = {}
+    foundIsidData = False
+    for line in cliOutput.splitlines():
+        matchObj = re.match(r'^i-sid (\d+) ', line)
+        if matchObj:
+            isid = matchObj.group(1)
+            isidUniPortDict[isid] = {}
+            foundIsidData = True
+            continue
+
+        if foundIsidData:
+            matchObj = re.match(r'c-vid (\d+) (port|mlt) (\S+)', line)
+            if matchObj:
+                tagging = 'tag'
+                cvlan = matchObj.group(1)
+                btype = matchObj.group(2)
+                if btype == 'port':
+                    ports = matchObj.group(3)
+                    mlt = None
+                else:
+                    ports = None
+                    mlt = matchObj.group(3)
+            else:
+                matchObj = re.match(r'untagged-traffic (port|mlt) (\S+)', line)
+                if matchObj:
+                    tagging = 'untag'
+                    cvlan = None
+                    btype = matchObj.group(1)
+                    if btype == 'port':
+                        ports = matchObj.group(2)
+                        mlt = None
+                    else:
+                        ports = None
+                        mlt = matchObj.group(2)
+                else:
+                    matchObj = re.match(r'(port|mlt) (\S+)', line)
+                    if matchObj:
+                        tagging = 'transparent'
+                        cvlan = None
+                        btype = matchObj.group(1)
+                        if btype == 'port':
+                            ports = matchObj.group(2)
+                            mlt = None
+                        else:
+                            ports = None
+                            mlt = matchObj.group(2)
+                    elif re.match(r'exit', line):
+                        foundIsidData = False
+                        continue
+                    else:
+                        continue
+
+            if ports:
+                portList = generatePortList(ports)
+                debug("portList = {}".format(portList))
+                for port in portList:
+                    isidUniPortDict[isid][port] = {'type': tagging, 'vlan': cvlan}
+            if mlt:
+                isidUniPortDict[isid][mlt] = {'type': tagging, 'vlan': cvlan}
+
+    debug("getIsidUniStruct OUT = {}".format(isidUniPortDict))
+    return isidUniPortDict
+
+
+
+def main():
+    print "Delete L2VSN Range version {}".format(__version__)
+
+    family    = emc_vars["family"]
+    if not family in CLI_Dict.keys():
+        raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+
+    l2domain  = emc_vars["userInput_l2domain"]
+    try:
+        vlanGb = emc_vars["userInput_vlanGlobal"].strip()
+    except:
+        vlanGb = None
+    try:
+        portsGb = emc_vars["userInput_portsGlobal"].strip()
+    except:
+        portsGb = None
+    try:
+        mltsGb = emc_vars["userInput_mltsGlobal"].strip()
+    except:
+        mltsGb = None
+    try:
+        vlanDv = emc_vars["userInput_vlan"].strip()
+    except:
+        vlanDv = None
+    try:
+        portsDv = emc_vars["userInput_ports"].strip()
+    except:
+        portsDv = None
+    try:
+        mltsDv = emc_vars["userInput_mlts"].strip()
+    except:
+        mltsDv = None
+
+    isidOffset = re.search(r'(\d+$)', l2domain).group(1)
+    debug("isidOffset = {}".format(isidOffset))
+
+    print "Information provided by User:"
+    print " Global settings:"
+    print " - L2 Domain = {}".format(l2domain)
+    print " - I-SID offset = {}".format(isidOffset)
+    print " - Global VLAN(s) = {}".format(vlanGb)
+    print " - Global Ports = {}".format(portsGb)
+    print " - Global MLT ids = {}".format(mltsGb)
+    print " Device override settings:"
+    print " - VLAN(s) = {}".format(vlanDv)
+    print " - Ports = {}".format(portsDv)
+    print " - MLT ids = {}".format(mltsDv)
+
+    # Determine Vlan and port to use for this device
+    if vlanDv:
+        vlan = vlanDv
+    elif vlanGb:
+        vlan = vlanGb
+    else:
+        raise RuntimeError('One or more VLANs must be provided')
+
+    vlanList = generatePortList(vlan)
+    debug("vlanList = {}".format(vlanList))
+    for vlan in vlanList:
+        if not vlan.isdigit() or int(vlan) &gt; 4095:
+            raise RuntimeError('Invalid VLAN id value {}; needs to be a number not higher than 4059'.format(vlan))
+
+    if portsDv:
+        ports = portsDv
+    elif portsGb:
+        ports = portsGb
+    else:
+        ports = None
+
+    if mltsDv:
+        mlts = mltsDv
+    elif mltsGb:
+        mlts = mltsGb
+    else:
+        mlts = None
+    if mlts:
+        mltList = generatePortList(mlts)
+    else:
+        mltList = []
+    debug("mltList = {}".format(mltList))
+    for mlt in mltList:
+        if not mlt.isdigit() or int(mlt) &gt; 512:
+            raise RuntimeError('Invalid MLT id value {}; needs to be a number not higher than 512'.format(mlt))
+
+    # Disable more paging (generatePortList might issue a CLI command, so do this before)
+    sendCLI_showCommand(CLI_Dict[family]['disable_more_paging'])
+
+    # Obtain ports in list and range format
+    if ports:
+        portList = generatePortList(ports)
+        portRange = generatePortRange(portList)
+    else:
+        portList = []
+        portRange = ''
+    debug("portList = {}".format(portList))
+    debug("portRange = {}".format(portRange))
+
+    # Enter privExec, for show commands
+    if 'enable_context' in CLI_Dict[family]:
+        sendCLI_showCommand(CLI_Dict[family]['enable_context'])
+
+    # Enter config mode now
+    if 'config_context' in CLI_Dict[family]:
+        sendCLI_configCommand(CLI_Dict[family]['config_context'])
+    performConfig = False # Assume not
+
+    # Only Switched UNI config covered here
+    uniIsidDict = getIsidUniStruct()
+    debug('uniIsidDict = {}'.format(uniIsidDict))
+    for vlan in vlanList:
+        # Prepare the I-SID
+        isid = str(int(isidOffset) + int(vlan))
+        debug("vlan {} = isid {}".format(vlan, isid))
+        portsInIsidToRemove = []
+        mltsInIsidToRemove = []
+
+        if portList: # Remove ports from Switched-UNI I-SID
+            portsInIsidToRemove = [x for x in portList if isid in uniIsidDict.keys() and x in uniIsidDict[isid].keys() and uniIsidDict[isid][x]['vlan'] == vlan]
+            debug("portsInIsidToRemove = {}".format(portsInIsidToRemove))
+            if portsInIsidToRemove:
+                print "Ports to remove from I-SID {} = {}".format(isid, portRange)
+
+        if mltList: # Remove MLTs from Switched-UNI I-SID
+            mltsInIsidToRemove = [x for x in mltList if isid in uniIsidDict.keys() and x in uniIsidDict[isid].keys() and uniIsidDict[isid][x]['vlan'] == vlan]
+            debug("mltsInIsidToRemove = {}".format(mltsInIsidToRemove))
+            if mltsInIsidToRemove:
+                print "MLTs to remove from I-SID {} = {}".format(isid, mltsInIsidToRemove)
+
+        if portsInIsidToRemove or mltsInIsidToRemove:
+            # Enter I-SID context
+            sendCLI_configCommand(CLI_Dict[family]['isid_config_context'].format(isid))
+            performConfig = True
+            if portsInIsidToRemove:
+                # Remove ports from I-SID
+                for port in portsInIsidToRemove:
+                    sendCLI_configCommand(CLI_Dict[family]['delete_switched_uni'][uniIsidDict[isid][port]['type']].format(uniIsidDict[isid][port]['vlan'], portRange))
+            if mltsInIsidToRemove:
+                # Remove MLT ids from I-SID
+                for mlt in mltsInIsidToRemove:
+                    sendCLI_configCommand(CLI_Dict[family]['delete_mlt_switched_uni'][uniIsidDict[isid][mlt]['type']].format(uniIsidDict[isid][mlt]['vlan'], mlt))
+            # Exit I-SID context
+            if performConfig:
+                sendCLI_configCommand(CLI_Dict[family]['exit_config_context'])
+
+        else:
+            if isid in uniIsidDict.keys(): # Delete I-SID
+                sendCLI_configChain(CLI_Dict[family]['delete_switched_isid'].format(isid))
+                performConfig = True
+            else:
+                print "VLAN {} I-SID {} not on switch; nothing to delete".format(vlan, isid)
+
+    # End and save config
+    if 'end_config' in CLI_Dict[family]:
+        sendCLI_configCommand(CLI_Dict[family]['end_config'])
+    if performConfig:
+        sendCLI_configCommand(CLI_Dict[family]['save_config'])
+
+    # Print summary of config performed
+    printConfigSummary()
+
+main()
+</content>
+    <creationDate>1562693346974</creationDate>
+    <creator>lstevens</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Device,Groups,</contexts>
+    <id>1165</id>
+    <lastUpdateDate>1570091134170</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
+    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Delete_L2VSN_Range.xml</metaDataPath>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-voss,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Delete_L2VSN_Range.py</scriptPath>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,CSE,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
