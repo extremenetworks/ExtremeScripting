@@ -28,6 +28,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[List_Compress](list_compress)|This script takes a string of numerical values and compresses them into a string of condensed ranges.|
 |[MIB View](mibview)|Converts a MIB view defined with asterisks to the mask notation used in EXOS configuration.|
 |[MLAG config check](mlag_config_check)|Checks to ensure that all VLANs on MLAG ports are also present on the ISC.|
+|[MLAG config compare](mlag_config_compare)|Check your MLAG config by comparing this script output from both MLAG peers. |
 |[NON-stacking config converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[Convert Port Config](convert_port_config)| Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
 |[QOS Config Wizard](qosconfigpy)|Wizard to aid in creating QoS profiles|
