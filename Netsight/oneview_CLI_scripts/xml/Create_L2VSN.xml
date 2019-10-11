@@ -2,9 +2,9 @@
 <script name="Create L2VSN">
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1570090067495</cacheDate>
+    <cacheDate>1570701628472</cacheDate>
     <category>,Config,</category>
-    <comments>Create L2VSN across any of VSP,XOS,ERS - v1.3</comments>
+    <comments>Create L2VSN across any of VSP,XOS,ERS - v1.4</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -529,7 +529,7 @@ except:
 # Create a L2VSN across any of VOSS, EXOS, BOSS
 # Written by Ludovico Stevens, CSE Extreme Networks
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 #
 # XMC Metadata
@@ -737,7 +737,7 @@ CLI_Dict = {
         'config_context'             : 'config term',
         'end_config'                 : 'end',
         'save_config'                : 'copy config nvram',
-        'get_cvlan_name'             : 'str://show vlan id {0}||^{0}\s+(\S.+\S)\s+Port', # VLAN id
+        'get_cvlan_name'             : 'str://show vlan||^{0}\s+(\S.+\S)\s+Port', # VLAN id
         'create_cvlan'               : 'vlan create {0} type port', # {0} = VLAN id
         'get_cvlan_isid'             : 'str://show vlan i-sid {0}||^{0}\s+(\d+)', # VLAN id
         'set_cvlan_isid'             : 'i-sid {1} vlan {0}', # {0} = VLAN id; {1} = i-sid 
@@ -1102,8 +1102,8 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <id>1130</id>
-    <lastUpdateDate>1570090067449</lastUpdateDate>
+    <id>543</id>
+    <lastUpdateDate>1570701628380</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Create_L2VSN.xml</metaDataPath>
     <miscXMLData></miscXMLData>
