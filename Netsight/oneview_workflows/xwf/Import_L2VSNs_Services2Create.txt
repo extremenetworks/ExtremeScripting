@@ -1,0 +1,13 @@
+#NSI,L2VSN-name,VlanID,VlanName,Service Definition,Service Application
+1511,CRM1511 - Global,1511,Vlan 1511,Prague,CRM
+1901512,CRMAPP - Service,1512,Vlan 1512,Prague,CRM
+1701513,CRMDB - Service,1513,Vlan 1513,Prague,CRM
+
+1511,CRM1511 - Global,1511,Vlan 1511,Vienna,CRM
+1701512,CRMAPP - Service,1512,Vlan 1512,Vienna,CRM
+1701513,CRMDB - Service,1513,Vlan 1513,Vienna,CRM
+
+1911514,PAC - Service,1514,Vlan 1514,Prague,PAC
+1911515,PACDB - Service,1515,Vlan 1515,Prague,PAC
+1711514,PAC - Service,1514,Vlan 1514,Vienna,PAC
+1711515,PACDB - Service,1515,Vlan 1515,Vienna,PAC
