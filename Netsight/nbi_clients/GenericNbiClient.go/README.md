@@ -1,6 +1,6 @@
-# GenericNbiClient (Go)
+# GenericNbiClient.go
 
-GenericNbiClient sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
+[GenericNbiClient.go](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/nbi_clients/GenericNbiClient.go/GenericNbiClient.go) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
 
 ## Compiling
 
