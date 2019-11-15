@@ -10,7 +10,7 @@ save config to %TARGET_FILE_NAME%
 @KEY %0D
 exit
 scp export configuration from %TARGET_FILE_NAME% to %SCP_USER%@%SCP_IP%:%ABSOLUTE_SERVER_DIR_PATH%
-y
+yes
 @SLEEP 5
 %SCP_PSWD%
 @receive 30
