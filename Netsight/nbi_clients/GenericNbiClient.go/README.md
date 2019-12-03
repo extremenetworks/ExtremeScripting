@@ -1,4 +1,4 @@
-# GenericNbiClient.go
+# XMC NBI GenericNbiClient (Go)
 
 [GenericNbiClient.go](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/nbi_clients/GenericNbiClient.go/GenericNbiClient.go) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
 
@@ -6,13 +6,18 @@
 
 Use `go run GenericNbiClient.go` to run the tool directly or `go build GenericNbiClient.go` to compile a binary.
 
-Tested with go1.11 and go1.13.
+Tested with go1.13.
 
 ## Usage
 
 `GenericNbiClient -h`:
 
 <pre>
+Available options:
+  -clientid string
+        Client ID for OAuth2
+  -clientsecret string
+        Client Secret for OAuth2
   -host string
         XMC Hostname / IP
   -httptimeout uint
@@ -29,6 +34,19 @@ Tested with go1.11 and go1.13.
         Username for HTTP auth (default "admin")
   -version
         Print version information and exit
+
+OAuth2 will be preferred over username/password.
+
+All options that take a value can be set via environment variables:
+  XMCHOST          -->  -host
+  XMCPORT          -->  -port
+  XMCINSECURE      -->  -insecurehttps
+  XMCTIMEOUT       -->  -httptimeout
+  XMCCLIENTID      -->  -clientid
+  XMCCLIENTSECRET  -->  -clientsecret
+  XMCUSERNAME      -->  -username
+  XMCPASSWORD      -->  -password
+  XMCQUERY         -->  -query
 </pre>
 
 ## Source
@@ -38,3 +56,4 @@ The original project is [hosted at GitLab](https://gitlab.com/rbrt-weiler/xmc-nb
 ## Support
 
 _The software is provided as-is and neither [Extreme Networks](http://www.extremenetworks.com/) nor [BELL Computer-Netzwerke GmbH](https://www.bell.de/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) or [BELL Computer-Netzwerke GmbH](https://www.bell.de/) is at its sole discretion._
+
