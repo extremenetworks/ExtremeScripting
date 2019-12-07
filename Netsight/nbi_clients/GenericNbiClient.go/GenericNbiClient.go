@@ -24,46 +24,243 @@ SOFTWARE.
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
+	"strconv"
+	"strings"
 	"time"
 )
 
+// AppConfig stores the application configuration once parsed by flags.
+type AppConfig struct {
+	XMCHost         string
+	XMCPort         uint
+	HTTPTimeout     uint
+	InsecureHTTPS   bool
+	XMCClientID     string
+	XMCClientSecret string
+	XMCUsername     string
+	XMCPassword     string
+	XMCQuery        string
+	UseOAuth        bool
+	PrintVersion    bool
+}
+
+// OAuth2Token stores the OAuth2 Token used for authentication.
+type OAuth2Token struct {
+	TokenType     string `json:"token_type"`
+	AccessToken   string `json:"access_token"`
+	TokenElements OAuth2TokenElements
+}
+
+// OAuth2TokenElements stores decoded information contained in a valid OAuth2 token.
+type OAuth2TokenElements struct {
+	Issuer           string   `json:"iss,omitempty"`
+	Subject          string   `json:"sub,omitempty"`
+	JWTID            string   `json:"jti,omitempty"`
+	Roles            []string `json:"roles,omitempty"`
+	IsuedAtUnixfmt   int64    `json:"iat,omitempty"`
+	NotBeforeUnixfmt int64    `json:"nbf,omitempty"`
+	ExpiresAtUnixfmt int64    `json:"exp,omitempty"`
+	IssuedAt         time.Time
+	NotBefore        time.Time
+	ExpiresAt        time.Time
+	LongLived        bool `json:"longLived,omitempty"`
+}
+
+// Definitions used within the code.
 const (
-	toolName         string = "BELL XMC NBI GenericNbiClient.go"
-	toolVersion      string = "0.3.0"
-	httpUserAgent    string = toolName + "/" + toolVersion
-	errSuccess       int    = 0  // No error
-	errUsage         int    = 1  // Usage error
-	errMissArg       int    = 2  // Missing arguments
-	errHTTPRequest   int    = 10 // Error creating the HTTPS request
-	errXMCConnect    int    = 11 // Error connecting to XMC
-	errHTTPSResponse int    = 12 // Error parsing the HTTPS response
+	toolName      string = "XMC NBI GenericNbiClient.go"
+	toolVersion   string = "0.6.6"
+	httpUserAgent string = toolName + "/" + toolVersion
+	jsonMimeType  string = "application/json"
 )
 
-func main() {
-	var xmcHost string
-	var httpPort uint
-	var httpTimeout uint
-	var insecureHTTPS bool
-	var httpUsername string
-	var httpPassword string
-	var xmcQuery string
-	var printVersion bool
+// Error codes.
+const (
+	errSuccess      int = 0  // No error
+	errUsage        int = 1  // Usage error
+	errMissArg      int = 2  // Missing arguments
+	errHTTPRequest  int = 10 // Error creating the HTTPS request
+	errXMCConnect   int = 11 // Error connecting to XMC
+	errHTTPResponse int = 12 // Error parsing the HTTPS response
+	errHTTPOAuth    int = 20 // Error authenticating to XMC (OAuth)
+)
 
-	flag.StringVar(&xmcHost, "host", "", "XMC Hostname / IP")
-	flag.UintVar(&httpPort, "port", 8443, "HTTP port where XMC is listening")
-	flag.UintVar(&httpTimeout, "httptimeout", 5, "Timeout for HTTP(S) connections")
-	flag.BoolVar(&insecureHTTPS, "insecurehttps", false, "Do not validate HTTPS certificates")
-	flag.StringVar(&httpUsername, "username", "admin", "Username for HTTP auth")
-	flag.StringVar(&httpPassword, "password", "", "Password for HTTP auth")
-	flag.StringVar(&xmcQuery, "query", "query { network { devices { up ip sysName nickName } } }", "GraphQL query to send to XMC")
-	flag.BoolVar(&printVersion, "version", false, "Print version information and exit")
+// Variables used to pass data between functions.
+var (
+	Config    AppConfig
+	NBIClient http.Client
+	OAuth     OAuth2Token
+)
+
+// getEnvOrDefaultString returns the string value of the environment variable "name" or "defaultVal" if that variable does not exist.
+func getEnvOrDefaultString(name string, defaultVal string) string {
+	retVal := defaultVal
+	envVal, ok := os.LookupEnv(name)
+	if ok {
+		retVal = envVal
+	}
+	return retVal
+}
+
+// getEnvOrDefaultUint returns the uint value of the environment variable "name" or "defaultVal" if that variable does not exist.
+func getEnvOrDefaultUint(name string, defaultVal uint) uint {
+	retVal := defaultVal
+	envVal, ok := os.LookupEnv(name)
+	if ok {
+		intVal, _ := strconv.Atoi(envVal)
+		retVal = uint(intVal)
+	}
+	return retVal
+}
+
+// getEnvOrDefaultBool returns the bool value of the environment variable "name" or "defaultVal" if that variable does not exist.
+func getEnvOrDefaultBool(name string, defaultVal bool) bool {
+	retVal := defaultVal
+	envVal, ok := os.LookupEnv(name)
+	if ok {
+		retVal, _ = strconv.ParseBool(envVal)
+	}
+	return retVal
+}
+
+// retrieveOAuthToken retrieves a usable OAuth token from XMC.
+func retrieveOAuthToken() (string, int, error) {
+	tokenURL := "https://" + Config.XMCHost + ":" + fmt.Sprint(Config.XMCPort) + "/oauth/token/access-token?grant_type=client_credentials"
+
+	// Generate an actual HTTP request.
+	req, reqErr := http.NewRequest(http.MethodPost, tokenURL, nil)
+	if reqErr != nil {
+		return "", errHTTPRequest, fmt.Errorf("Could not create HTTPS request: %s", reqErr)
+	}
+	req.Header.Set("User-Agent", httpUserAgent)
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Accept", jsonMimeType)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth(Config.XMCClientID, Config.XMCClientSecret)
+
+	// Try to get a result from the API.
+	res, resErr := NBIClient.Do(req)
+	if resErr != nil {
+		return "", errXMCConnect, fmt.Errorf("Could not connect to XMC: %s", resErr)
+	}
+	if res.StatusCode != 200 {
+		return "", errXMCConnect, fmt.Errorf("Got status code %d instead of 200", res.StatusCode)
+	}
+	defer res.Body.Close()
+
+	// Check if the HTTP response has yielded the expected content type.
+	resContentType := res.Header.Get("Content-Type")
+	if strings.Index(resContentType, jsonMimeType) != 0 {
+		return "", errHTTPResponse, fmt.Errorf("Content-Type %s returned instead of %s", resContentType, jsonMimeType)
+	}
+
+	// Read and parse the body of the HTTP response.
+	xmcToken, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return "", errHTTPResponse, fmt.Errorf("Could not read server response: %s", readErr)
+	}
+	jsonErr := json.Unmarshal(xmcToken, &OAuth)
+	if jsonErr != nil {
+		return "", errHTTPResponse, fmt.Errorf("Could not read server response: %s", jsonErr)
+	}
+
+	return OAuth.AccessToken, errSuccess, nil
+}
+
+// decodeOAuthToken decodes certain parts of the OAuth token.
+func decodeOAuthToken() (OAuth2TokenElements, error) {
+	var tokenElements OAuth2TokenElements
+
+	// Seperate and base64 decode the relevant part of the token.
+	tokenParts := strings.Split(OAuth.AccessToken, ".")
+	tokenData, tokenErr := base64.StdEncoding.DecodeString(fmt.Sprintf("%s==", tokenParts[1]))
+	if tokenErr != nil {
+		return tokenElements, tokenErr
+	}
+
+	// Parse the JSON into our struct.
+	decodeErr := json.Unmarshal(tokenData, &tokenElements)
+	if decodeErr != nil {
+		return tokenElements, decodeErr
+	}
+
+	// Transform UNIX timestamps into time.Time objects.
+	tokenElements.IssuedAt = time.Unix(tokenElements.IsuedAtUnixfmt, 0)
+	tokenElements.NotBefore = time.Unix(tokenElements.NotBeforeUnixfmt, 0)
+	tokenElements.ExpiresAt = time.Unix(tokenElements.ExpiresAtUnixfmt, 0)
+
+	return tokenElements, nil
+}
+
+// retrieveAPIResult sends the given query to XMC and returns the raw JSON result, an error code for os.Exit() and the actual error.
+func retrieveAPIResult(query string) (string, int, error) {
+	apiURL := "https://" + Config.XMCHost + ":" + fmt.Sprint(Config.XMCPort) + "/nbi/graphql"
+
+	// Generate an actual HTTP request.
+	jsonQuery, jsonQueryErr := json.Marshal(map[string]string{"query": query})
+	if jsonQueryErr != nil {
+		return "", errHTTPRequest, fmt.Errorf("Could not encode query into JSON: %s", jsonQueryErr)
+	}
+	req, reqErr := http.NewRequest(http.MethodPost, apiURL, bytes.NewBuffer(jsonQuery))
+	if reqErr != nil {
+		return "", errHTTPRequest, fmt.Errorf("Could not create HTTPS request: %s", reqErr)
+	}
+	req.Header.Set("User-Agent", httpUserAgent)
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Content-Type", jsonMimeType)
+	req.Header.Set("Accept", jsonMimeType)
+	if Config.UseOAuth {
+		req.Header.Set("Authorization", "Bearer "+OAuth.AccessToken)
+	} else {
+		req.SetBasicAuth(Config.XMCUsername, Config.XMCPassword)
+	}
+
+	// Try to get a result from the API.
+	res, resErr := NBIClient.Do(req)
+	if resErr != nil {
+		return "", errXMCConnect, fmt.Errorf("Could not connect to XMC: %s", resErr)
+	}
+	if res.StatusCode != 200 {
+		return "", errXMCConnect, fmt.Errorf("Got status code %d instead of 200", res.StatusCode)
+	}
+	defer res.Body.Close()
+
+	// Check if the HTTP response has yielded the expected content type.
+	resContentType := res.Header.Get("Content-Type")
+	if strings.Index(resContentType, jsonMimeType) != 0 {
+		return "", errHTTPResponse, fmt.Errorf("Content-Type %s returned instead of %s", resContentType, jsonMimeType)
+	}
+
+	// Read the body of the HTTP response.
+	body, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return "", errHTTPResponse, fmt.Errorf("Could not read server response: %s", readErr)
+	}
+
+	return string(body), errSuccess, nil
+}
+
+func parseCLIOptions() {
+	flag.StringVar(&Config.XMCHost, "host", getEnvOrDefaultString("XMCHOST", ""), "XMC Hostname / IP")
+	flag.UintVar(&Config.XMCPort, "port", getEnvOrDefaultUint("XMCPORT", 8443), "HTTP port where XMC is listening")
+	flag.UintVar(&Config.HTTPTimeout, "httptimeout", getEnvOrDefaultUint("XMCTIMEOUT", 5), "Timeout for HTTP(S) connections")
+	flag.BoolVar(&Config.InsecureHTTPS, "insecurehttps", getEnvOrDefaultBool("XMCINSECURE", false), "Do not validate HTTPS certificates")
+	flag.StringVar(&Config.XMCClientID, "clientid", getEnvOrDefaultString("XMCCLIENTID", ""), "Client ID for OAuth2")
+	flag.StringVar(&Config.XMCClientSecret, "clientsecret", getEnvOrDefaultString("XMCCLIENTSECRET", ""), "Client Secret for OAuth2")
+	flag.StringVar(&Config.XMCUsername, "username", getEnvOrDefaultString("XMCUSERNAME", "admin"), "Username for HTTP auth")
+	flag.StringVar(&Config.XMCPassword, "password", getEnvOrDefaultString("XMCPASSWORD", ""), "Password for HTTP auth")
+	flag.StringVar(&Config.XMCQuery, "query", getEnvOrDefaultString("XMCQUERY", "query { network { devices { up ip sysName nickName } } }"), "GraphQL query to send to XMC")
+	flag.BoolVar(&Config.PrintVersion, "version", false, "Print version information and exit")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "This tool queries the XMC API and prints the raw reply (JSON) to stdout.\n")
 		fmt.Fprintf(os.Stderr, "\n")
@@ -71,58 +268,74 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\n")
 		fmt.Fprintf(os.Stderr, "Available options:\n")
 		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "OAuth2 will be preferred over username/password.\n")
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "All options that take a value can be set via environment variables:\n")
+		fmt.Fprintf(os.Stderr, "  XMCHOST          -->  -host\n")
+		fmt.Fprintf(os.Stderr, "  XMCPORT          -->  -port\n")
+		fmt.Fprintf(os.Stderr, "  XMCINSECURE      -->  -insecurehttps\n")
+		fmt.Fprintf(os.Stderr, "  XMCTIMEOUT       -->  -httptimeout\n")
+		fmt.Fprintf(os.Stderr, "  XMCCLIENTID      -->  -clientid\n")
+		fmt.Fprintf(os.Stderr, "  XMCCLIENTSECRET  -->  -clientsecret\n")
+		fmt.Fprintf(os.Stderr, "  XMCUSERNAME      -->  -username\n")
+		fmt.Fprintf(os.Stderr, "  XMCPASSWORD      -->  -password\n")
+		fmt.Fprintf(os.Stderr, "  XMCQUERY         -->  -query\n")
 		os.Exit(errUsage)
 	}
 	flag.Parse()
+}
 
-	if printVersion {
+func main() {
+	// Parse all valid CLI options into variables.
+	parseCLIOptions()
+
+	// Print version information and exit.
+	if Config.PrintVersion {
 		fmt.Println(httpUserAgent)
 		os.Exit(errSuccess)
 	}
 
-	if xmcHost == "" {
+	// Check that the option "host" has been set.
+	if Config.XMCHost == "" {
 		fmt.Fprintln(os.Stderr, "Variable -host must be defined. Use -h to get help.")
 		os.Exit(errMissArg)
 	}
 
-	var apiURL string = "https://" + xmcHost + ":" + fmt.Sprint(httpPort) + "/nbi/graphql"
+	// Create an HTTP client to talk to XMC.
 	httpTransport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureHTTPS},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: Config.InsecureHTTPS},
 	}
-	nbiClient := http.Client{
+	NBIClient = http.Client{
 		Transport: httpTransport,
-		Timeout:   time.Second * time.Duration(httpTimeout),
+		Timeout:   time.Second * time.Duration(Config.HTTPTimeout),
 	}
 
-	req, reqErr := http.NewRequest(http.MethodGet, apiURL, nil)
-	if reqErr != nil {
-		fmt.Fprintf(os.Stderr, "Error: Could not create HTTPS request: %s\n", reqErr)
-		os.Exit(errHTTPRequest)
+	// Try to get an OAuth token if we have OAuth authentication data.
+	Config.UseOAuth = false
+	if Config.XMCClientID != "" && Config.XMCClientSecret != "" {
+		_, _, oAuthErr := retrieveOAuthToken()
+		if oAuthErr != nil {
+			fmt.Fprintf(os.Stderr, "Could not retrieve OAuth token: %s\n", oAuthErr)
+			os.Exit(errHTTPOAuth)
+		}
+		tokenElements, decodeErr := decodeOAuthToken()
+		if decodeErr != nil {
+			fmt.Fprintf(os.Stderr, "Could not decode OAuth token: %s\n", decodeErr)
+			os.Exit(errHTTPOAuth)
+		}
+		OAuth.TokenElements = tokenElements
+		Config.UseOAuth = true
 	}
 
-	req.Header.Set("User-Agent", httpUserAgent)
-	req.SetBasicAuth(httpUsername, httpPassword)
-
-	httpQuery := req.URL.Query()
-	httpQuery.Add("query", xmcQuery)
-	req.URL.RawQuery = httpQuery.Encode()
-
-	res, getErr := nbiClient.Do(req)
-	if getErr != nil {
-		fmt.Fprintf(os.Stderr, "Error: Could not connect to XMC: %s\n", getErr)
-		os.Exit(errXMCConnect)
-	}
-	if res.StatusCode != 200 {
-		fmt.Fprintf(os.Stderr, "Error: Got status code %d instead of 200\n", res.StatusCode)
-		os.Exit(errXMCConnect)
+	// Call the API and print the result.
+	apiResult, exitCode, apiError := retrieveAPIResult(Config.XMCQuery)
+	if apiError != nil {
+		fmt.Fprintf(os.Stderr, "Could not retrieve API result: %s\n", apiError)
+	} else {
+		fmt.Println(string(apiResult))
 	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		fmt.Fprintf(os.Stderr, "Error: Could not read server response: %s\n", readErr)
-		os.Exit(errHTTPSResponse)
-	}
-	fmt.Println(string(body))
-
-	os.Exit(errSuccess)
+	// Exit with an appropriate exit code.
+	os.Exit(exitCode)
 }
