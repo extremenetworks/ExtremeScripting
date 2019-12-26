@@ -1,6 +1,6 @@
 # GenericNbiClient.py
 
-[GenericNbiClient.py](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/nbi_clients/GenericNbiClient.py/GenericNbiClient.py) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
+[GenericNbiClient.py](GenericNbiClient.py?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
 
 ## Dependencies
 
@@ -29,7 +29,7 @@ Tested with Python 3.8.0.
 
 ## Source
 
-The original project is [hosted at GitLab](https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-py), with a [copy over at GitHub](https://github.com/rbrt-weiler/xmc-nbi-genericnbiclient-py) for the folks over there.
+The original project is [hosted at GitLab](https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-py), with a [copy over at GitHub](https://github.com/rbrt-weiler/xmc-nbi-genericnbiclient-py) for the folks over there. It may be more up-to-date than the version included in ExtremeScripting.
 
 ## Support
 

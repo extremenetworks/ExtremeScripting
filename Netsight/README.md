@@ -5,7 +5,7 @@ Scripts and Utilities for working with Extreme Management Center.
 * [Config backup scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/cfg_backup_scripts/README.md)
 * [OneView scripts](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/oneview_CLI_scripts/README.md)
 * [OneView workflows](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/oneview_workflows/README.md)
-* [Northbound API clients](https://github.com/extremenetworks/ExtremeScripting/blob/master/Netsight/nbi_clients/README.md)
+* [Northbound API clients](nbi_clients/README.md)
 
 
 # Support
