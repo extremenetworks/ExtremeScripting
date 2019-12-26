@@ -8,10 +8,10 @@
 # Community maintained CLI Scripting Library
 #
 # Script        : Configure vlan on ports - tagged or untagged based on request
-# Revision      : 1.1
-# Last updated  : 09.12.2017
+# Revision      : 1.2
+# Last updated  : 26.12.2019
 # Purpose       : Configure PVID on selected ports
-# Devices	    : Cisco Catalyst 12.2, XOS 15.7, XOS 21.3, XOS 22.2, XOS 15.3
+# Devices	    : Cisco Catalyst 12.2, 15.2, XOS 15.7, XOS 21.3, XOS 22.2, XOS 15.3
 #
 # Note:  This script does configure VLAN on ports.
 ################################################################################
@@ -147,8 +147,10 @@ IF ($vendor =="Cisco" ) THEN
             foreach line $records {
                 set LENGTH [string length $line]
                 set SPACE [string first " " $line 0]
-                set VLANTAG $TEMP
-                set TEMP [string range $line 0 $SPACE] 
+                set TEMP [string range $line 0 $SPACE]
+                IF ($TEMP != "") THEN
+                    set VLANTAG $TEMP
+                ENDIF
             }
             puts "### VLAN $VLANNAME does have tag $VLANTAG"
         ENDIF
@@ -173,7 +175,7 @@ IF ($vendor =="Cisco" ) THEN
           puts "### Lets save the config as was requested. ###"
           CLI write
         ENDIF
-        puts "### Have a nice day! ###"
+        puts "### Have a nice day! Be Extreme! ###"
         PerformSync -scope VLAN
 ENDIF
 

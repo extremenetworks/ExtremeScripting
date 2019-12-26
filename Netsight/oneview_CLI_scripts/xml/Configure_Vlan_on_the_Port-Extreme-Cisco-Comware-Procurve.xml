@@ -10,10 +10,10 @@
 # Community maintained CLI Scripting Library
 #
 # Script        : Configure vlan on ports - tagged or untagged based on request
-# Revision      : 1.3
-# Last updated  : 4.01.2019
+# Revision      : 1.4
+# Last updated  : 16.12.2019
 # Purpose       : Configure PVID on selected ports
-# Devices	    : Cisco Catalyst 12.2, XOS 15.7,
+# Devices	    : Cisco Catalyst 12.2, 15.2, XOS 15.7,
 # Devices       : XOS 21.3, XOS 22.2, XOS 15.3, 
 # Devices       : HPE Comware 7.1.045
 # Devices       : HPE Procurve H.10.119
@@ -173,10 +173,10 @@ IF ($vendor =="Cisco" ) THEN
             foreach line $records {
                 set LENGTH [string length $line]
                 set SPACE [string first " " $line 0]
+                set TEMP [string range $line 0 $SPACE]
                 IF ($TEMP != "") THEN
                     set VLANTAG $TEMP
                 ENDIF
-                set TEMP [string range $line 0 $SPACE] 
             }
             puts "### VLAN $VLANNAME does have tag $VLANTAG"
         ENDIF
