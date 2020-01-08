@@ -45,6 +45,7 @@
 |[Investigate End-System History](xwf/Investigate_End-System_history-8.2.5.50v48.xwf?raw=true)|Workflow does generate email with details from end-system history based on defined criteria.|Input:MAC or Username, Date range. Define email recepients before use.|8.2.5.50v48|
 |[Remove all End-Systems from group](xwf/Clear_End-Systems_in_the_group-8.3.1.9v12.xwf?raw=true)|This workflow does remove all end-systems from end-system group. It can be scheduled to execute periodically.|Define end-system group in variable "EndSystemGroup" default end-system group: "Access Expired".|8.3.1.9v12|
 |[Investigate End-System history](xwf/Investigate_End-System_history-8.2.5.50v48.xwf?raw=true)|Prompt for MAC or Username and for time range. Workflow does create table of end-system events in the database and send it by email.|Configure the email recipients before executing. Variable InstallDirectory is referring to the XMC installation path.|8.2.5.50v48|
+|[Import credentials from MySQL to local repository](xwf/MySQL-2-LocalRepository-8.4.0.115v13.xwf?raw=true)|Workflow does connect to external MySQL server and read usernames and passwords. These are then injected to the local password repository. Can be executed once, can be scheduled.|Input:SQL server, SQL username, SQL password, SQL database, SQL table, Column with username, Column with password.|8.4.0.115v13|
 
 # Extreme Management Center Workflow Combinations
 | Name | Workflows | Description | How To | Version |
