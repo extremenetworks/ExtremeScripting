@@ -7,6 +7,7 @@
 | ------------- | ----------- | ------- | ------- |
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.2.5.50v6.xwf?raw=true)|This workflow does create aggregated report over the time. Instead of 300 emails if 300 devices goes down, you will get one email with list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. You can define the aggregation time in minutes in the workflow. Define email recipients.|8.2.5.50v6|
 |[Link Aggregate Alarm](xwf/Link_Aggregate_Alarm-8.4.0.115v8.xwf?raw=true)|This workflow does create one email for each link down event. Instead of 2 emails if link goes down, you will get one email with all link details.|Create Alarm for Link Down based on selected trap (you can copy or modify original alarm) and as action assign this workflow. Define email recipients.|8.4.0.115v8|
+|[ERS 49xx/59xx PoE report](xwf/Check_ERS49xx-59xx_PoE-8.4.0.115v15.xwf?raw=true)|This workflow does perform several verifications on PoE devices 49xx and 59xx. If potential issue is found it does generate report. It does generate CSV file with all PoE 49xx/59xx models.|Select ERS 49xx/59xx devices.|8.4.0.115v15|
 
 # Extreme Management Center Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
