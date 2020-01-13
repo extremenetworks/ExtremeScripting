@@ -1,0 +1,131 @@
+-- ---------------------------------------------------------------------------
+-- Cisco Router SCP
+-- ---------------------------------------------------------------------------
+-- Scripts for management of Cisco ISR routers. May work on ASRs too.
+-- Mainly used and tested with Cisco ISR 4k. Tested against only a few ISR G2.
+-- Not tested against other Cisco routers.
+--
+-- Script was tested via a low bandwidth high latency line (5 Mbit/s, 300ms)
+-- Download reached only 125 kBit/s. It needed more than 16 hours.
+-- But it was successful :-)
+-- You should tweek time to run fw downloads and config archive jobs not at the same time.
+-- Otherwise you'll get "Device Busy" messages in XMC operations list.
+--
+-- boot rom (rom-monitor) upgrade does only copy file and not install rom-mon update.
+-- no way to exit script e.g. on error while verifying file integrity.
+-- But command to update is included in comment below.
+-- Command may not work on ASRs, since they have more route processors than R0.
+-- Does not work on ISR G2 and older. Syntax different, since no route processor visible.
+-- So please upgrade boot rom manually, before reloading router.
+--
+-- Timed reset is done by command "reload in <HHH:mm>".
+-- Ciscoes reload at will only allow a restart tiume at the same day.
+-- Reload in allows up to 999 hours delay. Works with EMC.
+--   But a reload with more than 999 hours will not throw an error...
+-- EMC shows only date/time selector for timed reset.
+--   If you want to reload in e.g. 45 minutes,
+--   you have to calculate time and date by yourself.
+--
+-- for debugging you can use following embedded event manager script:
+--   event manager applet log-commands
+--    event cli pattern ".*" sync no skip no
+--    action 1.0 syslog msg "$_cli_msg"
+-- This script will send all commands issued at vty to log/syslog.
+-- This will include the commands, issued by Extreme Management Center, how they are seen by the router.
+-- Caution!!!!! Do not change that script if you do not know Cisco EEM!
+--   e.g. if set to "skip yes" above, this will drop all commands entered at CLI without executing them!
+--     --> Time to reboot, if not saved to startup. Time to factory default if saved.
+--         But saving will be difficult, since command is ignored ;-)     phew...
+--
+-- Example of a log entry:
+--   002875: Jan  3 12:34:49.179 MET: %HA_EM-6-LOG: log-commands: show configuration
+--
+-- ---------------------------------------------------------------------------
+name="Cisco Router - SCP"
+desc="Cisco ISR Router SCP Scripts"
+protocol=SCP
+timed_reset_delay_format="HH:mm"
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 20
+copy running-config scp:
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+%SCP_PSWD%
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+bytes copied in
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "Configuration Download"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 20
+copy scp: startup-config
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+startup-config
+%SCP_PSWD%
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+bytes copied in
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "Firmware Download"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 20
+copy scp: flash:
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+%TARGET_FILE_NAME%
+%SCP_PSWD%
+verify flash:%TARGET_FILE_NAME%
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+Digital signature successfully verified
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "BootPROM Download"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 20
+copy scp: flash:
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+%TARGET_FILE_NAME%
+%SCP_PSWD%
+verify flash:%TARGET_FILE_NAME%
+@# no way to exit, if verify fails.
+@# upgrade rom-monitor filename flash:%TARGET_FILE_NAME% R0
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "BootPROM Download"-----
+Digital signature successfully verified
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "Reset"-----
+reload
+y
+y
+exit
+-----END SCRIPT-----
+--
+-----BEGIN SCRIPT "Timed Reset"-----
+reload in %TIMED_RESET_DELAY_SECONDS%
+y
+exit
+-----END SCRIPT-----
+--
+-----BEGIN SCRIPT "Timed Reset Abort"-----
+reload cancel
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Timed Reset Abort"-----
+SHUTDOWN ABORTED
+-----END SUCCESS-----
