@@ -12,6 +12,7 @@
 |[Cisco Catalyst](CiscoCatalyst-withRestore-TFTP.txt?raw=true)|XMC Configuration backup/restore for Cisco Catalyst.|
 |[Cisco Firmware 2xxx TAR](CiscoCatalyst2xxx_firmware_from_tar.txt?raw=true)|XMC Configuration backup and restore and FW upgrade and reset for Cisco Catalyst 2xxx. TAR file not BIN. Can take 30 minutes based on platform. Be patient.|
 |[Cisco Nexus](Cisco-Nexus-TFTP.txt?raw=true)|XMC Configuration backup and restore for Cisco Nexus.|
+|[Cisco Router SCP](Cisco-Router-SCP.txt?raw=true)|XMC config backup+restore, firmware+bootrom download, reset, timed reset, timed reset abort for Cisco Routers. See comments in script for details.|
 |[Cisco WLC 5500](Cisco_WLC_5500?raw=true)|XMC Configuration backup of Cisco WLC 5500.|
 |[Dell Force10](dell-force10?raw=true)|XMC Configuration backup of Dell Force10.|
 |[Extreme BR69xx](BR69xx.txt?raw=true)|XMC Configuration backup and restore and restart of Brocade/Extreme BR69xx.|
