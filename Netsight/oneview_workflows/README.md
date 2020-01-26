@@ -7,7 +7,6 @@
 | ------------- | ----------- | ------- | ------- |
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.4.1.23v10.xwf?raw=true)|This workflow does create aggregated report over the time. Instead of 300 emails if 300 devices goes down, you will get one email with list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. You can define the aggregation time in minutes in the workflow Input. Define email recipients.|8.4.1.23v10|
 |[Link Aggregate Alarm](xwf/Link_Aggregate_Alarm-8.4.0.115v8.xwf?raw=true)|This workflow does create one email for each link down event. Instead of 2 emails if link goes down, you will get one email with all link details.|Create Alarm for Link Down based on selected trap (you can copy or modify original alarm) and as action assign this workflow. Define email recipients.|8.4.0.115v8|
-|[ERS inventory](xwf/ERS_Devices_Report-8.4.0.115v106.xwf?raw=true)|This workflow does create one email with CSV file attached. All ERS devices are there with IP, serial numbers and many details.|Select ERS devices. Check your ERS devices do have defined Network OS.|8.4.0.115v106|
 |[ERS inventory](xwf/ERS_Devices_Report-8.4.1.23v108.xwf?raw=true)|This workflow does create one email with CSV file attached. All ERS devices are there with IP, serial numbers and many details.|Select ERS devices. Check your ERS devices do have defined Network OS.|8.4.1.23v108|
 
 # Extreme Management Center Troubleshooting Workflows
