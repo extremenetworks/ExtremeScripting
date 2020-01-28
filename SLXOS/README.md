@@ -4,6 +4,8 @@ Scripts and Utilities for working with SLXOS Switches and Platforms.
 # Scripts
 * [SLX EventHandler](SLX_EventHandler/README.md)
 * [MCT Conversion](MCT_Conversion/README.md)
+* [SLX IfIndex generator](SLX_IfIndex_gen/README.md)
+* [SLX PortStatus](SLX_PortStatus/README.md)
 
 
 # Support
