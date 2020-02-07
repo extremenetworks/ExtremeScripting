@@ -10,13 +10,12 @@ that if user wants to preserve existing MCT configuration, the tool 'mct_config_
 The tool 'mct_config_convert.py' converts the MCT configuration present in SLXOS 18r.2.00b device's startup-config to the new format as needed by SLXOS 20.1.1. The tool needs to be copied to the 'flash' path on the device running SLXOS 18r.2.00b.
 For example, below 'copy ' command can be run in 'exec' mode as shown below:
 
-*sw# scp://\<username\>:\<password\>@hostname/\<file path of mct_config_convert.py\>  flash://*
+*sw# copy scp://\<username\>:\<password\>@hostname/\<path to file\>\/mct_config_convert.py  flash://mct_config_convert.py
 
 # Files
+mct_config_convert.py
 
-* [The Core Python Script - mct_config_convert.py](mct_config_convert.py)
-* [README.md](README.md)
-
+README.md
 
 # Requirements
 Firmware: SLXOS 18r.2.00b
@@ -27,11 +26,11 @@ Platform(s): SLX 9540, SLX 9640
 <pre>
 > mct_config_convert.py [-h] --peer_ip PEER_IP --peer_int PEER_INT [--source_ip SOURCE_IP]  
 
-Arguments:
+Arguments: 
 
-  -h                      show this help message and exit
+  -h                      show this help message and exit 
 
-  --peer_ip PEER_IP        MCT peer IP address
+  --peer_ip PEER_IP        MCT peer IP address 
 
   --peer_int PEER_INT      MCT peer interface
 
@@ -41,7 +40,7 @@ Arguments:
 # Example
 
 <pre>
-sw# python mct_config_convert.py --peer_ip "10.20.20.18" --peer_int "Port-Channel 64"
+sw# python mct_config_convert.py --peer_ip "10.20.20.18" --peer_int "Port-Channel 64" 
 </pre>
 
 # License
@@ -58,7 +57,9 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Support
-# Support
-_The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
+The software is provided as is and Extreme Networks has no obligation to provide maintenance, support, updates, enhancements or modifications. Any support provided by Extreme Networks is at its sole discretion.
 
-Issues and/or bug fixes may be reported on [The Hub](https://community.extremenetworks.com/extreme).
+Issues and/or bug fixes may be reported on The Hub.
+
+
+  
