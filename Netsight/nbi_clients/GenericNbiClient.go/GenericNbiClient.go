@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strconv"
 
+	godotenv "github.com/joho/godotenv"
+	envordef "gitlab.com/rbrt-weiler/go-module-envordef"
 	xmcnbiclient "gitlab.com/rbrt-weiler/go-module-xmcnbiclient"
 )
 
 // AppConfig stores the application configuration once parsed by flags.
-type AppConfig struct {
+type appConfig struct {
 	XMCHost       string
 	XMCPort       uint
 	XMCPath       string
@@ -27,9 +28,9 @@ type AppConfig struct {
 
 // Definitions used within the code.
 const (
-	toolName      string = "XMC NBI GenericNbiClient.go"
-	toolVersion   string = "0.10.0"
-	versionString string = toolName + "/" + toolVersion
+	toolName    string = "GenericNbiClient.go"
+	toolVersion string = "0.11.1"
+	toolID      string = toolName + "/" + toolVersion
 )
 
 // Error codes.
@@ -44,53 +45,22 @@ const (
 
 // Variables used to pass data between functions.
 var (
-	Config AppConfig
+	config appConfig
 )
-
-// getEnvOrDefaultString returns the string value of the environment variable "name" or "defaultVal" if that variable does not exist.
-func getEnvOrDefaultString(name string, defaultVal string) string {
-	retVal := defaultVal
-	envVal, ok := os.LookupEnv(name)
-	if ok {
-		retVal = envVal
-	}
-	return retVal
-}
-
-// getEnvOrDefaultUint returns the uint value of the environment variable "name" or "defaultVal" if that variable does not exist.
-func getEnvOrDefaultUint(name string, defaultVal uint) uint {
-	retVal := defaultVal
-	envVal, ok := os.LookupEnv(name)
-	if ok {
-		intVal, _ := strconv.Atoi(envVal)
-		retVal = uint(intVal)
-	}
-	return retVal
-}
-
-// getEnvOrDefaultBool returns the bool value of the environment variable "name" or "defaultVal" if that variable does not exist.
-func getEnvOrDefaultBool(name string, defaultVal bool) bool {
-	retVal := defaultVal
-	envVal, ok := os.LookupEnv(name)
-	if ok {
-		retVal, _ = strconv.ParseBool(envVal)
-	}
-	return retVal
-}
 
 // parseCLIOptions parses all options passed by env or CLI into the Config variable.
 func parseCLIOptions() {
-	flag.StringVar(&Config.XMCHost, "host", getEnvOrDefaultString("XMCHOST", ""), "XMC Hostname / IP")
-	flag.UintVar(&Config.XMCPort, "port", getEnvOrDefaultUint("XMCPORT", 8443), "HTTP port where XMC is listening")
-	flag.StringVar(&Config.XMCPath, "path", getEnvOrDefaultString("XMCPATH", ""), "Path where XMC is reachable")
-	flag.UintVar(&Config.HTTPTimeout, "timeout", getEnvOrDefaultUint("XMCTIMEOUT", 5), "Timeout for HTTP(S) connections")
-	flag.BoolVar(&Config.NoHTTPS, "nohttps", getEnvOrDefaultBool("XMCNOHTTPS", false), "Use HTTP instead of HTTPS")
-	flag.BoolVar(&Config.InsecureHTTPS, "insecurehttps", getEnvOrDefaultBool("XMCINSECURE", false), "Do not validate HTTPS certificates")
-	flag.StringVar(&Config.XMCUserID, "userid", getEnvOrDefaultString("XMCUSERID", ""), "Client ID (OAuth) or username (Basic Auth) for authentication")
-	flag.StringVar(&Config.XMCSecret, "secret", getEnvOrDefaultString("XMCSECRET", ""), "Client Secret (OAuth) or password (Basic Auth) for authentication")
-	flag.BoolVar(&Config.BasicAuth, "basicauth", getEnvOrDefaultBool("XMCBASICAUTH", false), "Use HTTP Basic Auth instead of OAuth")
-	flag.StringVar(&Config.XMCQuery, "query", getEnvOrDefaultString("XMCQUERY", "query { network { devices { up ip sysName nickName } } }"), "GraphQL query to send to XMC")
-	flag.BoolVar(&Config.PrintVersion, "version", false, "Print version information and exit")
+	flag.StringVar(&config.XMCHost, "host", envordef.StringVal("XMCHOST", ""), "XMC Hostname / IP")
+	flag.UintVar(&config.XMCPort, "port", envordef.UintVal("XMCPORT", 8443), "HTTP port where XMC is listening")
+	flag.StringVar(&config.XMCPath, "path", envordef.StringVal("XMCPATH", ""), "Path where XMC is reachable")
+	flag.UintVar(&config.HTTPTimeout, "timeout", envordef.UintVal("XMCTIMEOUT", 5), "Timeout for HTTP(S) connections")
+	flag.BoolVar(&config.NoHTTPS, "nohttps", envordef.BoolVal("XMCNOHTTPS", false), "Use HTTP instead of HTTPS")
+	flag.BoolVar(&config.InsecureHTTPS, "insecurehttps", envordef.BoolVal("XMCINSECURE", false), "Do not validate HTTPS certificates")
+	flag.StringVar(&config.XMCUserID, "userid", envordef.StringVal("XMCUSERID", ""), "Client ID (OAuth) or username (Basic Auth) for authentication")
+	flag.StringVar(&config.XMCSecret, "secret", envordef.StringVal("XMCSECRET", ""), "Client Secret (OAuth) or password (Basic Auth) for authentication")
+	flag.BoolVar(&config.BasicAuth, "basicauth", envordef.BoolVal("XMCBASICAUTH", false), "Use HTTP Basic Auth instead of OAuth")
+	flag.StringVar(&config.XMCQuery, "query", envordef.StringVal("XMCQUERY", "query { network { devices { up ip sysName nickName } } }"), "GraphQL query to send to XMC")
+	flag.BoolVar(&config.PrintVersion, "version", false, "Print version information and exit")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "This tool queries the XMC API and prints the raw reply (JSON) to stdout.\n")
 		fmt.Fprintf(os.Stderr, "\n")
@@ -110,9 +80,34 @@ func parseCLIOptions() {
 		fmt.Fprintf(os.Stderr, "  XMCSECRET     -->  -secret\n")
 		fmt.Fprintf(os.Stderr, "  XMCBASICAUTH  -->  -basicauth\n")
 		fmt.Fprintf(os.Stderr, "  XMCQUERY      -->  -query\n")
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "Environment variables can also be configured via a file called .xmcenv,\n")
+		fmt.Fprintf(os.Stderr, "located in the current directory or in the home directory of the current\n")
+		fmt.Fprintf(os.Stderr, "user.\n")
 		os.Exit(errUsage)
 	}
 	flag.Parse()
+}
+
+// init loads environment files if available.
+func init() {
+	envFileName := ".xmcenv"
+
+	localEnvFile := fmt.Sprintf("./%s", envFileName)
+	if _, localEnvErr := os.Stat(localEnvFile); localEnvErr == nil {
+		if loadErr := godotenv.Load(localEnvFile); loadErr != nil {
+			fmt.Fprintf(os.Stderr, "Could not load env file <%s>: %s", localEnvFile, loadErr)
+		}
+	}
+
+	if homeDir, homeErr := os.UserHomeDir(); homeErr == nil {
+		homeEnvFile := fmt.Sprintf("%s/%s", homeDir, ".xmcenv")
+		if _, homeEnvErr := os.Stat(homeEnvFile); homeEnvErr == nil {
+			if loadErr := godotenv.Load(homeEnvFile); loadErr != nil {
+				fmt.Fprintf(os.Stderr, "Could not load env file <%s>: %s", homeEnvFile, loadErr)
+			}
+		}
+	}
 }
 
 // main ties everything together.
@@ -121,43 +116,43 @@ func main() {
 	parseCLIOptions()
 
 	// Print version information and exit.
-	if Config.PrintVersion {
-		fmt.Println(versionString)
+	if config.PrintVersion {
+		fmt.Println(toolID)
 		os.Exit(errSuccess)
 	}
 	// Check that the option "host" has been set.
-	if Config.XMCHost == "" {
+	if config.XMCHost == "" {
 		fmt.Fprintln(os.Stderr, "Variable -host must be defined. Use -h to get help.")
 		os.Exit(errMissArg)
 	}
 
 	// Set up a NBI client
-	client := xmcnbiclient.New(Config.XMCHost)
-	client.SetUserAgent(versionString)
-	portErr := client.SetPort(Config.XMCPort)
+	client := xmcnbiclient.New(config.XMCHost)
+	client.SetUserAgent(toolID)
+	portErr := client.SetPort(config.XMCPort)
 	if portErr != nil {
-		fmt.Fprintf(os.Stderr, "Port could not be set: %s\n", portErr)
+		fmt.Fprintf(os.Stderr, "XMC port could not be set: %s\n", portErr)
 		os.Exit(errHTTPPort)
 	}
-	if Config.NoHTTPS {
+	if config.NoHTTPS {
 		client.UseHTTP()
 	}
-	if Config.InsecureHTTPS {
+	if config.InsecureHTTPS {
 		client.UseInsecureHTTPS()
 	}
-	timeoutErr := client.SetTimeout(Config.HTTPTimeout)
+	timeoutErr := client.SetTimeout(config.HTTPTimeout)
 	if timeoutErr != nil {
-		fmt.Fprintf(os.Stderr, "Timeout could not be set: %s\n", timeoutErr)
+		fmt.Fprintf(os.Stderr, "HTTP timeout could not be set: %s\n", timeoutErr)
 		os.Exit(errHTTPTimeout)
 	}
-	client.SetBasePath(Config.XMCPath)
-	client.UseOAuth(Config.XMCUserID, Config.XMCSecret)
-	if Config.BasicAuth {
-		client.UseBasicAuth(Config.XMCUserID, Config.XMCSecret)
+	client.SetBasePath(config.XMCPath)
+	client.UseOAuth(config.XMCUserID, config.XMCSecret)
+	if config.BasicAuth {
+		client.UseBasicAuth(config.XMCUserID, config.XMCSecret)
 	}
 
 	// Call the API and print the result.
-	apiResult, apiError := client.QueryAPI(Config.XMCQuery)
+	apiResult, apiError := client.QueryAPI(config.XMCQuery)
 	if apiError != nil {
 		fmt.Fprintf(os.Stderr, "Could not retrieve API result: %s\n", apiError)
 		os.Exit(errAPIResult)
