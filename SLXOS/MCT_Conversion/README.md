@@ -10,13 +10,12 @@ that if user wants to preserve existing MCT configuration, the tool 'mct_config_
 The tool 'mct_config_convert.py' converts the MCT configuration present in SLXOS 18r.2.00b device's startup-config to the new format as needed by SLXOS 20.1.1. The tool needs to be copied to the 'flash' path on the device running SLXOS 18r.2.00b.
 For example, below 'copy ' command can be run in 'exec' mode as shown below:
 
-*sw# scp://\<username\>:\<password\>@hostname/\<file path of mct_config_convert.py\>  flash://*
+*sw# copy scp://\<username\>:\<password\>@hostname/\<path to file\>\/mct_config_convert.py  flash://mct_config_convert.py
 
 # Files
+mct_config_convert.py
 
-* [The Core Python Script - mct_config_convert.py](mct_config_convert.py)
-* [README.md](README.md)
-
+README.md
 
 # Requirements
 Firmware: SLXOS 18r.2.00b
@@ -61,6 +60,3 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 The software is provided as is and Extreme Networks has no obligation to provide maintenance, support, updates, enhancements or modifications. Any support provided by Extreme Networks is at its sole discretion.
 
 Issues and/or bug fixes may be reported on The Hub.
-
-
-  
