@@ -416,8 +416,9 @@ class parse_file():
                             output.write(cmd)
                             output.write('\n')
                     elif (parent_interface_cmd is not None and
+                          ((self.old_peer_int is None) or
                           (parent_interface_cmd ==
-                           'interface ' + self.old_peer_int)
+                           'interface ' + self.old_peer_int))
                           and cmd.startswith(' ip address ')
                           and cmd.split(' ')[-1] == self.source_ip):
                         continue
@@ -563,3 +564,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
