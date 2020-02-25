@@ -2,6 +2,8 @@
 
 [GenericNbiClient.py](GenericNbiClient.py?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
 
+**Notice**: This project has surfaced as a proof of concept and is _not maintained_ anymore. If you need a production ready NBI client, please refer to [the Go version of GenericNbiClient](../GenericNbiClient.go/README.md).
+
 ## Dependencies
 
 GenericNbiClient.py requires the Python module `requests` to be installed. PIP may be used to install it:

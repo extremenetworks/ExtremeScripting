@@ -3,7 +3,7 @@
 Client applications that utilize the NBI API provided by Extreme Management Center (Netsight).
 
 * [GenericNbiClient.go](GenericNbiClient.go/README.md): Application written in Go that can be used to send generic GraphQL queries to a remote XMC instance.
-* [GenericNbiClient.py](GenericNbiClient.py/README.md): Application written in Python that can be used to send generic GraphQL queries to a remote XMC instance.
+* [GenericNbiClient.py](GenericNbiClient.py/README.md) (DEPRECATED): Application written in Python that can be used to send generic GraphQL queries to a remote XMC instance.
 
 ## Support
 
