@@ -2,6 +2,7 @@
 Scripts and Utilities for working with EXOS Switches and Platforms.
 
 # Categories
+* [Debug Bundle](Debug_Bundle/README.md)
 * [Policies](Policies/README.md)
 * [CLI Scripting](CLI_Scripting/README.md)
 * [EXOS SDK](SDK/README.md)

@@ -1,0 +1,82 @@
+#version 0.1
+
+#L3 Ipv4 bundle
+
+{"L3_Ipv4": {"exos_cmd": ["show iproute","show iparp","show iproute reserved-entries statistics","debug hal show ipv4Adj","debug hal show ipv4Fib","show fdb","debug hal run platform portmap"],"shell_cmd": ["ip route list table 258"],"bcm_cmd": ["l3 l3table show","l3 defip show","extr l3 show","extr l3 count","extr defip","dump sw l3","dump chg l3_defip","dump chg L3_ENTRY_1","dump chg L3_ENTRY_2","dump chg L3_ENTRY_3","dump chg L3_ENTRY_4","dump chg MY_STATION_TCAM","dump chg L3_ENTRY_IPV4_UNICAST","dump chg L3_ENTRY_IPV4_MULTICAST","dump chg L3_DEFIP_ALPM_IPV4","dump chg IHOP","dump chg EHOP"]}}
+
+#vlan bundle
+
+{"Vlan": {"exos_cmd": ["show vlan detail","debug vlan show vpifs","debug hal show platform learning"],"shell_cmd":["cat /proc/net/exvlan/config"],"bcm_cmd": ["vlan show","dump chg port","dump chg vlan_profile"]}}
+
+#L2-vpn bundle- VPLS and VPWS
+
+{"L2-Vpn": {"exos_cmd": ["show vlan","show mpls ldp peer","show l2vpn","show l2vpn detail","show mpls ldp peer detail","show mpls rsvp-te path detail","show mpls rsvp-te lsp detail","show mpls rsvp-te neighbor detail","show ospf neighbor","show mpls label","show iproute","show iparp","show fdb","debug hal show platform mpls","debug mpls show hal","debug hal run platform portmap"],"bcm_cmd": ["l2 show","dump chg port","dump chg source_vp","dump chg mpls_entry","dump chg my_station_tcam","fp show","dump chg ing_dvp_table","dump chg vlan_xlate","dump chg ihop","dump chg ehop","dump chg VFI","trunk show","dump chg egr_mac_da_profile","dump chg egr_mpls_vc_and_swap_label_table","dump chg egr_l3_intf","dump chg egr_ip_tunnel_mpls","dump chg l3_ipmc","dump chg IPMC_VLAN","dump chg REPL_GROUP","dump chg REPL_HEAD","phy info"]}}
+
+#MPLS
+
+{"Mpls": {"exos_cmd": ["show vlan","show mpls ldp peer","show mpls ldp peer detail","show mpls rsvp-te path detail","show mpls rsvp-te lsp detail","show mpls rsvp-te neighbor detail","show ospf neighbor","show mpls label","show iproute","show iparp","show fdb","debug hal show platform mpls","debug mpls show hal","debug hal run platform portmap"],"bcm_cmd": ["l2 show","dump chg port","dump chg mpls_entry","dump chg my_station_tcam","dump chg ihop","dump chg ehop","dump chg VFI","trunk show","dump chg egr_mac_da_profile","dump chg egr_mpls_vc_and_swap_label_table","dump chg egr_l3_intf","dump chg egr_ip_tunnel_mpls","phy info"]}}
+
+#Netlogin bundle
+
+{"Netlogin": {"exos_cmd": ["debug hal show platform learning","show netlogin dot1x detail","jerry aaa show radius","debug hal show fdb"],"bcm_cmd": ["l2 show","dump chg port","vlan show"]}}
+
+# policy bundle
+
+{"Policy": {"exos_cmd": ["debug hal show platform learning","show netlogin dot1x detail","jerry aaa show radius","debug hal show fdb","show access-list any detail","show netlogin session all"],"bcm_cmd": ["l2 show","dump chg port","fp show","vlan show"]}}
+
+# ACL
+
+{"ACL": {"exos_cmd": ["show policy detail", "show access-list any detail", "debug hal show device acl-slice system unit 0", "show policy", "debug hal show platform acl AclInstTree"], "bcm_cmd": ["fp show", "fp slicestats", "fp show brief", "dump chg EFP_POLICY_TABLE", "dump chg VFP_TCAM", "dump chg VFP_POLICY_TABLE", "dump chg FP_POLICY_TABLE"] }}
+
+# Link Issue
+
+{"Link-issues": {"exos_cmd": ["show ports configuration no-refresh","debug hal show optic-info"], "bcm_cmd": ["ps", "phy info", "phy all","soc", "linkscan", "phy control", "dump sw link", "dump phy", "dump port", "pbmp", "ports", "show counters", "port hg" ] }}
+
+# AAA
+
+{"AAA": {"exos_cmd": ["jerry aaa show radius", "show session", "show radius dynamic-authorization"]}}
+
+#IPV4 L2 Multicast
+
+{"L2-Multicast": {"exos_cmd": ["show igmp", "show igmp group", "show igmp snooping", "show igmp snooping detail", "show igmp snooping cache", "show mcast cache", "jerry mcm show stats", "jerry mcm show igmp cache config", "debug hal show ipv4Mc", "debug hal show platform IPv4Mc", "debug vlan show lib mcmgr vpifs", "debug hal run platform portmap", "debug hal show platform vlan", "show l2stats"], "shell_cmd": ["cat /proc/net/snoop_mr_cache"], "bcm_cmd": ["dump chg port", "dump chg l3_entry_ipv4_multicast", "dump chg l3_ipmc", "dump chg ipmc_vlan", "fp show", "show pmap", "phy info"]}}
+
+#GPTP
+
+{"GPTP": {"exos_cmd": ["show network-clock gptp", "show network-clock gptp current-set", "show network-clock gptp parent-set", "show network-clock gptp default-set", "show network-clock gptp time-properties-set", "show network-clock gptp ports all", "show network-clock gptp ports all counters", "debug gptp show ports all asCapable", "debug gptp show ports all latency"], "bcm_cmd":["extreme gptp show", "extr gptp timeCapture;sleep 2;extr gptp timeCapture;sleep 2;extr gptp timeCapture"]}}
+
+# OSPF
+
+{"OSPF": {"exos_cmd": ["show ospf","show ospf neighbor","show ospf neighbor detail","show ospf area detail","show ospf interfaces detail", "show ospf lsdb", "show ospf lsdb detail", "show ospf ase-summary", "show ospf virtual-link","show iproute","show iproute origin ospf","show iparp","show fdb","debug show ospf route", "show log counters ospf"]}}
+
+# L2
+
+{"L2": {"exos_cmd": ["show fdb","show l2stats","debug fdb show fdbentry all","debug fdb show filters","debug fdb show globals", "debug hal show fdb", "debug hal show platform fdb", "debug hal show platform learning all"],"shell_cmd": ["cat /proc/net/exvlan/fdb"],"bcm_cmd": ["L2 show","l2 cache show","dump EXT_L2_ENTRY_TCAM","dump chg EXT_L2_ENTRY_TCAM","dump l2_user_entry","dump chg l2_entry","vlan show","dump chg port"]}}
+
+# Optics
+
+{"Optics": {"exos_cmd": ["show ports configuration no-r","show ports information","show ports information detail","show ports transceiver information","show ports transceiver information detail","show ports rxerrors no-refresh","show ports txerrors no-refresh","debug hal show optic-info","debug hal show optic-info eeprom","debug hal show optic-info ddmi","debug hal run platform portmap"],"bcm_cmd": ["phy info","phy all","ps","dump port","pbmp","show pmap","dump sw link","linkscan","soc","config","dump phy","dump port","show counters"]}}
+
+#VRRP
+
+{"VRRP": {"exos_cmd": ["show vrrp","sh vrrp detail","show fdb","show iparp","debug vlan show vmac","debug hal show fdb"],"shell_cmd": ["cat /proc/net/exvlan/fdb"],"bcm_cmd": ["l2 show","fp slicestats" ,"fp show","dump chg l2_entry","dump my_station_tcam"]}}
+
+#STP
+
+{"STP": {"exos_cmd": ["show stpd detail","debug stp show internal-state"],"shell_cmd": ["cat /proc/net/expkt/filter"],"bcm_cmd": ["dump l2_user_entry","dump chg l2_user_entry","l2 cache show","vlan show"]}}
+
+# LAG
+
+{"LAG": {"exos_cmd": ["show sharing detail","debug hal show sharing","debug hal show sharing interfaces","debug hal run platform portmap","debug vlan show ports"],"shell_cmd": ["cat /proc/net/expkt/filter"],"bcm_cmd": ["trunk show","dump trunk_group","get hash_control","phy info","show c cpu0","l2 cache show"]}}
+
+# Eaps 
+
+{"Eaps": {"exos_cmd": ["show eaps detail","show eaps shared-port detail","show eaps counters global","show eaps counters shared-port global","show eaps cfm groups","debug eaps show checkpoint-stats","show vlan detail","debug vlan show vpifs","debug hal run platform portmap","debug hal show platform fdb"],"bcm_cmd": ["dump chg l2_user_entry","vlan show"]}}
+
+# VPEX
+
+{"VPEX": {"exos_cmd": ["show vpex","show vpex ports","show vpex bpe statistics detail","show vpex bpe version detail","show vpex bpe cpu-utilization","show vpex bpe environment","show vpex ports ecp statistics","show vpex bpe","debug vpex show extslot","debug vpex show bpe","debug vpex show bpe detailed","debug vpex show polling","debug vpex show port detailed","debug hal show platform vpex detail"]}}
+
+#MLAG
+
+{"MLAG": {"exos_cmd": ["show mlag ports","show mlag peer","show fdb","show iparp","debug hal show fdb","debug fdb show globals","debug fdb show fdbentry all"," debug hal show vsm"],"shell_cmd": ["!cat /proc/net/exvlan/config"],"bcm_cmd": ["fp slicestats","fp show"]}}
+
