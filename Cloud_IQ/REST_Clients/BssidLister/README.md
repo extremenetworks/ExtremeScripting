@@ -62,3 +62,7 @@ BssidLister uses the OAuth authentication model used by XIQ's API. Authenticatio
 ## Source
 
 The original project is [hosted at GitLab](https://gitlab.com/rbrt-weiler/xiq-rest-bssidlister-go), with a [copy over at GitHub](https://github.com/rbrt-weiler/xiq-rest-bssidlister-go) for the folks over there.
+
+## Support
+
+_The software is provided as-is. There is no obligation to provide maintenance, support, updates, enhancements or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) or [the original author](https://robert.weiler.one/) is at its sole discretion._
