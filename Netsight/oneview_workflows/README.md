@@ -60,8 +60,8 @@
 |IGE Governance Regime|[Governance Regime Export](combo/GovernanceEngine/Governance_Regime_Export-8.4.1.23v7.xwf?raw=true), [Governance Regime Import](combo/GovernanceEngine/Governance_Regime_Import-8.4.1.23v4.xwf?raw=true)|Governance Regime can be exported and then imported to other XMC instance. You can share your regime with the community. Professionals can share regimes with their customers.|You may need modify the InstallDirectory variable. During the Export you need to specify name of the regime. The regime is exported to the file system InstallDirectory/GovernanceEngine/audit-tests/ as tgz file. The export workflow can email the regime. Transfer the file to the new system. During the import select if imported tests will be marked read only or editable.|8.4.1.23v7 8.4.1.23v4|
 
 # Extreme Management Center Extreme Fabric Automation Workflows
-| Name | Workflows | Description | How To | Version |
-| ---- | --------- | ----------- | ------ | ------- |
+| Workflow Name | Description | How To | Version |
+| ------------- | ----------- | ------ | ------- |
 |[Day 0 Create Fabric](xwf/EFA_1_Create_Fabric-8.4.2.38v3.xwf?raw=true)|Does create Fabric through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|8.4.2.38v3|
 |[Day 1 Create Tenant](xwf/EFA_2_Create_Tenant-8.4.2.38v3.xwf?raw=true)|Does create Tenant through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|8.4.2.38v3|
 |[Day 1 Create EPG](xwf/EFA_3_Create_EPG-8.4.2.38v3.xwf?raw=true)|Does create VRF, Port Channels, EndPointGroup through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress, PortChannelSpeed, PortChannelNegotiation, PoName to reflect your environment.|8.4.2.38v3|
