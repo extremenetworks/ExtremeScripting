@@ -8,6 +8,8 @@
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.4.2.38v14.xwf?raw=true)|This workflow creates aggregated report over the time. Instead of 300 emails if 300 devices goes down, you will get one email with list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. You can define the aggregation time in minutes in the workflow Input. Define email recipients.|8.4.2.38v14|
 |[Link Aggregate Alarm](xwf/Link_Aggregate_Alarm-8.4.0.115v8.xwf?raw=true)|This workflow creates one email for each link down event. Instead of 2 emails if link goes down, you will get one email with all link details.|Create Alarm for Link Down based on selected trap (you can copy or modify original alarm) and as action assign this workflow. Define email recipients.|8.4.0.115v8|
 |[ERS inventory](xwf/ERS_Devices_Report-8.4.1.23v108.xwf?raw=true)|This workflow creates one email with CSV file attached. All ERS devices are there with IP, serial numbers and many details.|Select ERS devices. Check your ERS devices do have defined Network OS.|8.4.1.23v108|
+|[ERS port counters](xwf/ERS_por_counters_report-8.4.2.38v39.xwf?raw=true)|This workflow creates one email with CSV file attached. Ports with defined property above defined threshold are in the list.|Select ERS devices. Define property (e.g. Dropped on no resources), define threshold (e.g. 0), define email address.|8.4.2.38v39|
+
 
 # Extreme Management Center Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
@@ -26,7 +28,7 @@
 |[Import End-Systems to XCA](xwf/Import_CSV_to_XCA_ES_group-8.3.0.111v4.xwf?raw=true)|This workflow reads the CSV file with MACs and descriptions. The workflow injects the content of the CSV file to end-system group in Extreme Cloud Appliance through the API. The XCA must be in XMC and must have CLI credentials defined. The end-system group must exist. Maximum number of entries in one run is 100 for XCA verion 04.36.02.0014 |Inputs: [File with End-systems](xwf/Import_CSV_to_XCA_ES_group.txt?raw=true). The file contains MAC,description.|8.3.0.111v4|
 |[Import L2VSNs to XMC](xwf/Import_L2VSNs-8.3.1.9v7.xwf?raw=true)|Imports VLANs and L2VSNs from file to XMC Service Definitions and Service Applications. If Service Definition does not exist then it is created. If Service Application does not exist then it is created. If Vlan ID exists then it is updated. If NSI exists then it is updated. The goal is: You do not need to manually create each VLAN and ISID in XMC.|Inputs: [File with Services](xwf/Import_L2VSNs_Services2Create.txt?raw=true)|8.3.1.9v7|
 |[Create Device Groups from Sites](xwf/Create_Device_Groups_from_Sites-8.4.0.115v25.xwf?raw=true)|Based on the Site structure user groups will be created. Workflow stops if there is a name conflict: if group with the same name already exists. Backup of the XMC is strongly recommended before the workflow execution.|Name of each site must be unique. Restart of XMC is mandatory after the workflow execution.|8.4.0.115v25|
-|[Change EXOS policy Rule model](xwf/Change_EXOS_policy_model-8.4.3.10v29.xwf?raw=true)|This workflow adress incompatibility of EXOS 30.5 with Policy Manager in XMC 8.4 and older. [KB article](https://gtacknowledge.extremenetworks.com/articles/Solution/xmc-Policy-enforce-is-failing-after-upgrading-to-v8-4-x/). The workflow can be executed through ZTP+ process or manualy.|CLI access must work, Policy domain must be assigned. [ZTP+ settings](xwf/Change_EXOS_policy_mode_ZTP_configuration.PNG)|8.4.3.10v29|
+|[Change EXOS policy Rule model](xwf/Change_EXOS_policy_model-8.4.3.10v29.xwf?raw=true)|This workflow adress incompatibility of EXOS 30.5 with Policy Manager in XMC 8.4 and older. [KB article](https://gtacknowledge.extremenetworks.com/articles/Solution/xmc-Policy-enforce-is-failing-to-EXOS-switches-running-30-5-x-15-firmware-after-upgrading-to-v8-4-x/). The workflow can be executed through ZTP+ process or manualy.|CLI access must work, Policy domain must be assigned. [ZTP+ settings](xwf/Change_EXOS_policy_mode_ZTP_configuration.PNG)|8.4.3.10v29|
 
 # Extreme Management Center daily job Workflows
 | Workflow name | Description | Comment | Version |
@@ -77,8 +79,7 @@
 |[Day 2 Delete PortChannel](xwf/EFA_Delete_PO-8.4.2.38v2.xwf?raw=true)|Workflow deletes existing Port Channels through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|8.4.2.38v2|
 |[Day 2 Delete VRF](xwf/EFA_Delete_VRFs-8.4.2.38v2.xwf?raw=true)|Workflow deletes existing VRFs through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|8.4.2.38v2|
 |[Day 2 Delete EPG](xwf/EFA_Delete_EPG-8.4.2.38v3.xwf?raw=true)|Workflow deletes existing EPGs through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|8.4.2.38v3|
-
-
+|[Whole EFA package](xwf/EFA.zip?raw=true)|All EFA workflows zipped to one package.|Unzip and import.| - |
 
 
 # Support
