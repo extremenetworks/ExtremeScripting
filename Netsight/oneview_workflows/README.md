@@ -9,6 +9,7 @@
 |[Link Aggregate Alarm](xwf/Link_Aggregate_Alarm-8.4.0.115v8.xwf?raw=true)|This workflow creates one email for each link down event. Instead of 2 emails if link goes down, you will get one email with all link details.|Create Alarm for Link Down based on selected trap (you can copy or modify original alarm) and as action assign this workflow. Define email recipients.|8.4.0.115v8|
 |[ERS inventory](xwf/ERS_Devices_Report-8.4.1.23v108.xwf?raw=true)|This workflow creates one email with CSV file attached. All ERS devices are there with IP, serial numbers and many details.|Select ERS devices. Check your ERS devices do have defined Network OS.|8.4.1.23v108|
 |[ERS port counters](xwf/ERS_por_counters_report-8.4.2.38v39.xwf?raw=true)|This workflow creates one email with CSV file attached. Ports with defined property above defined threshold are in the list.|Select ERS devices. Define property (e.g. Dropped on no resources), define threshold (e.g. 0), define email address.|8.4.2.38v39|
+|[Open ServiceNow Ticket](xwf/Open_ServiceNow_Ticket-8.4.2.38v3.xwf?raw=true)|This workflow creates ticket in ServiceNow through the API call based on alarm.|Define variables for ServiceNow (Instance, credentials, queue, priority). Create alarm to trigger this worfklow.|8.4.2.38v3|
 
 
 # Extreme Management Center Troubleshooting Workflows
@@ -29,6 +30,9 @@
 |[Import L2VSNs to XMC](xwf/Import_L2VSNs-8.3.1.9v7.xwf?raw=true)|Imports VLANs and L2VSNs from file to XMC Service Definitions and Service Applications. If Service Definition does not exist then it is created. If Service Application does not exist then it is created. If Vlan ID exists then it is updated. If NSI exists then it is updated. The goal is: You do not need to manually create each VLAN and ISID in XMC.|Inputs: [File with Services](xwf/Import_L2VSNs_Services2Create.txt?raw=true)|8.3.1.9v7|
 |[Create Device Groups from Sites](xwf/Create_Device_Groups_from_Sites-8.4.0.115v25.xwf?raw=true)|Based on the Site structure user groups will be created. Workflow stops if there is a name conflict: if group with the same name already exists. Backup of the XMC is strongly recommended before the workflow execution.|Name of each site must be unique. Restart of XMC is mandatory after the workflow execution.|8.4.0.115v25|
 |[Change EXOS policy Rule model](xwf/Change_EXOS_policy_model-8.4.3.10v29.xwf?raw=true)|This workflow adress incompatibility of EXOS 30.5 with Policy Manager in XMC 8.4 and older. [KB article](https://gtacknowledge.extremenetworks.com/articles/Solution/xmc-Policy-enforce-is-failing-to-EXOS-switches-running-30-5-x-15-firmware-after-upgrading-to-v8-4-x/). The workflow can be executed through ZTP+ process or manualy.|CLI access must work, Policy domain must be assigned. [ZTP+ settings](xwf/Change_EXOS_policy_mode_ZTP_configuration.PNG)|8.4.3.10v29|
+|[ZTP+ Remove Redundant IPs](xwf/Remove_redundant_IPs-8.4.2.38v1.xwf?raw=true)|During the ZTP+ process the switch can learn multip IPs from the DHCP server. This workflow can be executed after the EXOS device is onboarded and it does remove IPs from EXOS not registered in XMC.|Configure Site Actions to execute this workflow as part of ZTP+ process.|8.4.2.38v1|
+
+
 
 # Extreme Management Center daily job Workflows
 | Workflow name | Description | Comment | Version |
