@@ -1,0 +1,25 @@
+-- Use these scripts to manage Cisco Nexus devices. By Martin Flammia
+name="Cisco Systems Adapted - TFTP"
+desc="Cisco Systems NEXSUS TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config %TFTP_URL%
+@KEY %0D
+@receive 40
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+Copy complete.
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+%ENABLEPSWD%
+copy %TFTP_URL% startup-config
+startup-config
+@receive 60
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+bytes copied
+-----END SUCCESS-----

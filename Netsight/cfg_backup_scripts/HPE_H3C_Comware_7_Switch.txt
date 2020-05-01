@@ -1,0 +1,25 @@
+--- Use these scripts to backup and restore HPE H3C Comware 7.x switches
+name="HPE H3C Comware 7 Switch TFTP"
+desc="HPE H3C Comware 7 Switch SSH/TFTP Scripts"
+timed_reset_delay_format="HH:mm:ss:SS"
+-----BEGIN SCRIPT "Configuration Upload"-----
+backup startup-configuration to %TFTP_IP% %RELATIVE_TARGET_FILE_PATH%
+@RECEIVEUNTIL 20 "Finished."
+quit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+Finished.
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+tftp %TFTP_IP% get %RELATIVE_TARGET_FILE_PATH% startup.cfg
+y
+sys
+configuration replace file startup.cfg
+n
+@RECEIVEUNTIL 20 "Succeeded"
+quit
+quit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+Succeeded
+-----END SUCCESS-----

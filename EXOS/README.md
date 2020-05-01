@@ -1,7 +1,8 @@
-# ExtremeScripting
-Scripts and Utilities for working with Extreme Networks Switches and Platforms.
+# EXOS Scripting
+Scripts and Utilities for working with EXOS Switches and Platforms.
 
 # Categories
+* [Debug Bundle](Debug_Bundle/Readme.md)
 * [Policies](Policies/README.md)
 * [CLI Scripting](CLI_Scripting/README.md)
 * [EXOS SDK](SDK/README.md)

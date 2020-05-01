@@ -22,6 +22,8 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | EXOS |[Create EAPS control VLAN](xml/Create_EAPS_control_VLAN.xml?raw=true)| If the vlan does not exist it does create the vlan, it add the vlan to the EAPS as control. Control vlan is configured as tagged on all EAPS ring ports.|TCL|
 | EXOS |[Create EAPS protected VLAN](xml/Create_EAPS_protected_VLAN.xml?raw=true)|Add vlan to the EAPS as protected. If the vlan does not exits then it creates it. Selected ports are added as tagged or untagged. If there is only one EAPS ring then you do not need to specify the EAPS ring name. Ring ports are added as tagged automatically.|TCL|
 | EXOS |[Authentication EXOS](xml/Authentication_EXOS.xml?raw=true)|Script does create NetLogin vlan (if does not exist), configure NetLogin on ports and configure Radius on EXOS devices.|TCL|
+| EXOS |[ZTP+ Remove Redundant IPs](xml/Remove_redundant_IPs.xml?raw=true)|During the ZTP+ process the switch can learn multip IPs from the DHCP server. This script can be executed after the EXOS device is onboarded and it does remove IPs from EXOS not registered in XMC. Configure Site Actions to execute this script as part of ZTP+ process.|Python|
+
 ## Fabric Connect and Fabric Attach scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|

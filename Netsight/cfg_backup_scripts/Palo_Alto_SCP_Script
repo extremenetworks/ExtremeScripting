@@ -1,20 +1,21 @@
-name="Palo Alto"
-desc="Palo Alto SCP Script"
-separator=UNIX_FILE_SEPARATOR
+-- Use these scripts to backup Palo Alto devices. Inspired by Martin Flammia
+name="Palo Alto - SCP"
+desc="Palo Alto TFTP Scripts"
+protocol=SCP
 --
------BEGIN PRE-SCRIPT "Configuration Upload"-----
-Create /root/firmware/images/
------END PRE-SCRIPT-----
 -----BEGIN SCRIPT "Configuration Upload"-----
-scp export configuration from running-config.xml to root@IpAddressOfServer:/root/configs/tmp
-@receive 30
+configure
+save config to %TARGET_FILE_NAME%
+@SLEEP 10
+@KEY %0D
+exit
+scp export configuration from %TARGET_FILE_NAME% to %SCP_USER%@%SCP_IP%:%ABSOLUTE_SERVER_DIR_PATH%
+yes
+@SLEEP 5
 %SCP_PSWD%
-@receive 60
+@receive 30
 exit
 -----END SCRIPT-----
 -----BEGIN SUCCESS "Configuration Upload"-----
 100%
 -----END SUCCESS-----
------BEGIN POST-SCRIPT "Configuration Upload"-----
-copy /root/configs/tmp/running-config.xml %ABSOLUTE_TARGET_FILE_PATH%
------END POST-SCRIPT-----

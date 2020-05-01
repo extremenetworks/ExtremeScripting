@@ -1,6 +1,6 @@
 # Documentation
-* [Python Getting Started Guide](https://documentation.extremenetworks.com/Python%20Getting%20Started%20Guide.pdf)
-* [The EXOS Python API](http://documentation.extremenetworks.com/python/)
+* [Python Getting Started Guide](https://documentation.extremenetworks.com/pdfs/exos/Python_Getting_Started_Guide.pdf)
+* [The EXOS Python API](https://www.extremenetworks.com/support/documentation-api/extremexos-software/)
 
 <!---
 ------git_dlownload.py------
