@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script name="Delete L2VSN Range">
+<script name="VSP EPT Enforce">
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Config,</category>
-    <comments>Delete L2VSN Range on VSP - v2.0</comments>
+    <comments>Enforce XMC NAC and Endpoint-Tracking config to VSP switch - v1.0</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -581,20 +581,14 @@ except:
 
 # --&gt; XMC Python script actually starts here &lt;--
 
-############################################################
-# XMC Script: Delete L2VSN Range (for device context menu) #
-# Written by Ludovico Stevens, CSE Extreme Networks        #
-############################################################
-# Delete multiple L2VSNs using VLAN list/ranges on VOSS
-# Written by Ludovico Stevens, CSE Extreme Networks
 
-__version__ = '2.0'
+##########################################################
+# XMC Script: VSP-EPT-Enforce                            #
+# Written by Ludovico Stevens, CSE Extreme Networks      #
+##########################################################
+# Push Endpoint-Tracking (EPT) configuration to VSP switch
 
-# 1.4 - Changed CLI dict 'get_isid_uni_data' so that it can work on VSP8600 also (no CLI grep)
-#     - Updated libraries
-# 2.0 - Added ability to enter ports from XMC graphical port chooser
-#     - MLT ids can still be entered, but now has logic to derive MLT-id from port list entered
-#     - Script now has delete action pulldown
+__version__ = '1.0'
 
 #
 # XMC Metadata
@@ -602,47 +596,91 @@ __version__ = '2.0'
 '''
 #@MetaDataStart
 #@DetailDescriptionStart
-######################################################################################
+#######################################################################################
+#######################################################################################
+# 
+# This script allows the XMC operator to easily configure a VSP switch for Endpoint-
+# Tracking (EPT) based on the ExtremeControl NAC configuration.
 #
-# This script deletes existing L2VSN services.
-# It works across with VOSS VSPs in Switched-UNI mode only.
+# WARNING: if you use this script to re-enforce the EPT config to an already operational
+# switch and you specify any of the EPT global settings (Auto I-SID offset or Visibility
+# mode pull-downs), this script will temporarily disable and re-enable EPT which will
+# result in any existing EPT bindings getting flushed and that could cause a brief
+# connectivity loss for server VMs, the time for their MACs to be RADIUS re-validated
+# and for the VLAN:ISID binding to be re-applied on the access ports.
 #
-# An I-SID range/offset must be provided.
+#  1 - Add the switch under XMC Access Control Engine Group
+#  2 - And, still under XMC Access Control, configure the switch for:
+#      - Primary/Secondary engine.
+#      - Authentication Access type (Manual RADIUS Configuration).
+#      - RADIUS Attributes to Send (Fabric Attach attributes).
+#      - RADIUS accounting (disabled; not supported with VOSS EPT).
+#      - Advanced settings / Override RADIUS shared secret key.
+#        Note that this script can currently only work if the shared secret is set under
+#        switch advanced settings, override RADIUS; if the shared secret is set under the
+#        engine settings, currently it is not possible for this script to access that
+#        info via NBI.
+#      - Advanced settings / Reauthentication behaviour.
+#        (for VSP EPT select "RFC 3576 - Generic CoA Colon Delimited")
+#  3 - Perform an Access Control Engine Enforce on XMC
+#  4 - Run this script against the VSP switch (or multiple VSP switches simultaneously).
+#  5 - Select the access ports which will be configured for EPT; select none if enforcing only
+#      global changes.
+#      (If you wish to apply the config to all access ports, simply select ALL ports;
+#      this script is intelligent enough to infer VSP existing NNI and FA ports and will
+#      remove them from the port selection; if ports are members of MLT or SMLT UNIs, EPT will
+#      automatically get enabled on the corresponding MLT interface)
+#  6 - Select the desired EPT port configuration:
+#      - Enable: EPT is created and enabled on ports (if any ports were selected) and EPT
+#                global settings are enforced.
+#      - Disable: EPT is created but disabled on ports.
+#              (if this option is selected then simply skip to step 9 directly)
+#      - None: EPT is deleted from ports.
+#              (if this option is selected then simply skip to step 9 directly)
+#  7 - Select the desired Auto-ISID-Offset mode:
+#      - Empty: Whatever setting is on the VSP switch it will not be changed.
+#      - Disable: I-SID must be returned with VLAN-id in RADIUS attribute.
+#      - Offset selection: If no I-SID is returned in RADIUS response then this I-SID offset
+#                          will be added to the VLAN-id returned by RADIUS to obtain the I-SID.
+#  8 - Select the desired Visibility mode:
+#      - Empty: Whatever setting is on the VSP switch it will not be changed.
+#      - Disable: VSP will only RADIUS authenticate MACs which do not belong to static bindings.
+#      - Enable: VSP will RADIUS authenticate all MACs, including MACs on static bindings.
+#  9 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
+#      running but config commands will not be executed on the switch; useful to see what the script
+#      does without it actually changing any switch settings. Debug can be enabled when/if reporting
+#      problems
+# 10 - Finally, RUN the script
 #
-# A VLAN-id (or list of or range of or both combined) must also be provided, either
-# at the global level or at the device level (when a value is provided at both global
-# and device level, the device level value will be used).
+# The script will automatically configure all of the following:
+# - Primary and Secondary RADIUS Servers, including shared secret
+# - RADIUS dynamic-client (RFC3576 Change-of-Authorization)
+# - NTP or SNTP configuration to match that of the XMC Server, including the right timezone
+#   (RFC3576 Change-of-Authorization requires the switch and server to have the same time)
+#   Note: if XMC has no NTP server configured, then no NTP/SNTP config will be applied to the
+#   VSP. If the script is unable to extract NTP server and time-zone from XMC then it is possible to
+#   hard code the desired values in the NtpList and TimeZone global variables of this script.
+# - EPT global and port level configuration
+# - If the port selection included NNI or FA ports these will be filtered out.
+# - If some or all the ports selected are members of MLT or SMLT interfaces, then the EPT config
+#   will be applied to the corresponding MLT interface (again NNI MLTs and FA MLTs will be ignored)
 #
-# This script allows user to select the desired ports either using XMC's graphical
-# port chooser or by entering port numbers/ranges in text input fields.
-# XMC's graphical port chooser offers the ability to launch this script directly
-# against port groups defined in XMC, without the user having to manually select the
-# desired ports. Whereas the port text input offers a faster way to select many ports
-# by entering port list/ranges as is done on the CLI.
-# The script also offers the ability to select MLT ids to attach to services, though
-# note that it is not necessary to enter the MLT id. One can equally select the MLT
-# ports (either in XMC's graphical port chooser or in the port input text box) and
-# this script will work out whether the requested ports belong to an MLT or LACP LAG
-# and the configuration will automatically get applied to the corresponding MLT id.
-# If the user has a preference as to whether this script should request port input via
-# XMC's graphical port chooser or via text input and whether it is desired to have MLT
-# input text fields, he may simply comment out all respective lines in sections named:
-# #### Port Selection in text field : START
-# #### Port Selection in text field : END
-# #### MLT id Selection in text field : START
-# #### MLT id Selection in text field : END
-# #### Port Selection in XMC graphical port chooser : START
-# #### Port Selection in XMC graphical port chooser : END
-# If port inputs are selected using both the XMC graphical port chooser and the text
-# input box, the latter will override the former.
+# This script can be run multiple times against the same VSP, either to change the
+# configuration or enable EPT on different access ports or indeed to subsequently
+# disable or delete EPT on certain ports.
+# If running the script a second time to change the port EPT config, simply
+# set the desired EPT port config mode and execute the script (no need to populate the
+# other dialogues if those config options have already been set).
+# In particular, if running the script to disable/delete EPT on some ports then only the first
+# EPT port config dialogue needs to be set (to None or Disable) and then the script can be executed;
+# in this case the script will execute even if the VSP switch has already been deleted
+# from the XMC Access Control configuration.
+# This script uses the XMC North Bound interface API to extract the Access Control switch
+# configuration; therefore the XMC user running this script must have authorization rights
+# under "Northbound API / Access Control Northbound Interface Read Access"
 #
-# Select the desired delete action:
-# - A: Delete I-SID(s) from switch
-#      The I-SIDs to delete are obtained by adding the VLAN-ids to the I-SID offset 
-# - B: Remove selected interfaces from I-SID(s)
-#      The I-SIDs to remove from the selected port or MLT interfaces are obtained by
-#      adding the VLAN-ids to the I-SID offset
-#
+# Limitations: This script will only work on XMC Linux based VM installations.
+#              Running this script on a Windows based XMC installation will fail.
 #######################################################################################
 #@DetailDescriptionEnd
 # ( = &amp;#40;
@@ -651,77 +689,53 @@ __version__ = '2.0'
 # &lt; = &amp;lt;
 # &gt; = &amp;gt;
 
-#@SectionStart (description = "Service Definition to delete")
+#@SectionStart (description = "Endpoint-Tracking port level configuration")
 #    @VariableFieldLabel (
-#        description = "L2 SERVICE Domain &amp;#40;I-SID offset applied to VLAN-ids&amp;#41;",
+#        description = "EPT port config mode. If selecting None or Disable can skip all other inputs below",
 #        type = string,
 #        required = yes,
 #        readOnly = no,
-#        validValues = [Range0: I-SIDs 2000000, Range1: I-SIDs 2010000, Range2: I-SIDs 2020000, Range3: I-SIDs 2030000, Range4: I-SIDs 2040000],
-#        name = "userInput_l2domain",
-#    )
-#    @VariableFieldLabel (
-#        description = "VLAN-id &amp;#40;list or range&amp;#41;&amp;#44; can be overridden below at device level",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_vlanGlobal",
-#    )
-#### Port Selection in text field : START
-#    @VariableFieldLabel (
-#        description = "Port list&amp;#44; can be overridden below at device level",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_portsGlobal",
-#    )
-#### Port Selection in text field : END
-#### MLT id Selection in text field : START
-#    @VariableFieldLabel (
-#        description = "MLT id list&amp;#44; can be overridden below at device level",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_mltsGlobal",
-#    )
-#### MLT id Selection in text field : END
-#    @VariableFieldLabel (
-#        description = "Delete action",
-#        type = string,
-#        required = yes,
-#        validValues = [A: Delete I-SID&amp;#40;s&amp;#41; from switch, B: Remove selected interfaces from I-SID&amp;#40;s&amp;#41;],
-#        name = "userInput_delAction",
+#        validValues = [Enable: EPT created and enabled on ports, Disable: EPT created but disabled on ports, None: EPT deleted on ports],
+#        name = "userInput_eptPortMode",
+#        value = "Enable: EPT created and enabled on ports",
 #    )
 #@SectionEnd
 
-#@SectionStart (description = "Device level Port and VLAN assignment to overrides above global values")
-#### Port Selection in text field : START
+#@SectionStart (description = "Endpoint-Tracking global configuration")
 #    @VariableFieldLabel (
-#        description = "Port&amp;#40;s&amp;#41;",
+#        description = "Auto-ISID-Offset. If XMC Control returns only VLAN-id&amp;#44 offset is added to obtain L2 I-SID",
 #        type = string,
 #        required = no,
 #        readOnly = no,
-#        name = "userInput_ports",
-#        scope = device
+#        validValues = [Disable, CTC-Reading: I-SIDs 2800000, Range0: I-SIDs 2000000, Range1: I-SIDs 2010000, Range2: I-SIDs 2020000, Range3: I-SIDs 2030000, Range4: I-SIDs 2040000],
+#        name = "userInput_autoIsidOffset",
 #    )
-#### Port Selection in text field : END
-#### MLT id Selection in text field : START
 #    @VariableFieldLabel (
-#        description = "MLT id&amp;#40;s&amp;#41;",
+#        description = "Visibility Mode. If enabled&amp;#44 VSP will also notify XMC Control of MACs learnt on static bindings",
 #        type = string,
 #        required = no,
 #        readOnly = no,
-#        name = "userInput_mlts",
-#        scope = device
+#        validValues = [Enable, Disable],
+#        name = "userInput_visibilityMode",
 #    )
-#### MLT id Selection in text field : END
+#@SectionEnd
+
+#@SectionStart (description = "Other useful access features to enable on Endpoint-Tracking ports")
 #    @VariableFieldLabel (
-#        description = "VLAN&amp;#40;list&amp;#41;",
+#        description = "Spoof-Detect. Automatically discard all traffic from MAC if MAC is spoofing the default-gatewaty IP",
 #        type = string,
 #        required = no,
 #        readOnly = no,
-#        name = "userInput_vlan",
-#        scope = device
+#        validValues = [Enable, Disable],
+#        name = "userInput_spoofDetect",
+#    )
+#    @VariableFieldLabel (
+#        description = "SLPP-Guard. Automatically shut down access ports if a loop is detected on those ports",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_slppGuard",
 #    )
 #@SectionEnd
 
@@ -747,43 +761,104 @@ __version__ = '2.0'
 #
 # Imports:
 #
+from distutils.version import LooseVersion
 
 
 #
 # Variables:
 #
+
+NtpList  = [] #['10.8.255.160', '10.8.255.159'] # Set statically if you cannot use NBI to obtain from XMC
+TimeZone = [] #['GMT', '+00', '00']             # Set statically if you cannot use NBI to obtain from XMC
+
+NBI_Query = { # GraphQl query used to obtain NAC config for switch with IP = {0}; curlies need to be doubled not to interfere with .format()
+    'nbiAccess': '''
+        {
+          administration {
+            serverInfo {
+              version
+            }
+          }
+        }
+    ''',
+    'nacConfig': '''
+        {
+          accessControl {
+            switch(ipAddress: "&lt;IP&gt;") {
+              primaryGateway
+              secondaryGateway
+              overrideSharedSecret
+              sharedSecret
+            }
+          }
+        }
+    ''',
+}
+
 CLI_Dict = {
-    'VSP Series'    : {
+    'VSP Series': {
         'disable_more_paging'        : 'terminal more disable',
         'enable_context'             : 'enable',
         'config_context'             : 'config term',
-        'isid_config_context'        : 'i-sid {0}', # {0} = i-sid
+        'port_config_context'        : 'interface gigabitEthernet {}', # Port list
+        'mlt_config_context'         : 'interface mlt {}', # MLT id
         'exit_config_context'        : 'exit',
-        'end_config'                 : 'end',
-        'save_config'                : 'save config',
+        'end_save_config'            : 'end; save config',
+
+        'list_radius_ept_servers'    : 'list://show radius-server ||^(\d+\.\d+\.\d+\.\d+) +endpoint-tracking',
         'get_mlt_data'               : 'list://show mlt||^(?:(\d+) +\d+.+?(?:access|trunk) +(norm|smlt) +(?:norm|smlt) *(\S+)?|(\d+) +\d+ +(?:[\d\/]+|null) +(enable|disable)|(\d+) +\d+ +\S+ +\S+ +\S+ +\S+ +\S+ +(enable|disable))',
         'list_fa_interfaces'         : 'list://show fa interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +(enabled|disabled) +(\d+) +(\d+) +(enabled|disabled)',
         'get_lacp_port_data'         : 'list://show lacp actor-oper interface||^(\d+/\d+(?:/\d+)?) +(\d+) +\d+ +\d+ +(true|false)',
         'list_mlt_lacp_key'          : 'dict://show lacp interface mlt||^(\d+) +\d+ +\d+ +\S+ +\d+ +(\d+)',
-        'get_isid_uni_data'          : 'show running-config module i-sid',
-        'delete_switched_uni'        : { # {0} = vlan; {1} = port-list
-            'tag'                    : 'no c-vid {0} port {1}',
-            'untag'                  : 'no untagged-traffic port {1}',
-            'transparent'            : 'no port {1}'
-                                       },
-        'delete_mlt_switched_uni'    : { # {0} = VLAN id; {1} = MLT id
-            'tag'                    : 'no c-vid {0} mlt {1}',
-            'untag'                  : 'no untagged-traffic mlt {1}',
-            'transparent'            : 'no mlt {1}'
-                                       },
-        'delete_switched_isid'       : 'no i-sid {}', # Isid
+        'list_nni_interfaces'        : 'list://show isis interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +',
+        'list_brouter_ports'         : 'list://show brouter||^\s*(\d+/\d+(?:/\d+)?) +\d+',
+        'list_slpp_ports'            : 'list://show slpp interface gigabitEthernet||^(\d+/\d+(?:/\d+)?) +enabled',
+        'get_flex_uni'               : 'dict://show interfaces gigabitEthernet config {}||^(\d+/\d+(?:/\d+)?) +\S+ +\S+ +\S+ +\S+ +\S+ +(Enable|Disable)', # Port
+        'list_ntp_servers'           : 'list://show ntp server ||^(\d+\.\d+\.\d+\.\d+)',
+        'delete_ntp_server'          : 'no ntp server {}', # IP
+        'create_ntp_server'          : 'ntp server {} enable', # IP
+        'enable_ntp'                 : 'ntp',
+        'set_timezone'               : 'clock time-zone {} {}', # Zone
+        'delete_radius_server'       : 'no radius server host {} used-by endpoint-tracking', # IP
+        'delete_radius_client'       : 'no radius dynamic-server client {}', # IP
+        'create_radius_server'       : # {0} = Radius Server IP, {1} = Radius secret, {2} = Source IP
+                                       '''
+                                       radius server host {0} key {1} used-by endpoint-tracking source-ip {2}
+                                       radius dynamic-server client {0} secret {1} enable
+                                       ''',
+        'enable_radius'              : 'radius sourceip-flag; radius enable',
+        'enable_ept_isid_offset'     : 'endpoint-tracking auto-isid-offset {}; endpoint-tracking auto-isid-offset enable', # I-SID
+        'disable_ept_isid_offset'    : 'no endpoint-tracking auto-isid-offset enable; default endpoint-tracking auto-isid-offset',
+        'enable_ept_visibility_mode' : 'endpoint-tracking visibility-mode',
+        'disable_ept_visibility_mode': 'no endpoint-tracking visibility-mode',
+        'enable_ept'                 : 'endpoint-tracking enable',
+        'disable_ept'                : 'no endpoint-tracking enable',
+        'delete_ept'                 : 'no endpoint-tracking',
+        'enable_flex_uni'            : 'flex-uni enable',
+        'create_flex_uni'            : 'vlan members remove 1 {0}; interface gigabitEthernet {0}; flex-uni enable; exit', # Port
+        'ports_enable_ept'           : 'interface gigabitEthernet {0}; endpoint-tracking enable; exit', # Port
+        'ports_disable_ept'          : 'interface gigabitEthernet {0}; no endpoint-tracking enable; exit', # Port
+        'ports_delete_ept'           : 'interface gigabitEthernet {0}; no endpoint-tracking; exit', # Port
+        'port_enable_spoof_detect'   : 'spoof-detect',
+        'port_disable_spoof_detect'  : 'no spoof-detect',
+        'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
+        'port_enable_slpp_guard'     : 'slpp-guard enable',
+        'port_disable_slpp_guard'    : 'no slpp-guard enable',
+        'port_enable'                : 'no shutdown',
     },
+}
+
+Shell_Dict = { # Dictionary of all Linux shell commands used by this script
+    'list_ntp_servers'           : 'list://ntpq -pn ||^[*+](\d+\.\d+\.\d+\.\d+)',
+    'list_ntp_servers_84'        : 'list://chronyc -n sources ||^\^[*+-]\s*(\d+\.\d+\.\d+\.\d+)',
+    'get_time_zone'              : 'tuple:// timedatectl ||Time zone: (\S+?)(?:/(\S+?))? \((\w+?), ([-+]\d\d)(\d\d)\)',
 }
 
 
 #
 # Functions:
 #
+
 def extractMltAndPortData(mltInclude=[], portInclude=[]): # Extract MLT data (include = ['fa','lacp','vlacp']) / and Port data (include = ['fa','lacp','vlacp'])
     # Only supported for family = 'VSP Series'
     mltDict = {}
@@ -864,297 +939,371 @@ def extractMltAndPortData(mltInclude=[], portInclude=[]): # Extract MLT data (in
     # {"id" {'fa': None|True|False, 'faAuth': True|False, 'faMgmt': "vlan:isid", 'flex': True|False, 'key': None|"key", 'lacp': True|False, 'ports': "port-range", 'type': "smlt|norm", 'vlacp': True|False}}
     # portDict: will include info of all ports which are either FA enabled or LACP enabled or assigned to an MLT (statically or via LACP) [so not all ports]
     # {"port": {'fa': None|True|False, 'faAuth': True|False, 'faMgmt': "vlan:isid", 'key':None|"key", 'lacp': True|False, 'mlt': None|"id", 'vlacp': True|False}}
-    return mltDict, portDict
+    return mltDict, portDict, faData
 
 
-def getIsidUniStruct(): # Extract all switched-uni/transparent-uni I-SIDs and port data
-    # Only supported for family = 'VSP Series'
-    # the "show i-sid" command is too fiddly to scrape...
-    # the "show interfaces gigabitEthernet i-sid" command does not show I-SIDs with no ports assigned...
-    # so we use "show run module i-sid" instead...
-    cliOutput = sendCLI_showCommand(CLI_Dict[Family]['get_isid_uni_data'])
-    isidUniPortDict = {}
-    foundIsidData = False
-    for line in cliOutput.splitlines():
-        matchObj = re.match(r'^i-sid (\d+) ', line)
-        if matchObj:
-            isid = matchObj.group(1)
-            isidUniPortDict[isid] = {}
-            foundIsidData = True
-            continue
-
-        if foundIsidData:
-            matchObj = re.match(r'c-vid (\d+) (port|mlt) (\S+)', line)
-            if matchObj:
-                tagging = 'tag'
-                cvlan = matchObj.group(1)
-                btype = matchObj.group(2)
-                if btype == 'port':
-                    ports = matchObj.group(3)
-                    mlt = None
-                else:
-                    ports = None
-                    mlt = matchObj.group(3)
-            else:
-                matchObj = re.match(r'untagged-traffic (port|mlt) (\S+)', line)
-                if matchObj:
-                    tagging = 'untag'
-                    cvlan = None
-                    btype = matchObj.group(1)
-                    if btype == 'port':
-                        ports = matchObj.group(2)
-                        mlt = None
-                    else:
-                        ports = None
-                        mlt = matchObj.group(2)
-                else:
-                    matchObj = re.match(r'(port|mlt) (\S+)', line)
-                    if matchObj:
-                        tagging = 'transparent'
-                        cvlan = None
-                        btype = matchObj.group(1)
-                        if btype == 'port':
-                            ports = matchObj.group(2)
-                            mlt = None
-                        else:
-                            ports = None
-                            mlt = matchObj.group(2)
-                    elif re.match(r'exit', line):
-                        foundIsidData = False
-                        continue
-                    else:
-                        continue
-
-            if ports:
-                portList = generatePortList(ports)
-                debug("portList = {}".format(portList))
-                for port in portList:
-                    isidUniPortDict[isid][port] = {'type': tagging, 'vlan': cvlan}
-            if mlt:
-                isidUniPortDict[isid][mlt] = {'type': tagging, 'vlan': cvlan}
-
-    debug("getIsidUniStruct OUT = {}".format(isidUniPortDict))
-    return isidUniPortDict
-
-
-
+#
+# Main:
+#
 def main():
-    print "Delete L2VSN Range version {}".format(__version__)
-    setFamily() # Sets global Family variable
-    enteredPortList = []
+    print "VSP-EPT-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
+    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
+    if nbiAccess == None:
+        raise RuntimeError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
 
-#### Port Selection in XMC graphical port chooser : START
+    #
+    # Obtain Info on switch and from XMC
+    #
+    setFamily() # Sets global Family variable
     try:
         enteredPortList = generatePortList(emc_vars['port'])
-        enteredPortRange = generatePortRange(enteredPortList)
     except:
-        enteredPortRange = ''
+        enteredPortList = []
     debug("enteredPortList = {}".format(enteredPortList))
-#### Port Selection in XMC graphical port chooser : END
 
-    l2domain  = emc_vars["userInput_l2domain"]
-    delAction = emc_vars['userInput_delAction'][:1]
-    try:
-        vlanGb = emc_vars["userInput_vlanGlobal"].strip()
-    except:
-        vlanGb = None
-    try:
-        portsGb = emc_vars["userInput_portsGlobal"].strip()
-    except:
-        portsGb = None
-    try:
-        mltsGb = emc_vars["userInput_mltsGlobal"].strip()
-    except:
-        mltsGb = None
-    try:
-        vlanDv = emc_vars["userInput_vlan"].strip()
-    except:
-        vlanDv = None
-    try:
-        portsDv = emc_vars["userInput_ports"].strip()
-    except:
-        portsDv = None
-    try:
-        mltsDv = emc_vars["userInput_mlts"].strip()
-    except:
-        mltsDv = None
+    eptPortMode = emc_vars['userInput_eptPortMode'].split(':', 1)[0]
 
-    isidOffset = re.search(r'(\d+$)', l2domain).group(1)
-    debug("isidOffset = {}".format(isidOffset))
+    autoIsid = emc_vars['userInput_autoIsidOffset']
+    if autoIsid:
+        isidMatch = re.search(r'(\d+$)', emc_vars['userInput_autoIsidOffset'])
+        if isidMatch:
+            autoIsid = 'Enable'
+            autoIsidOffset = isidMatch.group(1)
+        else:
+            autoIsid = 'Disable'
+            autoIsidOffset = ''
+    else:
+        autoIsid = ''
+        autoIsidOffset = ''
+
+    visibilityMode = emc_vars['userInput_visibilityMode']
+    spoofDetect = emc_vars['userInput_spoofDetect']
+    slppGuard = emc_vars['userInput_slppGuard']
 
     print "Information provided by User:"
-    print " Global settings:"
-    print " - L2 Domain = {}".format(l2domain)
-    print " - I-SID offset = {}".format(isidOffset)
-    print " - Global VLAN(s) = {}".format(vlanGb)
-    print " - Global Ports GUI input = {}".format(enteredPortRange)
-    print " - Global Ports text input = {}".format(portsGb)
-    print " - Global MLT ids = {}".format(mltsGb)
-    print " - Delete action = {}{}".format(delAction, emc_vars['userInput_delAction'][1:])
-    print " Device override settings:"
-    print " - VLAN(s) = {}".format(vlanDv)
-    print " - Ports = {}".format(portsDv)
-    print " - MLT ids = {}".format(mltsDv)
+    print " - Switch access ports where to configure EPT = {}".format(generatePortRange(enteredPortList))
+    print " - EPT Port Mode = {}".format(eptPortMode)
+    print " - EPT Auto-ISID = {}".format(autoIsid)
+    print " - EPT Auto-ISID-Offset = {}".format(autoIsidOffset)
+    print " - EPT Visibility Mode = {}".format(visibilityMode)
+    print " - Spoof-Detect = {}".format(spoofDetect)
+    print " - SLPP-Guard = {}".format(slppGuard)
 
-    # Determine Vlan and port to use for this device
-    if vlanDv:
-        vlan = vlanDv
-    elif vlanGb:
-        vlan = vlanGb
-    else:
-        raise RuntimeError('One or more VLANs must be provided')
+    if eptPortMode == 'Enable': # All this info won't be needed if we are just going to delete/disable EPT on selcted ports
+        vspIP  = emc_vars['deviceIP']
+        print "Extracted information from XMC:"
+        print " - Switch IP = {}".format(vspIP)
 
-    vlanList = generatePortList(vlan)
-    debug("vlanList = {}".format(vlanList))
-    for vlan in vlanList:
-        if not vlan.isdigit() or int(vlan) &gt; 4095:
-            raise RuntimeError('Invalid VLAN id value {}; needs to be a number not higher than 4059'.format(vlan))
+        # This GraphQl query will fail if the switch IP is not already configured as a NAC switch in XMC Control
+        nacConfig = nbiQuery(NBI_Query['nacConfig'].replace('&lt;IP&gt;', vspIP), 'switch', 'nacConfig')
+        #  "switch": { # Sample of what we get back
+        #    "primaryGateway": "10.8.255.17",
+        #    "secondaryGateway": null,
+        #    "sharedSecret": "radius",
+        #    "overrideSharedSecret": true  # Currently we only work if this is set, and hence sharedSecret returned
+        #  }
+        #  Or, if switch not configured under XMC Access  Control:
+        #  "switch": null
+        if nacConfig == None: # Switch is not configured under XMC Access Control; give a meaningful error message
+            raise RuntimeError('Switch {} does not exist under XMC Access-Control'.format(vspIP))
+        print " - {} configured under XMC Access Control Switches, with:".format(vspIP)
+        print "    - Primary XMC Radius server = {}".format(nacConfig['primaryGateway'])
+        print "    - Secondary XMC Radius server = {}".format(nacConfig['secondaryGateway'])
+        print "    - XMC switch overrideSharedSecret (must be true) = {}".format(nacConfig['overrideSharedSecret'])
+        print "    - XMC configured Radius secret = {}".format(nacConfig['sharedSecret'])
+        if not nacConfig['overrideSharedSecret']: # Switch is configured under XMC Access Control, but the sharedsecret is set under engine settings, and we can't get to it with NBI currently
+            raise RuntimeError('Switch {} does not have an override RADIUS shared secret set (this script cannot currently work with shared secret set under engine settings)'.format(vspIP))
 
-    if portsDv:
-        ports = portsDv
-    elif portsGb:
-        ports = portsGb
-    else:
-        ports = None
+        if NtpList and TimeZone: # We have static overrides
+            xmcNtpList = NtpList
+            xmcTimeZone = TimeZone
+            print " - Static NTP Server 1 = {}".format(xmcNtpList[0])
+            if len(xmcNtpList) &gt; 1:
+                print " - Static NTP Server 2 = {}".format(xmcNtpList[1])
+            print " - Static Time Zone = {} {}:{}".format(xmcTimeZone[0], xmcTimeZone[1], xmcTimeZone[2])
+        else: # Obtain from XMC via Linux shell
+            if LooseVersion(emc_vars["serverVersion"]) &gt;= LooseVersion("8.4"): # Required for XMC 8.4.x and above
+                xmcNtpList = xmcLinuxCommand(Shell_Dict['list_ntp_servers_84'], 'xmcNtpList')
+            else: # This works up to XMC versions 8.3.x
+                xmcNtpList = xmcLinuxCommand(Shell_Dict['list_ntp_servers'], 'xmcNtpList')
+            if xmcNtpList:
+                print " - XMC NTP Server 1 = {}".format(xmcNtpList[0])
+                if len(xmcNtpList) &gt; 1:
+                    print " - XMC NTP Server 2 = {}".format(xmcNtpList[1])
+    
+                xmcTimeZone = xmcLinuxCommand(Shell_Dict['get_time_zone'], 'xmcTimeZone')
+                print " - XMC Time Zone = {} {} / {} {}:{}".format(xmcTimeZone[0], xmcTimeZone[1], xmcTimeZone[2], xmcTimeZone[3], xmcTimeZone[4])
+    
+            else:
+                print " - Unable to extract XMC NTP Server configuration (=&gt; NTP/SNTP and CoA replay-protect will not be configured on switch)"
+        print
 
-    if mltsDv:
-        mlts = mltsDv
-    elif mltsGb:
-        mlts = mltsGb
-    else:
-        mlts = None
-    if mlts:
-        inputMltList = generatePortList(mlts)
-    else:
-        inputMltList = []
-    debug("inputMltList = {}".format(inputMltList))
-    for mlt in inputMltList:
-        if not mlt.isdigit() or int(mlt) &gt; 512:
-            raise RuntimeError('Invalid MLT id value {}; needs to be a number not higher than 512'.format(mlt))
-
-    # Disable more paging (generatePortList might issue a CLI command, so do this before)
+    # First off, disable more paging
     sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
 
-    # Obtain ports in list and range format
-    if ports:
-        inputPortList = generatePortList(ports)
-        inputPortRange = generatePortRange(inputPortList)
-    elif enteredPortList:
-        inputPortList = enteredPortList
-        inputPortRange = enteredPortRange
-    else:
-        inputPortList = []
-        inputPortRange = ''
-    debug("inputPortList = {}".format(inputPortList))
-    debug("inputPortRange = {}".format(inputPortRange))
-
-    if delAction == 'B' and not inputPortList:
-        print "Request to delete L2VSN(s) from port/MLT interfaces but no port or MLT interfaces selected; nothing to do."
-        return
-
-    # Enter privExec, for show commands
+    # Enter privExec mode
     sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
 
-    # Determine actual port list and MLT list to configure
-    portList = []
-    mltList = inputMltList
-    if inputPortList and delAction == 'B': # Only if some ports were selected
+    if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
+        # Extract RADIUS server config
+        radiusEptServerList = sendCLI_showRegex(CLI_Dict[Family]['list_radius_ept_servers'], 'radiusEptServerList')
+
+    eptPortList = []
+    eptMltList = []
+    if enteredPortList: # Only if some ports were selected
         # Extract MLT &amp; port data; we also get FA interface data from here directly
-        mltDict, portDict = extractMltAndPortData(['fa', 'lacp'], ['fa', 'lacp'])
+        mltDict, portDict, faData = extractMltAndPortData(['fa', 'lacp'], ['fa', 'lacp'])
+        faInterfaceList = [x[0] for x in faData]
+        debug("faInterfaceList = {}".format(faInterfaceList))
 
-        # Check if user entered MLT ids exist
-        invalidMltList = [x for x in mltList if x not in mltDict]
-        if invalidMltList:
-            raise RuntimeError('The following MLT ids do not exist on the switch: {}'.format(generateRange(invalidMltList)))
+        # Dump NNI interfaces - obtain list of ports &amp; mltids
+        nniInterfaceList = sendCLI_showRegex(CLI_Dict[Family]['list_nni_interfaces'], 'nniInterfaceList')
 
-        # Determine ports and MLT ids to configure
-        for port in inputPortList:
+        # Get list of any Brouter ports (could be used for mgmt or Fabric Extend..)
+        brouterPortList = sendCLI_showRegex(CLI_Dict[Family]['list_brouter_ports'], 'brouterPortList')
+
+        if slppGuard:
+            # Get list of any SLPP enabled ports (if my SMLT-Pair-Enforce script was used to create SMLT MLTs, these will have regular SLPP on them..)
+            slppPortList = sendCLI_showRegex(CLI_Dict[Family]['list_slpp_ports'], 'slppPortList')
+
+        # Condense NNI interfaces (any FA MLTs are converted to individual ports)
+        nniPortDict = {} # Use a Dict so that keys are unique
+        for interface in nniInterfaceList:
+            if re.match(r'^\d+$' ,interface): # MLT id
+                for port in generatePortList(mltDict[interface]['ports']):
+                    nniPortDict[port] = 1
+            else: # Port
+                nniPortDict[interface] = 1
+        nniPortList = nniPortDict.keys()
+        debug("nniPortList = {}".format(nniPortList))
+
+        # Condense FA interfaces (any NNI MLTs are converted to individual ports)
+        faPortDict = {} # Use a Dict so that keys are unique
+        for interface in faInterfaceList:
+            if re.match(r'^\d+$', interface): # MLT id
+                for port in generatePortList(mltDict[interface]['ports']):
+                    faPortDict[port] = 1
+            else: # Port
+                faPortDict[interface] = 1
+        faPortList = faPortDict.keys()
+        debug("faPortList = {}".format(faPortList))
+
+        # Identify NNI ports in selection
+        nniPortsInSelection = [x for x in enteredPortList if x in nniPortList]
+        debug("nniPortsInSelection = {}".format(nniPortsInSelection))
+        # Identify FA ports in selection
+        faPortsInSelection = [x for x in enteredPortList if x in faPortList]
+        debug("faPortsInSelection = {}".format(faPortsInSelection))
+        # Identify Brouter ports in selection
+        brouterPortsInSelection = [x for x in enteredPortList if x in brouterPortList]
+        debug("brouterPortsInSelection = {}".format(brouterPortsInSelection))
+        # Subtract NNI,FA,Brouter ports from selection
+        prunedPortList = [x for x in enteredPortList if x not in nniPortList and x not in faPortList and x not in brouterPortList]
+        debug("prunedPortList = {}".format(prunedPortList))
+        prunedPortRange = generatePortRange(prunedPortList)
+        if slppGuard:
+            regSlppRemoveList = [x for x in prunedPortList if x in slppPortList]
+            debug("regSlppRemoveList = {}".format(regSlppRemoveList))
+            if regSlppRemoveList:
+                regSlppRemoveRange = generatePortRange(regSlppRemoveList)
+
+        # Determine ports and MLT ids to configure for EPT
+        for port in prunedPortList:
             if port in portDict and portDict[port]['mlt']:
-                if portDict[port]['mlt'] not in mltList:
-                    mltList.append(portDict[port]['mlt'])
+                eptMltList.append(portDict[port]['mlt'])
             else:
-                portList.append(port)
-        debug("portList = {}".format(portList))
-        mltList = [str(x) for x in sorted([int(x) for x in mltList])] # Sort the MLT ids
-        debug("mltList = {}".format(mltList))
-        portRange = generatePortRange(portList)
-        debug("portRange = {}".format(portRange))
+                eptPortList.append(port)
+        debug("eptPortList = {}".format(eptPortList))
+        eptMltList = [str(x) for x in sorted([int(x) for x in eptMltList])] # Sort the MLT ids
+        debug("eptMltList = {}".format(eptMltList))
+        eptPortRange = generatePortRange(eptPortList)
+        debug("eptPortRange = {}".format(eptPortRange))
 
+        if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
+            # Check which of the future EPT ports will also require Flex-Uni enabling
+            flexUniDisabledRange = None
+            if eptPortList:
+                flexUniList = sendCLI_showRegex(CLI_Dict[Family]['get_flex_uni'].format(eptPortRange), 'flexUniList')
+                flexUniDisabledList = [x for x in flexUniList if flexUniList[x] == 'Disable']
+                debug("flexUniDisabledList = {}".format(flexUniDisabledList))
+                flexUniDisabledRange = generatePortRange(flexUniDisabledList)
+
+    if eptPortMode == 'Enable' and xmcNtpList: # Only if XMC is configured with NTP server(s)
+        # Get NTP servers already configured on switch, if any
+        switchNtpList = sendCLI_showRegex(CLI_Dict[Family]['list_ntp_servers'], 'switchNtpList')
+
+    if enteredPortList or (eptPortMode == 'Enable' and xmcNtpList):
         print "Extracted information from VSP switch via CLI:"
         if enteredPortList: # Only if some ports were selected
-            print " - MLT ids to remove service from = {}".format(generatePortRange(mltList))
-            print " - Individual ports to remove service from = {}".format(portRange)
-            print
+            print " - VSP NNI ports = {}".format(generatePortRange(nniPortList))
+            print " - VSP FA ports = {}".format(generatePortRange(faPortList))
+            print " - EPT MLTs to configure = {}".format(generatePortRange(eptMltList))
+            print " - EPT ports to configure = {}".format(eptPortRange)
+            if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
+                print " - EPT ports to Flex-Uni enable = {}".format(flexUniDisabledRange)
+                print " - EPT ports to bring up (no shut) = {}".format(prunedPortRange)
+                if spoofDetect:
+                    print " - EPT ports to Spoof-Detect enable/disable = {}".format(prunedPortRange)
+                if slppGuard:
+                    print " - EPT ports to SLPP-Guard enable/disable = {}".format(prunedPortRange)
+                    if regSlppRemoveList:
+                        print " - EPT ports where to remove regular SLPP before setting SLPP-Guard = {}".format(regSlppRemoveRange)
+        if eptPortMode == 'Enable' and xmcNtpList: # Only if XMC is configured with NTP server(s)
+            print " - Existing NTP Servers = {}".format(', '.join(switchNtpList))
+        print
 
-    # Enter config mode now
+    #
+    # Now configure the switch
+    #
+    # Enter config mode
     sendCLI_configCommand(CLI_Dict[Family]['config_context'])
-    performConfig = False # Assume not
 
-    # Only Switched UNI config covered here
-    uniIsidDict = getIsidUniStruct()
-    debug('uniIsidDict = {}'.format(uniIsidDict))
-    for vlan in vlanList:
-        # Prepare the I-SID
-        isid = str(int(isidOffset) + int(vlan))
-        debug("vlan {} = isid {}".format(vlan, isid))
-        portsInIsidToRemove = []
-        mltsInIsidToRemove = []
+    if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
 
-        if delAction == 'B':
-            if portList: # Remove ports from Switched-UNI I-SID
-                portsInIsidToRemove = [x for x in portList if isid in uniIsidDict and x in uniIsidDict[isid]]
-                debug("portsInIsidToRemove = {}".format(portsInIsidToRemove))
-                if portsInIsidToRemove:
-                    print "Ports to remove from I-SID {} = {}".format(isid, portRange)
+        if xmcNtpList: # Only if XMC is configured with NTP server(s)
+            deleteNtpServers = False
+            createNtpServers = False
+            # If switch configured NTP servers are not the XMC ones, delete them all
+            if xmcNtpList[0] not in switchNtpList or (len(xmcNtpList) == 2 and xmcNtpList[1] not in switchNtpList):
+                deleteNtpServers = True
+                createNtpServers = True
 
-            if mltList: # Remove MLTs from Switched-UNI I-SID
-                mltsInIsidToRemove = [x for x in mltList if isid in uniIsidDict and x in uniIsidDict[isid]]
-                debug("mltsInIsidToRemove = {}".format(mltsInIsidToRemove))
-                if mltsInIsidToRemove:
-                    print "MLTs to remove from I-SID {} = {}".format(isid, mltsInIsidToRemove)
+            if deleteNtpServers:
+                for ntpIp in switchNtpList:
+                    sendCLI_configCommand(CLI_Dict[Family]['delete_ntp_server'].format(ntpIp))
+            if createNtpServers:
+                for ntpIp in xmcNtpList:
+                    sendCLI_configCommand(CLI_Dict[Family]['create_ntp_server'].format(ntpIp))
+            sendCLI_configChain(CLI_Dict[Family]['enable_ntp'])
 
-            if portsInIsidToRemove or mltsInIsidToRemove:
-                # Enter I-SID context
-                sendCLI_configCommand(CLI_Dict[Family]['isid_config_context'].format(isid))
-                performConfig = True
-                if portsInIsidToRemove:
-                    # Remove ports from I-SID
-                    for port in portsInIsidToRemove:
-                        sendCLI_configCommand(CLI_Dict[Family]['delete_switched_uni'][uniIsidDict[isid][port]['type']].format(uniIsidDict[isid][port]['vlan'], portRange))
-                if mltsInIsidToRemove:
-                    # Remove MLT ids from I-SID
-                    for mlt in mltsInIsidToRemove:
-                        sendCLI_configCommand(CLI_Dict[Family]['delete_mlt_switched_uni'][uniIsidDict[isid][mlt]['type']].format(uniIsidDict[isid][mlt]['vlan'], mlt))
-                # Exit I-SID context
-                if performConfig:
-                    sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
-            else:
-                print "VLAN {} I-SID {} not on selected interface; nothing to delete".format(vlan, isid)
+            # Set the time-zone
+            sendCLI_configCommand(CLI_Dict[Family]['set_timezone'].format(xmcTimeZone[0], xmcTimeZone[1]))
 
-        else: # delAction == 'A'
-            if isid in uniIsidDict: # Delete I-SID
-                sendCLI_configChain(CLI_Dict[Family]['delete_switched_isid'].format(isid))
-                performConfig = True
-            else:
-                print "I-SID {} not on switch; nothing to delete".format(vlan, isid)
+        # Delete existing EPT RADIUS servers
+        for server in radiusEptServerList:
+            sendCLI_configChain(CLI_Dict[Family]['delete_radius_server'].format(server))
+            sendCLI_configChain(CLI_Dict[Family]['delete_radius_client'].format(server), True, "There was no RADIUS dynamic-server client for {}".format(server))
 
-    # End and save config
-    if 'end_config' in CLI_Dict[Family]:
-        sendCLI_configCommand(CLI_Dict[Family]['end_config'])
-    if performConfig:
-        sendCLI_configCommand(CLI_Dict[Family]['save_config'])
+        # Configure Primary RADIUS server
+        sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret'], vspIP))
+
+        # Configure Secondary RADIUS server, if defined for switch
+        if nacConfig['secondaryGateway']:
+            sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret']))
+
+        # Enable RADIUS
+        sendCLI_configChain(CLI_Dict[Family]['enable_radius'])
+
+        if autoIsid or visibilityMode:
+
+            # Disable EPT globally (in case it was enabled, otherwise global values cannot be set)
+            sendCLI_configChain(CLI_Dict[Family]['disable_ept'])
+
+            # Configure EPT global settings
+            if autoIsid == 'Enable':
+                sendCLI_configChain(CLI_Dict[Family]['enable_ept_isid_offset'].format(autoIsidOffset))
+            elif autoIsid == 'Disable':
+                sendCLI_configChain(CLI_Dict[Family]['disable_ept_isid_offset'])
+
+            if visibilityMode == 'Enable':
+                sendCLI_configChain(CLI_Dict[Family]['enable_ept_visibility_mode'])
+            elif visibilityMode == 'Disable':
+                sendCLI_configChain(CLI_Dict[Family]['disable_ept_visibility_mode'])
+
+        # Enable EPT Globally
+        sendCLI_configChain(CLI_Dict[Family]['enable_ept'])
+
+    if enteredPortList: # Only if some ports were selected
+
+        # Configure EPT on MLTs
+        for mltid in eptMltList:
+
+            # Enter MLT config context
+            sendCLI_configCommand(CLI_Dict[Family]['mlt_config_context'].format(mltid))
+
+            if eptPortMode == 'Enable':
+                # Enable Flex-Uni if necessary
+                if not mltDict[mltid]['flex']: 
+                    sendCLI_configChain(CLI_Dict[Family]['enable_flex_uni'])
+                # Enable EPT
+                sendCLI_configChain(CLI_Dict[Family]['enable_ept'])
+
+            elif eptPortMode == 'Disable':
+                # Disable EPT
+                sendCLI_configChain(CLI_Dict[Family]['disable_ept'])
+
+            elif eptPortMode == 'None':
+                # Delete EPT
+                sendCLI_configChain(CLI_Dict[Family]['delete_ept'])
+
+            # Come out of MLT config context
+            sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
+
+        # Configure EPT on Ports
+        if eptPortMode == 'Enable':
+            if flexUniDisabledRange:
+                # Enable Flex-Uni (also removes default VLAN 1) on those ports where Flex-Uni is not already enabled
+                sendCLI_configChain(CLI_Dict[Family]['create_flex_uni'].format(flexUniDisabledRange))
+            if eptPortList:
+                sendCLI_configChain(CLI_Dict[Family]['ports_enable_ept'].format(eptPortRange))
+
+        elif eptPortMode == 'Disable' and eptPortList:
+            # Disable EPT
+            sendCLI_configChain(CLI_Dict[Family]['ports_disable_ept'].format(eptPortRange))
+
+        elif eptPortMode == 'None' and eptPortList:
+            # Delete EPT
+            sendCLI_configChain(CLI_Dict[Family]['ports_delete_ept'].format(eptPortRange))
+
+        # Enable individual ports and set Spoof-Detect / SLPP-Guard if requested
+        if eptPortMode == 'Enable' and prunedPortList:
+            # Enter Port config context (individual ept ports + MLT ept ports)
+            sendCLI_configCommand(CLI_Dict[Family]['port_config_context'].format(prunedPortRange))
+
+            # Apply Spoof-Detect config if this was specified 
+            if spoofDetect == 'Enable':
+                sendCLI_configChain(CLI_Dict[Family]['port_enable_spoof_detect'].format(prunedPortRange))
+            elif spoofDetect == 'Disable':
+                sendCLI_configChain(CLI_Dict[Family]['port_disable_spoof_detect'].format(prunedPortRange))
+
+            # Apply SLPP-Guard config if this was specified 
+            if slppGuard and regSlppRemoveList:
+                sendCLI_configChain(CLI_Dict[Family]['disable_slpp_packet_rx'].format(regSlppRemoveRange))
+            if slppGuard == 'Enable':
+                sendCLI_configChain(CLI_Dict[Family]['port_enable_slpp_guard'].format(prunedPortRange))
+            elif slppGuard == 'Disable':
+                sendCLI_configChain(CLI_Dict[Family]['port_disable_slpp_guard'].format(prunedPortRange))
+
+            # Bring up ports
+            sendCLI_configChain(CLI_Dict[Family]['port_enable'].format(prunedPortRange))
+
+            # Come out of port config context
+            sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
+
+    # End config and save
+    sendCLI_configChain(CLI_Dict[Family]['end_save_config'])
 
     # Print summary of config performed
     printConfigSummary()
 
+    if enteredPortList: # Only if some ports were selected
+        if nniPortsInSelection:
+            print "Information: User selected ports {} were not EPT configured as these ports are NNI ports".format(generatePortRange(nniPortsInSelection))
+        if faPortsInSelection:
+            print "Information: User selected ports {} were not EPT configured as these ports are FA ports".format(generatePortRange(faPortsInSelection))
+        if brouterPortsInSelection:
+            print "Information: User selected ports {} were not EPT configured as these ports are Brouter ports".format(generatePortRange(brouterPortsInSelection))
+    if eptPortMode == 'Enable' and not xmcNtpList: # In case we had to miss out the NTP config, produce warning at the very end
+        print "Warning: It was not possible to obtain NTP server IPs &amp; Time-zone from XMC. Hence NTP was not configured on the VSP switch"
+
 main()
 </content>
-    <creationDate>1562693346974</creationDate>
+    <creationDate>1584546599552</creationDate>
     <creator>lstevens</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1588418416226</lastUpdateDate>
+    <lastUpdateDate>1588416426248</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
