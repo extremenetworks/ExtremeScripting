@@ -2,9 +2,8 @@
 <script name="Delete L2VSN - port context">
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1570091491768</cacheDate>
     <category>,Config,</category>
-    <comments>Delete L2VSN across any of VSP,XOS,ERS - port context - v1.3</comments>
+    <comments>Delete L2VSN across any of VSP,XOS,ERS - port context - v1.5</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -23,7 +22,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
 SCRIPTS.
 '''
 ##########################################################
-# Ludo Standard library; Version 2.7                     #
+# Ludo Standard library; Version 2.11                    #
 # Written by Ludovico Stevens, CSE Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
@@ -61,7 +60,7 @@ from java.util import LinkedHashMap
 #
 RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
 RegexError  = re.compile(
-    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
     re.IGNORECASE
 )
 RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
@@ -84,7 +83,10 @@ LastError = None
 ConfigHistory = []
 RollbackStack = []
 SlotPortRange = None # Gets set to dict by getSlotPortRanges()
-
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series': 'VSP Series',
+}
+Family = None # This needs to get set by setFamily()
 
 #
 # FUNCTIONS:
@@ -92,6 +94,24 @@ SlotPortRange = None # Gets set to dict by getSlotPortRanges()
 def debug(debugOutput): # Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
     if Debug:
         print debugOutput
+
+def setFamily(): # Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if not Family in CLI_Dict:
+        raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+
+def portValue(port): # Function to pass to sorted(key) to sort port lists
+    slotPort = re.split('[/:]', port)
+    if len(slotPort) == 2: # slot/port format
+        idx = int(slotPort[0])*100 + int(slotPort[1])
+    else: # standalone port (no slot)
+        idx = int(slotPort[0])
+    return idx
 
 def cleanOutput(outputStr): # Remove echoed command and final prompt from output
     lastLine = outputStr.splitlines()[-1:][0]
@@ -102,8 +122,9 @@ def cleanOutput(outputStr): # Remove echoed command and final prompt from output
     return '\n'.join(lines)
 
 def configChain(chainStr): # Produces a list of a set of concatenated commands (either with ';' or newlines)
-    chainStr = re.sub(r'\n(\w)(\n|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
     cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
     cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
     return cmdList
 
@@ -113,7 +134,8 @@ def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_
     else:
         mode = None
     cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
-    return mode, cmd, regex
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
 
 def formatOutputData(data, mode): # Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
     if not mode                 : value = data                                   # Legacy behaviour same as list
@@ -136,12 +158,15 @@ def formatOutputData(data, mode): # Formats output data for both sendCLI_showReg
 
 def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
     print "Aborting script due to error on previous command"
+    rollbackStack()
+    print "Aborting because this command failed: {}".format(cmd)
+    raise RuntimeError(errorOutput)
+
+def rollbackStack(): # Execute all commands on the rollback stack
     if RollbackStack:
         print "Applying rollback commands to undo partial config and return device to initial state"
         while RollbackStack:
-            sendCLI_configChain(RollbackStack.pop(), returnCliError=True)
-    print "Aborting because this command failed: {}".format(cmd)
-    raise RuntimeError(errorOutput)
+            sendCLI_configChain(RollbackStack.pop(), True)
 
 def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
     RollbackStack.append(cmd)
@@ -149,6 +174,15 @@ def rollbackCommand(cmd): # Add a command to the rollback stack; these commands 
     cmdList = [x for x in cmdList if x] # Weed out empty elements 
     cmdOneLiner = " / ".join(cmdList)
     print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
+
+def rollBackPop(number=0): # Remove entries from RollbackStack
+    global RollbackStack
+    if number == 0:
+        RollbackStack = []
+        print "Rollback stack emptied"
+    else:
+        del RollbackStack[-number:]
+        print "Rollback stack popped last {} entries".format(number)
 
 def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
     global LastError
@@ -162,9 +196,8 @@ def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CL
                     print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
                 return None
             abortError(cmd, outputStr)
-        else:
-            LastError = None
-            return outputStr
+        LastError = None
+        return outputStr
     else:
         raise RuntimeError(resultObj.getError())
 
@@ -186,56 +219,64 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a 
                     print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
                 return False
             abortError(cmd, outputStr)
-        else:
-            ConfigHistory.append(cmdStore)
-            LastError = None
-            return True
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
     else:
         raise RuntimeError(resultObj.getError())
 
 def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
     cmdList = configChain(chainStr)
     for cmd in cmdList:
-        if len(cmd): # Skip empty lines
-            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
-            if not success:
-                return False
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            return False
     return True
 
 def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
-    cmdList = configChain(chainStr)
-    if emc_vars['family'] != 'VSP Series':
+    if Family != 'VSP Series':
         raise RuntimeError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    cmdList = configChain(chainStr)
     if Sanity:
         for cmd in cmdList:
-            print "SANITY - Appended to config.cfg&gt; {}".format(cmd)
-        ConfigHistory.append(cmd + ' [after reboot]')
+            print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
+        ConfigHistory.append('[after reboot] ' + cmd)
         LastError = None
         return True
     # Edit config.cfg
-    emc_cli.send('edit config.cfg', False) # We get no prompt back..
-    emc_cli.send("?end\nO", False) # Search backwards for last end statement, then edit above it
+    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
     for cmd in cmdList:
-        emc_cli.send(cmd + "\n", False) # Insert each command
-    resultObj = emc_cli.send("\eZZ\n")
+        cmdStream += cmd + "\n"
+    cmdStream += "\x1bZZ" # Escape edit mode and save file
+    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
+    resultObj = emc_cli.send(cmdStream)
     if resultObj.isSuccess():
         outputStr = cleanOutput(resultObj.getOutput())
         if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
             abortError(cmd, outputStr)
         else:
             for cmd in cmdList:
-                ConfigHistory.append(cmd + ' [after reboot]')
+                print "Added to config.cfg: {}".format(cmd)
+                ConfigHistory.append('[after reboot] ' + cmd)
             LastError = None
             return True
     else:
         raise RuntimeError(resultObj.getError())
 
-def sendCLI_showRegex(cmdRegexStr, debugKey=None): # Send show command and extract values from output using regex
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
     # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
     # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
-    mode, cmd, regex = parseRegexInput(cmdRegexStr)
-    outputStr = sendCLI_showCommand(cmd)
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
     data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
     # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
     value = formatOutputData(data, mode)
     if Debug:
@@ -243,7 +284,7 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None): # Send show command and extra
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
     response = emc_nbi.query(jsonQuery)
     if 'errors' in response: # Query response contains errors
         abortError("nbiQuery for {}".format(returnKey), response['errors'][0].message)
@@ -257,6 +298,7 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XM
                     foundKey, foundValue = recursionKeySearch(value)
                     if foundKey:
                         return True, foundValue
+                return [None, None] # If we find nothing
 
         foundKey, returnValue = recursionKeySearch(response)
         if foundKey:
@@ -264,7 +306,8 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XM
                 if debugKey: debug("{} = {}".format(debugKey, returnValue))
                 else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
             return returnValue
-
+        if returnKeyError:
+            return None
         # If requested key not found, raise error
         abortError("nbiQuery for {}".format(returnKey), 'Key "{}" was not found in query response'.format(returnKey))
 
@@ -274,13 +317,26 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XM
         else: debug("nbiQuery response = {}".format(response))
     return response
 
+def nbiMutation(jsonQuery): # Makes a GraphQl mutation query of XMC NBI; returns true on success
+    status = nbiQuery(jsonQuery, "status", "status", True)
+    if status == "SUCCESS":
+        return True
+    else:
+        return False
+
 def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and recover the output
-    mode, cmd, regex = parseRegexInput(cmdRegexStr)
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    cmd = cmdList[0] # We only support single shell command syntax for now
     cmdList = cmd.split(' ')
     if execution == 'dev': # I develop on my Windows laptop...
         cmdList[0] += '.bat'
     debug("xmcLinuxCommand about to execute : {}".format(cmd))
-    outputStr = subprocess.check_output(cmdList)
+    try:
+        outputStr = subprocess.check_output(cmdList)
+    except Exception as e: # Expect OSError
+        print "{}: {}".format(type(e).__name__, str(e))
+        print "Error executing '{}' on XMC shell".format(cmd)
+        return
     data = re.findall(regex, outputStr, re.MULTILINE)
     # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
     value = formatOutputData(data, mode)
@@ -292,10 +348,10 @@ def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and 
 def getSlotPortRanges(): # Populates the SlotPortRange dict
     global SlotPortRange
     slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+)\s+\S+\s+\S+\s+\S+\s+(\d+)'} # Only XOS supported
-    if emc_vars['family'] not in slotCommand:
+    if Family not in slotCommand:
         SlotPortRange = {}
         return
-    SlotPortRange = sendCLI_showRegex(slotCommand[emc_vars['family']])
+    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
     debug("getSlotPortRanges = {}".format(SlotPortRange))
 
 def generatePortList(portStr, debugKey=None): # Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
@@ -344,13 +400,6 @@ def generatePortList(portStr, debugKey=None): # Given a port list/range, validat
             print "Warning: generatePortList skipping unexpected port format: {}".format(port)
 
     # Sort and return the list as a comma separated string
-    def portValue(port): # Function to pass to sorted(key)
-        slotPort = re.split('[/:]', port)
-        if len(slotPort) == 2: # slot/port format
-            idx = int(slotPort[0])*100 + int(slotPort[1])
-        else: # standalone port (no slot)
-            idx = int(slotPort[0])
-        return idx
     portList = sorted(portDict, key=portValue)
 
     if Debug:
@@ -358,7 +407,7 @@ def generatePortList(portStr, debugKey=None): # Given a port list/range, validat
         else: debug("generatePortList OUT = {}".format(portList))
     return portList
 
-def generatePortRange(portList, debugKey=None): # Given an ordered list of ports, generates a compacted port list/range string for use on CLI commands
+def generatePortRange(portList, debugKey=None): # Given a list of ports, generates a compacted port list/range string for use on CLI commands
     # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
     debug("generatePortRange IN = {}".format(portList))
     rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
@@ -368,6 +417,9 @@ def generatePortRange(portList, debugKey=None): # Given an ordered list of ports
     currentSlot = None
     currentPort = None
     rangeLast = None
+
+    # First off, sort the list
+    portList = sorted(portList, key=portValue)
     for port in portList:
         slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
         # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
@@ -375,7 +427,7 @@ def generatePortRange(portList, debugKey=None): # Given an ordered list of ports
             if elementBuild:
                 if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
                     currentPort = slotPort[2]
-                    if rangeMode[emc_vars['family']] == 1:
+                    if rangeMode[Family] == 1:
                         rangeLast = currentPort
                     else: # rangeMode = 2
                         rangeLast = currentSlot + slotPort[1] + currentPort
@@ -439,10 +491,14 @@ def numberToIp(ipNumber): # Method to convert a long number into an IP/Mask dott
 
 def maskToNumber(mask): # Method to convert a mask (dotted decimal or Cidr number) into a long number
     if re.match(r'^\d+$', mask): # Mask as number
-        maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
+        if int(mask) &gt; 0 and int(mask) &lt;= 32:
+            maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
+        else:
+            maskNumber = None
     else:
         maskNumber = ipToNumber(mask)
-    debug("maskNumber = {}".format(hex(maskNumber)))
+    if maskNumber:
+        debug("maskNumber = {}".format(hex(maskNumber)))
     return maskNumber
 
 def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
@@ -481,11 +537,11 @@ def printConfigSummary(): # Print summary of all config commands executed with c
     print "The following configuration was successfully performed on switch:"
     indent = ''
     level = 0
-    if emc_vars['family'] in RegexContextPatterns:
-        maxLevel = len(RegexContextPatterns[emc_vars['family']])
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
     for cmd in ConfigHistory:
-        if emc_vars['family'] in RegexContextPatterns:
-            if RegexContextPatterns[emc_vars['family']][level].match(cmd):
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
                 print "-&gt; {}{}".format(indent, cmd)
                 if level + 1 &lt; maxLevel:
                     level += 1
@@ -529,7 +585,11 @@ except:
 # Delete a L2VSN across any of VOSS, EXOS, BOSS
 # Written by Ludovico Stevens, CSE Extreme Networks
 
-__version__ = '1.3'
+__version__ = '1.5'
+
+# 1.4 - Changed CLI dict 'get_isid_uni_data' so that it can work on VSP8600 also (no CLI grep)
+#     - Updated libraries
+# 1.5 - XOS has changed some CLI commands; modifications to be able to specify 2 or more syntaxes
 
 #
 # XMC Metadata
@@ -637,7 +697,7 @@ CLI_Dict = {
         'get_isid_cvlan'             : 'str://show vlan i-sid||^(\d+)\s+{0}', # Isid
         'clear_cvlan_isid'           : 'no vlan i-sid {0}', # {0} = VLAN id
         'delete_cvlan_uni'           : 'vlan members remove {0} {1}', # {0} = VLAN id; {1} = port-list
-        'get_swithed_uni_data'       : 'show running-config module i-sid | begin "i-sid {}"', # Isid
+        'get_isid_uni_data'          : 'show running-config module i-sid',
         'delete_switched_uni'        : { # {0} = i-sid; {1} = VLAN id; {2} = port-list
             'tag'                    : 'i-sid {0}; no c-vid {1} port {2}; exit',
             'untag'                  : 'i-sid {0}; no untagged-traffic port {2}; exit',
@@ -650,8 +710,8 @@ CLI_Dict = {
         'save_config'                : 'save configuration',
         'check_cvlan_exists'         : 'bool://show vlan||^\S+\s+({0})\s', # VLAN id
         'delete_cvlan'               : 'delete vlan {0}', # {0} = VLAN id
-        'get_cvlan_isid'             : 'str://show vlan {0} fabric attach assignments||^\s+{0}\s+\S+\s+(?:Static|Dynamic)\s+(\d+)', # VLAN id
-        'get_isid_cvlan'             : 'str://show vlan fabric attach assignments||^\s+(\d+)\s+\S+\s+Static\s+{0}', # Isid
+        'get_cvlan_isid'             : 'str://show vlan {0} fabric attach assignments &amp; show fabric attach vlan {0} assignments||^\s+{0}\s+\S+\s+(?:Static|Dynamic)\s+(\d+)', # VLAN id
+        'get_isid_cvlan'             : 'str://show vlan fabric attach assignments &amp; show fabric attach assignments||^\s+(\d+)\s+\S+\s+Static\s+{0}', # Isid
         'clear_cvlan_isid'           : 'configure vlan {0} delete isid {1}', # {0} = VLAN id; {1} = i-sid 
         'delete_cvlan_uni'           : 'configure vlan {0} delete ports {1}', # {0} = VLAN id; {1} = port-list
     },
@@ -674,10 +734,11 @@ CLI_Dict = {
 # Functions:
 #
 def getIsidUniStruct(isid): # Extract all port members of an I-SID
+    # Only supported for family = 'VSP Series'
     # the "show i-sid" command is too fiddly to scrape...
     # the "show interfaces gigabitEthernet i-sid" command does not show I-SIDs with no ports assigned...
     # so we use "show run module i-sid" instead...
-    cliOutput = sendCLI_showCommand(CLI_Dict['VSP Series']['get_swithed_uni_data'].format(isid))
+    cliOutput = sendCLI_showCommand(CLI_Dict[Family]['get_isid_uni_data'].format(isid))
     isidPorts = {}
     foundIsidData = False
     for line in cliOutput.splitlines():
@@ -733,9 +794,7 @@ def getIsidUniStruct(isid): # Extract all port members of an I-SID
             isidPorts['exists'] = True
             foundIsidData = True
             continue
-        elif re.match(r'^i-sid \d+', line): # Next I-SID record, not the one we are extracting, come out
-            break # We come out - should never happen, we should come out above
-        else: # Banner line, skip
+        else: # Other line, skip
             continue
 
     debug("getIsidUniStruct OUT = {}".format(isidPorts))
@@ -744,10 +803,7 @@ def getIsidUniStruct(isid): # Extract all port members of an I-SID
 
 def main():
     print "Delete L2VSN (portContext) version {}".format(__version__)
-
-    family    = emc_vars["family"]
-    if not family in CLI_Dict.keys():
-        raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+    setFamily() # Sets global Family variable
 
     isid      = emc_vars["userInput_isid"].strip()
     delAction = emc_vars['userInput_delAction'][:1]
@@ -788,7 +844,7 @@ def main():
         raise RuntimeError('Invalid VLAN id value {}; needs to be a number not higher than 4059'.format(vlan))
 
     # Disable more paging (generatePortList might issue a CLI command, so do this before)
-    sendCLI_showCommand(CLI_Dict[family]['disable_more_paging'])
+    sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
 
     # Obtain ports in list and range format
     if ports:
@@ -801,13 +857,13 @@ def main():
     debug("portRange = {}".format(portRange))
 
     # Enter privExec, for show commands
-    if 'enable_context' in CLI_Dict[family]:
-        sendCLI_showCommand(CLI_Dict[family]['enable_context'])
+    if 'enable_context' in CLI_Dict[Family]:
+        sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
 
     # Determine what type of I-SID we are going to delete
     isidType = None
-    if 'get_isid_type' in CLI_Dict[family]:
-        isidType = sendCLI_showRegex(CLI_Dict[family]['get_isid_type'].format(isid), 'isidType')
+    if 'get_isid_type' in CLI_Dict[Family]:
+        isidType = sendCLI_showRegex(CLI_Dict[Family]['get_isid_type'].format(isid), 'isidType')
         if not isidType:
             print 'I-SID {} does not exist on device'.format(isid)
             return # Not an error (service is already deleted)
@@ -820,21 +876,21 @@ def main():
     # Pre-checks before entering config mode
     if uni == 'delete_cvlan_uni':
         if vlan:
-            vlanExist = sendCLI_showRegex(CLI_Dict[family]['check_cvlan_exists'].format(vlan), 'vlanExist')
+            vlanExist = sendCLI_showRegex(CLI_Dict[Family]['check_cvlan_exists'].format(vlan), 'vlanExist')
             if not vlanExist:
-                isidVlan = sendCLI_showRegex(CLI_Dict[family]['get_isid_cvlan'].format(isid), 'isidVlan')
+                isidVlan = sendCLI_showRegex(CLI_Dict[Family]['get_isid_cvlan'].format(isid), 'isidVlan')
                 if not isidVlan:
                     print 'I-SID {} does not exist on device'.format(isid)
                     return # Not an error (service is already deleted)
                 else:
                     raise RuntimeError('I-SID {} is assigned to VLAN {} and VLAN {} does not exist on switch'.format(isid, isidVlan, vlan))
-            vlanIsid = sendCLI_showRegex(CLI_Dict[family]['get_cvlan_isid'].format(vlan), 'vlanIsid')
+            vlanIsid = sendCLI_showRegex(CLI_Dict[Family]['get_cvlan_isid'].format(vlan), 'vlanIsid')
             if not vlanIsid:
                 raise RuntimeError('VLAN {} to delete is not assigned to I-SID {}'.format(vlan, isid))
             elif vlanIsid != isid:
                 raise RuntimeError('VLAN {} to delete is assigned to I-SID {} not I-SID {}'.format(vlan, vlanIsid, isid))
         else: # No VLAN was provided, we need to find it based on the I-SID
-            isidVlan = sendCLI_showRegex(CLI_Dict[family]['get_isid_cvlan'].format(isid), 'isidVlan')
+            isidVlan = sendCLI_showRegex(CLI_Dict[Family]['get_isid_cvlan'].format(isid), 'isidVlan')
             if not isidVlan:
                 print 'I-SID {} does not exist on device'.format(isid)
                 return # Not an error (service is already deleted)
@@ -855,42 +911,42 @@ def main():
 
 
     # Enter config mode now
-    if 'config_context' in CLI_Dict[family]:
-        sendCLI_configCommand(CLI_Dict[family]['config_context'])
+    if 'config_context' in CLI_Dict[Family]:
+        sendCLI_configCommand(CLI_Dict[Family]['config_context'])
 
     # CVLAN and Switched-UNI configuration dealt separately
     if uni == 'delete_cvlan_uni':
         if portList and delAction == 'B': # Simply remove ports from VLAN/I-SID
             if vlan:
-                sendCLI_configChain(CLI_Dict[family][uni].format(vlan, portRange))
+                sendCLI_configChain(CLI_Dict[Family][uni].format(vlan, portRange))
             elif isidVlan:
-                sendCLI_configChain(CLI_Dict[family][uni].format(isidVlan, portRange))
+                sendCLI_configChain(CLI_Dict[Family][uni].format(isidVlan, portRange))
         else: # Delete VLAN
             if vlan: # We delete the VLAN (on XOS and VSP, this will delete the I-SID as well)
-                if family == 'ERS Series': # (on ERS, we need to remove the I-SID before deleting the VLAN)
-                    sendCLI_configCommand(CLI_Dict[family]['clear_cvlan_isid'].format(vlan, isid))
-                sendCLI_configCommand(CLI_Dict[family]['delete_cvlan'].format(vlan))
+                if Family == 'ERS Series': # (on ERS, we need to remove the I-SID before deleting the VLAN)
+                    sendCLI_configCommand(CLI_Dict[Family]['clear_cvlan_isid'].format(vlan, isid))
+                sendCLI_configCommand(CLI_Dict[Family]['delete_cvlan'].format(vlan))
             elif isidVlan: # We delete the I-SID assignment of the VLAN (VLAN is not deleted)
-                sendCLI_configCommand(CLI_Dict[family]['clear_cvlan_isid'].format(isidVlan, isid))
+                sendCLI_configCommand(CLI_Dict[Family]['clear_cvlan_isid'].format(isidVlan, isid))
 
     else: # 'delete_switched_uni'
         if portList and delAction == 'B': # Remove ports from Switched-UNI I-SID
             print "Ports to remove from I-SID = {}".format(portsInIsidToRemove)
             for port in portsInIsidToRemove:
                 # Delete any of the selected ports which might happen to have already been configured in same I-SID but different c-vid
-                sendCLI_configChain(CLI_Dict[family][uni][isidPorts[port]['type']].format(isid, isidPorts[port]['vlan'], port))
+                sendCLI_configChain(CLI_Dict[Family][uni][isidPorts[port]['type']].format(isid, isidPorts[port]['vlan'], port))
 
         else:
             if isidPorts: # Delete I-SID
-                sendCLI_configChain(CLI_Dict[family]['delete_switched_isid'].format(isid))
+                sendCLI_configChain(CLI_Dict[Family]['delete_switched_isid'].format(isid))
                 performConfig = True
             else:
                 print "VLAN {} I-SID {} not on switch; nothing to delete".format(vlan, isid)
 
     # End and save config
-    if 'end_config' in CLI_Dict[family]:
-        sendCLI_configCommand(CLI_Dict[family]['end_config'])
-    sendCLI_configCommand(CLI_Dict[family]['save_config'])
+    if 'end_config' in CLI_Dict[Family]:
+        sendCLI_configCommand(CLI_Dict[Family]['end_config'])
+    sendCLI_configCommand(CLI_Dict[Family]['save_config'])
 
     # Print summary of config performed
     printConfigSummary()
@@ -902,17 +958,14 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,Port,</contexts>
-    <id>1183</id>
-    <lastUpdateDate>1570091491711</lastUpdateDate>
+    <lastUpdateDate>1588418303313</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
-    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Delete_L2VSN_-_port_context.xml</metaDataPath>
     <miscXMLData></miscXMLData>
     <nosIds></nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
     <scriptOwner></scriptOwner>
-    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Delete_L2VSN_-_port_context.py</scriptPath>
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>

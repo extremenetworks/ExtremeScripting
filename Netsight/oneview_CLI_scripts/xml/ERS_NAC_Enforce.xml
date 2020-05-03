@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Config,</category>
-    <comments>Enforce XMC NAC switch config to ERS switch - v1.6</comments>
+    <comments>Enforce XMC NAC switch config to ERS switch - v1.7</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -22,7 +22,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
 SCRIPTS.
 '''
 ##########################################################
-# Ludo Standard library; Version 2.10                    #
+# Ludo Standard library; Version 2.14                    #
 # Written by Ludovico Stevens, CSE Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
@@ -134,7 +134,8 @@ def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_
     else:
         mode = None
     cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
-    return mode, cmd, regex
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
 
 def formatOutputData(data, mode): # Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
     if not mode                 : value = data                                   # Legacy behaviour same as list
@@ -265,8 +266,13 @@ def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (befor
 def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
     # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
     # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
-    mode, cmd, regex = parseRegexInput(cmdRegexStr)
-    outputStr = sendCLI_showCommand(cmd, returnCliError, msgOnError)
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
     if not outputStr: # returnCliError true
         return None
     data = re.findall(regex, outputStr, re.MULTILINE)
@@ -281,14 +287,17 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnErr
 def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
     response = emc_nbi.query(jsonQuery)
     if 'errors' in response: # Query response contains errors
-        abortError("nbiQuery for {}".format(returnKey), response['errors'][0].message)
+        if returnKeyError:
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
 
     if returnKey: # If a specific key requested, we find it
         def recursionKeySearch(nestedDict):
             for key, value in nestedDict.iteritems():
                 if key == returnKey:
                     return True, value
-                elif isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+            for key, value in nestedDict.iteritems():
+                if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
                     foundKey, foundValue = recursionKeySearch(value)
                     if foundKey:
                         return True, foundValue
@@ -303,7 +312,7 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes
         if returnKeyError:
             return None
         # If requested key not found, raise error
-        abortError("nbiQuery for {}".format(returnKey), 'Key "{}" was not found in query response'.format(returnKey))
+        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
 
     # Else, return the full response
     if Debug:
@@ -319,7 +328,8 @@ def nbiMutation(jsonQuery): # Makes a GraphQl mutation query of XMC NBI; returns
         return False
 
 def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and recover the output
-    mode, cmd, regex = parseRegexInput(cmdRegexStr)
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    cmd = cmdList[0] # We only support single shell command syntax for now
     cmdList = cmd.split(' ')
     if execution == 'dev': # I develop on my Windows laptop...
         cmdList[0] += '.bat'
@@ -340,7 +350,7 @@ def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and 
 
 def getSlotPortRanges(): # Populates the SlotPortRange dict
     global SlotPortRange
-    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+)\s+\S+\s+\S+\s+\S+\s+(\d+)'} # Only XOS supported
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
     if Family not in slotCommand:
         SlotPortRange = {}
         return
@@ -578,7 +588,7 @@ except:
 ##########################################################
 # Push NAC configuration to ERS switch
 
-__version__ = '1.6'
+__version__ = '1.7'
 
 # 1.0 - Initial
 # 1.1 - Was failing to set auto-non-eap-mhsa-enable on port in MHSA mode
@@ -604,6 +614,7 @@ __version__ = '1.6'
 # 1.6 - As of XMC8.4 Ubuntu is upgraded to 18.04 and the synchronization deamon being used is timesyncd now;
 #       older versions of this script would try to extract the NTP servers from XMC using the "ntpq" Linux
 #       command which is no loger there; updated script to now use chronyc if the XMC version is 8.4 or above
+# 1.7 - Added ability to configure fail-open 
 
 #
 # XMC Metadata
@@ -616,7 +627,13 @@ __version__ = '1.6'
 # When configuring NAC/Policy on ExtremeControl, an Enforce results in a push of the
 # corresponding config to XOS switches. But not for an ERS switch.
 # This script allows the XMC operator to easily configure an ERS switch based on the
-# ExtremeControl NAC configuration:
+# ExtremeControl NAC configuration.
+#
+# WARNING: if you use this script to re-enforce the NAC config to an already operational
+# switch, this script will temporarily disable and re-enable eapol which will result in
+# any already authenticated clients being disconnected and will have to re-authenticate
+# again once the config is re-enforced.
+#
 #  1 - Add the switch under XMC Access Control Engine Group
 #  2 - And, still under XMC Access Control, configure the switch for:
 #      - Primary/Secondary engine
@@ -662,19 +679,27 @@ __version__ = '1.6'
 #      (If it is desired to have NAC disabled on access ports where FA Clients are detected
 #      select the second option; otherwise leave the default option)
 #  9 - Modify the default re-authentication timer if necessary
-# 10 - Optionally select whether to use pap or ms-chap-v2 for MAC based authentication
+# 10 - Optionally specify whether a Fail-Open mode should be enabled.
+#      (Note that continuity mode is not available on some ERS2x00 and 3x00 models)
+# 11 - If a fail-open mode is selected above:
+#      - Leave this field empty  : Fail-open will authorize clients into whatever default VLAN is
+#                                  already configured on the port.
+#                                  (Note this mode not available on some ERS 3x00 models)
+#      - Provide a VLAN-id       : Fail-open will authorize clients into the provided VLAN. The
+#                                  VLAN must already exist on the switch.
+# 12 - Optionally select whether to use pap or ms-chap-v2 for MAC based authentication
 #      (this setting is required only for MAC based authentication (NEAP) and will need
 #      to be consistent with what configured under XMC Access Control AAA configuration;
 #      Note that this is not configurable on some ERS 3x00 models, in which case the switch
 #      will only do pap)
-# 11 - Optionally select the type of RADIUS reachability to use on the ERS (use-icmp or use-radius)
-# 12 - If use-radius was selected above, provide dummy RADIUS username and password
-# 13 - Optionally enable EAPoL allow port mirroring if this will be required
-# 14 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
+# 13 - Optionally select the type of RADIUS reachability to use on the ERS (use-icmp or use-radius)
+# 14 - If use-radius was selected above, provide dummy RADIUS username and password
+# 15 - Optionally enable EAPoL allow port mirroring if this will be required
+# 16 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
 #      running but config commands will not be executed on the switch; useful to see what the script
 #      does without it actually changing any switch settings. Debug can be enabled when/if reporting
 #      problems
-# 15 - Finally, RUN the script
+# 17 - Finally, RUN the script
 #
 # The script will automatically configure all of the following:
 # - Primary and Secondary RADIUS Servers, including shared secret
@@ -703,7 +728,7 @@ __version__ = '1.6'
 # EAP port config dialogue needs to be set (to None) and then the script can be executed;
 # in this case the script will execute even if the ERS switch has already been deleted
 # from the XMC Access Control configuration.
-# This scripts uses the XMC North Bound interface API to extract the Access Control switch
+# This script uses the XMC North Bound interface API to extract the Access Control switch
 # configuration; therefore the XMC user running this script must have authorization rights
 # under "Northbound API / Access Control Northbound Interface Read Access"
 #
@@ -717,6 +742,7 @@ __version__ = '1.6'
 #        description = "EAP port config mode. If simply disabling NAC on selected ports can skip all other inputs below",
 #        type = string,
 #        required = yes,
+#        readOnly = no,
 #        validValues = [None: NAC disabled -&gt; force-authorized, SHSA: Single Host Single Authenticaton, MHMA: Multiple Host Multiple Authentication, MHSA: Multiple Host Single Authentication - AP aware],
 #        name = "userInput_eapPortMode",
 #    )
@@ -724,6 +750,7 @@ __version__ = '1.6'
 #        description = "EAP port authentication",
 #        type = string,
 #        required = yes,
+#        readOnly = no,
 #        validValues = [Both: EAPoL 802.1X and/or MAC/NEAP, 802X: EAPoL 802.1X only, NEAP: MAC/NEAP only],
 #        name = "userInput_eapPortAuth",
 #        value = "Both: EAPoL 802.1X and/or MAC/NEAP"
@@ -732,6 +759,7 @@ __version__ = '1.6'
 #        description = "If enabling NAC\, automatically filter out from port selection these ports",
 #        type = string,
 #        required = yes,
+#        readOnly = no,
 #        validValues = [A: Uplink&amp;#44; MLT and Mirror Monitor ports, B: Uplink&amp;#44; MLT&amp;#44; Mirror Monitor and FA Client ports],
 #        name = "userInput_filterPorts",
 #        value = "A: Uplink&amp;#44; MLT and Mirror Monitor ports"
@@ -740,6 +768,7 @@ __version__ = '1.6'
 #        description = "Re-authentication timer. Default of 3600secs is best for most cases but value can be increased for scaled environments. Configurable range is 60-604800secs",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        name = "userInput_eapReauthTimer",
 #        value = "3600"
 #    )
@@ -747,9 +776,25 @@ __version__ = '1.6'
 
 #@SectionStart (description = "Switch Global EAP options")
 #    @VariableFieldLabel (
+#        description = "Fail-Open mode. If enabled will also be configured on any ports selected",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [disable, fail-open, fail-open continuity],
+#        name = "userInput_failOpenMode",
+#    )
+#    @VariableFieldLabel (
+#        description = "Fail-Open VLAN id. Only applicable if fail-open enabled above. Leave empty to allow users into whatever VLAN is already on the ports. Specify a VLAN id otherwise",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_failOpenVlan",
+#    )
+#    @VariableFieldLabel (
 #        description = "RADIUS encapsulation for MAC based authentication. Must match what configured on XMC. Only pap is supported on ERS3600 and ERS3500",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        validValues = [pap, ms-chap-v2],
 #        name = "userInput_radiusEncap",
 #    )
@@ -757,6 +802,7 @@ __version__ = '1.6'
 #        description = "RADIUS reachability",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        validValues = [use-icmp, use-radius],
 #        name = "userInput_radiusReachability",
 #    )
@@ -764,18 +810,21 @@ __version__ = '1.6'
 #        description = "RADIUS reachability dummy username. Only if use-radius reachability specified above",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        name = "userInput_radiusDummyUser",
 #    )
 #    @VariableFieldLabel (
 #        description = "RADIUS reachability dummy password. Only if use-radius reachability specified above",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        name = "userInput_radiusDummyPwd",
 #    )
 #    @VariableFieldLabel (
 #        description = "EAPoL Allow port mirroring",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        validValues = [enable,disable],
 #        name = "userInput_eapolMirror",
 #    )
@@ -813,6 +862,15 @@ NtpList  = [] #['10.8.255.160', '10.8.255.159'] # Set statically if you cannot u
 TimeZone = [] #['GMT', '+00', '00']             # Set statically if you cannot use NBI to obtain from XMC
 
 NBI_Query = { # GraphQl query used to obtain NAC config for switch with IP = {0}; curlies need to be doubled not to interfere with .format()
+    'nbiAccess': '''
+        {
+          administration {
+            serverInfo {
+              version
+            }
+          }
+        }
+    ''',
     'nacConfig': '''
         {
           accessControl {
@@ -844,12 +902,13 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
         'disable_password_security'  : 'no password security',
         'enable_password_security'   : 'password security',
         'check_ntp_support'          : 'show ntp', # Used to check if NTP is supported; on ERS models which do not support NTP we expect to get an error
-        'list_sntp_servers'          : 'list://show sntp ||server address:\s+([1-9]\d*\.\d+\.\d+\.\d+)',
+        'list_sntp_servers'          : 'list://show sntp ||server address: +([1-9]\d*\.\d+\.\d+\.\d+)',
+        'check_vlan_exists'          : 'bool://show vlan id {0}||^{0}\s', # VLAN id
         'delete_sntp_servers'        : 'no sntp enable; no sntp server primary; no sntp server secondary',
         'create_sntp_server1'        : 'sntp server primary address {}', # IP
         'create_sntp_server2'        : 'sntp server secondary address {}', # IP
         'enable_sntp'                : 'sntp enable; clock source sntp',
-        'get_clock_source'           : 'str://show clock detail ||System Clock Source\s+:\s+(\S+)',
+        'get_clock_source'           : 'str://show clock detail ||System Clock Source +: +(\S+)',
         'list_ntp_servers'           : 'list://show ntp server ||^(\d+\.\d+\.\d+\.\d+)',
         'delete_ntp_server'          : 'no ntp server {}', # IP
         'create_ntp_server'          : 'ntp server {} enable', # IP
@@ -857,21 +916,21 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
         'get_spanning_tree_mode'     : 'str://show spanning-tree mode ||^Current STP Operation Mode: (\w+)',
         'list_no_vlan_ports'         : 'list://show vlan interface vids||^((?:\d\/)?\d+)\s*$',
         'get_fabric_mode'            : 'list://show fa agent ||(?:Fabric Attach Element Type: (Server|Proxy)|Fabric Attach Provision Mode: VLAN \((Standalone)\))',
-        'get_stacking_mode'          : 'str://show sys-info ||^Operation Mode:\s+(Switch|Stack)',
+        'get_stacking_mode'          : 'str://show sys-info ||^Operation Mode: +(Switch|Stack)',
         'list_uplink_ports'          : {
             'Server'                 : 'show isis interface ||^Port: ((?:\d\/)?\d+)',
-            'Proxy'                  : 'show fa elements ||^(\d\/(\d+))\s+Server',
+            'Proxy'                  : 'show fa elements ||^(\d\/(\d+)) +Server',
             'StandaloneProxy'        : 'show fa uplink ||^  Port - ((?:\d\/)?\d+)',
                                        },
         'list_faproxy_ports'         : {
-            'Switch'                 : 'list://show fa elements ||^1\/(\d+)\s+Proxy',
-            'Stack'                  : 'list://show fa elements ||^(\d\/\d+)\s+Proxy',
+            'Switch'                 : 'list://show fa elements ||^1\/(\d+) +Proxy',
+            'Stack'                  : 'list://show fa elements ||^(\d\/\d+) +Proxy',
                                        },
         'list_faclient_ports'        : {
-            'Switch'                 : 'list://show fa elements ||^1\/(\d+)\s+Client',
-            'Stack'                  : 'list://show fa elements ||^(\d\/\d+)\s+Client',
+            'Switch'                 : 'list://show fa elements ||^1\/(\d+) +Client',
+            'Stack'                  : 'list://show fa elements ||^(\d\/\d+) +Client',
                                        },
-        'list_mirror_monitor_ports'  : 'list://show port-mirroring||^Monitor Port:\s+((?:\d\/)?\d+)',
+        'list_mirror_monitor_ports'  : 'list://show port-mirroring||^Monitor Port: +((?:\d\/)?\d+)',
         'list_mlt_ports'             : 'list://show mlt ||^\d[\d ] .{16} ([\d\/,-]+)',
         'set_timezone'               : 'clock time-zone {} {} {}', # Zone, hours-offset, minutes
         'enable_coa_replay_protect'  : 'radius dynamic-server replay-protection',
@@ -922,8 +981,11 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
             'disable'                : 'no eapol allow-port-mirroring',
                                        },
         'config_eapol_mhsa'          : 'eapol multihost auto-non-eap-mhsa-enable',
+        'enable_failopen'            : 'eapol multihost fail-open-vlan enable',
+        'enable_failopen_continuity' : 'eapol multihost fail-open-vlan continuity-mode enable',
+        'config_failopen_vlan'       : 'eapol multihost fail-open-vlan vid {}', # VLAN id
         'port_readd_vlan1'           : 'vlan members add 1 {}', # Port list
-        'port_disable_eap'           : 'default eapol',
+        'port_disable_eap'           : 'default eapol; default eapol multihost fail-open-vlan',
         'port_config_multihost'      : 'eapol multihost enable', # This command may be obsolete on recent ERS models/software
         'port_config_eap_common'     : '''
                                        default eapol multihost
@@ -958,6 +1020,8 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
             'MSTP'                   : 'spanning-tree mstp learning enable; spanning-tree mstp edge-port true',
                                        },
         'port_config_reauth_timer'   : 'eapol re-authentication-period {}', # Value
+        'port_config_failopen_vlan'  : 'eapol multihost fail-open-vlan enable',
+        'port_config_failopen_pvid'  : 'eapol multihost fail-open-vlan enable vid port-pvid',
     },
 }
 
@@ -972,6 +1036,9 @@ Shell_Dict = { # Dictionary of all Linux shell commands used by this script
 #
 def main():
     print "ERS-NAC-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
+    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
+    if nbiAccess == None:
+        raise RuntimeError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
 
     #
     # Obtain Info on switch and from XMC
@@ -991,11 +1058,13 @@ def main():
     eapPortMode = emc_vars['userInput_eapPortMode'][:4]
     eapPortType = emc_vars['userInput_eapPortAuth'][:4]
     portFilteringMode = emc_vars['userInput_filterPorts'][:1]
-    eapPortReauthTimer = emc_vars['userInput_eapReauthTimer']
+    eapPortReauthTimer = emc_vars['userInput_eapReauthTimer'].strip()
+    failOpenMode = emc_vars['userInput_failOpenMode']
+    failOpenVlan = emc_vars['userInput_failOpenVlan'].strip()
     radiusEncap = emc_vars['userInput_radiusEncap']
     radiusReachability = emc_vars['userInput_radiusReachability']
-    radiusDummyUser = emc_vars['userInput_radiusDummyUser']
-    radiusDummyPwd = emc_vars['userInput_radiusDummyPwd']
+    radiusDummyUser = emc_vars['userInput_radiusDummyUser'].strip()
+    radiusDummyPwd = emc_vars['userInput_radiusDummyPwd'].strip()
     eapolMirror = emc_vars['userInput_eapolMirror']
 
     print "Information provided by User:"
@@ -1004,11 +1073,20 @@ def main():
     print " - EAPoL Port Type = {}".format(eapPortType)
     print " - EAPoL Port Filtering mode = {}".format(portFilteringMode)
     print " - EAPoL Re-auth timer = {}".format(eapPortReauthTimer)
+    print " - EAPoL Fail-Open Mode = {}".format(failOpenMode)
+    print " - EAPoL Fail-Open VLAN = {}".format(failOpenVlan)
     print " - RADIUS Encapsulation = {}".format(radiusEncap)
     print " - RADIUS Reachability mode = {}".format(radiusReachability)
     print " - RADIUS Reachability use-radius dummy username = {}".format(radiusDummyUser)
     print " - RADIUS Reachability use-radius dummy password = {}".format(radiusDummyPwd)
     print " - EAPoL Mirroring = {}".format(eapolMirror)
+
+    # Timer validation
+    if eapPortReauthTimer and (not eapPortReauthTimer.isdigit() or int(eapPortReauthTimer) &lt; 60 or int(eapPortReauthTimer) &gt; 604800):
+        raise RuntimeError('Invalid re-authentication timer id value {}; needs to be a number between 60 and 604800'.format(eapPortReauthTimer))
+    # VLAN validation
+    if failOpenVlan and (not failOpenVlan.isdigit() or int(failOpenVlan) &gt; 4095):
+        raise RuntimeError('Invalid Fail-Open VLAN id value {}; needs to be a number not higher than 4059'.format(failOpenVlan))
 
     if eapPortMode != 'None': # All this info won't be needed if we are just going to disable NAC on selcted ports
         ersModel = emc_vars['deviceType'][:5] # Retain 1st 5 characters, eg ERS48,ERS49,ERS59,etc..
@@ -1087,7 +1165,7 @@ def main():
         print " - ERS access ports where to disable NAC = {}".format(enteredNacPortList)
         sendCLI_configCommand(CLI_Dict[Family]['config_context'])
         sendCLI_configCommand(CLI_Dict[Family]['port_config_context'].format(enteredNacPortList))
-        sendCLI_configCommand(CLI_Dict[Family]['port_disable_eap'])
+        sendCLI_configChain(CLI_Dict[Family]['port_disable_eap'])
         sendCLI_configCommand(CLI_Dict[Family]['end_config'])
         printConfigSummary()
         return
@@ -1177,6 +1255,9 @@ def main():
             switchNtpList = []
         switchSntpList = sendCLI_showRegex(CLI_Dict[Family]['list_sntp_servers'], 'switchNtpList')
 
+    if re.match(r'fail-open', failOpenMode) and failOpenVlan:
+        failOpenVlanExists = sendCLI_showRegex(CLI_Dict[Family]['check_vlan_exists'].format(failOpenVlan), 'failOpenVlanExists')
+
     print "Extracted information from ERS switch via CLI:"
     print " - ERS Terminal length which will be restored on exit = {}".format(morePaging)
     print " - ERS Stacking mode = {}".format(stackingMode)
@@ -1200,6 +1281,10 @@ def main():
         if switchNtpSupport:
             print " - Existing NTP Servers = {}".format(', '.join(switchNtpList))
         print " - Existing SNTP Servers = {}".format(', '.join(switchSntpList))
+    if re.match(r'fail-open', failOpenMode) and failOpenVlan:
+        print " - Fail-Open VLAN {} exists = {}".format(failOpenVlan, failOpenVlanExists)
+        if not failOpenVlanExists:
+            raise RuntimeError('Fail-Open VLAN {} does not exist on switch'.format(failOpenVlan))
 
     #
     # Now configure the switch
@@ -1301,7 +1386,15 @@ def main():
     if eapPortMode == 'MHSA':
         sendCLI_configCommand(CLI_Dict[Family]['config_eapol_mhsa'])
 
-    # We should always have NAC ports set; though in theory could be empty if user only selected uplink ports which then got filtered out..
+    # Configure fail-open globally
+    if re.match(r'fail-open', failOpenMode):
+        sendCLI_configCommand(CLI_Dict[Family]['enable_failopen'])
+        if failOpenMode == 'fail-open continuity':
+            sendCLI_configCommand(CLI_Dict[Family]['enable_failopen_continuity'], True, 'fail-open continuity mode not available on this ERS model/software version')
+        if failOpenVlan:
+            sendCLI_configCommand(CLI_Dict[Family]['config_failopen_vlan'].format(failOpenVlan))
+
+    # We might not have NAC ports set; user may not have provided any, or they got filtered out if they were uplinks ports..
     if nacPortList:
         if noVlanPorts: # There might be some of these, in STPG mode; if so we need to re-add VLAN 1 to them or we will get an error when trying to enable faststart on them
             sendCLI_configCommand(CLI_Dict[Family]['port_config_context'].format(noVlanPorts))
@@ -1328,13 +1421,20 @@ def main():
         if eapPortReauthTimer:
             sendCLI_configCommand(CLI_Dict[Family]['port_config_reauth_timer'].format(eapPortReauthTimer))
 
+        # Configure fail-open
+        if re.match(r'fail-open', failOpenMode):
+            if failOpenVlan:
+                sendCLI_configCommand(CLI_Dict[Family]['port_config_failopen_vlan'], True, 'fail-open is only set globally on this ERS model/software version')
+            else:
+                sendCLI_configCommand(CLI_Dict[Family]['port_config_failopen_pvid'], True, 'fail-open is only set globally on this ERS model/software version and thus only uses the globally set fail-open VLAN')
+
         # Configure fast start on the port
         sendCLI_configChain(CLI_Dict[Family]['port_config_faststart'][ersStpMode])
 
         if facPortList: # Come out of port config context only if we have FA Client ports below
             sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
 
-    # In mode B, if we have identified FA Client ports, we go and disable eapol on them, just in case this was had been previously enabled
+    # In mode B, if we have identified FA Client ports, we go and disable eapol on them, just in case this had been previously enabled
     if facPortList:
         sendCLI_configCommand(CLI_Dict[Family]['port_config_context'].format(facPortList))
         sendCLI_configCommand(CLI_Dict[Family]['port_disable_eap'])
@@ -1361,7 +1461,7 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1580657335760</lastUpdateDate>
+    <lastUpdateDate>1588194943846</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-ers-4900-5900,nos-id-ers-4800,nos-id-ers-3600,nos-id-ers-3500,nos-id-boss,</nosIds>
@@ -1372,7 +1472,7 @@ main()
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,CSE,NetSight Administrator,SE,</roles>
+    <roles>,NetSight Administrator,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>
