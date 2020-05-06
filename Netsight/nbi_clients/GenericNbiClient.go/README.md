@@ -1,6 +1,6 @@
 # GenericNbiClient.go
 
-[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
+[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center (XMC; formerly known as NetSight) and prints the raw JSON response to stdout.
 
 ## Dependencies
 
@@ -12,17 +12,17 @@ GenericNbiClient uses the modules [godotenv](https://github.com/joho/godotenv), 
 
 ...before running or compiling GenericNbiClient. All other dependencies are included in a standard Go installation.
 
-## Compiling
+## Running / Compiling
 
 Use `go run GenericNbiClient.go` to run the tool directly or `go build GenericNbiClient.go` to compile a binary. Prebuilt binaries may be available as artifacts from the GitLab CI/CD [pipeline for tagged releases](https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-go/pipelines?scope=tags).
 
-Tested with [go1.13](https://golang.org/doc/go1.13) against XMC 8.4.1.24.
+Tested with [go1.13](https://golang.org/doc/go1.13).
 
 ## Usage
 
 `GenericNbiClient -h`:
 
-<pre>
+```text
 Available options:
   -basicauth
     	Use HTTP Basic Auth instead of OAuth
@@ -48,21 +48,21 @@ Available options:
     	Print version information and exit
 
 All options that take a value can be set via environment variables:
-  XMCHOST       -->  -host
-  XMCPORT       -->  -port
-  XMCPATH       -->  -path
-  XMCTIMEOUT    -->  -timeout
-  XMCNOHTTPS    -->  -nohttps
-  XMCINSECURE   -->  -insecurehttps
-  XMCUSERID     -->  -userid
-  XMCSECRET     -->  -secret
-  XMCBASICAUTH  -->  -basicauth
-  XMCQUERY      -->  -query
+  XMCHOST           -->  -host
+  XMCPORT           -->  -port
+  XMCPATH           -->  -path
+  XMCTIMEOUT        -->  -timeout
+  XMCNOHTTPS        -->  -nohttps
+  XMCINSECUREHTTPS  -->  -insecurehttps
+  XMCUSERID         -->  -userid
+  XMCSECRET         -->  -secret
+  XMCBASICAUTH      -->  -basicauth
+  XMCQUERY          -->  -query
 
 Environment variables can also be configured via a file called .xmcenv,
 located in the current directory or in the home directory of the current
 user.
-</pre>
+```
 
 ## Authentication
 
