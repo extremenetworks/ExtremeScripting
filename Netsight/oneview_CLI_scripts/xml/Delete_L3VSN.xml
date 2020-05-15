@@ -2,9 +2,8 @@
 <script name="Delete L3VSN">
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
-    <cacheDate>1570093699562</cacheDate>
     <category>,Config,</category>
-    <comments>Delete L3VSN across VSP nodes - v1.1</comments>
+    <comments>Delete L3VSN across VSP nodes - v1.2</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -23,7 +22,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
 SCRIPTS.
 '''
 ##########################################################
-# Ludo Standard library; Version 2.8                     #
+# Ludo Standard library; Version 2.12                    #
 # Written by Ludovico Stevens, CSE Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
@@ -61,7 +60,7 @@ from java.util import LinkedHashMap
 #
 RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
 RegexError  = re.compile(
-    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|must be|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
     re.IGNORECASE
 )
 RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
@@ -84,7 +83,10 @@ LastError = None
 ConfigHistory = []
 RollbackStack = []
 SlotPortRange = None # Gets set to dict by getSlotPortRanges()
-
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series': 'VSP Series',
+}
+Family = None # This needs to get set by setFamily()
 
 #
 # FUNCTIONS:
@@ -92,6 +94,24 @@ SlotPortRange = None # Gets set to dict by getSlotPortRanges()
 def debug(debugOutput): # Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
     if Debug:
         print debugOutput
+
+def setFamily(): # Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if not Family in CLI_Dict:
+        raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+
+def portValue(port): # Function to pass to sorted(key) to sort port lists
+    slotPort = re.split('[/:]', port)
+    if len(slotPort) == 2: # slot/port format
+        idx = int(slotPort[0])*100 + int(slotPort[1])
+    else: # standalone port (no slot)
+        idx = int(slotPort[0])
+    return idx
 
 def cleanOutput(outputStr): # Remove echoed command and final prompt from output
     lastLine = outputStr.splitlines()[-1:][0]
@@ -102,8 +122,9 @@ def cleanOutput(outputStr): # Remove echoed command and final prompt from output
     return '\n'.join(lines)
 
 def configChain(chainStr): # Produces a list of a set of concatenated commands (either with ';' or newlines)
-    chainStr = re.sub(r'\n(\w)(\n|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
     cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
     cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
     return cmdList
 
@@ -113,7 +134,8 @@ def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_
     else:
         mode = None
     cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
-    return mode, cmd, regex
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
 
 def formatOutputData(data, mode): # Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
     if not mode                 : value = data                                   # Legacy behaviour same as list
@@ -136,12 +158,15 @@ def formatOutputData(data, mode): # Formats output data for both sendCLI_showReg
 
 def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
     print "Aborting script due to error on previous command"
+    rollbackStack()
+    print "Aborting because this command failed: {}".format(cmd)
+    raise RuntimeError(errorOutput)
+
+def rollbackStack(): # Execute all commands on the rollback stack
     if RollbackStack:
         print "Applying rollback commands to undo partial config and return device to initial state"
         while RollbackStack:
-            sendCLI_configChain(RollbackStack.pop(), returnCliError=True)
-    print "Aborting because this command failed: {}".format(cmd)
-    raise RuntimeError(errorOutput)
+            sendCLI_configChain(RollbackStack.pop(), True)
 
 def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
     RollbackStack.append(cmd)
@@ -149,6 +174,15 @@ def rollbackCommand(cmd): # Add a command to the rollback stack; these commands 
     cmdList = [x for x in cmdList if x] # Weed out empty elements 
     cmdOneLiner = " / ".join(cmdList)
     print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
+
+def rollBackPop(number=0): # Remove entries from RollbackStack
+    global RollbackStack
+    if number == 0:
+        RollbackStack = []
+        print "Rollback stack emptied"
+    else:
+        del RollbackStack[-number:]
+        print "Rollback stack popped last {} entries".format(number)
 
 def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
     global LastError
@@ -162,9 +196,8 @@ def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CL
                     print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
                 return None
             abortError(cmd, outputStr)
-        else:
-            LastError = None
-            return outputStr
+        LastError = None
+        return outputStr
     else:
         raise RuntimeError(resultObj.getError())
 
@@ -186,56 +219,64 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a 
                     print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
                 return False
             abortError(cmd, outputStr)
-        else:
-            ConfigHistory.append(cmdStore)
-            LastError = None
-            return True
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
     else:
         raise RuntimeError(resultObj.getError())
 
 def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
     cmdList = configChain(chainStr)
     for cmd in cmdList:
-        if len(cmd): # Skip empty lines
-            success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
-            if not success:
-                return False
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            return False
     return True
 
 def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
-    cmdList = configChain(chainStr)
-    if emc_vars['family'] != 'VSP Series':
+    if Family != 'VSP Series':
         raise RuntimeError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    cmdList = configChain(chainStr)
     if Sanity:
         for cmd in cmdList:
-            print "SANITY - Appended to config.cfg&gt; {}".format(cmd)
-        ConfigHistory.append(cmd + ' [after reboot]')
+            print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
+        ConfigHistory.append('[after reboot] ' + cmd)
         LastError = None
         return True
     # Edit config.cfg
-    emc_cli.send('edit config.cfg', False) # We get no prompt back..
-    emc_cli.send("?end\nO", False) # Search backwards for last end statement, then edit above it
+    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
     for cmd in cmdList:
-        emc_cli.send(cmd + "\n", False) # Insert each command
-    resultObj = emc_cli.send("\eZZ\n")
+        cmdStream += cmd + "\n"
+    cmdStream += "\x1bZZ" # Escape edit mode and save file
+    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
+    resultObj = emc_cli.send(cmdStream)
     if resultObj.isSuccess():
         outputStr = cleanOutput(resultObj.getOutput())
         if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
             abortError(cmd, outputStr)
         else:
             for cmd in cmdList:
-                ConfigHistory.append(cmd + ' [after reboot]')
+                print "Added to config.cfg: {}".format(cmd)
+                ConfigHistory.append('[after reboot] ' + cmd)
             LastError = None
             return True
     else:
         raise RuntimeError(resultObj.getError())
 
-def sendCLI_showRegex(cmdRegexStr, debugKey=None): # Send show command and extract values from output using regex
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
     # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
     # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
-    mode, cmd, regex = parseRegexInput(cmdRegexStr)
-    outputStr = sendCLI_showCommand(cmd)
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
     data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
     # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
     value = formatOutputData(data, mode)
     if Debug:
@@ -243,10 +284,10 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None): # Send show command and extra
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
     response = emc_nbi.query(jsonQuery)
     if 'errors' in response: # Query response contains errors
-        abortError("nbiQuery for {}".format(returnKey), response['errors'][0].message)
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
 
     if returnKey: # If a specific key requested, we find it
         def recursionKeySearch(nestedDict):
@@ -257,6 +298,7 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XM
                     foundKey, foundValue = recursionKeySearch(value)
                     if foundKey:
                         return True, foundValue
+                return [None, None] # If we find nothing
 
         foundKey, returnValue = recursionKeySearch(response)
         if foundKey:
@@ -264,9 +306,10 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XM
                 if debugKey: debug("{} = {}".format(debugKey, returnValue))
                 else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
             return returnValue
-
+        if returnKeyError:
+            return None
         # If requested key not found, raise error
-        abortError("nbiQuery for {}".format(returnKey), 'Key "{}" was not found in query response'.format(returnKey))
+        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
 
     # Else, return the full response
     if Debug:
@@ -274,13 +317,26 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None): # Makes a GraphQl query of XM
         else: debug("nbiQuery response = {}".format(response))
     return response
 
+def nbiMutation(jsonQuery): # Makes a GraphQl mutation query of XMC NBI; returns true on success
+    status = nbiQuery(jsonQuery, "status", "status", True)
+    if status == "SUCCESS":
+        return True
+    else:
+        return False
+
 def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and recover the output
-    mode, cmd, regex = parseRegexInput(cmdRegexStr)
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    cmd = cmdList[0] # We only support single shell command syntax for now
     cmdList = cmd.split(' ')
     if execution == 'dev': # I develop on my Windows laptop...
         cmdList[0] += '.bat'
     debug("xmcLinuxCommand about to execute : {}".format(cmd))
-    outputStr = subprocess.check_output(cmdList)
+    try:
+        outputStr = subprocess.check_output(cmdList)
+    except Exception as e: # Expect OSError
+        print "{}: {}".format(type(e).__name__, str(e))
+        print "Error executing '{}' on XMC shell".format(cmd)
+        return
     data = re.findall(regex, outputStr, re.MULTILINE)
     # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
     value = formatOutputData(data, mode)
@@ -291,11 +347,11 @@ def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and 
 
 def getSlotPortRanges(): # Populates the SlotPortRange dict
     global SlotPortRange
-    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+)\s+\S+\s+\S+\s+\S+\s+(\d+)'} # Only XOS supported
-    if emc_vars['family'] not in slotCommand:
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
+    if Family not in slotCommand:
         SlotPortRange = {}
         return
-    SlotPortRange = sendCLI_showRegex(slotCommand[emc_vars['family']])
+    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
     debug("getSlotPortRanges = {}".format(SlotPortRange))
 
 def generatePortList(portStr, debugKey=None): # Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
@@ -344,13 +400,6 @@ def generatePortList(portStr, debugKey=None): # Given a port list/range, validat
             print "Warning: generatePortList skipping unexpected port format: {}".format(port)
 
     # Sort and return the list as a comma separated string
-    def portValue(port): # Function to pass to sorted(key)
-        slotPort = re.split('[/:]', port)
-        if len(slotPort) == 2: # slot/port format
-            idx = int(slotPort[0])*100 + int(slotPort[1])
-        else: # standalone port (no slot)
-            idx = int(slotPort[0])
-        return idx
     portList = sorted(portDict, key=portValue)
 
     if Debug:
@@ -358,7 +407,7 @@ def generatePortList(portStr, debugKey=None): # Given a port list/range, validat
         else: debug("generatePortList OUT = {}".format(portList))
     return portList
 
-def generatePortRange(portList, debugKey=None): # Given an ordered list of ports, generates a compacted port list/range string for use on CLI commands
+def generatePortRange(portList, debugKey=None): # Given a list of ports, generates a compacted port list/range string for use on CLI commands
     # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
     debug("generatePortRange IN = {}".format(portList))
     rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
@@ -368,6 +417,9 @@ def generatePortRange(portList, debugKey=None): # Given an ordered list of ports
     currentSlot = None
     currentPort = None
     rangeLast = None
+
+    # First off, sort the list
+    portList = sorted(portList, key=portValue)
     for port in portList:
         slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
         # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
@@ -375,7 +427,7 @@ def generatePortRange(portList, debugKey=None): # Given an ordered list of ports
             if elementBuild:
                 if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
                     currentPort = slotPort[2]
-                    if rangeMode[emc_vars['family']] == 1:
+                    if rangeMode[Family] == 1:
                         rangeLast = currentPort
                     else: # rangeMode = 2
                         rangeLast = currentSlot + slotPort[1] + currentPort
@@ -485,11 +537,11 @@ def printConfigSummary(): # Print summary of all config commands executed with c
     print "The following configuration was successfully performed on switch:"
     indent = ''
     level = 0
-    if emc_vars['family'] in RegexContextPatterns:
-        maxLevel = len(RegexContextPatterns[emc_vars['family']])
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
     for cmd in ConfigHistory:
-        if emc_vars['family'] in RegexContextPatterns:
-            if RegexContextPatterns[emc_vars['family']][level].match(cmd):
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
                 print "-&gt; {}{}".format(indent, cmd)
                 if level + 1 &lt; maxLevel:
                     level += 1
@@ -534,7 +586,11 @@ except:
 # Delete a L3VSN on VOSS
 # Written by Ludovico Stevens, CSE Extreme Networks
 
-__version__ = '1.1'
+__version__ = '1.2'
+
+# 1.2 - Fixed CLI Dict get_l3vsn_vrf_name which was not working on XA1400
+#     - Updated libraries
+
 
 #
 # XMC Metadata
@@ -561,12 +617,14 @@ __version__ = '1.1'
 #        description = "VRF Service Name",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        name = "userInput_vrf_name",
 #    )
 #    @VariableFieldLabel (
 #        description = "L3VSN I-SID &amp;lt;100 - 15999999&amp;gt;",
 #        type = string,
 #        required = no,
+#        readOnly = no,
 #        name = "userInput_vsn_isid",
 #    )
 #@SectionEnd
@@ -617,20 +675,20 @@ __version__ = '1.1'
 #
 
 CLI_Dict = {
-#    'VSP Series': {
+    'VSP Series': {
         'disable_more_paging'        : 'terminal more disable',
         'enable_context'             : 'enable',
         'config_context'             : 'config term',
         'exit_config_context'        : 'exit',
         'end_save_config'            : 'end; save config',
-        'get_l3vsn_vrf_name'         : 'str://show ip ipvpn||VRF Name\s+: (\S+)\n\s+Ipv4 Ipvpn-state\s+: \S+\n\s+Ipv6 Ipvpn-state\s+: \S+\n\s+I-sid\s+: {}', # L3 I-SID
+        'get_l3vsn_vrf_name'         : 'str://show ip ipvpn||^\s+VRF Name\s+: (\S+)\n(?:\s+(?:Ipv[46] )?Ipvpn-state\s+: \w+\n)*\s+I-sid\s+: {}', # L3 I-SID
         'check_vrf_exists'           : 'bool://show ip vrf||^{}\s', # VRF name
         'check_cvlan_exists'         : 'bool://show vlan basic {0}||^({0})\s', # VLAN id
         'get_isid_cvlan'             : 'str://show vlan i-sid||^(\d+)\s+{0}', # Isid
         'list_vrf_vlans'             : 'list://show ip interface vrf {}||^Vlan(\d+)\s', # VRF name
         'delete_vrf'                 : 'no ip vrf {}\ny', # VRF name
         'delete_cvlan'               : 'vlan delete {}', # VLAN id
-#    },
+    },
 }
 
 
@@ -639,10 +697,7 @@ CLI_Dict = {
 #
 def main():
     print "Delete-L3VSN version {}".format(__version__)
-
-    family  = emc_vars['family']
-    if family != 'VSP Series':
-        raise RuntimeError('This scripts only supports VSP Series family type')
+    setFamily() # Sets global Family variable
 
     vrfName = emc_vars['userInput_vrf_name']
     try:
@@ -677,16 +732,16 @@ def main():
         raise RuntimeError('Invalid VLAN id value {}; needs to be a number not higher than 4059'.format(vlanId))
 
     # Disable more paging on device
-    sendCLI_showCommand(CLI_Dict['disable_more_paging'])
+    sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
 
     # Enter privExec
-    sendCLI_configCommand(CLI_Dict['enable_context'])
+    sendCLI_configCommand(CLI_Dict[Family]['enable_context'])
 
     if vsnIsid: # Determine if it already exists
-        isidExists = sendCLI_showRegex(CLI_Dict['get_l3vsn_vrf_name'].format(vsnIsid))
+        isidExists = sendCLI_showRegex(CLI_Dict[Family]['get_l3vsn_vrf_name'].format(vsnIsid))
 
     if vrfName: # Determine if it already exists
-        vrfExists = sendCLI_showRegex(CLI_Dict['check_vrf_exists'].format(vrfName))
+        vrfExists = sendCLI_showRegex(CLI_Dict[Family]['check_vrf_exists'].format(vrfName))
         if vrfExists and vsnIsid and not isidExists:
             raise RuntimeError('Provided VRF name {} is not assigned to L3VSN I-SID {}'.format(vrfName, vsnIsid))
         if vrfExists and vsnIsid and isidExists and vrfName != isidExists:
@@ -704,7 +759,7 @@ def main():
         return # Not an error (service is already deleted)
 
     if not vlanId and vlanIsid:
-        isidVlan = sendCLI_showRegex(CLI_Dict['get_isid_cvlan'].format(vlanIsid))
+        isidVlan = sendCLI_showRegex(CLI_Dict[Family]['get_isid_cvlan'].format(vlanIsid))
         if not isidVlan:
             print 'No VLAN with L2 I-SID {}'.format(vlanIsid)
             return # Not an error (service is already deleted)
@@ -712,33 +767,33 @@ def main():
         debug("vlanId = {}".format(vlanId))
         vlanExist = True
     elif vlanId:
-        vlanExist = sendCLI_showRegex(CLI_Dict['check_cvlan_exists'].format(vlanId))
+        vlanExist = sendCLI_showRegex(CLI_Dict[Family]['check_cvlan_exists'].format(vlanId))
     if vlanId and not vlanExist:
         print 'No VLAN with id {}'.format(vlanId)
         return # Not an error (service is already deleted)
 
     # Get list of VLANs assigned to VRF
-    vrfVlans = sendCLI_showRegex(CLI_Dict['list_vrf_vlans'].format(vrfName))
+    vrfVlans = sendCLI_showRegex(CLI_Dict[Family]['list_vrf_vlans'].format(vrfName))
     if vlanId and vlanId not in vrfVlans:
         raise RuntimeError('VLAN id {} does not belong to VRF {}'.format(vlanId, vrfName))
 
     #
     # Enter config mode
     #
-    sendCLI_configCommand(CLI_Dict['config_context'])
+    sendCLI_configCommand(CLI_Dict[Family]['config_context'])
 
     if vlanId: # Just delete the single VLAN of the VRF
-        sendCLI_configCommand(CLI_Dict['delete_cvlan'].format(vlanId))
+        sendCLI_configCommand(CLI_Dict[Family]['delete_cvlan'].format(vlanId))
 
     else: # Delete all VRF VLANs and the VRF itself
         for vlan in vrfVlans: # Delete these VLANs
-            sendCLI_configCommand(CLI_Dict['delete_cvlan'].format(vlan))
+            sendCLI_configCommand(CLI_Dict[Family]['delete_cvlan'].format(vlan))
 
         # Delete the VRF
-        sendCLI_configCommand(CLI_Dict['delete_vrf'].format(vrfName))
+        sendCLI_configCommand(CLI_Dict[Family]['delete_vrf'].format(vrfName))
 
     # Save config &amp; exit
-    sendCLI_configChain(CLI_Dict['end_save_config'])
+    sendCLI_configChain(CLI_Dict[Family]['end_save_config'])
 
     # Print summary of config performed
     printConfigSummary()
@@ -750,21 +805,18 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <id>1219</id>
-    <lastUpdateDate>1570093699497</lastUpdateDate>
+    <lastUpdateDate>1588418354304</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
-    <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Delete_L3VSN.xml</metaDataPath>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
     <scriptOwner></scriptOwner>
-    <scriptPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Delete_L3VSN.py</scriptPath>
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,NetSight Administrator,CSE,SE,GCE,</roles>
+    <roles>,NetSight Administrator,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>
