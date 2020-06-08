@@ -35,6 +35,7 @@ common to all SLX device classes.
 * [Slx9250_IfIndex.py](build/lib/Slx9250_IfIndex.py) - Provides the SLX9250 class
 * [Slx9540_IfIndex.py](build/lib/Slx9540_IfIndex.py) - Provides the SLX9540 class
 * [Slx9640_IfIndex.py](build/lib/Slx9640_IfIndex.py) - Provides the SLX9640 class
+* [Slx9740_IfIndex.py](build/lib/Slx9740_IfIndex.py) - Provides the SLX9740 class
 * [Slx9850_IfIndex.py](build/lib/Slx9850_IfIndex.py) - Provides the SLX9850 class
 * [SLXRSpeedMap.py](build/lib/SLXRSpeedMap.py) - Instantiates a BitMap with various interface speeds.
 * [SLXSSpeedMap.py](build/lib/SLXSSpeedMap.py) - Instantiates a BitMap with various interface speeds for the SLX 9140 and 9240.
