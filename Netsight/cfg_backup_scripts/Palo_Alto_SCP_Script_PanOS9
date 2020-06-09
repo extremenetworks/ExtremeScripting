@@ -1,5 +1,5 @@
 -- Use these scripts to backup Palo Alto devices. Inspired by Martin Flammia
-name="Palo Alto - SCP - PanOS 8"
+name="Palo Alto - SCP - PanOS 9"
 desc="Palo Alto SCP Scripts"
 protocol=SCP
 --
@@ -16,6 +16,3 @@ yes
 @receive 30
 exit
 -----END SCRIPT-----
------BEGIN SUCCESS "Configuration Upload"-----
-100%
------END SUCCESS-----

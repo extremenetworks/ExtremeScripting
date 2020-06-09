@@ -25,7 +25,8 @@
 |[Juniper EX SCP](juniper_EX-SCP?raw=true)|XMC Configuration backup/restore of Juniper EX over SCP.|
 |[Juniper EX TFTP](juniper_EX-TFTP?raw=true)|XMC Configuration backup/restore of Juniper EX over TFTP.|
 |[Microsens G6](Microsens_G6-TFTP.txt?raw=true)|XMC Configuration backup/restore over TFTP, firmware upgrade & reboot of Microsens G6.|
-|[Palo Alto firewalls](Palo_Alto_SCP_Script?raw=true)|XMC Configuration backup of Palo Alto firewall over SCP.|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script?raw=true)|XMC Configuration backup of Palo Alto firewall over SCP. PanOS 8|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script_PanOS9?raw=true)|XMC Configuration backup of Palo Alto firewall over SCP. PanOS 9|
 |[Ubiquiti EdgeRouter](EdgOS?raw=true)|XMC Configuration backup of Ubiquiti EdgeRouter over TFTP.|
 |[Zyxel switch](Zyxel-TFTP.txt?raw=true)|XMC Configuration backup/restore of Zyxel switch over TFTP. CLI and SNMP credentials are not part of the backup, update the script with your credentials.|
 

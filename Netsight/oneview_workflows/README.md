@@ -16,7 +16,7 @@
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
 |[Uptime and Tech Support](xwf/Uptime_and_Tech_Support-8.4.0.115v87.xwf?raw=true)|Checks the uptime of each device (families: Wireless Controller, VSP, Summit Series, Catalyst, Extreme Access Series, VDX). If the uptime is lower then configured value and the device is not in maintenance then the workflow gathers tech support information and send email.|Add XMC to devices with proper CLI credentials. Configure variables and email destination.|8.4.0.115v87|
-|[Gather Show Support](xwf/Gather_Show_Support-8.4.0.115v27.xwf?raw=true)|Workflow gathers show support information from devices (families: Wireless Controller, VSP, Summit Series, Catalyst, Extreme Access Series, VDX). Workflow should be executed by alarm or with right click on the device. Workflow genearates email with attached tech support.|Configure the email destination. Create Alarm to execute this workflow. Add XMC to the database with CLI credentials or define XMC credentials in variables.|8.4.0.115v27|
+|[Gather Show Support](xwf/Gather_Show_Support-8.4.3.24v29.xwf?raw=true)|Workflow gathers show support information from devices (families: Wireless Controller, VSP, Summit Series, Catalyst, Extreme Access Series, VDX, SLX). Workflow should be executed by alarm or with right click on the device. Workflow genearates email with tech support attached.|Configure the email destination. Create Alarm to execute this workflow. Add XMC to the database with CLI credentials or define XMC credentials in variables.|8.4.3.24v29|
 
 # Extreme Management Center Provisioning Workflows
 | Workflow name | Description | Comment | Version |
