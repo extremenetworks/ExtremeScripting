@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Config,</category>
-    <comments>Enforce XMC NAC and Endpoint-Tracking config to VSP switch - v1.0</comments>
+    <comments>Enforce XMC NAC and Endpoint-Tracking config to VSP switch - v1.1</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -588,7 +588,10 @@ except:
 ##########################################################
 # Push Endpoint-Tracking (EPT) configuration to VSP switch
 
-__version__ = '1.0'
+__version__ = '1.1'
+
+# 1.0 - Initial
+# 1.1 - VOSS 8.2 introduces the Segmented Mgmt Stack; configuration of RADIUS server must no longer specify a source-ip
 
 #
 # XMC Metadata
@@ -824,9 +827,15 @@ CLI_Dict = {
         'create_radius_server'       : # {0} = Radius Server IP, {1} = Radius secret, {2} = Source IP
                                        '''
                                        radius server host {0} key {1} used-by endpoint-tracking source-ip {2}
+                                       radius sourceip-flag
                                        radius dynamic-server client {0} secret {1} enable
                                        ''',
-        'enable_radius'              : 'radius sourceip-flag; radius enable',
+        'create_radius_server_lns'   : # {0} = Radius Server IP, {1} = Radius secret
+                                       '''
+                                       radius server host {0} key {1} used-by endpoint-tracking
+                                       radius dynamic-server client {0} secret {1} enable
+                                       ''',
+        'enable_radius'              : 'radius enable',
         'enable_ept_isid_offset'     : 'endpoint-tracking auto-isid-offset {}; endpoint-tracking auto-isid-offset enable', # I-SID
         'disable_ept_isid_offset'    : 'no endpoint-tracking auto-isid-offset enable; default endpoint-tracking auto-isid-offset',
         'enable_ept_visibility_mode' : 'endpoint-tracking visibility-mode',
@@ -955,6 +964,8 @@ def main():
     # Obtain Info on switch and from XMC
     #
     setFamily() # Sets global Family variable
+    vossSegMgmt = LooseVersion(emc_vars["deviceSoftwareVer"]) &gt;= LooseVersion("8.2")
+    debug("vossSegMgmt = {}".format(vossSegMgmt))
     try:
         enteredPortList = generatePortList(emc_vars['port'])
     except:
@@ -1185,11 +1196,17 @@ def main():
             sendCLI_configChain(CLI_Dict[Family]['delete_radius_client'].format(server), True, "There was no RADIUS dynamic-server client for {}".format(server))
 
         # Configure Primary RADIUS server
-        sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret'], vspIP))
+        if vossSegMgmt:
+            sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret']))
+        else:
+            sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret'], vspIP))
 
         # Configure Secondary RADIUS server, if defined for switch
         if nacConfig['secondaryGateway']:
-            sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret']))
+            if vossSegMgmt:
+                sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret']))
+            else:
+                sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret'], vspIP))
 
         # Enable RADIUS
         sendCLI_configChain(CLI_Dict[Family]['enable_radius'])
@@ -1303,7 +1320,7 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1588416426248</lastUpdateDate>
+    <lastUpdateDate>1594197988469</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
