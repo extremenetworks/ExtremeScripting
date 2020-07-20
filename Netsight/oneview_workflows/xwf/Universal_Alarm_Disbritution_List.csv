@@ -1,0 +1,5 @@
+#Expected format: sysLocation,EmailAddress
+Lab,helpdeskLab@localdomain
+Location A,helpdesk-A@localdomain.local
+Location B,helpdesk-B@localdomain.local;helpdesk@localdomain.local
+Location C,helpdesk-C@localdomain.local

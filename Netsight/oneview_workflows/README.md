@@ -11,6 +11,8 @@
 |[ERS port counters](xwf/ERS_por_counters_report-8.4.2.38v39.xwf?raw=true)|This workflow creates one email with CSV file attached. Ports with defined property above defined threshold are in the list.|Select ERS devices. Define property (e.g. Dropped on no resources), define threshold (e.g. 0), define email address.|8.4.2.38v39|
 |[Open ServiceNow Ticket](xwf/Open_ServiceNow_Ticket-8.4.2.38v3.xwf?raw=true)|This workflow creates ticket in ServiceNow through the API call based on alarm.|Define variables for ServiceNow (Instance, credentials, queue, priority). Create alarm to trigger this worfklow.|8.4.2.38v3|
 |[Aggregated Report Alarm History](xwf/Aggregated_Report_Alarm_History-8.4.3.24v28.xwf?raw=true)|This workflow creates aggregated csv report of alarm history. Columns in CSV file are AlarmName, Source, Subcomponent, Occurence.|The workflow can be executed or scheduled. You can define the aggregation time in seconds in the workflow Input. Define email recipients.|8.4.3.24v28|
+|[Universal Alarm Email List](xwf/Universal_Alarm_Disbritution_List-8.4.4.26v1.xwf?raw=true)|This workflow sends email to recipient based on sysLocation. The translation from sysLocation to email address is defined in CSV file. First column in the CSV file is sysLocation. Second column is EmailAddress.|The workflow must be executed by alarm. You can define the location of the CSV file.|8.4.4.26v1|
+
 
 # Extreme Management Center Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
