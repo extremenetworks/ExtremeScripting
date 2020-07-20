@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Remove redundant IPs">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Provisioning,</category>
+    <comments>Removes all IPs except the one used in XMC</comments>
+    <content>from xmclib import logger
+from xmclib import emc_vars
+import re
+
+######## FUNCTION DEFINITIONS
+def wf_error(log):
+    print 'Error:' +log
+    logger.error(log)
+    
+def wf_info(log):
+    print 'INFO:' +log
+    logger.info(log)
+
+def sendConfigCmds(cmds): 
+    for cmd in cmds:
+        cli_results = emc_cli.send( cmd )
+        if cli_results.isSuccess() is False:
+            print 'CLI-ERROR: ' + cli_results.getError()
+            wf_error("CLI ERROR EXECUTING CLI COMMANDS")
+            status = emc_results.Status;
+            emc_results.setStatus( status.ERROR )
+    cli_lines = cli_results.getOutput()
+    return cli_lines
+
+############# Starting Here
+
+# Check vlans in the switch
+varCMDS = []
+varCMDS.append('disable cli paging')
+varCMDS.append('show vlan')
+varCli_result = sendConfigCmds(varCMDS)
+
+regex = re.compile(r"(.+?) +\d+ +(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
+try:
+    varVlans = regex.findall(varCli_result)
+except:
+    wf_error("Unexpected CLI response from the switch.")
+else:
+    varCMDS = []
+    for varVlan in varVlans:
+        if varVlan[1] != emc_vars["deviceIP"]:
+            varCMDS.append('unconfigure vlan %s ipaddress'%varVlan[0])
+    wf_info ("Now will remove IPs")
+    sendConfigCmds(varCMDS)
+
+#################
+## Be Extreme! ##
+#################</content>
+    <creationDate>1587031756693</creationDate>
+    <creator>root</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Groups,Device,</contexts>
+    <lastUpdateDate>1587031756693</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-exos,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+

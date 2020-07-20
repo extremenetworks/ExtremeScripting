@@ -21,10 +21,12 @@
 |[FortiWLC controller](FortiWLC-FTP.txt?raw=true)|XMC Configuration backup/restore over FTP of FortiWLC / Meru wireless controller. If your FTP server does support chroot then you may need to change %ABSOLUTE_TARGET_FILE_PATH% with %RELATIVE_TARGET_FILE_PATH%.|
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP?raw=true)|XMC Configuration backup/restore & firmware upgrade of Comware 5100.|
 |[HP Aruba Comware](HPE_H3C_Comware_5_Switch.txt?raw=true)|Backup and restore HPE H3C Comware 5.x switches.|
+|[HP Aruba Comware](HPE_H3C_Comware_7_Switch.txt?raw=true)|Backup and restore HPE H3C Comware 7.x switches.|
 |[Juniper EX SCP](juniper_EX-SCP?raw=true)|XMC Configuration backup/restore of Juniper EX over SCP.|
 |[Juniper EX TFTP](juniper_EX-TFTP?raw=true)|XMC Configuration backup/restore of Juniper EX over TFTP.|
 |[Microsens G6](Microsens_G6-TFTP.txt?raw=true)|XMC Configuration backup/restore over TFTP, firmware upgrade & reboot of Microsens G6.|
-|[Palo Alto firewalls](Palo_Alto_SCP_Script?raw=true)|XMC Configuration backup of Palo Alto firewall over SCP.|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script?raw=true)|XMC Configuration backup of Palo Alto firewall over SCP. PanOS 8|
+|[Palo Alto firewalls](Palo_Alto_SCP_Script_PanOS9?raw=true)|XMC Configuration backup of Palo Alto firewall over SCP. PanOS 9|
 |[Ubiquiti EdgeRouter](EdgOS?raw=true)|XMC Configuration backup of Ubiquiti EdgeRouter over TFTP.|
 |[Zyxel switch](Zyxel-TFTP.txt?raw=true)|XMC Configuration backup/restore of Zyxel switch over TFTP. CLI and SNMP credentials are not part of the backup, update the script with your credentials.|
 

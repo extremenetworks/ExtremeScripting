@@ -1,12 +1,18 @@
 # GenericNbiClient.go
 
-[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
+[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center (XMC; formerly known as NetSight) and prints the raw JSON response to stdout.
 
 ## Dependencies
 
-GenericNbiClient uses the [module xmcnbiclient](https://gitlab.com/rbrt-weiler/go-module-xmcnbiclient). This module has to be installed with `go get gitlab.com/rbrt-weiler/go-module-xmcnbiclient` or updated with `go get -u gitlab.com/rbrt-weiler/go-module-xmcnbiclient` before running or compiling GenericNbiClient. All other dependencies are included in a standard Go installation.
+GenericNbiClient uses the modules [godotenv](https://github.com/joho/godotenv), [envordef](https://gitlab.com/rbrt-weiler/go-module-envordef) and [xmcnbiclient](https://gitlab.com/rbrt-weiler/go-module-xmcnbiclient). Execute...
 
-## Compiling
+1. `go get -u github.com/joho/godotenv`
+1. `go get -u gitlab.com/rbrt-weiler/go-module-envordef`
+1. `go get -u gitlab.com/rbrt-weiler/go-module-xmcnbiclient`
+
+...before running or compiling GenericNbiClient. All other dependencies are included in a standard Go installation.
+
+## Running / Compiling
 
 Use `go run GenericNbiClient.go` to run the tool directly or `go build GenericNbiClient.go` to compile a binary. Prebuilt binaries may be available as artifacts from the GitLab CI/CD [pipeline for tagged releases](https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-go/pipelines?scope=tags).
 
@@ -16,49 +22,53 @@ Tested with [go1.13](https://golang.org/doc/go1.13).
 
 `GenericNbiClient -h`:
 
-<pre>
+```text
 Available options:
   -basicauth
-        Use HTTP Basic Auth instead of OAuth
+    	Use HTTP Basic Auth instead of OAuth
   -host string
-        XMC Hostname / IP
+    	XMC Hostname / IP
   -insecurehttps
-        Do not validate HTTPS certificates
+    	Do not validate HTTPS certificates
   -nohttps
-        Use HTTP instead of HTTPS
+    	Use HTTP instead of HTTPS
   -path string
-        Path where XMC is reachable
+    	Path where XMC is reachable
   -port uint
-        HTTP port where XMC is listening (default 8443)
+    	HTTP port where XMC is listening (default 8443)
   -query string
-        GraphQL query to send to XMC (default "query { network { devices { up ip sysName nickName } } }")
+    	GraphQL query to send to XMC (default "query { network { devices { up ip sysName nickName } } }")
   -secret string
-        Client Secret (OAuth) or password (Basic Auth) for authentication
+    	Client Secret (OAuth) or password (Basic Auth) for authentication
   -timeout uint
-        Timeout for HTTP(S) connections (default 5)
+    	Timeout for HTTP(S) connections (default 5)
   -userid string
-        Client ID (OAuth) or username (Basic Auth) for authentication
+    	Client ID (OAuth) or username (Basic Auth) for authentication
   -version
-        Print version information and exit
+    	Print version information and exit
 
 All options that take a value can be set via environment variables:
-  XMCHOST       -->  -host
-  XMCPORT       -->  -port
-  XMCPATH       -->  -path
-  XMCTIMEOUT    -->  -timeout
-  XMCNOHTTPS    -->  -nohttps
-  XMCINSECURE   -->  -insecurehttps
-  XMCUSERID     -->  -userid
-  XMCSECRET     -->  -secret
-  XMCBASICAUTH  -->  -basicauth
-  XMCQUERY      -->  -query
-</pre>
+  XMCHOST           -->  -host
+  XMCPORT           -->  -port
+  XMCPATH           -->  -path
+  XMCTIMEOUT        -->  -timeout
+  XMCNOHTTPS        -->  -nohttps
+  XMCINSECUREHTTPS  -->  -insecurehttps
+  XMCUSERID         -->  -userid
+  XMCSECRET         -->  -secret
+  XMCBASICAUTH      -->  -basicauth
+  XMCQUERY          -->  -query
+
+Environment variables can also be configured via a file called .xmcenv,
+located in the current directory or in the home directory of the current
+user.
+```
 
 ## Authentication
 
 GenericNbiClient supports two methods of authentication: OAuth2 and HTTP Basic Auth.
 
-* OAuth2: To use OAuth2, provide the parameters `userid` and `secret`. GenericNbiClient will attempt to obtain a OAuth2 token from XMC with the supplied credentials and, if successful, submit only that token with each API request as part of the HTTP header.
+* OAuth2: To use OAuth2, provide the parameters `userid` and `secret`. GenericNbiClient will attempt to obtain an OAuth2 token from XMC with the supplied credentials and, if successful, submit only that token with each API request as part of the HTTP header.
 * HTTP Basic Auth: To use HTTP Basic Auth, provide the parameters `userid` and `secret` as well as `basicauth`. GenericNbiClient will transmit the supplied credentials with each API request as part of the HTTP request header.
 
 As all interactions between GenericNbiClient and XMC are secured with HTTPS by default both methods should be safe for transmission over networks. It is strongly recommended to use OAuth2 though. Should the credentials ever be compromised, for example when using them on the CLI on a shared workstation, remediation will be much easier with OAuth2. When using unencrypted HTTP transfer (`nohttps`), Basic Auth should never be used.
@@ -69,7 +79,7 @@ In order to use OAuth2 you will need to create a Client API Access client. To cr
 
 Any user or API client who wants to access the Northbound Interface needs the appropriate access rights. In general, checking the full _Northbound API_ section within rights management will suffice. Depending on the use case, it may be feasible to go into detail and restrict the rights to the bare minimum required.
 
-For regular users (HTTP Basic Auth) the rights are managed via _Authorization Groups_ found in the _Administration_ -> _Users_ tab within XMC. For API clients (OAuth2) the rights are defined when creating an API client and can later be adjusted in the same tab.
+For API clients (OAuth2) the rights are defined when creating an API client and can later be adjusted in the same tab. For regular users (HTTP Basic Auth) the rights are managed via _Authorization Groups_ found in the _Administration_ -> _Users_ tab within XMC.
 
 ## Source
 

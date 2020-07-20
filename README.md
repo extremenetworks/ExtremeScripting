@@ -7,6 +7,8 @@ Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 * [EXOS Switches](EXOS/README.md)
 * [SLXOS Switches](SLXOS/README.md)
 * [XMC (Netsight) Scripts](Netsight/README.md)
+* [ExtremeCloud Appliance (XCA) Scripts](Cloud_Appliance/README.md)
+* [ExtremeCloud IQ (XIQ) Scripts](Cloud_IQ/README.md)
 
 ### Quick links
 
