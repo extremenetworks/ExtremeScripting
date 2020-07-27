@@ -10,8 +10,8 @@
 # Community maintained CLI Scripting Library
 #
 # Script        : Configure RADIUS
-# Revision      : 1.0
-# Last updated  : 17.10.2018
+# Revision      : 1.1
+# Last updated  : 27.07.2020
 # Purpose       : Will enable authentication to the switch
 # Devices	    : VOSS v7.0.0.0
 #
@@ -62,10 +62,12 @@ set var SAVECONFIG "yes"
 IF ($family =="VSP Series" ) THEN
     CLI enable
     CLI configure terminal
+    CLI radius sourceip-flag
 	
     IF ($Radius1 != "") THEN
         puts "### Lets configure primary radius server. ###"
-        CLI radius server host $Radius1 key $SharedSecret source-ip $deviceIP
+        CLI radius server host $Radius1 key $SharedSecret used-by cli source-ip $deviceIP
+        CLI radius server host $Radius1 key $SharedSecret used-by web source-ip $deviceIP
     ENDIF
 
     IF ($Accounting == "Yes") THEN
@@ -74,7 +76,8 @@ IF ($family =="VSP Series" ) THEN
 
     IF ($Radius2 != "") THEN
         puts "### Lets configure secondary radius server. ###"
-        CLI radius server host $Radius2 key $SharedSecret source-ip $deviceIP
+        CLI radius server host $Radius2 key $SharedSecret used-by cli source-ip $deviceIP
+        CLI radius server host $Radius2 key $SharedSecret used-by web source-ip $deviceIP
     ENDIF
     
     IF ($SAVECONFIG == "yes" ) THEN
