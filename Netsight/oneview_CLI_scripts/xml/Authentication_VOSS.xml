@@ -54,36 +54,45 @@ set var SAVECONFIG "yes"
 # @SectionEnd
 # @MetaDataEnd
 
-################################################################################
-#    Here starts the magic
-################################################################################
 
 
 IF ($family =="VSP Series" ) THEN
     CLI enable
     CLI configure terminal
-    CLI radius sourceip-flag
 	
     IF ($Radius1 != "") THEN
-        puts "### Lets configure primary radius server. ###"
-        CLI radius server host $Radius1 key $SharedSecret used-by cli source-ip $deviceIP
-        CLI radius server host $Radius1 key $SharedSecret used-by web source-ip $deviceIP
-    ENDIF
-
-    IF ($Accounting == "Yes") THEN
-        CLI radius accounting enable
+        IF ($SourceIP == "Yes") THEN
+            puts "### Lets configure primary radius server. ###"
+            CLI radius sourceip-flag
+            CLI radius server host $Radius1 key $SharedSecret used-by cli source-ip $deviceIP
+            CLI radius server host $Radius1 key $SharedSecret used-by web source-ip $deviceIP
+        ELSE
+            puts "### Lets configure primary radius server. ###"
+            CLI radius server host $Radius1 key $SharedSecret used-by cli
+            CLI radius server host $Radius1 key $SharedSecret used-by web      
+        ENDIF
     ENDIF
 
     IF ($Radius2 != "") THEN
-        puts "### Lets configure secondary radius server. ###"
-        CLI radius server host $Radius2 key $SharedSecret used-by cli source-ip $deviceIP
-        CLI radius server host $Radius2 key $SharedSecret used-by web source-ip $deviceIP
+        IF ($SourceIP == "Yes") THEN
+            puts "### Lets configure secondary radius server. ###"
+            CLI radius server host $Radius2 key $SharedSecret used-by cli source-ip $deviceIP
+            CLI radius server host $Radius2 key $SharedSecret used-by web source-ip $deviceIP
+        ELSE
+            puts "### Lets configure secondary radius server. ###"
+            CLI radius server host $Radius2 key $SharedSecret used-by cli
+            CLI radius server host $Radius2 key $SharedSecret used-by web      
+        ENDIF
     ENDIF
-	    
+    
     IF ($Radius1 != "") THEN
-	CLI radius enable
+        CLI radius enable
+    ENDIF    
+    
+    IF ($Accounting == "Yes") THEN
+        CLI radius accounting enable
     ENDIF
-	    
+    
     IF ($SAVECONFIG == "yes" ) THEN
       puts "### Lets save the config as was requested. ###"
       CLI save config
