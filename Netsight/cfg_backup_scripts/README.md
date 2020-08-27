@@ -10,6 +10,7 @@
 |[Avaya ERS8xxx](ERS8K-TFTP-BACKUP.txt?raw=true)|XMC Configuration backup and restore of Nortel/Avaya ERS8000 family. Restore works only single CPU platforms.|
 |[Barracuda F-Series](Barracuda-SCP.txt?raw=true)|XMC Configuration backup/restore of Barracuda NG Firewall F-Series.|
 |[Cisco Catalyst](CiscoCatalyst-withRestore-TFTP.txt?raw=true)|XMC Configuration backup/restore for Cisco Catalyst.|
+|[Cisco Catalyst](CiscoSG500-TFTP.txt?raw=true)|XMC Configuration backup for Cisco SG500.|
 |[Cisco Firmware 2xxx TAR](CiscoCatalyst2xxx_firmware_from_tar.txt?raw=true)|XMC Configuration backup and restore and FW upgrade and reset for Cisco Catalyst 2xxx. TAR file not BIN. Can take 30 minutes based on platform. Be patient.|
 |[Cisco Nexus](Cisco-Nexus-TFTP.txt?raw=true)|XMC Configuration backup and restore for Cisco Nexus.|
 |[Cisco Router SCP](Cisco-Router-SCP.txt?raw=true)|XMC config backup+restore, firmware+bootrom download, reset, timed reset, timed reset abort for Cisco Routers. See comments in script for details.|
