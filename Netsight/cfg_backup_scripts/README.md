@@ -23,6 +23,8 @@
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP?raw=true)|XMC Configuration backup/restore & firmware upgrade of Comware 5100.|
 |[HP Aruba Comware](HPE_H3C_Comware_5_Switch.txt?raw=true)|Backup and restore HPE H3C Comware 5.x switches.|
 |[HP Aruba Comware](HPE_H3C_Comware_7_Switch.txt?raw=true)|Backup and restore HPE H3C Comware 7.x switches.|
+|[HP Aruba ArubaOS-CX](Hewlett_Packard_ArubaOS-CX-TFTP-MGMT.txt?raw=true)|Backup and restore HPE ArubaOS-CX through MGMT vrf. Reboot is also supported.|
+|[HP Aruba ArubaOS-CX](Hewlett_Packard_ArubaOS-CX-TFTP-Default.txt?raw=true)|Backup and restore HPE ArubaOS-CX through Default vrf. Reboot is also supported.|
 |[Juniper EX SCP](juniper_EX-SCP?raw=true)|XMC Configuration backup/restore of Juniper EX over SCP.|
 |[Juniper EX TFTP](juniper_EX-TFTP?raw=true)|XMC Configuration backup/restore of Juniper EX over TFTP.|
 |[Microsens G6](Microsens_G6-TFTP.txt?raw=true)|XMC Configuration backup/restore over TFTP, firmware upgrade & reboot of Microsens G6.|
