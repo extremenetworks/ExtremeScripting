@@ -2,9 +2,23 @@
 
 Client applications that utilize the NBI API provided by Extreme Management Center (Netsight).
 
+## How To
+### XMC version 8.4
+* setup the API client access = In the Extreme Management Center -> Administration -> Client API Access -> Add
+
+## generic NBI client examples
 * [GenericNbiClient.go](GenericNbiClient.go/README.md): Application written in Go that can be used to send generic GraphQL queries to a remote XMC instance.
 * [GenericNbiClient.py](GenericNbiClient.py/README.md) (deprecated): Application written in Python that can be used to send generic GraphQL queries to a remote XMC instance.
 * [VlanLister.go](VlanLister.go/README.md): Tool that fetches the port/VLAN associations from XMC and stores the result as CSV and/or XLSX.
+
+# Extreme Management Center version 8.4+ Python class
+## Python 3.5+ scripts
+| Script name   | Description   | Type   |
+| ------------- | ------------- |:------:|
+| [XMC_NBI](Python3/XMC_NBI.py?raw=true)|Python class used by all the other scripts below.|Python class|
+| [get all devices](Python3/get_all_devicese_from_XMC.py?raw=true)| pull all devices managed by XMC.|Python script|
+| [get all MACs](Python3/get-all-MAC-from-XMC.py?raw=true)|pull all MAC addresses hosted by XMC.|Python script|
+| [manage MAC](Python3/manage_MAC_in_XMC.py?raw=true)|get / add update / delete MAC address in Printer End-System-Group.|Python script|
 
 ## Support
 
