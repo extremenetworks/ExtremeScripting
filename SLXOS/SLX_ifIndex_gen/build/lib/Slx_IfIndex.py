@@ -11,6 +11,7 @@ from SLX_PortMapping import PortMapping
 from IfIndex import IfIndex
 from SLX_IfIndex_Core import Slx_IfIndex_Core
 from Slx9850_IfIndex import Slx9850_IfIndex
+from Slx9740_IfIndex import Slx9740_IfIndex
 from Slx9640_IfIndex import Slx9640_IfIndex
 from Slx9540_IfIndex import Slx9540_IfIndex
 from Slx9250_IfIndex import Slx9250_IfIndex
@@ -34,6 +35,7 @@ class Slx_IfIndex(object):
                  tunnel_type='', **kwargs):
         # add new SLX devices and thier classes here.
         self.device_class_map = {'9850': 'Slx9850_IfIndex',
+                                 '9740': 'Slx9740_IfIndex',
                                  '9640': 'Slx9640_IfIndex',
                                  '9540': 'Slx9540_IfIndex',
                                  '9250': 'Slx9250_IfIndex',

@@ -80,27 +80,27 @@ class Slx_IfIndex_Core(object):
         self.sub_port = 0
         if type in ['ethernet', 'e', 'ethe']:
             self.max_port = self.mapping.get_max_interface()
-            valid_speeds = []
+            self.valid_speeds = []
             self.slot = intf_id.split('/')[0]
             self.port = intf_id.split('/')[1]
             port_data = self.mapping.get_interface(self.port)
             if port_data:
-                valid_speeds = port_data.valid_speeds
+                self.valid_speeds = port_data.valid_speeds
             if ':' in intf_id:
                 self.port = intf_id.split('/')[1].split(':')[0]
                 sub_port = intf_id.split('/')[1].split(':')[1]
                 port_data = self.mapping.get_interface(self.port)
                 if port_data:
-                    valid_speeds = port_data.breakout_speeds
+                    self.valid_speeds = port_data.breakout_speeds
                 if int(sub_port) not in range(1, 5):
                     raise ValueError('Sub-interface is out of range (1-4).')
                 if not port_data.breakout:
                     raise TypeError('Interface is not able to do breakout')
                 self.sub_port = sub_port
-            if not valid_speeds:
+            if not self.valid_speeds:
                 raise ValueError('Interface does not have a valid speed, or '
                                  + 'is an invalid interface.')
-            if self.data['speed'] not in valid_speeds:
+            if self.data['speed'] not in self.valid_speeds:
                 raise ValueError('Interface does not '
                                  + 'support the requested speed')
             if int(self.slot) not in range(self.min_slot, self.max_slot + 1):
@@ -156,8 +156,8 @@ class Slx_IfIndex_Core(object):
             # bits: 8..6
             if self.speed_over_ride:
                 max_speed = sorted([int(re.search(r'(\d+)', x).group(1)) for
-                                    x in valid_speeds])[-1]
-                self.data['speed'] = [x for x in valid_speeds
+                                    x in self.valid_speeds])[-1]
+                self.data['speed'] = [x for x in self.valid_speeds
                                       if str(max_speed) in x][0]
             self.bit_map += self.speed_map.map(self.data['speed'])
             self.bit_map += self.bit_mapper(chip_num, 6)  # bits: 5..0

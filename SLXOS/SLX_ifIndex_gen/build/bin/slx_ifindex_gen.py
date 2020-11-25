@@ -17,6 +17,7 @@ from SLX_PortMapping import PortMapping
 from IfIndex import IfIndex
 from SLX_IfIndex_Core import Slx_IfIndex_Core
 from Slx9850_IfIndex import Slx9850_IfIndex
+from Slx9740_IfIndex import Slx9740_IfIndex
 from Slx9640_IfIndex import Slx9640_IfIndex
 from Slx9540_IfIndex import Slx9540_IfIndex
 from Slx9250_IfIndex import Slx9250_IfIndex
@@ -47,7 +48,8 @@ def main():
                         + 'product number. Examples: 9850, 9140',
                         required=True)
     parser.add_argument('--linecard', '-l', default='', type=str,
-                        choices=['72x10G', '36x100G', '48Y', '48XT'],
+                        choices=['72x10G', '36x100G', '48Y', '48XT', '40C',
+                                 '80C'],
                         help='LC type for 9850, or model for 9150 '
                         + 'for physical ports', required=False)
     parser.add_argument('--speed', '-s', default='10g', type=str,
