@@ -1,8 +1,8 @@
 # How To
-## Workflows are available from XMC version 8.1.5 as beta feature. Fully supported in XMC version 8.2 GA
-* Import the sctript = In the Extreme Management Center OneView -> Tasks -> Workflow -> Import...
+## Workflows are available from XMC version 8.1.5 as beta feature. Fully supported since XMC version 8.2 GA and XIQ Site Engine
+* Import the sctript = Open the web GUI -> Tasks -> Workflow -> Import...
 
-# Extreme Management Center Reporting Workflows
+# XIQ Site Engine (XMC) Reporting Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.5.1.60v20.xwf?raw=true)|This workflow creates aggregated report over the time. Instead of 300 emails if 300 devices go down, you will get one email with a list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. You can define the aggregation time in minutes in the workflow Input. Define email recipients.|8.5.1.60v20|
@@ -15,19 +15,20 @@
 |[Report configuration changes by email](xwf/Report_Configuration_Changes-8.5.2.6v10.xwf?raw=true)|This workflow sends an email to the recipient with the configuration changes detected. It compares last two archived configurations.|The workflow can be executed by an [alarm](xwf/Report_Configuration_Changes.png). Define the email recipients.|8.4.4.26v1|
 
 
-# Extreme Management Center Troubleshooting Workflows
+# XIQ Site Engine (XMC) Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
 |[Uptime and Tech Support](xwf/Uptime_and_Tech_Support-8.4.0.115v87.xwf?raw=true)|Checks the uptime of each device (families: Wireless Controller, VSP, Summit Series, Catalyst, Extreme Access Series, VDX). If the uptime is lower then configured value and the device is not in maintenance then the workflow gathers tech support information and send an email.|Add XMC to devices with proper CLI credentials. Configure variables and email destination.|8.4.0.115v87|
 |[Gather Show Support](xwf/Gather_Show_Support-8.4.3.24v29.xwf?raw=true)|Workflow gathers show support information from devices (families: Wireless Controller, VSP, Summit Series, Catalyst, Extreme Access Series, VDX, SLX). The workflow should be executed by alarm or with right-click on the device. Workflow generates an email with tech support attached.|Configure the email destination. Create an Alarm to execute this workflow. Add XMC to the database with CLI credentials or define XMC credentials in variables.|8.4.3.24v29|
 
-# Extreme Management Center Provisioning Workflows
+# XIQ Site Engine (XMC) Provisioning Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
 |[Export Site Structure](xwf/Export_Sites-8.4.1.24v1.xwf?raw=true)|Exports Site structure to the file or email.|Inputs: FileName including full path, the email address is optional.|8.4.1.24v1|
 |[Import Site Structure](xwf/Import_Sites-8.2.5.50v2.xwf?raw=true)|Automatically creates sites and subsites based on input file|Inputs: [File with site names](xwf/Import_Sites_Sites2Create.txt?raw=true). Parent site must exist.|8.2.5.50v2|
 |[Import Devices](xwf/Import_Devices-8.4.4.26v6.xwf?raw=true)|Import devices to the database based on input file|Inputs: [File with devices](xwf/Import_Devices.txt?raw=true). The file contains IP (IPv4/IPv6), Nickname, Site, Profile. The workflow finishes quickly, added devices will start to appear in the XMC sequentially.|8.4.4.26v6|
 |[Import VLANs](xwf/Import_VLANs_to_Site-8.3.0.106v3.xwf?raw=true)|Import VLANs to the Site based on input file|Inputs: [File with VLANs](xwf/Import_VLANs_to_Site.txt?raw=true). The file contains VlanID, VlanName. Chose method ADD (fails if the VLAN exists) or REPLACE (if does not exist then it creates the VLAN). Specify the Site.|8.3.0.106v3|
+|[Import VLANs to Sites](xwf/Import_VLANs_to_Sites-8.5.1.60v47.xwf?raw=true)|Import VLANs to Sites based on input CSV text|Inputs: CSV formated text with SiteName, VlanID, VlanName. Chose action: Check only (generates report), Add non-existing (Adds only non-existing VLANs) or Modify & Add (Renames existing VLANs and Adds non-existing VLANs).|8.5.1.60v47|
 |[Import VRFs and VLANs and Services from VSP](xwf/Import_VLANs_and_Services_from_VSP-8.4.0.107v37.xwf?raw=true)|Workflow reads VRFs, VLANs, L2VSN, L3VSN from VSP, and import it to Service Defintions.|Inputs: Service Application, VSP device, or XA. The Service Definition is determined automatically = VSP must be assigned to the site with Service Definition.|8.4.0.107v37|
 |[Import End-Systems to XCA](xwf/Import_CSV_to_XCA_ES_group-8.3.0.111v4.xwf?raw=true)|This workflow reads the CSV file with MACs and descriptions. The workflow injects the content of the CSV file to the end-system group in Extreme Cloud Appliance through the API. The XCA must be in XMC and must have CLI credentials defined. The end-system group must exist. The maximum number of entries in one run is 100 for XCA version 04.36.02.0014 |Inputs: [File with End-systems](xwf/Import_CSV_to_XCA_ES_group.txt?raw=true). The file contains MAC, description.|8.3.0.111v4|
 |[Import L2VSNs to XMC](xwf/Import_L2VSNs-8.3.1.9v7.xwf?raw=true)|Imports VLANs and L2VSNs from file to XMC Service Definitions and Service Applications. If Service Definition does not exist then it is created. If Service Application does not exist then it is created. If Vlan ID exists then it is updated. If NSI exists then it is updated. The goal is: You do not need to manually create each VLAN and ISID in XMC.|Inputs: [File with Services](xwf/Import_L2VSNs_Services2Create.txt?raw=true)|8.3.1.9v7|
@@ -43,7 +44,7 @@
 |[Clear Nicknames](xwf/Clear_Nicknames-8.5.1.60v6.xwf?raw=true)|Workflow removes Nicknames from all devices in the database except those without sysName (e.g. ICMP monitored). If the Nickname is not present then XMC display actual sysName. |Inputs:Confirm the action.|8.5.1.60v6|
 
 
-# Extreme Management Center daily job Workflows
+# XIQ Site Engine (XMC) daily job Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
 |[Send System Time by Email](xwf/Send_SystemTime_by_Email-8.2.1.56v22.xwf?raw=true)|Gather system time from a group of EXOS devices sequentially and the aggregated result is sent by email.|Configure the email recipients before executing.|8.2.1.56v22|
@@ -60,7 +61,7 @@
 |[Import APs from XIQ](xwf/Process_New_XIQ_Devices-8.5.0.169v158.xwf?raw=true)|This workflow automatically adds APs from Extreme Cloud IQ to XMC and to ExtremeControl.|Update the Bearer Token, client secret, client-id, redirect-uri, and ownerid in the curl_cmd variable to match your developer credentials, bearer token from XIQ, and VIQ ID.|8.5.0.169v158|
 
 
-# Extreme Management Center NAC-related Workflows
+# XIQ Site Engine (XMC) NAC-related Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
 |[Delete end-system from ExtremeControl](xwf/GDPR-Delete_End-System-8.2.4.41v6.xwf?raw=true)|This workflow deletes End-System with specified MAC from the database. Can help with the implementation of GDPR "Right to be forgotten".|Various MAC address formats are accepted: lowercase, uppercase, dot delimited, colon-delimited, dash delimited, not delimited|8.2.4.41v6|
@@ -76,14 +77,14 @@
 
 
 
-# Extreme Management Center Workflow Combinations
+# XIQ Site Engine (XMC) Workflow Combinations
 | Name | Workflows | Description | How To | Version |
 | ---- | --------- | ----------- | ------ | ------- |
 |Add NSI to Vlan Egress = After Policy Enforcement|[Run Add NSI After Policy Enforcement](combo/AddNSIprefix/Run_Add_NSI_After_Policy_Enforcement-8.4.0.107v11.xwf?raw=true), [Add NSI prefix to vlan egress](combo/AddNSIprefix/Add_NSI_prefix_to_vlan_egress-8.3.1.9v35.xwf?raw=true)|There maybe tagged egress vlans in the policy profiles. This workflow ensures these egress vlans are mapped to proper NSI on EXOS switch. This check is executed on each reachable device in the policy domain, when the enforce is completed.|Import both workflows. The "Run Add NSI After Policy Enforcement" should be executable by [Alarm](combo/AddNSIprefix/Alarm.png). Configure the [path](combo/AddNSIprefix/WorkflowPath.png) to the "Add NSI prefix to vlan egress" workflow. [Create Alarm](combo/AddNSIprefix/AlarmDefinition.png) to execute the workflow if the policy domain is enforced. Create [topology](combo/AddNSIprefix/Topology.png) if you do not have any. Create [Service and Application](combo/AddNSIprefix/Applications.png). Assign [Topology](combo/AddNSIprefix/SiteTopology.png) to the Site. Assign [Service](combo/AddNSIprefix/SiteService.png) Definition to the Site.|8.4.0.107v11 8.3.1.9v35|
 |User authenticated on domain computer|[Add MAC to Domain Computers](combo/UserAndComputer/Add_MAC_to_Domain_Computers-8.3.1.9v3.xwf?raw=true), [Clear old End-Systems in the group](combo/UserAndComputer/Clear_old_End-Systems_in_the_group-8.3.1.9v5.xwf?raw=true)|"Add MAC to Domain Computers" is executed when the computer authenticates. The MAC address is added to End-System and the timestamp is created (updated). Consequent User authentication can be combined with the condition of the End-System group. "Clear old End-Systems in the group" checks if the timestamp is older than X hours and old End-Systems are deleted from the group.|Create End-System group "Domain Computers". Create User Group [Username starts with host/](combo/UserAndComputer/UserGroup.PNG). Create notification [Domain authentication - after logoff](combo/UserAndComputer/Notification1.PNG). Create notification [Domain authentication - after boot](combo/UserAndComputer/Notification2.PNG). Configure inputs for workflows. Schedule the workflow execution to clean old end-systems from the End-Systems group. Create [NAC rule](combo/UserAndComputer/Rule.PNG)|8.3.1.9v3 8.3.1.9v5|
 |IGE Governance Regime|[Governance Regime Export](combo/GovernanceEngine/Governance_Regime_Export-8.4.1.23v7.xwf?raw=true), [Governance Regime Import](combo/GovernanceEngine/Governance_Regime_Import-8.4.1.23v4.xwf?raw=true)|Governance Regime can be exported and then imported to other XMC instance. You can share your regime with the community. Professionals can share regimes with their customers.|You may need to modify the InstallDirectory variable. During Export, you need to specify the name of the regime. The regime is exported to the file system InstallDirectory/GovernanceEngine/audit-tests/ as tgz file. The export workflow can email the regime. Transfer the file to the new system. During the import select if imported tests will be marked read-only or editable.|8.4.1.23v7 8.4.1.23v4|
 
-# Extreme Management Center Extreme Fabric Automation Workflows
+# XIQ Site Engine (XMC) Extreme Fabric Automation Workflows
 | Workflow Name | Description | How To | Version |
 | ------------- | ----------- | ------ | ------- |
 |[Day 0 Create Fabric](xwf/EFA_1_Create_Fabric-8.4.4.26v3.xwf?raw=true)|Creates Fabric through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|EFA version 2.2.0, XMC version 8.4|

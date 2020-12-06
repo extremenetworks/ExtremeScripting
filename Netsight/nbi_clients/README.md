@@ -1,17 +1,17 @@
-# Extreme Management Center Northbound Interface Clients
+# XIQ Site Engine & Extreme Management Center Northbound Interface Clients
 
-Client applications that utilize the NBI API provided by Extreme Management Center (Netsight).
+Client applications that utilize the NBI API provided by XIQ Site Engine - XMC - Netsight.
 
 ## How To
-### XMC version 8.4
-* setup the API client access = In the Extreme Management Center -> Administration -> Client API Access -> Add
+### XIQ Site Engine and XMC version 8.4+
+* setup the API client access = Open the web GUI -> Administration -> Client API Access -> Add
 
 ## generic NBI client examples
 * [GenericNbiClient.go](GenericNbiClient.go/README.md): Application written in Go that can be used to send generic GraphQL queries to a remote XMC instance.
 * [GenericNbiClient.py](GenericNbiClient.py/README.md) (deprecated): Application written in Python that can be used to send generic GraphQL queries to a remote XMC instance.
 * [VlanLister.go](VlanLister.go/README.md): Tool that fetches the port/VLAN associations from XMC and stores the result as CSV and/or XLSX.
 
-# Extreme Management Center version 8.4+ Python class
+# XIQ Site Engine & XMC version 8.4+ Python class
 ## Python 3.5+ scripts
 | Script name   | Description   | Type   |
 | ------------- | ------------- |:------:|
