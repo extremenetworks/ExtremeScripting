@@ -1,0 +1,14 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = tab
+indent_size = 4
+tab_width = 4
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+[{*.md,*.txt,*.yml}]
+indent_style = space
+indent_size = 2
