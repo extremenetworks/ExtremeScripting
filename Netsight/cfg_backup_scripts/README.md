@@ -1,6 +1,6 @@
 # Reference Material
 * [TEMPLATE FILE for creating Device Family Definition files](script_template.txt)
-* [How to import this script?](https://gtacknowledge.extremenetworks.com/articles/Q_A/What-directory-do-you-put-custom-device-type-scripts-Inventory-Manger)
+* [How to import this script?](https://extremeportal.force.com/ExtrArticleDetail?an=000091050&q=What-directory-do-you-put-custom-device-type-scripts-Inventory-Manger)
 * [How to chose what script should be used?](https://emc.extremenetworks.com/content/oneview/docs/network/devices/docs/c_ov_at_firmware_mib_config.html)
 
 
