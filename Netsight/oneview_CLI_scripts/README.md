@@ -57,6 +57,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[Automatic Fabric Creation](xml/FC_Config.xml?raw=true)|Select group of switches with the same NNI portlist, specify some basic parameters.|Python|
 | VOSS |[Authentication VOSS](xml/Authentication_VOSS.xml?raw=true)|Configure radius server and accounting for management access.|TCL|
 | VOSS |[VSP EPT Enforce](xml/VSP_EPT_Enforce.xml?raw=true)|This script allows the XMC operator to easily configure a VSP switch for Endpoint-Tracking (EPT) based on the ExtremeControl NAC configuration.|Python|
+| VOSS |[VSP PreUpgrade CleanUp](xml/VOSS_PreUpgrade_CleanUp.xml?raw=true)|Script prepares a VSP or XA1400 for an XMC upgrade, by removing old software versions from the software archive.|Python|
 | Procurve |[Authentication Procurve](xml/Authentication_Procurve.xml?raw=true)|Script will configure Radius and authentication on Procurve devices & ports.|TCL|
 | Linux |[NAC Daemon Commands](xml/NAC_Daemon_Control.xml?raw=true)|Script does stop - start - restart - status the nacctl.|TCL|
 

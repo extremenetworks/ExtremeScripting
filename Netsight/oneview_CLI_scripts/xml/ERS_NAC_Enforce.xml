@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Config,</category>
-    <comments>Enforce XMC NAC switch config to ERS switch - v1.7</comments>
+    <comments>Enforce XMC NAC switch config to ERS switch - v2.0</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -21,9 +21,315 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
 SCRIPTS.
 '''
+
 ##########################################################
-# Ludo Standard library; Version 2.14                    #
+# XMC Script: ERS-NAC-Enforce                            #
 # Written by Ludovico Stevens, CSE Extreme Networks      #
+##########################################################
+# Push NAC configuration to ERS switch
+
+__version__ = '2.0'
+
+# 1.0 - Initial
+# 1.1 - Was failing to set auto-non-eap-mhsa-enable on port in MHSA mode
+#     - Added pull down option to specify port filtering mode and select option to filter FA Client ports
+#     - FA Client ports are not only filtered out from port selection, but are also disabled for eapol
+#     - ERS in FA server mode, now also filters out downlink FA Proxy ports
+#     - More paging is now disabled on ERS; terminal length is recorded upon connection and restored on exit
+# 1.2 - Script was failing if run on XMC with no NTP server configured; now the script will work but if no
+#       NTP server is configured on XMC then no NTP/SNTP configuration will be performed on ERS either
+#     - Script was failing with telnet as it was not executing "enable" upon CLI connection 
+# 1.3 - Some Cleanup; script version printed in output
+# 1.4 - Added ability to specify whether port should allow 802.1X + NEAP or one or the other
+# 1.5 - Script now checks whether the shared secret was not set under switch advanced override and if so fails
+#     - Now will always globally enable NTP/SNTP and set the clock source, even if servers were the right ones
+#     - Mirror Monitor ports are now filtered out from ports where to configure NAC
+#     - In STPG mode, script was failing when trying to enable FastStart on ports which have no VLANs assigned
+#       so now, in STPG mode only, we obtain list of ports with no VLANs and we re-add VLAN 1 to them before
+#       applying the NAC/STP config
+#     - If it was not possible to extract XMC's NTP server configuration (using ntpq on linux shell) script
+#       would bomb out instead of proceeding to configure ERS without NTP/SNTP and CoA Replay protection
+#     - Ability to statically set NTP Servers and time-zone by hard coding NtpList and TimeZone variables in
+#       script below; then the script will not need to use the Linux shell to obtain these from XMC.
+# 1.6 - As of XMC8.4 Ubuntu is upgraded to 18.04 and the synchronization deamon being used is timesyncd now;
+#       older versions of this script would try to extract the NTP servers from XMC using the "ntpq" Linux
+#       command which is no loger there; updated script to now use chronyc if the XMC version is 8.4 or above
+# 1.7 - Added ability to configure fail-open
+# 1.8 - Added ability to set traffic-control and disable/enable FA on the ports (latter commented out in code)
+# 1.9 - With MHSA, mac-max was only set to 2 on ERS4900/5900; but 1 on other ERS models; this was happening
+#       because this script was just defaulting the setting, and expecting all ERS models to have same default..
+#       now mac-max is expressly set to 2 for MHMA mode.
+#     - Added ability to set mac-max to user set value for MHMA mode (instead of default 2)
+#     - Ability to disable FA on ports permanently added, for non-fabric ERS deployments
+# 2.0 - Moved metadata to beginning of script file, as editing the form input values in the XMC Overview tab
+#       would result in the python code before the metadata section having all indentation removed and thus
+#       getting corrupted; fixed in XMC since.
+
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# When configuring NAC/Policy on ExtremeControl, an Enforce results in a push of the
+# corresponding config to XOS switches. But not for an ERS switch.
+# This script allows the XMC operator to easily configure an ERS switch based on the
+# ExtremeControl NAC configuration.
+#
+# WARNING: if you use this script to re-enforce the NAC config to an already operational
+# switch, this script will temporarily disable and re-enable eapol which will result in
+# any already authenticated clients being disconnected and will have to re-authenticate
+# again once the config is re-enforced.
+#
+#  1 - Add the switch under XMC Access Control Engine Group
+#  2 - And, still under XMC Access Control, configure the switch for:
+#      - Primary/Secondary engine
+#      - Authentication Access type (Manual RADIUS Configuration)
+#      - RADIUS Attributes to Send (Fabric Attach attributes)
+#      - RADIUS accounting (enabled or disabled)
+#      - Advanced settings / Override RADIUS shared secret key
+#        Note that this script can currently only work if the shared secret is set under
+#        switch advanced settings, override RADIUS; if the shared secret is set under the
+#        engine settings, currently it is not possible for this script to access that
+#        info via NBI
+#        (Note that on ERS devices this is limited to 16 characters max)
+#      - Advanced settings / Reauthentication behaviour (for ERS select "RFC3576-Brocade ICX")
+#  3 - Perform an Access Control Engine Enforce on XMC
+#  4 - Run this script against the ERS switch (or multiple ERS switches simultaneously)
+#  5 - Select the access ports which will be configured for 802.1X EAP/NEAP
+#      (If you wish to apply the config to all access ports, simply select ALL ports;
+#      this script is intelligent enough to infer the ERS uplinks ports and will remove
+#      them from the port selection anyway; in the case of an ERS FA Server, downlink
+#      FA Proxy ports are also removed; MLT member ports will always be removed
+#      and never configured for NAC whether they are seen as uplink ports or not;
+#      finally if any ports are configured as mirror-monitor ports, these will also be
+#      filtered out as it is not possible to configure NAC on them without deleting the
+#      port mirroring instance)
+#  6 - Select the desired EAP port configuration:
+#      - None: NAC disabled -&gt; force-authorized
+#              (The eapol config on the port is reset to defaults;
+#              if this option is selected then simply skip to step 14 directly)
+#      - SHSA: Single Host Single Authenticaton
+#              (This is achieved be setting mac-max to 1 on the port;
+#              if MHSA was enabled on the port it is removed)
+#      - MHMA: Multiple Host Multiple Authentication
+#              (Mac-max is defaulted back to its default value 2;
+#              if MHSA was enabled on the port it is removed)
+#      - MHSA: Multiple Host Single Authentication - AP aware
+#              (mhsa is globally enabled and
+#              mhsa-no-limit is enabled on the port)
+#  7 - Select the authentication types to allow on the port:
+#      - Both: 802.1X EAPoL and/or MAC/NEAP will be allowed
+#      - 802X: Only 802.1X EAPoL will be allowed
+#      - NEAP: Only MAC/NEAP will be allowed
+#  8 - Verify the desired port filtering of the port selection already made
+#      (If it is desired to have NAC disabled on access ports where FA Clients are detected
+#      select the second option; otherwise leave the default option)
+#  9 - Modify the default re-authentication timer if necessary
+# 10 - If MHMA was selected above, the number of clients per port (mac-max) can be set here.
+#      The default value for MHMA is 2; all of mac-max, eap-mac-max and non-eap-mac-max are set
+#      to the same value
+# 11 - Set desired eapol traffic-control, or leave empty to keep current setting
+# 12 - Ability to disable FA on the ports; if the ERS is fabric enabled (SPB, FA Proxy or Standalone
+#      Proxy) always leave this option enabled. Note that if you disable FA on the ports then the
+#      FA RADIUS attributes will no longer work.
+# 13 - Optionally specify whether a Fail-Open mode should be enabled.
+#      (Note that continuity mode is not available on some ERS2x00 and 3x00 models)
+# 14 - If a fail-open mode is selected above:
+#      - Leave this field empty  : Fail-open will authorize clients into whatever default VLAN is
+#                                  already configured on the port.
+#                                  (Note this mode not available on some ERS 3x00 models)
+#      - Provide a VLAN-id       : Fail-open will authorize clients into the provided VLAN. The
+#                                  VLAN must already exist on the switch.
+# 15 - Optionally select whether to use pap or ms-chap-v2 for MAC based authentication
+#      (this setting is required only for MAC based authentication (NEAP) and will need
+#      to be consistent with what configured under XMC Access Control AAA configuration;
+#      Note that this is not configurable on some ERS 3x00 models, in which case the switch
+#      will only do pap)
+# 16 - Optionally select the type of RADIUS reachability to use on the ERS (use-icmp or use-radius)
+# 17 - If use-radius was selected above, provide dummy RADIUS username and password
+# 18 - Optionally enable EAPoL allow port mirroring if this will be required
+# 19 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
+#      running but config commands will not be executed on the switch; useful to see what the script
+#      does without it actually changing any switch settings. Debug can be enabled when/if reporting
+#      problems
+# 20 - Finally, RUN the script
+#
+# The script will automatically configure all of the following:
+# - Primary and Secondary RADIUS Servers, including shared secret
+# - RADIUS accounting, if enabled in XMC switch config
+# - RADIUS dynamic-client (RFC3576 Change-of-Authorization)
+# - NTP or SNTP configuration to match that of the XMC Server, including the right timezone
+#   (RFC3576 Change-of-Authorization requires the switch and server to have the same time)
+#   Note: if XMC has no NTP server configured, then no NTP/SNTP config will be applied to the
+#   ERS and in this case RADIUS CoA replay-protection will be disabled, otherwise CoA won't work
+#   If the script is unable to extract NTP server and time-zone from XMC then it is possible to
+#   hard code the desired values in the NtpList and TimeZone global variables of this script.
+# - RADIUS reachability, if specified by user
+# - EAPoL global and port level configuration
+# - If the port selection included FA Client ports and these are to be filtered out,
+#   these ports will have EAPoL expressly disabled on them
+# - Fabric Attach is always enabled on the ports
+# - Spanning Tree FastStart or Edge configuration is always set on the ports
+#
+# This script can be run multiple times against the same ERS, either to change the
+# configuration or enable NAC on different access ports or indeed to subsequently
+# disable NAC on certain ports.
+# If simply running the script a second time to change the port NAC config, simply
+# set the desired EAP port config mode and execute the script (no need to populate the
+# other dialogues if those config options have already been set).
+# In particular, if running the script to disable NAC on some ports then only the first
+# EAP port config dialogue needs to be set (to None) and then the script can be executed;
+# in this case the script will execute even if the ERS switch has already been deleted
+# from the XMC Access Control configuration.
+# This script uses the XMC North Bound interface API to extract the Access Control switch
+# configuration; therefore the XMC user running this script must have authorization rights
+# under "Northbound API / Access Control Northbound Interface Read Access"
+#
+# Limitations: This script will only work on XMC Linux based VM installations.
+#              Running this script on a Windows based XMC installation will fail.
+#######################################################################################
+#@DetailDescriptionEnd
+
+#@SectionStart (description = "Switch EAP port configuration")
+#    @VariableFieldLabel (
+#        description = "EAP port config mode. If simply disabling NAC on selected ports can skip all other inputs below",
+#        type = string,
+#        required = yes,
+#        readOnly = no,
+#        validValues = [None: NAC disabled -&gt; force-authorized, SHSA: Single Host Single Authenticaton, MHMA: Multiple Host Multiple Authentication, MHSA: Multiple Host Single Authentication - AP aware],
+#        name = "userInput_eapPortMode",
+#    )
+#    @VariableFieldLabel (
+#        description = "EAP port authentication",
+#        type = string,
+#        required = yes,
+#        readOnly = no,
+#        validValues = [Both: EAPoL 802.1X and/or MAC/NEAP, 802X: EAPoL 802.1X only, NEAP: MAC/NEAP only],
+#        name = "userInput_eapPortAuth",
+#        value = "Both: EAPoL 802.1X and/or MAC/NEAP"
+#    )
+#    @VariableFieldLabel (
+#        description = "If enabling NAC\, automatically filter out from port selection these ports",
+#        type = string,
+#        required = yes,
+#        readOnly = no,
+#        validValues = [A: Uplink&amp;#44; MLT and Mirror Monitor ports, B: Uplink&amp;#44; MLT&amp;#44; Mirror Monitor and FA Client ports],
+#        name = "userInput_filterPorts",
+#        value = "A: Uplink&amp;#44; MLT and Mirror Monitor ports"
+#    )
+#    @VariableFieldLabel (
+#        description = "Re-authentication timer. Default of 3600secs is best for most cases but value can be increased for scaled environments. Configurable range is 60-604800secs",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_eapReauthTimer",
+#        value = "3600"
+#    )
+#    @VariableFieldLabel (
+#        description = "MHMA maximum allowed clients per port. Only applicable if MHMA selected above. If left empty MHMA will automatically set mac-max to 2",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_eapMacMax",
+#        value = "2"
+#    )
+#    @VariableFieldLabel (
+#        description = "Traffic-Control. Set to 'in' for Wake-on-LAN ports",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [in-out, in],
+#        name = "userInput_eapTrafCtrl",
+#    )
+#    @VariableFieldLabel (
+#        description = "Port level Fabric Attach. Note that the FA RADIUS attributes will no longer work if FA is disabled on the ERS NAC ports. Only disable this if the ERS is not fabric enabled",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [enable,disable],
+#        name = "userInput_portFa",
+#        value = "enable"
+#    )
+#@SectionEnd
+
+#@SectionStart (description = "Switch Global EAP options")
+#    @VariableFieldLabel (
+#        description = "Fail-Open mode. If enabled will also be configured on any ports selected",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [disable, fail-open, fail-open continuity],
+#        name = "userInput_failOpenMode",
+#    )
+#    @VariableFieldLabel (
+#        description = "Fail-Open VLAN id. Only applicable if fail-open enabled above. Leave empty to allow users into whatever VLAN is already on the ports. Specify a VLAN id otherwise",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_failOpenVlan",
+#    )
+#    @VariableFieldLabel (
+#        description = "RADIUS encapsulation for MAC based authentication. Must match what configured on XMC. Only pap is supported on ERS3600 and ERS3500",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [pap, ms-chap-v2],
+#        name = "userInput_radiusEncap",
+#    )
+#    @VariableFieldLabel (
+#        description = "RADIUS reachability",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [use-icmp, use-radius],
+#        name = "userInput_radiusReachability",
+#    )
+#    @VariableFieldLabel (
+#        description = "RADIUS reachability dummy username. Only if use-radius reachability specified above",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_radiusDummyUser",
+#    )
+#    @VariableFieldLabel (
+#        description = "RADIUS reachability dummy password. Only if use-radius reachability specified above",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_radiusDummyPwd",
+#    )
+#    @VariableFieldLabel (
+#        description = "EAPoL Allow port mirroring",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [enable,disable],
+#        name = "userInput_eapolMirror",
+#    )
+#@SectionEnd
+
+#@SectionStart (description = "Sanity / Debug")
+#    @VariableFieldLabel (
+#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_sanity",
+#    )
+#    @VariableFieldLabel (
+#        description = "Debug: enable if you need to report a problem to the script author",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_debug",
+#    )
+#@SectionEnd
+#@MetaDataEnd
+'''
+
+##########################################################
+# Ludo Standard library; Version 3.00                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
 Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
@@ -33,7 +339,7 @@ try:
     emc_vars
     execution = 'xmc'
 except: # If not running on XMC Jython...
-    # These lines only needed to run XMC Python script locally
+    # These lines only needed to run XMC Python script locally (on my laptop)
     # They can also be pasted to XMC, but will not execute
     import sys
     import json
@@ -52,8 +358,10 @@ except: # If not running on XMC Jython...
 # IMPORTS:
 #
 import re
-import subprocess
-from java.util import LinkedHashMap
+import os                           # Used by warpBuffer_execute
+import subprocess                   # Used by xmcLinuxCommand
+from java.util import LinkedHashMap # Used by nbiQuery
+import socket                       # Used by addXmcSyslogEvent
 
 #
 # VARIABLES:
@@ -82,9 +390,12 @@ Indent = 3 # Number of space characters for each indentation
 LastError = None
 ConfigHistory = []
 RollbackStack = []
+WarpBuffer = []
 SlotPortRange = None # Gets set to dict by getSlotPortRanges()
 FamilyChildren = { # Children will be rolled into parent family for these scripts
-    'Extreme Access Series': 'VSP Series',
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
 }
 Family = None # This needs to get set by setFamily()
 
@@ -95,6 +406,15 @@ def debug(debugOutput): # Use function to include debugging in script; set above
     if Debug:
         print debugOutput
 
+def scriptName(): # Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
 def setFamily(): # Set global Family variable; automatically handles family children, as far as this script is concerned
     global Family
     if emc_vars["family"] in FamilyChildren:
@@ -102,7 +422,7 @@ def setFamily(): # Set global Family variable; automatically handles family chil
     else:
         Family = emc_vars["family"]
     print "Using family type '{}' for this script".format(Family)
-    if not Family in CLI_Dict:
+    if Family not in CLI_Dict:
         raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
 
 def portValue(port): # Function to pass to sorted(key) to sort port lists
@@ -129,6 +449,7 @@ def configChain(chainStr): # Produces a list of a set of concatenated commands (
     return cmdList
 
 def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
     if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
         mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
     else:
@@ -156,17 +477,17 @@ def formatOutputData(data, mode): # Formats output data for both sendCLI_showReg
         RuntimeError("sendCLI_showRegex: invalid scheme type '{}'".format(mode))
     return value
 
-def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
-    print "Aborting script due to error on previous command"
-    rollbackStack()
-    print "Aborting because this command failed: {}".format(cmd)
-    raise RuntimeError(errorOutput)
-
 def rollbackStack(): # Execute all commands on the rollback stack
     if RollbackStack:
         print "Applying rollback commands to undo partial config and return device to initial state"
         while RollbackStack:
             sendCLI_configChain(RollbackStack.pop(), True)
+
+def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    rollbackStack()
+    print "Aborting because this command failed: {}".format(cmd)
+    raise RuntimeError(errorOutput)
 
 def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
     RollbackStack.append(cmd)
@@ -240,7 +561,7 @@ def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (befor
     if Sanity:
         for cmd in cmdList:
             print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
-        ConfigHistory.append('[after reboot] ' + cmd)
+            ConfigHistory.append('[after reboot] ' + cmd)
         LastError = None
         return True
     # Edit config.cfg
@@ -263,8 +584,95 @@ def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (befor
     else:
         raise RuntimeError(resultObj.getError())
 
+def warpBuffer_add(chainStr): # Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
+    global WarpBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        WarpBuffer.append(cmdAdd)
+
+def warpBuffer_execute(chainStr, returnCliError=False, msgOnError=None): # Appends to existing WarpBuffer and then executes it
+    # Same as sendCLI_configChain() but all commands are placed in a script file on the switch and then sourced there
+    # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
+    # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
+    global WarpBuffer
+    xmcTftpRoot = '/tftpboot'
+    xmcServerIP = emc_vars["serverIP"]
+    switchIP = emc_vars["deviceIP"]
+    userName = emc_vars["userName"]
+    tftpCheck = {
+        'VSP Series':    'bool://show boot config flags||^flags tftpd true',
+        'Summit Series': 'bool://show process tftpd||Ready',
+        'ERS Series':    True, # Always enabled
+    }
+    tftpActivate = {
+        'VSP Series':    'boot config flags tftpd',
+        'Summit Series': 'start process tftpd',
+    }
+    tftpDeactivate = {
+        'VSP Series':    'no boot config flags tftpd',
+        'Summit Series': 'terminate process tftpd graceful',
+    }
+    tftpExecute = { # XMC server IP (TFTP server), Script file to fetch and execute
+        'VSP Series':    'copy {0}:{1} /intflash/.script.src; source .script.src debug',
+        'Summit Series': 'tftp get {0} {1} .script.xsf; run script .script.xsf',
+        'ERS Series':    'configure network address {0} filename {1}',
+    }
+
+    warpBuffer_add(chainStr)
+    if Family not in tftpCheck:
+        raise RuntimeError('Sourcing commands via TFTP only supported in family types: {}'.format(", ".join(list(tftpCheck.keys()))))
+
+    # Determine whether switch can do TFTP
+    if tftpCheck[Family] == True:
+        tftpEnabled = True
+    else:
+        tftpEnabled = sendCLI_showRegex(tftpCheck[Family])
+    if not tftpEnabled:
+        if Sanity:
+            print "SANITY&gt; {}".format(tftpActivate[Family])
+        else:
+            sendCLI_configCommand(tftpActivate[Family]) # Activate TFTP now
+        warpBuffer_add(tftpDeactivate[Family])      # Restore TFTP state on completion
+
+    if Sanity:
+        for cmd in WarpBuffer:
+            print "SANITY(warp)&gt; {}".format(cmd)
+            ConfigHistory.append(cmd)
+        LastError = None
+        return True
+
+    # Write the commands to a file under XMC's TFTP root directory
+    tftpFileName = userName + '.' + scriptName() + '.' + switchIP.replace('.', '_')
+    tftpFilePath = xmcTftpRoot + '/' + tftpFileName
+    try:
+        with open(tftpFilePath, 'w') as f:
+            if Family == 'VSP Series': # Always add these 2 lines, as VSP source command does not inherit current context
+                f.write("enable\n")
+                f.write("config term\n")
+            for cmd in WarpBuffer:
+                f.write(cmd + "\n")
+            f.write("\n") # Make sure we have an empty line at the end, or VSP sourcing won't process last line...
+            debug("warpBuffer - write of TFTP config file : {}".format(tftpFilePath))
+    except Exception as e: # Expect IOError
+        print "{}: {}".format(type(e).__name__, str(e))
+        raise RuntimeError("Unable to write to TFTP file '{}'".format(tftpFilePath))
+
+    # Make the switch fetch the file and execute it
+    success = sendCLI_configChain(tftpExecute[Family].format(xmcServerIP, tftpFileName))
+    # Clean up by deleting the file from XMC TFTP directory
+    os.remove(tftpFilePath)
+    debug("warpBuffer - delete of TFTP config file : {}".format(tftpFilePath))
+
+    if not success: # In this case some commands might have executed, before the error; these won't be captured in ConfigHistory
+        WarpBuffer = []
+        return False
+    ConfigHistory.extend(WarpBuffer)
+    WarpBuffer = []
+    LastError = None
+    return True
+
 def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
-    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
     # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
     mode, cmdList, regex = parseRegexInput(cmdRegexStr)
     for cmd in cmdList:
@@ -537,6 +945,9 @@ def ipGateway(ip, mask, gw): # Return the gateway IP address, as first or last I
 
 def printConfigSummary(): # Print summary of all config commands executed with context indentation
     emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
     print "The following configuration was successfully performed on switch:"
     indent = ''
     level = 0
@@ -555,6 +966,17 @@ def printConfigSummary(): # Print summary of all config commands executed with c
                     level -= 1
                 indent = ' ' * Indent * level
         print "-&gt; {}{}".format(indent, cmd)
+
+def addXmcSyslogEvent(severity, message, ip=None): # Adds a syslog event to XMC
+    severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
+    severityLevel = severityHash[severity] if severity in severityHash else 6
+    session = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    session.connect(('127.0.0.1', 514))
+    if ip:
+        session.send("&lt;{}&gt; XMC Script {} / Device: {} / {}".format(severityLevel,scriptName(),ip,message))
+    else:
+        session.send("&lt;{}&gt; XMC Script {} / {}".format(severityLevel,scriptName(),ip,message))
+    session.close()
 
 
 #
@@ -582,273 +1004,6 @@ except:
 # --&gt; XMC Python script actually starts here &lt;--
 
 
-##########################################################
-# XMC Script: ERS-NAC-Enforce                            #
-# Written by Ludovico Stevens, CSE Extreme Networks      #
-##########################################################
-# Push NAC configuration to ERS switch
-
-__version__ = '1.7'
-
-# 1.0 - Initial
-# 1.1 - Was failing to set auto-non-eap-mhsa-enable on port in MHSA mode
-#     - Added pull down option to specify port filtering mode and select option to filter FA Client ports
-#     - FA Client ports are not only filtered out from port selection, but are also disabled for eapol
-#     - ERS in FA server mode, now also filters out downlink FA Proxy ports
-#     - More paging is now disabled on ERS; terminal length is recorded upon connection and restored on exit
-# 1.2 - Script was failing if run on XMC with no NTP server configured; now the script will work but if no
-#       NTP server is configured on XMC then no NTP/SNTP configuration will be performed on ERS either
-#     - Script was failing with telnet as it was not executing "enable" upon CLI connection 
-# 1.3 - Some Cleanup; script version printed in output
-# 1.4 - Added ability to specify whether port should allow 802.1X + NEAP or one or the other
-# 1.5 - Script now checks whether the shared secret was not set under switch advanced override and if so fails
-#     - Now will always globally enable NTP/SNTP and set the clock source, even if servers were the right ones
-#     - Mirror Monitor ports are now filtered out from ports where to configure NAC
-#     - In STPG mode, script was failing when trying to enable FastStart on ports which have no VLANs assigned
-#       so now, in STPG mode only, we obtain list of ports with no VLANs and we re-add VLAN 1 to them before
-#       applying the NAC/STP config
-#     - If it was not possible to extract XMC's NTP server configuration (using ntpq on linux shell) script
-#       would bomb out instead of proceeding to configure ERS without NTP/SNTP and CoA Replay protection
-#     - Ability to statically set NTP Servers and time-zone by hard coding NtpList and TimeZone variables in
-#       script below; then the script will not need to use the Linux shell to obtain these from XMC.
-# 1.6 - As of XMC8.4 Ubuntu is upgraded to 18.04 and the synchronization deamon being used is timesyncd now;
-#       older versions of this script would try to extract the NTP servers from XMC using the "ntpq" Linux
-#       command which is no loger there; updated script to now use chronyc if the XMC version is 8.4 or above
-# 1.7 - Added ability to configure fail-open 
-
-#
-# XMC Metadata
-#
-'''
-#@MetaDataStart
-#@DetailDescriptionStart
-#######################################################################################
-# 
-# When configuring NAC/Policy on ExtremeControl, an Enforce results in a push of the
-# corresponding config to XOS switches. But not for an ERS switch.
-# This script allows the XMC operator to easily configure an ERS switch based on the
-# ExtremeControl NAC configuration.
-#
-# WARNING: if you use this script to re-enforce the NAC config to an already operational
-# switch, this script will temporarily disable and re-enable eapol which will result in
-# any already authenticated clients being disconnected and will have to re-authenticate
-# again once the config is re-enforced.
-#
-#  1 - Add the switch under XMC Access Control Engine Group
-#  2 - And, still under XMC Access Control, configure the switch for:
-#      - Primary/Secondary engine
-#      - Authentication Access type (Manual RADIUS Configuration)
-#      - RADIUS Attributes to Send (Fabric Attach attributes)
-#      - RADIUS accounting (enabled or disabled)
-#      - Advanced settings / Override RADIUS shared secret key
-#        Note that this script can currently only work if the shared secret is set under
-#        switch advanced settings, override RADIUS; if the shared secret is set under the
-#        engine settings, currently it is not possible for this script to access that
-#        info via NBI
-#        (Note that on ERS devices this is limited to 16 characters max)
-#      - Advanced settings / Reauthentication behaviour (for ERS select "RFC3576-Brocade ICX")
-#  3 - Perform an Access Control Engine Enforce on XMC
-#  4 - Run this script against the ERS switch (or multiple ERS switches simultaneously)
-#  5 - Select the access ports which will be configured for 802.1X EAP/NEAP
-#      (If you wish to apply the config to all access ports, simply select ALL ports;
-#      this script is intelligent enough to infer the ERS uplinks ports and will remove
-#      them from the port selection anyway; in the case of an ERS FA Server, downlink
-#      FA Proxy ports are also removed; MLT member ports will always be removed
-#      and never configured for NAC whether they are seen as uplink ports or not;
-#      finally if any ports are configured as mirror-monitor ports, these will also be
-#      filtered out as it is not possible to configure NAC on them without deleting the
-#      port mirroring instance)
-#  6 - Select the desired EAP port configuration:
-#      - None: NAC disabled -&gt; force-authorized
-#              (The eapol config on the port is reset to defaults;
-#              if this option is selected then simply skip to step 14 directly)
-#      - SHSA: Single Host Single Authenticaton
-#              (This is achieved be setting mac-max to 1 on the port;
-#              if MHSA was enabled on the port it is removed)
-#      - MHMA: Multiple Host Multiple Authentication
-#              (Mac-max is defaulted back to its default value 2;
-#              if MHSA was enabled on the port it is removed)
-#      - MHSA: Multiple Host Single Authentication - AP aware
-#              (mhsa is globally enabled and
-#              mhsa-no-limit is enabled on the port)
-#  7 - Select the authentication types to allow on the port:
-#      - Both: 802.1X EAPoL and/or MAC/NEAP will be allowed
-#      - 802X: Only 802.1X EAPoL will be allowed
-#      - NEAP: Only MAC/NEAP will be allowed
-#  8 - Verify the desired port filtering of the port selection already made
-#      (If it is desired to have NAC disabled on access ports where FA Clients are detected
-#      select the second option; otherwise leave the default option)
-#  9 - Modify the default re-authentication timer if necessary
-# 10 - Optionally specify whether a Fail-Open mode should be enabled.
-#      (Note that continuity mode is not available on some ERS2x00 and 3x00 models)
-# 11 - If a fail-open mode is selected above:
-#      - Leave this field empty  : Fail-open will authorize clients into whatever default VLAN is
-#                                  already configured on the port.
-#                                  (Note this mode not available on some ERS 3x00 models)
-#      - Provide a VLAN-id       : Fail-open will authorize clients into the provided VLAN. The
-#                                  VLAN must already exist on the switch.
-# 12 - Optionally select whether to use pap or ms-chap-v2 for MAC based authentication
-#      (this setting is required only for MAC based authentication (NEAP) and will need
-#      to be consistent with what configured under XMC Access Control AAA configuration;
-#      Note that this is not configurable on some ERS 3x00 models, in which case the switch
-#      will only do pap)
-# 13 - Optionally select the type of RADIUS reachability to use on the ERS (use-icmp or use-radius)
-# 14 - If use-radius was selected above, provide dummy RADIUS username and password
-# 15 - Optionally enable EAPoL allow port mirroring if this will be required
-# 16 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
-#      running but config commands will not be executed on the switch; useful to see what the script
-#      does without it actually changing any switch settings. Debug can be enabled when/if reporting
-#      problems
-# 17 - Finally, RUN the script
-#
-# The script will automatically configure all of the following:
-# - Primary and Secondary RADIUS Servers, including shared secret
-# - RADIUS accounting, if enabled in XMC switch config
-# - RADIUS dynamic-client (RFC3576 Change-of-Authorization)
-# - NTP or SNTP configuration to match that of the XMC Server, including the right timezone
-#   (RFC3576 Change-of-Authorization requires the switch and server to have the same time)
-#   Note: if XMC has no NTP server configured, then no NTP/SNTP config will be applied to the
-#   ERS and in this case RADIUS CoA replay-protection will be disabled, otherwise CoA won't work
-#   If the script is unable to extract NTP server and time-zone from XMC then it is possible to
-#   hard code the desired values in the NtpList and TimeZone global variables of this script.
-# - RADIUS reachability, if specified by user
-# - EAPoL global and port level configuration
-# - If the port selection included FA Client ports and these are to be filtered out,
-#   these ports will have EAPoL expressly disabled on them
-# - Fabric Attach is always enabled on the ports
-# - Spanning Tree FastStart or Edge configuration is always set on the ports
-#
-# This script can be run multiple times against the same ERS, either to change the
-# configuration or enable NAC on different access ports or indeed to subsequently
-# disable NAC on certain ports.
-# If simply running the script a second time to change the port NAC config, simply
-# set the desired EAP port config mode and execute the script (no need to populate the
-# other dialogues if those config options have already been set).
-# In particular, if running the script to disable NAC on some ports then only the first
-# EAP port config dialogue needs to be set (to None) and then the script can be executed;
-# in this case the script will execute even if the ERS switch has already been deleted
-# from the XMC Access Control configuration.
-# This script uses the XMC North Bound interface API to extract the Access Control switch
-# configuration; therefore the XMC user running this script must have authorization rights
-# under "Northbound API / Access Control Northbound Interface Read Access"
-#
-# Limitations: This script will only work on XMC Linux based VM installations.
-#              Running this script on a Windows based XMC installation will fail.
-#######################################################################################
-#@DetailDescriptionEnd
-
-#@SectionStart (description = "Switch EAP port configuration")
-#    @VariableFieldLabel (
-#        description = "EAP port config mode. If simply disabling NAC on selected ports can skip all other inputs below",
-#        type = string,
-#        required = yes,
-#        readOnly = no,
-#        validValues = [None: NAC disabled -&gt; force-authorized, SHSA: Single Host Single Authenticaton, MHMA: Multiple Host Multiple Authentication, MHSA: Multiple Host Single Authentication - AP aware],
-#        name = "userInput_eapPortMode",
-#    )
-#    @VariableFieldLabel (
-#        description = "EAP port authentication",
-#        type = string,
-#        required = yes,
-#        readOnly = no,
-#        validValues = [Both: EAPoL 802.1X and/or MAC/NEAP, 802X: EAPoL 802.1X only, NEAP: MAC/NEAP only],
-#        name = "userInput_eapPortAuth",
-#        value = "Both: EAPoL 802.1X and/or MAC/NEAP"
-#    )
-#    @VariableFieldLabel (
-#        description = "If enabling NAC\, automatically filter out from port selection these ports",
-#        type = string,
-#        required = yes,
-#        readOnly = no,
-#        validValues = [A: Uplink&amp;#44; MLT and Mirror Monitor ports, B: Uplink&amp;#44; MLT&amp;#44; Mirror Monitor and FA Client ports],
-#        name = "userInput_filterPorts",
-#        value = "A: Uplink&amp;#44; MLT and Mirror Monitor ports"
-#    )
-#    @VariableFieldLabel (
-#        description = "Re-authentication timer. Default of 3600secs is best for most cases but value can be increased for scaled environments. Configurable range is 60-604800secs",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_eapReauthTimer",
-#        value = "3600"
-#    )
-#@SectionEnd
-
-#@SectionStart (description = "Switch Global EAP options")
-#    @VariableFieldLabel (
-#        description = "Fail-Open mode. If enabled will also be configured on any ports selected",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [disable, fail-open, fail-open continuity],
-#        name = "userInput_failOpenMode",
-#    )
-#    @VariableFieldLabel (
-#        description = "Fail-Open VLAN id. Only applicable if fail-open enabled above. Leave empty to allow users into whatever VLAN is already on the ports. Specify a VLAN id otherwise",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_failOpenVlan",
-#    )
-#    @VariableFieldLabel (
-#        description = "RADIUS encapsulation for MAC based authentication. Must match what configured on XMC. Only pap is supported on ERS3600 and ERS3500",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [pap, ms-chap-v2],
-#        name = "userInput_radiusEncap",
-#    )
-#    @VariableFieldLabel (
-#        description = "RADIUS reachability",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [use-icmp, use-radius],
-#        name = "userInput_radiusReachability",
-#    )
-#    @VariableFieldLabel (
-#        description = "RADIUS reachability dummy username. Only if use-radius reachability specified above",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_radiusDummyUser",
-#    )
-#    @VariableFieldLabel (
-#        description = "RADIUS reachability dummy password. Only if use-radius reachability specified above",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        name = "userInput_radiusDummyPwd",
-#    )
-#    @VariableFieldLabel (
-#        description = "EAPoL Allow port mirroring",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [enable,disable],
-#        name = "userInput_eapolMirror",
-#    )
-#@SectionEnd
-
-#@SectionStart (description = "Sanity / Debug")
-#    @VariableFieldLabel (
-#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
-#        type = string,
-#        required = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_sanity",
-#    )
-#    @VariableFieldLabel (
-#        description = "Debug: enable if you need to report a problem to the script author",
-#        type = string,
-#        required = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_debug",
-#    )
-#@SectionEnd
-#@MetaDataEnd
-'''
-
 #
 # Imports:
 #
@@ -857,7 +1012,6 @@ from distutils.version import LooseVersion
 #
 # Variables:
 #
-
 NtpList  = [] #['10.8.255.160', '10.8.255.159'] # Set statically if you cannot use NBI to obtain from XMC
 TimeZone = [] #['GMT', '+00', '00']             # Set statically if you cannot use NBI to obtain from XMC
 
@@ -993,8 +1147,9 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
                                        eapol multihost eap-packet-mode unicast
                                        eapol status auto re-authentication enable
                                        eapol radius-dynamic-server enable
-                                       fa port-enable
                                        ''',
+        'port_disable_fa'            : 'no fa port-enable',
+        'port_enable_fa'             : 'fa port-enable',
         'port_config_eap_type'       : {
             'Both'                   : # (do not config multihost allow-non-eap-enable; it is for switch local MAC based authentication without RADIUS)
                                        '''
@@ -1006,12 +1161,12 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
                                        '''
                                        eapol multihost radius-non-eap-enable
                                        eapol multihost non-eap-use-radius-assigned-vlan
-                                       no eapol multihost eap-protocol-enable	
+                                       no eapol multihost eap-protocol-enable
                                        ''',
                                        },
         'port_config_eap_mode'       : {
             'SHSA'                   : 'eapol multihost mac-max 1',
-            'MHMA'                   : '', # port_config_eap_common above covers for MHMA already
+            'MHMA'                   : 'eapol multihost mac-max {0}; eapol multihost eap-mac-max {0}; eapol multihost non-eap-mac-max {0}', # Mac-max
             'MHSA'                   : 'eapol multihost auto-non-eap-mhsa-enable mhsa-no-limit',
                                        },
         'port_config_faststart'      : {
@@ -1020,6 +1175,7 @@ CLI_Dict = { # Dictionary of all ERS CLI commands used by this script
             'MSTP'                   : 'spanning-tree mstp learning enable; spanning-tree mstp edge-port true',
                                        },
         'port_config_reauth_timer'   : 'eapol re-authentication-period {}', # Value
+        'port_config_traffic_control': 'eapol traffic-control {}', # 'in', 'in-out'
         'port_config_failopen_vlan'  : 'eapol multihost fail-open-vlan enable',
         'port_config_failopen_pvid'  : 'eapol multihost fail-open-vlan enable vid port-pvid',
     },
@@ -1035,7 +1191,7 @@ Shell_Dict = { # Dictionary of all Linux shell commands used by this script
 # Main:
 #
 def main():
-    print "ERS-NAC-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
+    print "{} version {} on XMC version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
     nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
     if nbiAccess == None:
         raise RuntimeError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
@@ -1059,6 +1215,12 @@ def main():
     eapPortType = emc_vars['userInput_eapPortAuth'][:4]
     portFilteringMode = emc_vars['userInput_filterPorts'][:1]
     eapPortReauthTimer = emc_vars['userInput_eapReauthTimer'].strip()
+    eapMacMax = emc_vars['userInput_eapMacMax'].strip()
+    eapTrafCtrl = emc_vars['userInput_eapTrafCtrl']
+    try:
+        portFa = emc_vars['userInput_portFa']
+    except:
+        portFa = 'enable'
     failOpenMode = emc_vars['userInput_failOpenMode']
     failOpenVlan = emc_vars['userInput_failOpenVlan'].strip()
     radiusEncap = emc_vars['userInput_radiusEncap']
@@ -1073,6 +1235,9 @@ def main():
     print " - EAPoL Port Type = {}".format(eapPortType)
     print " - EAPoL Port Filtering mode = {}".format(portFilteringMode)
     print " - EAPoL Re-auth timer = {}".format(eapPortReauthTimer)
+    print " - EAPoL MHMA Mac-max = {}".format(eapMacMax)
+    print " - EAPoL TrafficControl = {}".format(eapTrafCtrl)
+    print " - Port Fabric Attach = {}".format(portFa)
     print " - EAPoL Fail-Open Mode = {}".format(failOpenMode)
     print " - EAPoL Fail-Open VLAN = {}".format(failOpenVlan)
     print " - RADIUS Encapsulation = {}".format(radiusEncap)
@@ -1084,6 +1249,12 @@ def main():
     # Timer validation
     if eapPortReauthTimer and (not eapPortReauthTimer.isdigit() or int(eapPortReauthTimer) &lt; 60 or int(eapPortReauthTimer) &gt; 604800):
         raise RuntimeError('Invalid re-authentication timer id value {}; needs to be a number between 60 and 604800'.format(eapPortReauthTimer))
+    # Mac-max validation
+    if eapMacMax:
+        if not eapMacMax.isdigit() or int(eapMacMax) &gt; 64:
+            raise RuntimeError('Invalid mac-max value {}; needs to be a number between 1 and 64'.format(eapMacMax))
+    else:
+        eapMacMax = "2"
     # VLAN validation
     if failOpenVlan and (not failOpenVlan.isdigit() or int(failOpenVlan) &gt; 4095):
         raise RuntimeError('Invalid Fail-Open VLAN id value {}; needs to be a number not higher than 4059'.format(failOpenVlan))
@@ -1180,7 +1351,7 @@ def main():
     ersStpMode = sendCLI_showRegex(CLI_Dict[Family]['get_spanning_tree_mode'], 'ersStpMode')
 
     if ersStpMode == 'STPG': # In STPG mode, if we are to set FastStart, we need to identify ports which have no VLAN membership
-    	# We will add vlan 1 to them, otherwise we will get an error when enabling: spanning-tree learning fast
+        # We will add vlan 1 to them, otherwise we will get an error when enabling: spanning-tree learning fast
         noVlanPortList = sendCLI_showRegex(CLI_Dict[Family]['list_no_vlan_ports'], 'noVlanPortList')
         noVlanPorts = generatePortRange(noVlanPortList)
     else: # In other STP modes we don't care
@@ -1408,6 +1579,12 @@ def main():
         # Configure port common eapol configuration
         sendCLI_configChain(CLI_Dict[Family]['port_config_eap_common'])
 
+        # Enable (or disable) FA on the port
+        if portFa == 'disable':
+            sendCLI_configChain(CLI_Dict[Family]['port_disable_fa'])
+        else:
+            sendCLI_configChain(CLI_Dict[Family]['port_enable_fa'])
+
         # Enable port multihost, on older ERS models; the command is no longer recognized on newer ERS models/software, so we accept to get an error on this command
         sendCLI_configCommand(CLI_Dict[Family]['port_config_multihost'], True, 'this indicates that this ERS model/software version has obsoleted this command')
 
@@ -1415,11 +1592,15 @@ def main():
         sendCLI_configChain(CLI_Dict[Family]['port_config_eap_type'][eapPortType])
 
         # Configure port mode specific configuration
-        sendCLI_configChain(CLI_Dict[Family]['port_config_eap_mode'][eapPortMode])
+        sendCLI_configChain(CLI_Dict[Family]['port_config_eap_mode'][eapPortMode].format(eapMacMax))
 
         # Configure the reauthentication timer, if set
         if eapPortReauthTimer:
             sendCLI_configCommand(CLI_Dict[Family]['port_config_reauth_timer'].format(eapPortReauthTimer))
+
+        # Configure traffic-control
+        if eapTrafCtrl:
+            sendCLI_configCommand(CLI_Dict[Family]['port_config_traffic_control'].format(eapTrafCtrl))
 
         # Configure fail-open
         if re.match(r'fail-open', failOpenMode):
@@ -1460,8 +1641,9 @@ main()
     <creator>lstevens</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1588194943846</lastUpdateDate>
+    <lastUpdateDate>1612377583194</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-ers-4900-5900,nos-id-ers-4800,nos-id-ers-3600,nos-id-ers-3500,nos-id-boss,</nosIds>
