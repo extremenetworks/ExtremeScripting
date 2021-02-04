@@ -1,0 +1,9 @@
+-- Use these scripts to manage Cisco devices
+name="Cisco Systems SG500 - TFTP"
+desc="Cisco Systems SG500  SSH/TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+@receive 180
+exit

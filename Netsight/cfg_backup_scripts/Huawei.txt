@@ -1,0 +1,41 @@
+-- Use these scripts to manage an Huawei S5720 device
+name="Huawei - TFTP"
+desc="Huawei S5720 TFTP Scripts"
+protocol=TFTP
+-----BEGIN SCRIPT "Configuration Upload"-----
+save NMS.cfg
+y
+@receive 20
+tftp %TFTP_IP% put flash:/NMS.cfg %RELATIVE_TARGET_FILE_PATH%
+@receive 20
+quit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+tftp %TFTP_IP% get %RELATIVE_TARGET_FILE_PATH% flash:/NMS.cfg
+y
+startup system-software NMS.cfg
+quit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+second(s).
+-----END SUCCESS-----
+
+-----BEGIN SCRIPT "Firmware Download"-----
+tftp %TFTP_IP% get firmware/images/%TARGET_FILE_NAME% %TARGET_FILE_NAME%
+@RECEIVEUNTIL 600 "TFTP: Uploading the file successfully."
+save
+y
+startup system-software %TARGET_FILE_NAME% all
+y
+
+@RECEIVEUNTIL 60 "Info: Succeeded in setting the software for booting system."
+
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+Info: Succeeded in setting the software for booting system.
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Reset"-----
+reboot fast
+y
+
+-----END SCRIPT-----

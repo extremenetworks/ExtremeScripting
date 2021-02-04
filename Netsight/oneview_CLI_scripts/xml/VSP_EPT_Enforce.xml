@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script name="VSP EPT Enforce">
+<script name="VOSS PreUpgrade CleanUp">
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
-    <category>,Config,</category>
-    <comments>Enforce XMC NAC and Endpoint-Tracking config to VSP switch - v1.1</comments>
+    <category>,System,</category>
+    <comments>Prepares VOSS device for XMC software upgrade - v1.0</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -21,9 +21,82 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
 SCRIPTS.
 '''
+
+# --&gt; Insert here script description, version and metadata &lt;--
+
 ##########################################################
-# Ludo Standard library; Version 2.14                    #
-# Written by Ludovico Stevens, CSE Extreme Networks      #
+# XMC Script: VOSS-PreUpgrade-CleanUp                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+# Prepares VOSS device (VSP/XA1400) for XMC software upgrade
+# Two modes:
+# - Only oldest image is removed IF all software slots are used (default)
+# - All non-Primary and non-Secondary images are removed
+# Optionally, any *.tgz or *.voss software archive files found on /intflash/ can also be removed
+
+__version__ = '1.0'
+
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# Prepares VOSS device (VSP/XA1400) for XMC software upgrade
+# Two modes:
+# - Only oldest image is removed IF all software slots are used (default)
+#   If beta/private images are found, these will be all removed instead under this option
+#   If no beta/private image is found, then the first non-Primary non-Secondary image is removed,
+#   which is usually the oldest image in the list
+# - All non-Primary and non-Secondary images are removed
+# Optionally, any *.tgz or *.voss software archive files found on /intflash/ can also be removed
+#
+#######################################################################################
+#@DetailDescriptionEnd
+# ( = &amp;#40;
+# ) = &amp;#41;
+# , = &amp;#44;
+# &lt; = &amp;lt;
+# &gt; = &amp;gt;
+#@SectionStart (description = "VOSS Stored Software Clean Up")
+#    @VariableFieldLabel (
+#        description = "Clean Up action for software versions stored on switch. These actions can be performed immediately before performing a software upgrade from XMC and will ensure that the software upgrade is successful in case no software slots are available on the switch",
+#        type = string,
+#        required = yes,
+#        validValues = [A: Only delete oldest software version IF no empty slots, B: Delete all non-Primay and non-Secondary software versions],
+#        name = "userInput_cleanMode",
+#        value = "A: Only delete oldest software version IF no empty slots",
+#    )
+#    @VariableFieldLabel (
+#        description = "Delete any *.tgz and *.voss software archives found lingering on /intflash/",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_deleteTgz",
+#    )
+#@SectionStart (description = "Sanity / Debug")
+#    @VariableFieldLabel (
+#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_sanity",
+#    )
+#    @VariableFieldLabel (
+#        description = "Debug: enable if you need to report a problem to the script author",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_debug",
+#    )
+#@SectionEnd
+#@MetaDataEnd
+'''
+
+
+
+##########################################################
+# Ludo Standard library; Version 3.00                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
 Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
@@ -33,7 +106,7 @@ try:
     emc_vars
     execution = 'xmc'
 except: # If not running on XMC Jython...
-    # These lines only needed to run XMC Python script locally
+    # These lines only needed to run XMC Python script locally (on my laptop)
     # They can also be pasted to XMC, but will not execute
     import sys
     import json
@@ -52,8 +125,10 @@ except: # If not running on XMC Jython...
 # IMPORTS:
 #
 import re
-import subprocess
-from java.util import LinkedHashMap
+import os                           # Used by warpBuffer_execute
+import subprocess                   # Used by xmcLinuxCommand
+from java.util import LinkedHashMap # Used by nbiQuery
+import socket                       # Used by addXmcSyslogEvent
 
 #
 # VARIABLES:
@@ -82,9 +157,12 @@ Indent = 3 # Number of space characters for each indentation
 LastError = None
 ConfigHistory = []
 RollbackStack = []
+WarpBuffer = []
 SlotPortRange = None # Gets set to dict by getSlotPortRanges()
 FamilyChildren = { # Children will be rolled into parent family for these scripts
-    'Extreme Access Series': 'VSP Series',
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
 }
 Family = None # This needs to get set by setFamily()
 
@@ -95,6 +173,15 @@ def debug(debugOutput): # Use function to include debugging in script; set above
     if Debug:
         print debugOutput
 
+def scriptName(): # Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
 def setFamily(): # Set global Family variable; automatically handles family children, as far as this script is concerned
     global Family
     if emc_vars["family"] in FamilyChildren:
@@ -102,7 +189,7 @@ def setFamily(): # Set global Family variable; automatically handles family chil
     else:
         Family = emc_vars["family"]
     print "Using family type '{}' for this script".format(Family)
-    if not Family in CLI_Dict:
+    if Family not in CLI_Dict:
         raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
 
 def portValue(port): # Function to pass to sorted(key) to sort port lists
@@ -129,6 +216,7 @@ def configChain(chainStr): # Produces a list of a set of concatenated commands (
     return cmdList
 
 def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
     if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
         mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
     else:
@@ -156,17 +244,17 @@ def formatOutputData(data, mode): # Formats output data for both sendCLI_showReg
         RuntimeError("sendCLI_showRegex: invalid scheme type '{}'".format(mode))
     return value
 
-def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
-    print "Aborting script due to error on previous command"
-    rollbackStack()
-    print "Aborting because this command failed: {}".format(cmd)
-    raise RuntimeError(errorOutput)
-
 def rollbackStack(): # Execute all commands on the rollback stack
     if RollbackStack:
         print "Applying rollback commands to undo partial config and return device to initial state"
         while RollbackStack:
             sendCLI_configChain(RollbackStack.pop(), True)
+
+def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    rollbackStack()
+    print "Aborting because this command failed: {}".format(cmd)
+    raise RuntimeError(errorOutput)
 
 def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
     RollbackStack.append(cmd)
@@ -240,7 +328,7 @@ def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (befor
     if Sanity:
         for cmd in cmdList:
             print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
-        ConfigHistory.append('[after reboot] ' + cmd)
+            ConfigHistory.append('[after reboot] ' + cmd)
         LastError = None
         return True
     # Edit config.cfg
@@ -263,8 +351,95 @@ def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (befor
     else:
         raise RuntimeError(resultObj.getError())
 
+def warpBuffer_add(chainStr): # Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
+    global WarpBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        WarpBuffer.append(cmdAdd)
+
+def warpBuffer_execute(chainStr, returnCliError=False, msgOnError=None): # Appends to existing WarpBuffer and then executes it
+    # Same as sendCLI_configChain() but all commands are placed in a script file on the switch and then sourced there
+    # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
+    # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
+    global WarpBuffer
+    xmcTftpRoot = '/tftpboot'
+    xmcServerIP = emc_vars["serverIP"]
+    switchIP = emc_vars["deviceIP"]
+    userName = emc_vars["userName"]
+    tftpCheck = {
+        'VSP Series':    'bool://show boot config flags||^flags tftpd true',
+        'Summit Series': 'bool://show process tftpd||Ready',
+        'ERS Series':    True, # Always enabled
+    }
+    tftpActivate = {
+        'VSP Series':    'boot config flags tftpd',
+        'Summit Series': 'start process tftpd',
+    }
+    tftpDeactivate = {
+        'VSP Series':    'no boot config flags tftpd',
+        'Summit Series': 'terminate process tftpd graceful',
+    }
+    tftpExecute = { # XMC server IP (TFTP server), Script file to fetch and execute
+        'VSP Series':    'copy {0}:{1} /intflash/.script.src; source .script.src debug',
+        'Summit Series': 'tftp get {0} {1} .script.xsf; run script .script.xsf',
+        'ERS Series':    'configure network address {0} filename {1}',
+    }
+
+    warpBuffer_add(chainStr)
+    if Family not in tftpCheck:
+        raise RuntimeError('Sourcing commands via TFTP only supported in family types: {}'.format(", ".join(list(tftpCheck.keys()))))
+
+    # Determine whether switch can do TFTP
+    if tftpCheck[Family] == True:
+        tftpEnabled = True
+    else:
+        tftpEnabled = sendCLI_showRegex(tftpCheck[Family])
+    if not tftpEnabled:
+        if Sanity:
+            print "SANITY&gt; {}".format(tftpActivate[Family])
+        else:
+            sendCLI_configCommand(tftpActivate[Family]) # Activate TFTP now
+        warpBuffer_add(tftpDeactivate[Family])      # Restore TFTP state on completion
+
+    if Sanity:
+        for cmd in WarpBuffer:
+            print "SANITY(warp)&gt; {}".format(cmd)
+            ConfigHistory.append(cmd)
+        LastError = None
+        return True
+
+    # Write the commands to a file under XMC's TFTP root directory
+    tftpFileName = userName + '.' + scriptName() + '.' + switchIP.replace('.', '_')
+    tftpFilePath = xmcTftpRoot + '/' + tftpFileName
+    try:
+        with open(tftpFilePath, 'w') as f:
+            if Family == 'VSP Series': # Always add these 2 lines, as VSP source command does not inherit current context
+                f.write("enable\n")
+                f.write("config term\n")
+            for cmd in WarpBuffer:
+                f.write(cmd + "\n")
+            f.write("\n") # Make sure we have an empty line at the end, or VSP sourcing won't process last line...
+            debug("warpBuffer - write of TFTP config file : {}".format(tftpFilePath))
+    except Exception as e: # Expect IOError
+        print "{}: {}".format(type(e).__name__, str(e))
+        raise RuntimeError("Unable to write to TFTP file '{}'".format(tftpFilePath))
+
+    # Make the switch fetch the file and execute it
+    success = sendCLI_configChain(tftpExecute[Family].format(xmcServerIP, tftpFileName))
+    # Clean up by deleting the file from XMC TFTP directory
+    os.remove(tftpFilePath)
+    debug("warpBuffer - delete of TFTP config file : {}".format(tftpFilePath))
+
+    if not success: # In this case some commands might have executed, before the error; these won't be captured in ConfigHistory
+        WarpBuffer = []
+        return False
+    ConfigHistory.extend(WarpBuffer)
+    WarpBuffer = []
+    LastError = None
+    return True
+
 def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
-    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
     # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
     mode, cmdList, regex = parseRegexInput(cmdRegexStr)
     for cmd in cmdList:
@@ -537,6 +712,9 @@ def ipGateway(ip, mask, gw): # Return the gateway IP address, as first or last I
 
 def printConfigSummary(): # Print summary of all config commands executed with context indentation
     emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
     print "The following configuration was successfully performed on switch:"
     indent = ''
     level = 0
@@ -555,6 +733,17 @@ def printConfigSummary(): # Print summary of all config commands executed with c
                     level -= 1
                 indent = ' ' * Indent * level
         print "-&gt; {}{}".format(indent, cmd)
+
+def addXmcSyslogEvent(severity, message, ip=None): # Adds a syslog event to XMC
+    severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
+    severityLevel = severityHash[severity] if severity in severityHash else 6
+    session = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    session.connect(('127.0.0.1', 514))
+    if ip:
+        session.send("&lt;{}&gt; XMC Script {} / Device: {} / {}".format(severityLevel,scriptName(),ip,message))
+    else:
+        session.send("&lt;{}&gt; XMC Script {} / {}".format(severityLevel,scriptName(),ip,message))
+    session.close()
 
 
 #
@@ -582,285 +771,24 @@ except:
 # --&gt; XMC Python script actually starts here &lt;--
 
 
-##########################################################
-# XMC Script: VSP-EPT-Enforce                            #
-# Written by Ludovico Stevens, CSE Extreme Networks      #
-##########################################################
-# Push Endpoint-Tracking (EPT) configuration to VSP switch
-
-__version__ = '1.1'
-
-# 1.0 - Initial
-# 1.1 - VOSS 8.2 introduces the Segmented Mgmt Stack; configuration of RADIUS server must no longer specify a source-ip
-
-#
-# XMC Metadata
-#
-'''
-#@MetaDataStart
-#@DetailDescriptionStart
-#######################################################################################
-#######################################################################################
-# 
-# This script allows the XMC operator to easily configure a VSP switch for Endpoint-
-# Tracking (EPT) based on the ExtremeControl NAC configuration.
-#
-# WARNING: if you use this script to re-enforce the EPT config to an already operational
-# switch and you specify any of the EPT global settings (Auto I-SID offset or Visibility
-# mode pull-downs), this script will temporarily disable and re-enable EPT which will
-# result in any existing EPT bindings getting flushed and that could cause a brief
-# connectivity loss for server VMs, the time for their MACs to be RADIUS re-validated
-# and for the VLAN:ISID binding to be re-applied on the access ports.
-#
-#  1 - Add the switch under XMC Access Control Engine Group
-#  2 - And, still under XMC Access Control, configure the switch for:
-#      - Primary/Secondary engine.
-#      - Authentication Access type (Manual RADIUS Configuration).
-#      - RADIUS Attributes to Send (Fabric Attach attributes).
-#      - RADIUS accounting (disabled; not supported with VOSS EPT).
-#      - Advanced settings / Override RADIUS shared secret key.
-#        Note that this script can currently only work if the shared secret is set under
-#        switch advanced settings, override RADIUS; if the shared secret is set under the
-#        engine settings, currently it is not possible for this script to access that
-#        info via NBI.
-#      - Advanced settings / Reauthentication behaviour.
-#        (for VSP EPT select "RFC 3576 - Generic CoA Colon Delimited")
-#  3 - Perform an Access Control Engine Enforce on XMC
-#  4 - Run this script against the VSP switch (or multiple VSP switches simultaneously).
-#  5 - Select the access ports which will be configured for EPT; select none if enforcing only
-#      global changes.
-#      (If you wish to apply the config to all access ports, simply select ALL ports;
-#      this script is intelligent enough to infer VSP existing NNI and FA ports and will
-#      remove them from the port selection; if ports are members of MLT or SMLT UNIs, EPT will
-#      automatically get enabled on the corresponding MLT interface)
-#  6 - Select the desired EPT port configuration:
-#      - Enable: EPT is created and enabled on ports (if any ports were selected) and EPT
-#                global settings are enforced.
-#      - Disable: EPT is created but disabled on ports.
-#              (if this option is selected then simply skip to step 9 directly)
-#      - None: EPT is deleted from ports.
-#              (if this option is selected then simply skip to step 9 directly)
-#  7 - Select the desired Auto-ISID-Offset mode:
-#      - Empty: Whatever setting is on the VSP switch it will not be changed.
-#      - Disable: I-SID must be returned with VLAN-id in RADIUS attribute.
-#      - Offset selection: If no I-SID is returned in RADIUS response then this I-SID offset
-#                          will be added to the VLAN-id returned by RADIUS to obtain the I-SID.
-#  8 - Select the desired Visibility mode:
-#      - Empty: Whatever setting is on the VSP switch it will not be changed.
-#      - Disable: VSP will only RADIUS authenticate MACs which do not belong to static bindings.
-#      - Enable: VSP will RADIUS authenticate all MACs, including MACs on static bindings.
-#  9 - Sanity/Debug options are allowed at the end of user inputs. Sanity will result is the script
-#      running but config commands will not be executed on the switch; useful to see what the script
-#      does without it actually changing any switch settings. Debug can be enabled when/if reporting
-#      problems
-# 10 - Finally, RUN the script
-#
-# The script will automatically configure all of the following:
-# - Primary and Secondary RADIUS Servers, including shared secret
-# - RADIUS dynamic-client (RFC3576 Change-of-Authorization)
-# - NTP or SNTP configuration to match that of the XMC Server, including the right timezone
-#   (RFC3576 Change-of-Authorization requires the switch and server to have the same time)
-#   Note: if XMC has no NTP server configured, then no NTP/SNTP config will be applied to the
-#   VSP. If the script is unable to extract NTP server and time-zone from XMC then it is possible to
-#   hard code the desired values in the NtpList and TimeZone global variables of this script.
-# - EPT global and port level configuration
-# - If the port selection included NNI or FA ports these will be filtered out.
-# - If some or all the ports selected are members of MLT or SMLT interfaces, then the EPT config
-#   will be applied to the corresponding MLT interface (again NNI MLTs and FA MLTs will be ignored)
-#
-# This script can be run multiple times against the same VSP, either to change the
-# configuration or enable EPT on different access ports or indeed to subsequently
-# disable or delete EPT on certain ports.
-# If running the script a second time to change the port EPT config, simply
-# set the desired EPT port config mode and execute the script (no need to populate the
-# other dialogues if those config options have already been set).
-# In particular, if running the script to disable/delete EPT on some ports then only the first
-# EPT port config dialogue needs to be set (to None or Disable) and then the script can be executed;
-# in this case the script will execute even if the VSP switch has already been deleted
-# from the XMC Access Control configuration.
-# This script uses the XMC North Bound interface API to extract the Access Control switch
-# configuration; therefore the XMC user running this script must have authorization rights
-# under "Northbound API / Access Control Northbound Interface Read Access"
-#
-# Limitations: This script will only work on XMC Linux based VM installations.
-#              Running this script on a Windows based XMC installation will fail.
-#######################################################################################
-#@DetailDescriptionEnd
-# ( = &amp;#40;
-# ) = &amp;#41;
-# , = &amp;#44;
-# &lt; = &amp;lt;
-# &gt; = &amp;gt;
-
-#@SectionStart (description = "Endpoint-Tracking port level configuration")
-#    @VariableFieldLabel (
-#        description = "EPT port config mode. If selecting None or Disable can skip all other inputs below",
-#        type = string,
-#        required = yes,
-#        readOnly = no,
-#        validValues = [Enable: EPT created and enabled on ports, Disable: EPT created but disabled on ports, None: EPT deleted on ports],
-#        name = "userInput_eptPortMode",
-#        value = "Enable: EPT created and enabled on ports",
-#    )
-#@SectionEnd
-
-#@SectionStart (description = "Endpoint-Tracking global configuration")
-#    @VariableFieldLabel (
-#        description = "Auto-ISID-Offset. If XMC Control returns only VLAN-id&amp;#44 offset is added to obtain L2 I-SID",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [Disable, CTC-Reading: I-SIDs 2800000, Range0: I-SIDs 2000000, Range1: I-SIDs 2010000, Range2: I-SIDs 2020000, Range3: I-SIDs 2030000, Range4: I-SIDs 2040000],
-#        name = "userInput_autoIsidOffset",
-#    )
-#    @VariableFieldLabel (
-#        description = "Visibility Mode. If enabled&amp;#44 VSP will also notify XMC Control of MACs learnt on static bindings",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_visibilityMode",
-#    )
-#@SectionEnd
-
-#@SectionStart (description = "Other useful access features to enable on Endpoint-Tracking ports")
-#    @VariableFieldLabel (
-#        description = "Spoof-Detect. Automatically discard all traffic from MAC if MAC is spoofing the default-gatewaty IP",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_spoofDetect",
-#    )
-#    @VariableFieldLabel (
-#        description = "SLPP-Guard. Automatically shut down access ports if a loop is detected on those ports",
-#        type = string,
-#        required = no,
-#        readOnly = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_slppGuard",
-#    )
-#@SectionEnd
-
-#@SectionStart (description = "Sanity / Debug")
-#    @VariableFieldLabel (
-#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
-#        type = string,
-#        required = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_sanity",
-#    )
-#    @VariableFieldLabel (
-#        description = "Debug: enable if you need to report a problem to the script author",
-#        type = string,
-#        required = no,
-#        validValues = [Enable, Disable],
-#        name = "userInput_debug",
-#    )
-#@SectionEnd
-#@MetaDataEnd
-'''
-
 #
 # Imports:
 #
-from distutils.version import LooseVersion
 
 
 #
 # Variables:
 #
 
-NtpList  = [] #['10.8.255.160', '10.8.255.159'] # Set statically if you cannot use NBI to obtain from XMC
-TimeZone = [] #['GMT', '+00', '00']             # Set statically if you cannot use NBI to obtain from XMC
-
-NBI_Query = { # GraphQl query used to obtain NAC config for switch with IP = {0}; curlies need to be doubled not to interfere with .format()
-    'nbiAccess': '''
-        {
-          administration {
-            serverInfo {
-              version
-            }
-          }
-        }
-    ''',
-    'nacConfig': '''
-        {
-          accessControl {
-            switch(ipAddress: "&lt;IP&gt;") {
-              primaryGateway
-              secondaryGateway
-              overrideSharedSecret
-              sharedSecret
-            }
-          }
-        }
-    ''',
-}
-
 CLI_Dict = {
     'VSP Series': {
         'disable_more_paging'        : 'terminal more disable',
         'enable_context'             : 'enable',
-        'config_context'             : 'config term',
-        'port_config_context'        : 'interface gigabitEthernet {}', # Port list
-        'mlt_config_context'         : 'interface mlt {}', # MLT id
-        'exit_config_context'        : 'exit',
-        'end_save_config'            : 'end; save config',
-
-        'list_radius_ept_servers'    : 'list://show radius-server ||^(\d+\.\d+\.\d+\.\d+) +endpoint-tracking',
-        'get_mlt_data'               : 'list://show mlt||^(?:(\d+) +\d+.+?(?:access|trunk) +(norm|smlt) +(?:norm|smlt) *(\S+)?|(\d+) +\d+ +(?:[\d\/]+|null) +(enable|disable)|(\d+) +\d+ +\S+ +\S+ +\S+ +\S+ +\S+ +(enable|disable))',
-        'list_fa_interfaces'         : 'list://show fa interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +(enabled|disabled) +(\d+) +(\d+) +(enabled|disabled)',
-        'get_lacp_port_data'         : 'list://show lacp actor-oper interface||^(\d+/\d+(?:/\d+)?) +(\d+) +\d+ +\d+ +(true|false)',
-        'list_mlt_lacp_key'          : 'dict://show lacp interface mlt||^(\d+) +\d+ +\d+ +\S+ +\d+ +(\d+)',
-        'list_nni_interfaces'        : 'list://show isis interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +',
-        'list_brouter_ports'         : 'list://show brouter||^\s*(\d+/\d+(?:/\d+)?) +\d+',
-        'list_slpp_ports'            : 'list://show slpp interface gigabitEthernet||^(\d+/\d+(?:/\d+)?) +enabled',
-        'get_flex_uni'               : 'dict://show interfaces gigabitEthernet config {}||^(\d+/\d+(?:/\d+)?) +\S+ +\S+ +\S+ +\S+ +\S+ +(Enable|Disable)', # Port
-        'list_ntp_servers'           : 'list://show ntp server ||^(\d+\.\d+\.\d+\.\d+)',
-        'delete_ntp_server'          : 'no ntp server {}', # IP
-        'create_ntp_server'          : 'ntp server {} enable', # IP
-        'enable_ntp'                 : 'ntp',
-        'set_timezone'               : 'clock time-zone {} {}', # Zone
-        'delete_radius_server'       : 'no radius server host {} used-by endpoint-tracking', # IP
-        'delete_radius_client'       : 'no radius dynamic-server client {}', # IP
-        'create_radius_server'       : # {0} = Radius Server IP, {1} = Radius secret, {2} = Source IP
-                                       '''
-                                       radius server host {0} key {1} used-by endpoint-tracking source-ip {2}
-                                       radius sourceip-flag
-                                       radius dynamic-server client {0} secret {1} enable
-                                       ''',
-        'create_radius_server_lns'   : # {0} = Radius Server IP, {1} = Radius secret
-                                       '''
-                                       radius server host {0} key {1} used-by endpoint-tracking
-                                       radius dynamic-server client {0} secret {1} enable
-                                       ''',
-        'enable_radius'              : 'radius enable',
-        'enable_ept_isid_offset'     : 'endpoint-tracking auto-isid-offset {}; endpoint-tracking auto-isid-offset enable', # I-SID
-        'disable_ept_isid_offset'    : 'no endpoint-tracking auto-isid-offset enable; default endpoint-tracking auto-isid-offset',
-        'enable_ept_visibility_mode' : 'endpoint-tracking visibility-mode',
-        'disable_ept_visibility_mode': 'no endpoint-tracking visibility-mode',
-        'enable_ept'                 : 'endpoint-tracking enable',
-        'disable_ept'                : 'no endpoint-tracking enable',
-        'delete_ept'                 : 'no endpoint-tracking',
-        'enable_flex_uni'            : 'flex-uni enable',
-        'create_flex_uni'            : 'vlan members remove 1 {0}; interface gigabitEthernet {0}; flex-uni enable; exit', # Port
-        'ports_enable_ept'           : 'interface gigabitEthernet {0}; endpoint-tracking enable; exit', # Port
-        'ports_disable_ept'          : 'interface gigabitEthernet {0}; no endpoint-tracking enable; exit', # Port
-        'ports_delete_ept'           : 'interface gigabitEthernet {0}; no endpoint-tracking; exit', # Port
-        'port_enable_spoof_detect'   : 'spoof-detect',
-        'port_disable_spoof_detect'  : 'no spoof-detect',
-        'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
-        'port_enable_slpp_guard'     : 'slpp-guard enable',
-        'port_disable_slpp_guard'    : 'no slpp-guard enable',
-        'port_enable'                : 'no shutdown',
+        'list_software'              : 'list://show software ||^(\w\S+(?: \(.+\))?)$',
+        'list_archives'              : 'list://ls /intflash/*.tgz &amp; ls /intflash/*.voss ||^-rw-r.-r.- +\d+ 0       0 +\d{8,} \S+ +\d+ +\S+ +(\S+)',
+        'delete_software'            : 'software remove {}', # Software name
+        'delete_file'                : 'delete /intflash/{} -y', # Filename
     },
-}
-
-Shell_Dict = { # Dictionary of all Linux shell commands used by this script
-    'list_ntp_servers'           : 'list://ntpq -pn ||^[*+](\d+\.\d+\.\d+\.\d+)',
-    'list_ntp_servers_84'        : 'list://chronyc -n sources ||^\^[*+-]\s*(\d+\.\d+\.\d+\.\d+)',
-    'get_time_zone'              : 'tuple:// timedatectl ||Time zone: (\S+?)(?:/(\S+?))? \((\w+?), ([-+]\d\d)(\d\d)\)',
 }
 
 
@@ -868,459 +796,88 @@ Shell_Dict = { # Dictionary of all Linux shell commands used by this script
 # Functions:
 #
 
-def extractMltAndPortData(mltInclude=[], portInclude=[]): # Extract MLT data (include = ['fa','lacp','vlacp']) / and Port data (include = ['fa','lacp','vlacp'])
-    # Only supported for family = 'VSP Series'
-    mltDict = {}
-    portDict = {}
-    mltData = sendCLI_showRegex(CLI_Dict[Family]['get_mlt_data'])
-    if 'fa' in mltInclude or 'fa' in portInclude:
-        faData = sendCLI_showRegex(CLI_Dict[Family]['list_fa_interfaces'])
-        for tpl in faData:
-            enableFlag = True if tpl[1] == 'enabled' else False
-            faMgmt = tpl[3]+':'+tpl[2] if tpl[3] != '0' and tpl[2] != '0' else None
-            faAuth = True if tpl[4] == 'enabled' else False
-            portDict[tpl[0]] = {'fa': enableFlag, 'faAuth': faAuth, 'faMgmt': faMgmt, 'key': None, 'lacp': False, 'mlt': None, 'vlacp': False}
-            # Keys of portDict might include MLT-ids; these would be deleted below
-    if 'lacp' in mltInclude or 'lacp' in portInclude:
-        lacpPortData = sendCLI_showRegex(CLI_Dict[Family]['get_lacp_port_data'])
-        for tpl in lacpPortData:
-            enableFlag = True if tpl[2] == 'true' else False
-            if tpl[0] not in portDict:
-                if enableFlag:
-                    portDict[tpl[0]] = {'fa': None, 'faAuth': None, 'faMgmt': None, 'key': tpl[1], 'lacp': enableFlag, 'mlt': None, 'vlacp': False}
-                continue
-            portDict[tpl[0]]['key'] = tpl[1]
-            portDict[tpl[0]]['lacp'] = enableFlag
-    if 'lacp' in mltInclude:
-        lacpMltKey = sendCLI_showRegex(CLI_Dict[Family]['list_mlt_lacp_key'])
-    for tpl in mltData:
-        if tpl[0]:
-            mltDict[tpl[0]] = {'type': tpl[1], 'ports': tpl[2]}
-        elif tpl[3]:
-            mltDict[tpl[3]]['lacp'] = True if tpl[4] == 'enable' else False
-        elif tpl[5]:
-            mltDict[tpl[5]]['flex'] = True if tpl[6] == 'enable' else False
-    for mltid in mltDict:
-        for port in generatePortList(mltDict[mltid]['ports']):
-            if port not in portDict:
-                portDict[port] = {'fa': None, 'faAuth': None, 'faMgmt': None, 'key': None, 'lacp': False, 'mlt': None, 'vlacp': False}
-            portDict[port]['mlt'] = mltid
-    for mltid in mltDict:
-        if mltid in portDict:
-            if 'fa' in mltInclude:
-                mltDict[mltid]['fa'] = portDict[mltid]['fa']
-                mltDict[mltid]['faAuth'] = portDict[mltid]['faAuth']
-                mltDict[mltid]['faMgmt'] = portDict[mltid]['faMgmt']
-            del portDict[mltid] # We no longer need it
-        elif 'fa' in mltInclude:
-            mltDict[mltid]['fa'] = None
-            mltDict[mltid]['faAuth'] = None
-            mltDict[mltid]['faMgmt'] = None
-    if 'vlacp' in portInclude:
-        vlacpData = sendCLI_showRegex(CLI_Dict[Family]['list_vlacp_ports'].format('')) # All ports
-    elif 'vlacp' in mltInclude:
-        vlacpData = sendCLI_showRegex(CLI_Dict[Family]['list_vlacp_ports'].format(generatePortRange(portDict.keys()))) # Only MLT ports
-    if 'vlacp' in mltInclude:
-        for mltid in mltDict:
-            mltDict[mltid]['vlacp'] = False
-        for port in vlacpData:
-            if vlacpData[port] == 'true' and port in portDict and portDict[port]['mlt']:
-                mltDict[portDict[port]['mlt']]['vlacp'] = True
-    if 'vlacp' in portInclude:
-        for port in vlacpData:
-            if vlacpData[port] == 'true':
-                if port not in portDict:
-                    portDict[port] = {'fa': None, 'faAuth': None, 'faMgmt': None, 'key': None, 'lacp': False, 'mlt': None, 'vlacp': True}
-                else:
-                    portDict[port]['vlacp'] = True
-    if 'lacp' in mltInclude:
-        for mltid in mltDict:
-            mltDict[mltid]['key'] = None
-        for mltid in lacpMltKey:
-            mltDict[mltid]['key'] = lacpMltKey[mltid]
-            matchingKeyPortList = [x for x in portDict if portDict[x]['key'] == lacpMltKey[mltid]]
-            # This overwrites the ports, but at least we get in there all ports configured with matching LACP key (not just ports active in MLT LAG)
-            mltDict[mltid]['ports'] = generatePortRange(matchingKeyPortList)
-
-    debug("extractMltAndPortData() mltDict = {}".format(mltDict))
-    debug("extractMltAndPortData() portDict = {}".format(portDict))
-    # mltDict: will include info of all MLTs
-    # {"id" {'fa': None|True|False, 'faAuth': True|False, 'faMgmt': "vlan:isid", 'flex': True|False, 'key': None|"key", 'lacp': True|False, 'ports': "port-range", 'type': "smlt|norm", 'vlacp': True|False}}
-    # portDict: will include info of all ports which are either FA enabled or LACP enabled or assigned to an MLT (statically or via LACP) [so not all ports]
-    # {"port": {'fa': None|True|False, 'faAuth': True|False, 'faMgmt': "vlan:isid", 'key':None|"key", 'lacp': True|False, 'mlt': None|"id", 'vlacp': True|False}}
-    return mltDict, portDict, faData
-
 
 #
 # Main:
 #
 def main():
-    print "VSP-EPT-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
-    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
-    if nbiAccess == None:
-        raise RuntimeError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
-
-    #
-    # Obtain Info on switch and from XMC
-    #
+    print "{} version {} on XMC version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
     setFamily() # Sets global Family variable
-    vossSegMgmt = LooseVersion(emc_vars["deviceSoftwareVer"]) &gt;= LooseVersion("8.2")
-    debug("vossSegMgmt = {}".format(vossSegMgmt))
-    try:
-        enteredPortList = generatePortList(emc_vars['port'])
-    except:
-        enteredPortList = []
-    debug("enteredPortList = {}".format(enteredPortList))
 
-    eptPortMode = emc_vars['userInput_eptPortMode'].split(':', 1)[0]
-
-    autoIsid = emc_vars['userInput_autoIsidOffset']
-    if autoIsid:
-        isidMatch = re.search(r'(\d+$)', emc_vars['userInput_autoIsidOffset'])
-        if isidMatch:
-            autoIsid = 'Enable'
-            autoIsidOffset = isidMatch.group(1)
-        else:
-            autoIsid = 'Disable'
-            autoIsidOffset = ''
-    else:
-        autoIsid = ''
-        autoIsidOffset = ''
-
-    visibilityMode = emc_vars['userInput_visibilityMode']
-    spoofDetect = emc_vars['userInput_spoofDetect']
-    slppGuard = emc_vars['userInput_slppGuard']
+    cleanMode = emc_vars['userInput_cleanMode'][:1]
+    tgzDelete = emc_vars['userInput_deleteTgz']
 
     print "Information provided by User:"
-    print " - Switch access ports where to configure EPT = {}".format(generatePortRange(enteredPortList))
-    print " - EPT Port Mode = {}".format(eptPortMode)
-    print " - EPT Auto-ISID = {}".format(autoIsid)
-    print " - EPT Auto-ISID-Offset = {}".format(autoIsidOffset)
-    print " - EPT Visibility Mode = {}".format(visibilityMode)
-    print " - Spoof-Detect = {}".format(spoofDetect)
-    print " - SLPP-Guard = {}".format(slppGuard)
+    print " - Clean Up Mode = {}{}".format(cleanMode, emc_vars['userInput_cleanMode'][1:])
+    print " - Delete tgz/voss archives = {}".format(tgzDelete)
 
-    if eptPortMode == 'Enable': # All this info won't be needed if we are just going to delete/disable EPT on selcted ports
-        vspIP  = emc_vars['deviceIP']
-        print "Extracted information from XMC:"
-        print " - Switch IP = {}".format(vspIP)
-
-        # This GraphQl query will fail if the switch IP is not already configured as a NAC switch in XMC Control
-        nacConfig = nbiQuery(NBI_Query['nacConfig'].replace('&lt;IP&gt;', vspIP), 'switch', 'nacConfig')
-        #  "switch": { # Sample of what we get back
-        #    "primaryGateway": "10.8.255.17",
-        #    "secondaryGateway": null,
-        #    "sharedSecret": "radius",
-        #    "overrideSharedSecret": true  # Currently we only work if this is set, and hence sharedSecret returned
-        #  }
-        #  Or, if switch not configured under XMC Access  Control:
-        #  "switch": null
-        if nacConfig == None: # Switch is not configured under XMC Access Control; give a meaningful error message
-            raise RuntimeError('Switch {} does not exist under XMC Access-Control'.format(vspIP))
-        print " - {} configured under XMC Access Control Switches, with:".format(vspIP)
-        print "    - Primary XMC Radius server = {}".format(nacConfig['primaryGateway'])
-        print "    - Secondary XMC Radius server = {}".format(nacConfig['secondaryGateway'])
-        print "    - XMC switch overrideSharedSecret (must be true) = {}".format(nacConfig['overrideSharedSecret'])
-        print "    - XMC configured Radius secret = {}".format(nacConfig['sharedSecret'])
-        if not nacConfig['overrideSharedSecret']: # Switch is configured under XMC Access Control, but the sharedsecret is set under engine settings, and we can't get to it with NBI currently
-            raise RuntimeError('Switch {} does not have an override RADIUS shared secret set (this script cannot currently work with shared secret set under engine settings)'.format(vspIP))
-
-        if NtpList and TimeZone: # We have static overrides
-            xmcNtpList = NtpList
-            xmcTimeZone = TimeZone
-            print " - Static NTP Server 1 = {}".format(xmcNtpList[0])
-            if len(xmcNtpList) &gt; 1:
-                print " - Static NTP Server 2 = {}".format(xmcNtpList[1])
-            print " - Static Time Zone = {} {}:{}".format(xmcTimeZone[0], xmcTimeZone[1], xmcTimeZone[2])
-        else: # Obtain from XMC via Linux shell
-            if LooseVersion(emc_vars["serverVersion"]) &gt;= LooseVersion("8.4"): # Required for XMC 8.4.x and above
-                xmcNtpList = xmcLinuxCommand(Shell_Dict['list_ntp_servers_84'], 'xmcNtpList')
-            else: # This works up to XMC versions 8.3.x
-                xmcNtpList = xmcLinuxCommand(Shell_Dict['list_ntp_servers'], 'xmcNtpList')
-            if xmcNtpList:
-                print " - XMC NTP Server 1 = {}".format(xmcNtpList[0])
-                if len(xmcNtpList) &gt; 1:
-                    print " - XMC NTP Server 2 = {}".format(xmcNtpList[1])
-    
-                xmcTimeZone = xmcLinuxCommand(Shell_Dict['get_time_zone'], 'xmcTimeZone')
-                print " - XMC Time Zone = {} {} / {} {}:{}".format(xmcTimeZone[0], xmcTimeZone[1], xmcTimeZone[2], xmcTimeZone[3], xmcTimeZone[4])
-    
-            else:
-                print " - Unable to extract XMC NTP Server configuration (=&gt; NTP/SNTP and CoA replay-protect will not be configured on switch)"
-        print
-
-    # First off, disable more paging
+    # Disable more paging (generatePortList might issue a CLI command, so do this before)
     sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
 
-    # Enter privExec mode
+    # Enter privExec
     sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
 
-    if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
-        # Extract RADIUS server config
-        radiusEptServerList = sendCLI_showRegex(CLI_Dict[Family]['list_radius_ept_servers'], 'radiusEptServerList')
+    # Get installed software list
+    softwareList = sendCLI_showRegex(CLI_Dict[Family]['list_software'])
 
-    eptPortList = []
-    eptMltList = []
-    if enteredPortList: # Only if some ports were selected
-        # Extract MLT &amp; port data; we also get FA interface data from here directly
-        mltDict, portDict, faData = extractMltAndPortData(['fa', 'lacp'], ['fa', 'lacp'])
-        faInterfaceList = [x[0] for x in faData]
-        debug("faInterfaceList = {}".format(faInterfaceList))
+    # Clean Up software records
+    recordDeleted = False
+    privateBetaDeleted = False
+    errorNoDelete = False
+    if cleanMode == 'A':
+        for sw in softwareList: # First try and delete any beta loads (all of them)
+            if re.search(r'\)$', sw):
+                continue
+            if not re.search(r'[a-z]{3,}', sw): # Beta loads will have lowercase tags, like "int" or other
+                continue
+            sendCLI_configCommand(CLI_Dict[Family]['delete_software'].format(sw))
+            privateBetaDeleted = True
 
-        # Dump NNI interfaces - obtain list of ports &amp; mltids
-        nniInterfaceList = sendCLI_showRegex(CLI_Dict[Family]['list_nni_interfaces'], 'nniInterfaceList')
+        if not privateBetaDeleted and len(softwareList) &gt;= 6: # If none found and all records full, then delete 1st image only
+            for sw in softwareList:
+                if re.search(r'\)$', sw):
+                    continue
+                sendCLI_configCommand(CLI_Dict[Family]['delete_software'].format(sw))
+                recordDeleted = True
+                break # Only delete 1st record
+            if not recordDeleted:
+                print "ERROR: Failed to delete 1 software record !"
+                errorNoDelete = True
 
-        # Get list of any Brouter ports (could be used for mgmt or Fabric Extend..)
-        brouterPortList = sendCLI_showRegex(CLI_Dict[Family]['list_brouter_ports'], 'brouterPortList')
+    elif cleanMode == 'B' and len(softwareList) &gt; 2:
+        for sw in softwareList:
+            if re.search(r'\)$', sw):
+                continue
+            sendCLI_configCommand(CLI_Dict[Family]['delete_software'].format(sw))
+            recordDeleted = True
+        if not recordDeleted:
+            print "ERROR: Failed to delete all non primary/secondary software records !"
+            errorNoDelete = True
 
-        if slppGuard:
-            # Get list of any SLPP enabled ports (if my SMLT-Pair-Enforce script was used to create SMLT MLTs, these will have regular SLPP on them..)
-            slppPortList = sendCLI_showRegex(CLI_Dict[Family]['list_slpp_ports'], 'slppPortList')
+    if tgzDelete == 'Enable':
+        # Get software archives on intflash
+        archiveList = sendCLI_showRegex(CLI_Dict[Family]['list_archives'])
+        for tgz in archiveList:
+            sendCLI_configCommand(CLI_Dict[Family]['delete_file'].format(tgz))
 
-        # Condense NNI interfaces (any FA MLTs are converted to individual ports)
-        nniPortDict = {} # Use a Dict so that keys are unique
-        for interface in nniInterfaceList:
-            if re.match(r'^\d+$' ,interface): # MLT id
-                for port in generatePortList(mltDict[interface]['ports']):
-                    nniPortDict[port] = 1
-            else: # Port
-                nniPortDict[interface] = 1
-        nniPortList = nniPortDict.keys()
-        debug("nniPortList = {}".format(nniPortList))
-
-        # Condense FA interfaces (any NNI MLTs are converted to individual ports)
-        faPortDict = {} # Use a Dict so that keys are unique
-        for interface in faInterfaceList:
-            if re.match(r'^\d+$', interface): # MLT id
-                for port in generatePortList(mltDict[interface]['ports']):
-                    faPortDict[port] = 1
-            else: # Port
-                faPortDict[interface] = 1
-        faPortList = faPortDict.keys()
-        debug("faPortList = {}".format(faPortList))
-
-        # Identify NNI ports in selection
-        nniPortsInSelection = [x for x in enteredPortList if x in nniPortList]
-        debug("nniPortsInSelection = {}".format(nniPortsInSelection))
-        # Identify FA ports in selection
-        faPortsInSelection = [x for x in enteredPortList if x in faPortList]
-        debug("faPortsInSelection = {}".format(faPortsInSelection))
-        # Identify Brouter ports in selection
-        brouterPortsInSelection = [x for x in enteredPortList if x in brouterPortList]
-        debug("brouterPortsInSelection = {}".format(brouterPortsInSelection))
-        # Subtract NNI,FA,Brouter ports from selection
-        prunedPortList = [x for x in enteredPortList if x not in nniPortList and x not in faPortList and x not in brouterPortList]
-        debug("prunedPortList = {}".format(prunedPortList))
-        prunedPortRange = generatePortRange(prunedPortList)
-        if slppGuard:
-            regSlppRemoveList = [x for x in prunedPortList if x in slppPortList]
-            debug("regSlppRemoveList = {}".format(regSlppRemoveList))
-            if regSlppRemoveList:
-                regSlppRemoveRange = generatePortRange(regSlppRemoveList)
-
-        # Determine ports and MLT ids to configure for EPT
-        for port in prunedPortList:
-            if port in portDict and portDict[port]['mlt']:
-                eptMltList.append(portDict[port]['mlt'])
-            else:
-                eptPortList.append(port)
-        debug("eptPortList = {}".format(eptPortList))
-        eptMltList = [str(x) for x in sorted([int(x) for x in eptMltList])] # Sort the MLT ids
-        debug("eptMltList = {}".format(eptMltList))
-        eptPortRange = generatePortRange(eptPortList)
-        debug("eptPortRange = {}".format(eptPortRange))
-
-        if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
-            # Check which of the future EPT ports will also require Flex-Uni enabling
-            flexUniDisabledRange = None
-            if eptPortList:
-                flexUniList = sendCLI_showRegex(CLI_Dict[Family]['get_flex_uni'].format(eptPortRange), 'flexUniList')
-                flexUniDisabledList = [x for x in flexUniList if flexUniList[x] == 'Disable']
-                debug("flexUniDisabledList = {}".format(flexUniDisabledList))
-                flexUniDisabledRange = generatePortRange(flexUniDisabledList)
-
-    if eptPortMode == 'Enable' and xmcNtpList: # Only if XMC is configured with NTP server(s)
-        # Get NTP servers already configured on switch, if any
-        switchNtpList = sendCLI_showRegex(CLI_Dict[Family]['list_ntp_servers'], 'switchNtpList')
-
-    if enteredPortList or (eptPortMode == 'Enable' and xmcNtpList):
-        print "Extracted information from VSP switch via CLI:"
-        if enteredPortList: # Only if some ports were selected
-            print " - VSP NNI ports = {}".format(generatePortRange(nniPortList))
-            print " - VSP FA ports = {}".format(generatePortRange(faPortList))
-            print " - EPT MLTs to configure = {}".format(generatePortRange(eptMltList))
-            print " - EPT ports to configure = {}".format(eptPortRange)
-            if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
-                print " - EPT ports to Flex-Uni enable = {}".format(flexUniDisabledRange)
-                print " - EPT ports to bring up (no shut) = {}".format(prunedPortRange)
-                if spoofDetect:
-                    print " - EPT ports to Spoof-Detect enable/disable = {}".format(prunedPortRange)
-                if slppGuard:
-                    print " - EPT ports to SLPP-Guard enable/disable = {}".format(prunedPortRange)
-                    if regSlppRemoveList:
-                        print " - EPT ports where to remove regular SLPP before setting SLPP-Guard = {}".format(regSlppRemoveRange)
-        if eptPortMode == 'Enable' and xmcNtpList: # Only if XMC is configured with NTP server(s)
-            print " - Existing NTP Servers = {}".format(', '.join(switchNtpList))
-        print
-
-    #
-    # Now configure the switch
-    #
-    # Enter config mode
-    sendCLI_configCommand(CLI_Dict[Family]['config_context'])
-
-    if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
-
-        if xmcNtpList: # Only if XMC is configured with NTP server(s)
-            deleteNtpServers = False
-            createNtpServers = False
-            # If switch configured NTP servers are not the XMC ones, delete them all
-            if xmcNtpList[0] not in switchNtpList or (len(xmcNtpList) == 2 and xmcNtpList[1] not in switchNtpList):
-                deleteNtpServers = True
-                createNtpServers = True
-
-            if deleteNtpServers:
-                for ntpIp in switchNtpList:
-                    sendCLI_configCommand(CLI_Dict[Family]['delete_ntp_server'].format(ntpIp))
-            if createNtpServers:
-                for ntpIp in xmcNtpList:
-                    sendCLI_configCommand(CLI_Dict[Family]['create_ntp_server'].format(ntpIp))
-            sendCLI_configChain(CLI_Dict[Family]['enable_ntp'])
-
-            # Set the time-zone
-            sendCLI_configCommand(CLI_Dict[Family]['set_timezone'].format(xmcTimeZone[0], xmcTimeZone[1]))
-
-        # Delete existing EPT RADIUS servers
-        for server in radiusEptServerList:
-            sendCLI_configChain(CLI_Dict[Family]['delete_radius_server'].format(server))
-            sendCLI_configChain(CLI_Dict[Family]['delete_radius_client'].format(server), True, "There was no RADIUS dynamic-server client for {}".format(server))
-
-        # Configure Primary RADIUS server
-        if vossSegMgmt:
-            sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret']))
-        else:
-            sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret'], vspIP))
-
-        # Configure Secondary RADIUS server, if defined for switch
-        if nacConfig['secondaryGateway']:
-            if vossSegMgmt:
-                sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret']))
-            else:
-                sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret'], vspIP))
-
-        # Enable RADIUS
-        sendCLI_configChain(CLI_Dict[Family]['enable_radius'])
-
-        if autoIsid or visibilityMode:
-
-            # Disable EPT globally (in case it was enabled, otherwise global values cannot be set)
-            sendCLI_configChain(CLI_Dict[Family]['disable_ept'])
-
-            # Configure EPT global settings
-            if autoIsid == 'Enable':
-                sendCLI_configChain(CLI_Dict[Family]['enable_ept_isid_offset'].format(autoIsidOffset))
-            elif autoIsid == 'Disable':
-                sendCLI_configChain(CLI_Dict[Family]['disable_ept_isid_offset'])
-
-            if visibilityMode == 'Enable':
-                sendCLI_configChain(CLI_Dict[Family]['enable_ept_visibility_mode'])
-            elif visibilityMode == 'Disable':
-                sendCLI_configChain(CLI_Dict[Family]['disable_ept_visibility_mode'])
-
-        # Enable EPT Globally
-        sendCLI_configChain(CLI_Dict[Family]['enable_ept'])
-
-    if enteredPortList: # Only if some ports were selected
-
-        # Configure EPT on MLTs
-        for mltid in eptMltList:
-
-            # Enter MLT config context
-            sendCLI_configCommand(CLI_Dict[Family]['mlt_config_context'].format(mltid))
-
-            if eptPortMode == 'Enable':
-                # Enable Flex-Uni if necessary
-                if not mltDict[mltid]['flex']: 
-                    sendCLI_configChain(CLI_Dict[Family]['enable_flex_uni'])
-                # Enable EPT
-                sendCLI_configChain(CLI_Dict[Family]['enable_ept'])
-
-            elif eptPortMode == 'Disable':
-                # Disable EPT
-                sendCLI_configChain(CLI_Dict[Family]['disable_ept'])
-
-            elif eptPortMode == 'None':
-                # Delete EPT
-                sendCLI_configChain(CLI_Dict[Family]['delete_ept'])
-
-            # Come out of MLT config context
-            sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
-
-        # Configure EPT on Ports
-        if eptPortMode == 'Enable':
-            if flexUniDisabledRange:
-                # Enable Flex-Uni (also removes default VLAN 1) on those ports where Flex-Uni is not already enabled
-                sendCLI_configChain(CLI_Dict[Family]['create_flex_uni'].format(flexUniDisabledRange))
-            if eptPortList:
-                sendCLI_configChain(CLI_Dict[Family]['ports_enable_ept'].format(eptPortRange))
-
-        elif eptPortMode == 'Disable' and eptPortList:
-            # Disable EPT
-            sendCLI_configChain(CLI_Dict[Family]['ports_disable_ept'].format(eptPortRange))
-
-        elif eptPortMode == 'None' and eptPortList:
-            # Delete EPT
-            sendCLI_configChain(CLI_Dict[Family]['ports_delete_ept'].format(eptPortRange))
-
-        # Enable individual ports and set Spoof-Detect / SLPP-Guard if requested
-        if eptPortMode == 'Enable' and prunedPortList:
-            # Enter Port config context (individual ept ports + MLT ept ports)
-            sendCLI_configCommand(CLI_Dict[Family]['port_config_context'].format(prunedPortRange))
-
-            # Apply Spoof-Detect config if this was specified 
-            if spoofDetect == 'Enable':
-                sendCLI_configChain(CLI_Dict[Family]['port_enable_spoof_detect'].format(prunedPortRange))
-            elif spoofDetect == 'Disable':
-                sendCLI_configChain(CLI_Dict[Family]['port_disable_spoof_detect'].format(prunedPortRange))
-
-            # Apply SLPP-Guard config if this was specified 
-            if slppGuard and regSlppRemoveList:
-                sendCLI_configChain(CLI_Dict[Family]['disable_slpp_packet_rx'].format(regSlppRemoveRange))
-            if slppGuard == 'Enable':
-                sendCLI_configChain(CLI_Dict[Family]['port_enable_slpp_guard'].format(prunedPortRange))
-            elif slppGuard == 'Disable':
-                sendCLI_configChain(CLI_Dict[Family]['port_disable_slpp_guard'].format(prunedPortRange))
-
-            # Bring up ports
-            sendCLI_configChain(CLI_Dict[Family]['port_enable'].format(prunedPortRange))
-
-            # Come out of port config context
-            sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
-
-    # End config and save
-    sendCLI_configChain(CLI_Dict[Family]['end_save_config'])
+    if not privateBetaDeleted and not recordDeleted and not errorNoDelete:
+        print "No need to delete software as available slots exist"
+    else:
+        sendCLI_showRegex(CLI_Dict[Family]['list_software']) # Just print out show software
 
     # Print summary of config performed
     printConfigSummary()
 
-    if enteredPortList: # Only if some ports were selected
-        if nniPortsInSelection:
-            print "Information: User selected ports {} were not EPT configured as these ports are NNI ports".format(generatePortRange(nniPortsInSelection))
-        if faPortsInSelection:
-            print "Information: User selected ports {} were not EPT configured as these ports are FA ports".format(generatePortRange(faPortsInSelection))
-        if brouterPortsInSelection:
-            print "Information: User selected ports {} were not EPT configured as these ports are Brouter ports".format(generatePortRange(brouterPortsInSelection))
-    if eptPortMode == 'Enable' and not xmcNtpList: # In case we had to miss out the NTP config, produce warning at the very end
-        print "Warning: It was not possible to obtain NTP server IPs &amp; Time-zone from XMC. Hence NTP was not configured on the VSP switch"
+    print "Proceed to upgrade switch via XMC 'Update Firmware'"
 
 main()
 </content>
-    <creationDate>1584546599552</creationDate>
-    <creator>lstevens</creator>
+    <creator></creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1594197988469</lastUpdateDate>
+    <lastUpdateDate>1612366292027</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>

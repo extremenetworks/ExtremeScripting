@@ -1,6 +1,6 @@
-# Extreme Management Center (Netsight) Scripting
+# XIQ Site Engine - Extreme Management Center (Netsight) Scripting
 
-Scripts and Utilities for working with Extreme Management Center.
+Scripts and Utilities for working with XIQ Site Engine - Extreme Management Center.
 
 ## Categories
 

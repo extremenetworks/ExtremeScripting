@@ -1,68 +1,50 @@
 # GenericNbiClient.go
 
-[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center and prints the raw JSON response to stdout.
+[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center (XMC; formerly known as NetSight) and prints the raw JSON response to stdout.
 
 ## Dependencies
 
-GenericNbiClient uses the modules [godotenv](https://github.com/joho/godotenv), [envordef](https://gitlab.com/rbrt-weiler/go-module-envordef) and [xmcnbiclient](https://gitlab.com/rbrt-weiler/go-module-xmcnbiclient). Execute...
+This tool uses Go modules to handle dependencies.
 
-1. `go get -u github.com/joho/godotenv`
-1. `go get -u gitlab.com/rbrt-weiler/go-module-envordef`
-1. `go get -u gitlab.com/rbrt-weiler/go-module-xmcnbiclient`
+## Running / Compiling
 
-...before running or compiling GenericNbiClient. All other dependencies are included in a standard Go installation.
+Use `go run ./...` to run the tool directly or `go build -o GenericNbiClient ./...` to compile a binary. Prebuilt binaries may be available as artifacts from the GitLab CI/CD [pipeline for tagged releases](https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-go/pipelines?scope=tags).
 
-## Compiling
-
-Use `go run GenericNbiClient.go` to run the tool directly or `go build GenericNbiClient.go` to compile a binary. Prebuilt binaries may be available as artifacts from the GitLab CI/CD [pipeline for tagged releases](https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-go/pipelines?scope=tags).
-
-Tested with [go1.13](https://golang.org/doc/go1.13) against XMC 8.4.1.24.
+Tested with [go1.15](https://golang.org/doc/go1.15).
 
 ## Usage
 
-`GenericNbiClient -h`:
+`GenericNbiClient --help`:
 
-<pre>
+```text
 Available options:
-  -basicauth
-    	Use HTTP Basic Auth instead of OAuth
-  -host string
-    	XMC Hostname / IP
-  -insecurehttps
-    	Do not validate HTTPS certificates
-  -nohttps
-    	Use HTTP instead of HTTPS
-  -path string
-    	Path where XMC is reachable
-  -port uint
-    	HTTP port where XMC is listening (default 8443)
-  -query string
-    	GraphQL query to send to XMC (default "query { network { devices { up ip sysName nickName } } }")
-  -secret string
-    	Client Secret (OAuth) or password (Basic Auth) for authentication
-  -timeout uint
-    	Timeout for HTTP(S) connections (default 5)
-  -userid string
-    	Client ID (OAuth) or username (Basic Auth) for authentication
-  -version
-    	Print version information and exit
+  -h, --host string     XMC Hostname / IP
+      --port uint       HTTP port where XMC is listening (default 8443)
+      --path string     Path where XMC is reachable
+      --timeout uint    Timeout for HTTP(S) connections (default 5)
+      --nohttps         Use HTTP instead of HTTPS
+      --insecurehttps   Do not validate HTTPS certificates
+  -u, --userid string   Client ID (OAuth) or username (Basic Auth) for authentication
+  -s, --secret string   Client Secret (OAuth) or password (Basic Auth) for authentication
+      --basicauth       Use HTTP Basic Auth instead of OAuth
+      --version         Print version information and exit
+
+If not provided, query will default to:
+query { network { devices { up ip sysName nickName } } }
 
 All options that take a value can be set via environment variables:
-  XMCHOST       -->  -host
-  XMCPORT       -->  -port
-  XMCPATH       -->  -path
-  XMCTIMEOUT    -->  -timeout
-  XMCNOHTTPS    -->  -nohttps
-  XMCINSECURE   -->  -insecurehttps
-  XMCUSERID     -->  -userid
-  XMCSECRET     -->  -secret
-  XMCBASICAUTH  -->  -basicauth
-  XMCQUERY      -->  -query
+  XMCHOST           -->  --host
+  XMCPORT           -->  --port
+  XMCPATH           -->  --path
+  XMCTIMEOUT        -->  --timeout
+  XMCNOHTTPS        -->  --nohttps
+  XMCINSECUREHTTPS  -->  --insecurehttps
+  XMCUSERID         -->  --userid
+  XMCSECRET         -->  --secret
+  XMCBASICAUTH      -->  --basicauth
 
-Environment variables can also be configured via a file called .xmcenv,
-located in the current directory or in the home directory of the current
-user.
-</pre>
+Environment variables can also be configured via a file called .xmcenv, located in the current directory or in the home directory of the current user.
+```
 
 ## Authentication
 

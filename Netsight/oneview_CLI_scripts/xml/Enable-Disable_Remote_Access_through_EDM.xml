@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Enable-Disable Remote Access through EDM">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Security,</category>
+    <comments>Enable/Disable Remote Access to ERS through EDM</comments>
+    <content>'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# This script enables/disables Telnet/SSH access through EDM on ERS platform
+# written by:   Zdenek Pala
+# e-mail:       zpala@extremenetworks.com
+# date:         18th June 2020
+#
+#######################################################################################
+#@DetailDescriptionEnd
+
+#@SectionStart (description = "Credentials")
+#    @VariableFieldLabel (
+#        description = "EDM UserName",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_EDMUserName",
+#    )
+#    @VariableFieldLabel (
+#        description = "EDM Password",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        name = "userInput_EMMPassword",
+#    )
+#    @VariableFieldLabel (
+#        description = "Telnet or SSH",
+#        type = string,
+#        required = yes,
+#        readOnly = no,
+#        validValues=[Telnet,SSH],
+#        name = "userInput_Variable",
+#        value = "SSH"
+#    )
+#    @VariableFieldLabel (
+#        description = "Enable or Disable",
+#        type = string,
+#        required = yes,
+#        readOnly = no,
+#        validValues=[Enable,Disable],
+#        name = "userInput_Enable",
+#        value = "Enable"
+#    )
+#    @VariableFieldLabel (
+#        description = "Use Http or Https",
+#        type = string,
+#        required = yes,
+#        readOnly = no,
+#        validValues=[Http,Https],
+#        name = "userInput_Transport",
+#        value = "Http"
+#    )
+#@SectionEnd
+#@MetaDataEnd
+'''
+
+from xmclib import emc_vars
+from xmclib import logger
+import requests
+from requests.auth import HTTPBasicAuth
+
+######## FUNCTION DEFINITIONS
+def wf_info(log):
+    print 'INFO:' +log
+    logger.info(log)
+
+def CallEDM(varMethod,varUsername,varPassword,varProtocol,varEnable):
+    translate={"Enable":1,"Disable":2}
+    varURL = "%s://%s/jsp/setFormMibs.jsp" %(varMethod,emc_vars["deviceIP"])
+    varHeaders = {'Content-Type': 'application/x-www-form-urlencoded"'}
+    if varProtocol == "Telnet":
+        varBody = "command=setVariables&amp;oldWeb=true&amp;varNames=telnetAccess&amp;varValues=%s&amp;varCount=1&amp;timeout=30000"%translate[varEnable]
+    else:
+        varBody = "command=setVariables&amp;oldWeb=true&amp;varNames=sshAccess&amp;varValues=%s&amp;varCount=1&amp;timeout=30000"%translate[varEnable]
+    try:
+        myResponse = requests.post(varURL, auth=HTTPBasicAuth(varUsername, varPassword), verify=False, data = varBody, headers = varHeaders)
+    except requests.exceptions.RequestException as e:
+        wf_info(str(e))
+        status = emc_results.Status;
+        emc_results.setStatus( status.ERROR )
+    if myResponse.status_code != requests.codes.ok:
+        wf_info(varBody)
+        wf_info("ERROR communicating to EDM "+str(myResponse.status_code)+myResponse.text)
+        status = emc_results.Status
+        emc_results.setStatus( status.ERROR )
+    return myResponse.text
+
+#
+# Main:
+#
+def main():
+    try:
+        varUsername = emc_vars['userInput_EDMUserName']
+    except:
+        varUsername = ""
+    try:
+        varPassword = emc_vars['userInput_EMMPassword']
+    except:
+        varPassword = ""
+    try:
+        varVariable = emc_vars['userInput_Variable']
+    except:
+        wf_info ("wrong protocol")
+        varVariable = ""
+    try:
+        varTransport = emc_vars['userInput_Transport']
+    except:
+        wf_info ("wrong method")
+        varTransport = ""
+    try:
+        varEnable = emc_vars['userInput_Enable']
+    except:
+        varEnable = "Enable"
+    print "Information provided by User:"
+    print " - EDM Username = {}".format(varUsername)
+    print " - EDM Password = {}".format(varPassword)
+    print " - Protocol = {}".format(varVariable)
+    print " - What to do = {}".format(varEnable)
+    wf_info ("Web call response: %s. 1 means enabled. 2 means disabled."%CallEDM(varTransport,varUsername,varPassword,varVariable,varEnable).replace('\n',''))
+    return
+
+main()
+
+#################
+## Be Extreme! ##
+#################
+</content>
+    <creationDate>1592511638398</creationDate>
+    <creator>zpala</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <contexts>,Groups,Device,</contexts>
+    <lastUpdateDate>1592511993921</lastUpdateDate>
+    <lastUpdatedBy>zpala</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-ers-4900-5900,nos-id-ers-4800,ERS-4500,nos-id-ers-3600,nos-id-ers-3500,nos-id-boss,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+

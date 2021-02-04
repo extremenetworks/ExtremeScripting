@@ -1,0 +1,9 @@
+﻿#PVI NAME,VLAN NAME,VLAN ID
+Red Island,User_Vlan,202
+Red Island,Printer_Vlan,102
+Red Island,Server_Vlan,105
+Red Island,VoIP_Vlan,302
+Blue Island,User_Vlan,204
+Blue Island,Printer_Vlan,104
+Blue Island,Server_Vlan,105
+Blue Island,VoIP_Vlan,404

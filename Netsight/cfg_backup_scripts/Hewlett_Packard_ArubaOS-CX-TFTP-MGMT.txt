@@ -1,0 +1,26 @@
+-- Use these scripts to manage an ArubaOS device
+name="Hewlett Packard ArubaOS-CX Mgmt - TFTP"
+desc="Hewlett Packard ArubaOS-CX TFTP Scripts VRF mgmt"
+protocol=TFTP
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH% cli vrf mgmt
+@receive 20
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Configuration Download"-----
+copy %TFTP_URL% startup-config vrf mgmt
+@receive 20
+copy startup-config running-config
+@receive 10
+exit
+-----END SCRIPT-----
+-----BEGIN SCRIPT "Reset"-----
+auto-confirm
+boot system
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+100 
+-----END SUCCESS-----
+-----BEGIN SUCCESS "Configuration Download"-----
+100 
+-----END SUCCESS-----
