@@ -6,37 +6,12 @@ import (
 	"path"
 	"strings"
 
-	text "github.com/jedib0t/go-pretty/v6/text"
-	godotenv "github.com/joho/godotenv"
-	consolesize "github.com/nathan-fiscaletti/consolesize-go"
-	pflag "github.com/spf13/pflag"
+	consolehelper "gitlab.com/rbrt-weiler/go-module-consolehelper"
 	envordef "gitlab.com/rbrt-weiler/go-module-envordef"
+	godotenv "github.com/joho/godotenv"
+	pflag "github.com/spf13/pflag"
 	xmcnbiclient "gitlab.com/rbrt-weiler/go-module-xmcnbiclient"
 )
-
-// consoleHelper encapsulates functionality for pretty printing on the console.
-type consoleHelper struct {
-	Rows int
-	Cols int
-}
-
-// Updates the consoleHelper instance with the current console dimensions.
-func (c *consoleHelper) UpdateDimensions() {
-	c.Cols, c.Rows = consolesize.GetConsoleSize()
-}
-
-// Like fmt.Sprintf, but with text wrapping based on console size.
-func (c *consoleHelper) Sprintf(format string, a ...interface{}) string {
-	if c.Cols == 0 || c.Rows == 0 {
-		c.UpdateDimensions()
-	}
-	return text.WrapSoft(fmt.Sprintf(format, a...), c.Cols)
-}
-
-// Like fmt.Sprint, but with text wrapping based on console size.
-func (c *consoleHelper) Sprint(s string) string {
-	return c.Sprintf("%s", s)
-}
 
 // appConfig stores the application configuration once parsed by flags.
 type appConfig struct {
@@ -56,7 +31,7 @@ type appConfig struct {
 // Definitions used within the code.
 const (
 	toolName        string = "GenericNbiClient.go"
-	toolVersion     string = "1.0.0"
+	toolVersion     string = "1.0.1"
 	toolID          string = toolName + "/" + toolVersion
 	toolURL         string = "https://gitlab.com/rbrt-weiler/xmc-nbi-genericnbiclient-go"
 	envFileName     string = ".xmcenv"
@@ -75,8 +50,8 @@ const (
 
 // Global variables used throughout the program.
 var (
-	config  appConfig     // User configuration
-	console consoleHelper // Pretty printing
+	config appConfig                   // User configuration
+	cons   consolehelper.ConsoleHelper // Pretty printing
 )
 
 // parseCLIOptions parses all options passed by env or CLI into the Config variable.
@@ -93,31 +68,31 @@ func parseCLIOptions() {
 	pflag.BoolVar(&config.BasicAuth, "basicauth", envordef.BoolVal("XMCBASICAUTH", false), "Use HTTP Basic Auth instead of OAuth")
 	pflag.BoolVar(&config.PrintVersion, "version", false, "Print version information and exit")
 	pflag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint(toolID))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint(toolURL))
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("This tool queries the Northbound Interface (NBI) of Extreme Management Center (XMC) and prints the raw reply (in JSON format) to stdout."))
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprintf("Usage: %s [options] query", path.Base(os.Args[0])))
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("Available options:"))
+		cons.Fprintf(os.Stderr, "%s\n", toolID)
+		cons.Fprintf(os.Stderr, "%s\n", toolURL)
+		cons.Fprintf(os.Stderr, "\n")
+		cons.Fprintf(os.Stderr, "This tool queries the Northbound Interface (NBI) of Extreme Management Center (XMC) and prints the raw reply (in JSON format) to stdout.\n")
+		cons.Fprintf(os.Stderr, "\n")
+		cons.Fprintf(os.Stderr, "Usage: %s [options] query\n", path.Base(os.Args[0]))
+		cons.Fprintf(os.Stderr, "\n")
+		cons.Fprintf(os.Stderr, "Available options:\n")
 		pflag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("If not provided, query will default to:"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint(defaultXMCQuery))
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("All options that take a value can be set via environment variables:"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCHOST           -->  --host"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCPORT           -->  --port"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCPATH           -->  --path"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCTIMEOUT        -->  --timeout"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCNOHTTPS        -->  --nohttps"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCINSECUREHTTPS  -->  --insecurehttps"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCUSERID         -->  --userid"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCSECRET         -->  --secret"))
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprint("  XMCBASICAUTH      -->  --basicauth"))
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "%s\n", console.Sprintf("Environment variables can also be configured via a file called %s, located in the current directory or in the home directory of the current user.", envFileName))
+		cons.Fprintf(os.Stderr, "\n")
+		cons.Fprintf(os.Stderr, "If not provided, query will default to:\n")
+		cons.Fprintf(os.Stderr, "%s\n", defaultXMCQuery)
+		cons.Fprintf(os.Stderr, "\n")
+		cons.Fprintf(os.Stderr, "All options that take a value can be set via environment variables:\n")
+		cons.Fprintf(os.Stderr, "  XMCHOST           -->  --host\n")
+		cons.Fprintf(os.Stderr, "  XMCPORT           -->  --port\n")
+		cons.Fprintf(os.Stderr, "  XMCPATH           -->  --path\n")
+		cons.Fprintf(os.Stderr, "  XMCTIMEOUT        -->  --timeout\n")
+		cons.Fprintf(os.Stderr, "  XMCNOHTTPS        -->  --nohttps\n")
+		cons.Fprintf(os.Stderr, "  XMCINSECUREHTTPS  -->  --insecurehttps\n")
+		cons.Fprintf(os.Stderr, "  XMCUSERID         -->  --userid\n")
+		cons.Fprintf(os.Stderr, "  XMCSECRET         -->  --secret\n")
+		cons.Fprintf(os.Stderr, "  XMCBASICAUTH      -->  --basicauth\n")
+		cons.Fprintf(os.Stderr, "\n")
+		cons.Fprintf(os.Stderr, "Environment variables can also be configured via a file called %s, located in the current directory or in the home directory of the current user.\n", envFileName)
 		os.Exit(errUsage)
 	}
 	pflag.Parse()
@@ -130,13 +105,13 @@ func parseCLIOptions() {
 // init loads environment files if available.
 func init() {
 	// initialize console size
-	console.UpdateDimensions()
+	cons.UpdateDimensions()
 
 	// if envFileName exists in the current directory, load it
 	localEnvFile := fmt.Sprintf("./%s", envFileName)
 	if _, localEnvErr := os.Stat(localEnvFile); localEnvErr == nil {
 		if loadErr := godotenv.Load(localEnvFile); loadErr != nil {
-			fmt.Fprintf(os.Stderr, "Could not load env file <%s>: %s", localEnvFile, loadErr)
+			cons.Fprintf(os.Stderr, "Could not load env file <%s>: %s", localEnvFile, loadErr)
 		}
 	}
 
@@ -145,7 +120,7 @@ func init() {
 		homeEnvFile := fmt.Sprintf("%s/%s", homeDir, ".xmcenv")
 		if _, homeEnvErr := os.Stat(homeEnvFile); homeEnvErr == nil {
 			if loadErr := godotenv.Load(homeEnvFile); loadErr != nil {
-				fmt.Fprintf(os.Stderr, "Could not load env file <%s>: %s", homeEnvFile, loadErr)
+				cons.Fprintf(os.Stderr, "Could not load env file <%s>: %s", homeEnvFile, loadErr)
 			}
 		}
 	}
@@ -158,12 +133,12 @@ func main() {
 
 	// Print version information and exit.
 	if config.PrintVersion {
-		fmt.Println(toolID)
+		cons.Println(toolID)
 		os.Exit(errSuccess)
 	}
 	// Check that the option "host" has been set.
 	if config.XMCHost == "" {
-		fmt.Fprintln(os.Stderr, "Variable --host must be defined. Use --help to get help.")
+		cons.Fprintln(os.Stderr, "Variable --host must be defined. Use --help to get help.")
 		os.Exit(errMissArg)
 	}
 
@@ -171,7 +146,7 @@ func main() {
 	client := xmcnbiclient.New(config.XMCHost)
 	client.SetUserAgent(toolID)
 	if portErr := client.SetPort(config.XMCPort); portErr != nil {
-		fmt.Fprintf(os.Stderr, "XMC port could not be set: %s\n", portErr)
+		cons.Fprintf(os.Stderr, "XMC port could not be set: %s\n", portErr)
 		os.Exit(errHTTPPort)
 	}
 	if config.NoHTTPS {
@@ -181,7 +156,7 @@ func main() {
 		client.UseInsecureHTTPS()
 	}
 	if timeoutErr := client.SetTimeout(config.HTTPTimeout); timeoutErr != nil {
-		fmt.Fprintf(os.Stderr, "HTTP timeout could not be set: %s\n", timeoutErr)
+		cons.Fprintf(os.Stderr, "HTTP timeout could not be set: %s\n", timeoutErr)
 		os.Exit(errHTTPTimeout)
 	}
 	client.SetBasePath(config.XMCPath)
@@ -193,10 +168,10 @@ func main() {
 	// Call the API and print the result.
 	apiResult, apiError := client.QueryAPI(config.XMCQuery)
 	if apiError != nil {
-		fmt.Fprintf(os.Stderr, "Could not retrieve API result: %s\n", apiError)
+		cons.Fprintf(os.Stderr, "Could not retrieve API result: %s\n", apiError)
 		os.Exit(errAPIResult)
 	}
-	fmt.Println(string(apiResult))
+	cons.Println(string(apiResult))
 
 	// Exit with an appropriate exit code.
 	os.Exit(errSuccess)

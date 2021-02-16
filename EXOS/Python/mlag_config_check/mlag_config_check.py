@@ -200,7 +200,7 @@ def legacy_mlag_check():
                     vlan_on_next_iteration = False
         ## Check local and remote checksums to determine if FDB and VLANs match
         for count in range(0,3):
-            checksums = clicmd('debug fdb show globals | include LclCkhsum:', True)
+            checksums = clicmd('debug fdb show globals | include LclC[kh][kh]sum:', True)
             checksums = checksums.split()
             local = checksums[2]
             remote = checksums[4]
@@ -380,7 +380,7 @@ def main():
                     clicmd('configure vlan {0} add port {1} tagged'.format(vlan, isc_port))
             ## Check local and remote checksums to determine if FDB and VLANs match
             for count in range(0, 3):
-                checksums = clicmd('debug fdb show globals | include LclCkhsum:', True)
+                checksums = clicmd('debug fdb show globals | include LclC[kh][kh]sum:', True)
                 checksums = checksums.split()
                 if index == 0:
                     local = checksums[2]
