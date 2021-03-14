@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.0</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.1</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,10 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.0'
+__version__ = '1.1'
+
+# 1.0	- Initial
+# 1.1	- Some extra IP validation checks
 
 '''
 #@MetaDataStart
@@ -516,6 +519,32 @@ def ipToNumber(dottedDecimalStr): # Method to convert an IP/Mask dotted decimal 
     debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
     return ipNumber
 
+def numberToIp(ipNumber): # Method to convert a long number into an IP/Mask dotted decimal address
+    dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
+    debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
+    return dottedDecimalStr
+
+def maskToNumber(mask): # Method to convert a mask (dotted decimal or Cidr number) into a long number
+    if isinstance(mask, int) or re.match(r'^\d+$', mask): # Mask as number
+        if int(mask) &gt; 0 and int(mask) &lt;= 32:
+            maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
+        else:
+            maskNumber = None
+    else:
+        maskNumber = ipToNumber(mask)
+    if maskNumber:
+        debug("maskNumber = {}".format(hex(maskNumber)))
+    return maskNumber
+
+def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    ipSubnet = numberToIp(subnetNumber)
+    ipDottedMask = numberToIp(maskNumber)
+    ipCidrMask = bin(maskNumber).count('1')
+    debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
+    return ipSubnet, ipDottedMask, ipCidrMask
 
 #
 # Miscellaneous functions
@@ -567,6 +596,7 @@ CLI_Dict = {
         'disable_more_paging'        : 'terminal more disable',
         'enable_context'             : 'enable',
         'config_context'             : 'config term',
+        'get_mgmt_ip_mask'           : 'int://show mgmt ip||{}\/(\d\d?) ', # IP address
         'check_vrf_exists'           : 'bool://show ip vrf||^{} ', # VRF name
         'list_mgmt_interfaces'       : 'list://show mgmt interface||^\d +\S+ +([A-Z]+) ',
         'delete_mgmt_clip'           : 'no mgmt clip\ny',
@@ -700,6 +730,8 @@ def main():
     # IP validation
     if not ipToNumber(newIp):
         exitError('Invalid VLAN IP address {}'.format(newIp))
+    if newIp == currentIp:
+        exitError('Given IP {} is already used to manange the switch'.format(newIp))
 
     # VRF validation
     if not newVrf:
@@ -726,6 +758,15 @@ def main():
 
     # Enter privExec
     sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
+
+    # Get the mask of the IP we are using now
+    currentIpMask = sendCLI_showRegex(CLI_Dict[Family]['get_mgmt_ip_mask'].format(currentIp))
+    if not currentIpMask:
+        exitError("Cannot determine mask of existing IP {}".format(currentIp))
+
+    # Compare subnets for same mask (when moving from mgmt vlan IP to clip IP, ensure the clip IP is not in vlan IP subnet)
+    if subnetMask(currentIp, currentIpMask)[0] == subnetMask(newIp, currentIpMask)[0]:
+        exitError("New IP {} seems to be in same subnet of existing IP {}".format(newIp, currentIp))
 
     # Verify VRF existence
     if newVrf != 'GlobalRouter':
@@ -793,13 +834,13 @@ def main():
 
 main()
 </content>
-    <creationDate>1614203629393</creationDate>
+    <creationDate>1615564687832</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,</contexts>
-    <lastUpdateDate>1614793783002</lastUpdateDate>
+    <lastUpdateDate>1615589743853</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
