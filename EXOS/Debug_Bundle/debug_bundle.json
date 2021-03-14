@@ -74,7 +74,7 @@
 
 # VPEX
 
-{"VPEX": {"exos_cmd": ["show vpex","show vpex ports","show vpex bpe statistics detail","show vpex bpe version detail","show vpex bpe cpu-utilization","show vpex bpe environment","show vpex ports ecp statistics","show vpex bpe","debug vpex show extslot","debug vpex show bpe","debug vpex show bpe detailed","debug vpex show polling","debug vpex show port detailed","debug hal show platform vpex detail"]}}
+{"VPEX": {"exos_cmd": ["show vpex","show vpex ports","show vpex bpe statistics detail","show vpex bpe version detail","show vpex bpe cpu-utilization","show vpex bpe environment","show vpex ports ecp statistics","show vpex bpe","debug vpex show extslot","debug vpex show bpe","debug vpex show bpe detailed","debug vpex show polling","debug vpex show port detailed","debug hal show platform vpex detail"] , "bcm_cmd" : ["dump chg port","dump chg egr_port","getreg pe_ethertype","dump chg l2_user_entry","dump chg vlan_xlate","dump chg ing_vp_vlan_membership","dump chg egr_vp_vlan_membership","multicast show","dump chg l3_ipmc","dump chg repl_head","dump chg ihop","dump chg ehop","dump chg source_vp","dump chg egr_dvp_attribute"] ,"bpe_cmd" : ["bpe print echannel","bpe print trunks","bpe print trusted statistics"]  }  }
 
 #MLAG
 

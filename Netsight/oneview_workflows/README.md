@@ -46,6 +46,7 @@
 |[Onboard VSP](xwf/Onboard_VSP-8.5.4.23v49.xwf?raw=true)|This workflow allows for automated onboarding of VSP Edge and is designed to be assigned to a Site, under Action tab, as a Custom Configuration Task. The workflow inputs can be set on the workflow itself (if all VSPs will be onboarded to the same Site) or can be set to ${&lt;site-custom-variable&gt;} where the appropriate variable has been set under the Site Custom Variables tab as category "Site", site the site itself (not Global), and type "String". The workflow inputs will determine whether the onboarded VSP is NAC enabled (this will both configure the VSP switch and add the VSP switch to the correct XMC AccessControl Engine Group) and whether the VSP is made into a DVR Leaf node. Auto-sense configuration is also applied if provided and any additional CLI config commands can also be applied at the same time. Activation of DVR Leaf mode, will trigger a VSP switch reboot at the end of the workflow.|Inputs: DVR Leaf enable/disable, NAC enable/disable, NAC Engine Group name, RADIUS attributes template, RADIUS shared secret, Location Group, Auto-sense voice I-SID/VLAN, Auto-sense Data I-SID, Auto-sense ISIS Authentication key, Auto-sense FA Authentication key, Additional CLI commands|8.5.4.23v49|
 
 
+
 # XIQ Site Engine (XMC) daily job Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
