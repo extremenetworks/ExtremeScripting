@@ -15,6 +15,10 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 
 
 # XIQ Site Engine and Extreme Management Center version 8.0+ Scripts
+## XMC scripts
+| OS | Script name   | Description   | Type   |
+| -- | ------------- | ------------- |:------:|
+| n/a |[Retrieve Script Log](xml/Retrieve_Script_Log.xml?raw=true)| This script does for XMC scripts what Workflow Dashboard does for workflows. Once the script window is closed, it is hard to go back and see the script output (one has to go and look to XMC's Linux file system). To find a past script log, simply run this script against the switch (or switches) where the seeked script was previously executed. If no inputs are provided the script will list all script logs which were executed against the same switch IP, together with the relative timestamp. Once spotted the desired log, simply hit Back, enter the script name and timestamp and run again. If only 1 matching script log is found, then the script log is dumped in the script window. If no sript logs are found then this script intentionally raises an exception so as to get a red cross next to the device indicating no hit|Python|
 ## EXOS scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
