@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.1</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.2</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,10 +29,14 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.1'
+__version__ = '1.2'
 
-# 1.0	- Initial
-# 1.1	- Some extra IP validation checks
+# 1.0   - Initial
+# 1.1   - Some extra IP validation checks
+# 1.2   - Now works properly even in regular BEB (non-DVR Leaf) case
+#       - For regular BEB, IP shortcuts is checked
+#       - For regular BEB, non-GRT VRF L3VSN config is checked
+#       - If a mgmt clip does not exist, the new one is created, and rollback performed if not reachable
 
 '''
 #@MetaDataStart
@@ -43,6 +47,16 @@ __version__ = '1.1'
 # which will then be configured as mgmt clip on the VSP. If the VSP already had a mgmt
 # clip the existing mgmt clip will be deleted and replaced with the new one. If the
 # switch had a mgmt vlan IP, this will also be deleted.
+# Checks are made to ensure that IP Shortcuts are already enabled on a regular BEB
+# and if the VRF provided is non-GRT, that the VRF already has L3VSN enabled; otherwise
+# the script will error and make no changes.
+# If a mgmt clip does not already exist, the script takes a safer approach by creating
+# the new mgmt clip and making sure that this is reachable by XMC before proceeding to
+# delete the mgmt vlan interface. If the newly created mgmt clip is not reachable
+# after 10 seconds, the changes are rolled back and the script will error.
+# But if the mgmt clip does already exist, then the only way to change it is to go
+# ahead and delete it and create the new mgmt clip IP; but in this case, if the new IP
+# is not reachable then the switch will be lost.
 # Finally the switch is deleted from XMC's database as well as XMC Control if there,
 # and re-added to the same site with the new mgmt IP address.
 # Before attempting to change the IP on the switch, the script will first of all make
@@ -126,6 +140,7 @@ import re
 import os                           # Used by warpBuffer_execute
 from java.util import LinkedHashMap # Used by nbiQuery
 import socket                       # Used by addXmcSyslogEvent
+import time
 
 #
 # VARIABLES:
@@ -212,6 +227,24 @@ def setFamily(): # Set global Family variable; automatically handles family chil
     print "Using family type '{}' for this script".format(Family)
     if Family not in CLI_Dict:
         exitError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+
+
+#
+# CLI Rollback functions
+#
+
+def rollbackStack(): # v1 - Execute all commands on the rollback stack
+    if RollbackStack:
+        print "Applying rollback commands to undo partial config and return device to initial state"
+        while RollbackStack:
+            sendCLI_configChain(RollbackStack.pop(), True)
+
+def rollbackCommand(cmd): # v1 - Add a command to the rollback stack; these commands will get popped and executed should we need to abort
+    RollbackStack.append(cmd)
+    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
+    cmdList = [x for x in cmdList if x] # Weed out empty elements 
+    cmdOneLiner = " / ".join(cmdList)
+    print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
 
 
 #
@@ -550,6 +583,45 @@ def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and 
 # Miscellaneous functions
 #
 
+def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
+    # Only supported for family = 'VSP Series'
+    cmd = 'list://show isis spbm||(?:(B-VID) +PRIMARY +(NICK) +LSDB +(IP)(?: +(IPV6))?(?: +(MULTICAST))?|^\d+ +(?:(\d+)-(\d+) +\d+ +)?(?:([\da-f]\.[\da-f]{2}\.[\da-f]{2}) +)?(?:disable|enable) +(disable|enable)(?: +(disable|enable))?(?: +(disable|enable))?|^\d+ +(?:primary|secondary) +([\da-f:]+)(?: +([\da-f\.]+))?)'
+    data = sendCLI_showRegex(cmd)
+    # VOSS:[(u'B-VID', u'NICK', u'IP', u'IPV6', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''), (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.75', u'enable', u'disable', u'disable', u'', u''),           (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'00:00:00:00:00:00', u'')]
+    # V86: [(u'B-VID', u'NICK', u'IP', u'', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''),     (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.11', u'enable',             u'disable', u'', u'', u''),      (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'82:bb:00:00:11:ff', u'82bb.0000.1200')]
+    # XA:  [(u'B-VID', u'NICK', u'IP', u'', u'', u'', u'', u'', u'', u'', u'', u'', u''),              (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.46', u'enable',                         u'', u'', u'', u'')]
+    dataDict = {
+        'SpbmInstance' : False,
+        'BVIDs'        : [],
+        'Nickname'     : None,
+        'IP'           : None,
+        'IPV6'         : None,
+        'Multicast'    : None,
+        'SmltVirtBmac' : None,
+        'SmltPeerBmac' : None,
+    }
+    if len(data) &gt; 1: # If we did not just match the banner line
+        dataDict['SpbmInstance'] = True
+        if data[1][5] and data[1][6]:
+            dataDict['BVIDs'] = [data[1][5],data[1][6]]
+        else:
+            dataDict['BVIDs'] = []
+        dataDict['Nickname'] = data[1][7]
+        dataDict['IP'] = data[1][8]
+        if data[0][3] == 'IPV6':
+            dataDict['IPV6'] = data[1][9]
+            if data[0][4] == 'MULTICAST':
+                dataDict['Multicast'] = data[1][10]
+        else:
+            if data[0][4] == 'MULTICAST':
+                dataDict['Multicast'] = data[1][9]
+    if len(data) == 3: # We got SMLT data (on XA we don't have the line)
+        if data[2][11] and data[2][11] != '00:00:00:00:00:00':
+            dataDict['SmltVirtBmac'] = data[2][11]
+            dataDict['SmltPeerBmac'] = data[2][12]
+    debug("extractSpbmGlobal() = {}".format(dataDict))
+    return dataDict
+
 def addXmcSyslogEvent(severity, message, ip=None): # Adds a syslog event to XMC (only needed for Scripts)
     severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
     severityLevel = severityHash[severity] if severity in severityHash else 6
@@ -597,10 +669,12 @@ CLI_Dict = {
         'enable_context'             : 'enable',
         'config_context'             : 'config term',
         'get_mgmt_ip_mask'           : 'int://show mgmt ip||{}\/(\d\d?) ', # IP address
+        'get_dvr_type'               : 'str-lower://show dvr||^Role\s+:\s+(Leaf|Controller)',
         'check_vrf_exists'           : 'bool://show ip vrf||^{} ', # VRF name
+        'check_vrf_l3vsn'            : 'bool://show ip ipvpn vrf {0}||^{0} +\d+ +enabled', # VRF name
         'list_mgmt_interfaces'       : 'list://show mgmt interface||^\d +\S+ +([A-Z]+) ',
-        'delete_mgmt_clip'           : 'no mgmt clip\ny',
-        'delete_mgmt_vlan'           : 'no mgmt vlan\ny',
+        'delete_mgmt_clip'           : 'no mgmt clip',
+        'delete_mgmt_vlan'           : 'no mgmt vlan',
         'create_mgmt_clip'           : # VRF name, IP address
                                        '''
                                        mgmt clip vrf {0}
@@ -744,7 +818,7 @@ def main():
 
     # Check if given IP is already out there
     response = os.system("ping -c 1 " + newIp)
-    if response == 0:
+    if response == 0: # Response from ping
         exitError("Given IP address {} is already on the network (replies to ping)".format(newIp))
 
     # Get the site path for device
@@ -768,11 +842,32 @@ def main():
     if subnetMask(currentIp, currentIpMask)[0] == subnetMask(newIp, currentIpMask)[0]:
         exitError("New IP {} seems to be in same subnet of existing IP {}".format(newIp, currentIp))
 
-    # Verify VRF existence
-    if newVrf != 'GlobalRouter':
-        vrfExists = sendCLI_showRegex(CLI_Dict[Family]['check_vrf_exists'].format(newVrf))
-        if not vrfExists:
-            exitError("VRF {} does not exist on switch; cannot create a mgmt clip for non-existent VRF".format(newVrf))
+    # Check if node is a DVR Leaf
+    dvrNodeType = sendCLI_showRegex(CLI_Dict[Family]['get_dvr_type'], 'dvrNodeType', True, "No DVR support on this switch")
+
+    if dvrNodeType == 'leaf': # Processing diverges based on DVR Leaf or regular BEB
+        # Verify the VRF is GRT
+        if newVrf != 'GlobalRouter':
+            exitError("Switch is a DVR Leaf and mgmt clip can only be applied on GlobalRouter VRF")
+
+    else: # Regular BEB
+        # Verify VRF existence
+        if newVrf != 'GlobalRouter':
+            vrfExists = sendCLI_showRegex(CLI_Dict[Family]['check_vrf_exists'].format(newVrf))
+            if not vrfExists:
+                exitError("VRF {} does not exist on switch; cannot create a mgmt clip for non-existent VRF".format(newVrf))
+
+        # Verify if IP Shortcuts is enabled
+        spbmGlobalDict = extractSpbmGlobal()
+        if not spbmGlobalDict['IP'] == 'enable':
+            exitError("IP Shortcuts (spbm ip enable) must be enabled before assigning a mgmt clip")
+
+        # For a VRF other than GRT, we also need to check that ipvpn is enabled
+        if newVrf != 'GlobalRouter':
+            vrfL3vsnExists = sendCLI_showRegex(CLI_Dict[Family]['check_vrf_l3vsn'].format(newVrf))
+            if not vrfL3vsnExists:
+                exitError("VRF {} must be a L3VSN (ipvpn enabled) before assigning a mgmt clip to it".format(newVrf))
+
 
     # Verify whether mgmt clip is already set
     mgmtIfList = sendCLI_showRegex(CLI_Dict[Family]['list_mgmt_interfaces'])
@@ -780,12 +875,24 @@ def main():
     # Enter Config context
     sendCLI_showCommand(CLI_Dict[Family]['config_context'])
 
-    # Queue delete of existing mgmt clip
-    if 'CLIP' in mgmtIfList:
+    if 'CLIP' in mgmtIfList: # Here a mgmt clip already exists, and we are trying to change it
+        # Queue delete of existing mgmt clip
         warpBuffer_add(CLI_Dict[Family]['delete_mgmt_clip'])
 
-    # Queue creation of new mgmt clip
-    warpBuffer_add(CLI_Dict[Family]['create_mgmt_clip'].format(newVrf, newIp))
+        # Queue creation of new mgmt clip
+        warpBuffer_add(CLI_Dict[Family]['create_mgmt_clip'].format(newVrf, newIp))
+
+    else: # Here no mgmt clip exists, so we can take a safer approach...
+        # Go ahead and create the new mgmt clip
+        sendCLI_configChain(CLI_Dict[Family]['create_mgmt_clip'].format(newVrf, newIp))
+        rollbackCommand(CLI_Dict[Family]['delete_mgmt_clip'])
+
+        # Now check if the IP is reachable by XMC
+        print "Waitnig 10 seconds before checking if new CLIP Mgmt IP is reachable"
+        time.sleep(10)
+        response = os.system("ping -c 1 " + newIp)
+        if response == 1: # No response from ping
+            abortError("ping {}".format(newIp), "Newly configured clip IP {} not reachable by XMC; rolling back changes".format(newIp))
 
     # Queue delete of existing mgmt vlan
     if 'VLAN' in mgmtIfList:
@@ -834,13 +941,13 @@ def main():
 
 main()
 </content>
-    <creationDate>1615564687832</creationDate>
+    <creationDate>1617292431127</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,</contexts>
-    <lastUpdateDate>1615589743853</lastUpdateDate>
+    <lastUpdateDate>1621095858524</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
