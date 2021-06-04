@@ -719,6 +719,68 @@ mutation {
         else:
             return False
 
+        #################################################################################################
+
+    def runWorkFlow(self, wfid: str, deviceList: str):
+        query = """
+mutation {
+  workflows {
+    startWorkflow(input: {id: <ID>, variables: {devices: [<DEVICELIST>]}}) {
+      clientSessionId
+      errorCode
+      executionId
+      message
+      operationId
+      status
+    }
+  }
+}
+        """
+        query = query.replace("<ID>", wfid)
+        query = query.replace("<DEVICELIST>", deviceList)
+        if self._call(query):
+            if self.data["workflows"]["startWorkflow"]["status"] == "SUCCESS":
+                return self.data["workflows"]["startWorkflow"]["executionId"]
+            else:
+                self.message = "workflow " + wfid + " failed to run"
+                self.error = True
+        else:
+            return False
+
+    #################################################################################################
+    def getWorkflowResults(self, executionId: str):
+        query = """
+{
+ workflows {
+  execution(executionId:<ID>) {
+    workflowName
+    status
+    message
+    activityResults {
+      deviceResults{
+        variables
+      }
+    }
+        
+  }
+  }
+}
+        """
+        query = query.replace("<ID>", executionId)
+
+        if self._call(query):
+            if self.data["workflows"]["execution"]["status"] == "SUCCESS":
+                return self.data["workflows"]["execution"]["activityResults"][0][
+                    "deviceResults"
+                ]
+            else:
+                self.message = "workflow " + executionId + " failed"
+                self.error = True
+        else:
+            return False
+
+    #################################################################################################
+
 #####################################################################################################
 #######################################      self test      #########################################
 #####################################################################################################
