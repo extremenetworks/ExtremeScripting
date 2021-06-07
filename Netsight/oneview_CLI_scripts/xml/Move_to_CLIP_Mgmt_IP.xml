@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.2</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.3</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -37,6 +37,7 @@ __version__ = '1.2'
 #       - For regular BEB, IP shortcuts is checked
 #       - For regular BEB, non-GRT VRF L3VSN config is checked
 #       - If a mgmt clip does not exist, the new one is created, and rollback performed if not reachable
+# 1.3   - Deletion of mgmt vlan interface in DVR Leaf case can't be done, so we now just delete just the IP on it
 
 '''
 #@MetaDataStart
@@ -675,6 +676,7 @@ CLI_Dict = {
         'list_mgmt_interfaces'       : 'list://show mgmt interface||^\d +\S+ +([A-Z]+) ',
         'delete_mgmt_clip'           : 'no mgmt clip',
         'delete_mgmt_vlan'           : 'no mgmt vlan',
+        'delete_mgmt_vlan_dvr_leaf'  : 'mgmt vlan; no ip address {}; exit', # IP address
         'create_mgmt_clip'           : # VRF name, IP address
                                        '''
                                        mgmt clip vrf {0}
@@ -896,7 +898,10 @@ def main():
 
     # Queue delete of existing mgmt vlan
     if 'VLAN' in mgmtIfList:
-        warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan'])
+        if dvrNodeType == 'leaf':
+            warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan_dvr_leaf'].format(currentIp))
+        else:
+            warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan'])
 
     # Execute queued buffer
     warpBuffer_execute(waitForPrompt=False)
@@ -941,13 +946,13 @@ def main():
 
 main()
 </content>
-    <creationDate>1617292431127</creationDate>
+    <creationDate>1621160195628</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,</contexts>
-    <lastUpdateDate>1621095858524</lastUpdateDate>
+    <lastUpdateDate>1621603572681</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
