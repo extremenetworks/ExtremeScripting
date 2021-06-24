@@ -134,7 +134,7 @@ class XMC_NBI():
             self.token  = result[u'access_token']
 
             xmcTokenElements = self.token.split('.')
-            tokenData = json.loads( base64.b64decode(xmcTokenElements[1]+ "==") )
+            tokenData = json.loads( base64.urlsafe_b64decode(xmcTokenElements[1]+ "==") )
             self.expire = self._computeExpireTime( datetime.fromtimestamp( tokenData['iat'] ), datetime.fromtimestamp( tokenData['exp'] ) )
 
             logger.debug('            Issuer: %s' % tokenData['iss'] )
