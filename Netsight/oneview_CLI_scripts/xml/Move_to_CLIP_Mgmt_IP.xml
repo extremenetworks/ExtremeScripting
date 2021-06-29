@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.3</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.4</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -38,31 +38,45 @@ __version__ = '1.3'
 #       - For regular BEB, non-GRT VRF L3VSN config is checked
 #       - If a mgmt clip does not exist, the new one is created, and rollback performed if not reachable
 # 1.3   - Deletion of mgmt vlan interface in DVR Leaf case can't be done, so we now just delete just the IP on it
+# 1.4   - Can be run against multiple VSP switches
+#       - Can re-name the VSP at the same time; both SNMP and ISIS sys-names are changed
+#       - Decision whether to delete existing mgmt VLAN IP is configurable
+#       - Only runs on VOSS 8.2 or later
 
 '''
 #@MetaDataStart
 #@DetailDescriptionStart
 #######################################################################################
 # 
-# Given a switch already in XMC, this script will ask user to provide a CLIP IP and VRF
-# which will then be configured as mgmt clip on the VSP. If the VSP already had a mgmt
-# clip the existing mgmt clip will be deleted and replaced with the new one. If the
-# switch had a mgmt vlan IP, this will also be deleted.
-# Checks are made to ensure that IP Shortcuts are already enabled on a regular BEB
-# and if the VRF provided is non-GRT, that the VRF already has L3VSN enabled; otherwise
-# the script will error and make no changes.
+# Given one or more VSP switches already in XMC, this script will ask user to provide
+# a CLIP IP and VRF which will then be configured as mgmt clip on the VSP. If the VSP
+# already had a mgmt clip the existing mgmt clip will be deleted and replaced with the
+# new one. If the switch had a mgmt vlan IP, this can also be deleted if the user
+# selected to do so in the script input pull-down.
+# Before attempting to change the IP on the switch, the script will first of all make
+# sure that the new IP address provided is not already known by XMC and that it does
+# not exist on the network (does not reply to ping)
+# On a regular BEB (not a DVR Leaf) if the new mgmt clip is on GRT, IP Shortcuts will
+# also get automatically enabled if not already enabled. However no ISIS source-address
+# will be set.
+# Checks are made to ensure that if the VRF provided is non-GRT on a regular BEB, that
+# the VRF already has L3VSN enabled (which in turn implies that IP Shortcuts is enabled)
+# Otherwise the script will error and make no changes. Likewise, on a DVR Leaf, the
+# script will only accept to create a mgmt clip in GRT, and will error otherwise.
+#
 # If a mgmt clip does not already exist, the script takes a safer approach by creating
 # the new mgmt clip and making sure that this is reachable by XMC before proceeding to
 # delete the mgmt vlan interface. If the newly created mgmt clip is not reachable
 # after 10 seconds, the changes are rolled back and the script will error.
 # But if the mgmt clip does already exist, then the only way to change it is to go
 # ahead and delete it and create the new mgmt clip IP; but in this case, if the new IP
-# is not reachable then the switch will be lost.
-# Finally the switch is deleted from XMC's database as well as XMC Control if there,
-# and re-added to the same site with the new mgmt IP address.
-# Before attempting to change the IP on the switch, the script will first of all make
-# sure that the new IP address provided is not already known by XMC and that it does
-# not exist on the network (does not reply to ping)
+# is not reachable after the change, then the switch will be lost.
+# Finally, the switch is deleted from XMC's database as well as XMC Control if there,
+# and re-added to the same site with the new mgmt IP mgmt address.
+# Since the switch is effectively deleted and re-added to XMC, the script allows the
+# switch sysname to be changed at the same time, which will automatically be reflected
+# once the switch is re-added to XMC. Furthermore, the sysname change is perfomed not
+# only on the snmp-server name, but also for ISIS sys-name.
 #
 #######################################################################################
 #@DetailDescriptionEnd
@@ -71,19 +85,36 @@ __version__ = '1.3'
 # , = &amp;#44;
 # &lt; = &amp;lt;
 # &gt; = &amp;gt;
-#@SectionStart (description = "New switch mgmt circuitless IP")
-#    @VariableFieldLabel (
-#        description = "New IP &amp;#40;mask will be 32bits&amp;#41;",
-#        type = string,
-#        required = yes,
-#        name = "userInput_ip",
-#    )
+#@SectionStart (description = "New switch mgmt circuitless IP &amp;#40;mask will be 32bits&amp;#41;")
 #    @VariableFieldLabel (
 #        description = "Associated VRF name &amp;#40;default is GRT&amp;#41;",
 #        type = string,
 #        required = no,
 #        name = "userInput_vrf",
 #        value = "GlobalRouter",
+#    )
+#    @VariableFieldLabel (
+#        description = "Existing mgmt VLAN IP",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [Delete, Do NOT delete],
+#        value = "Delete"
+#        name = "userInput_mgmtVlanIp",
+#    )
+#    @VariableFieldLabel (
+#        description = "Mgmt CLIP IP",
+#        type = string,
+#        required = yes,
+#        name = "userInput_ip",
+#        scope = device
+#    )
+#    @VariableFieldLabel (
+#        description = "System Name",
+#        type = string,
+#        required = yes,
+#        name = "userInput_sysname",
+#        scope = device
 #    )
 #@SectionEnd
 #@SectionStart (description = "Sanity / Debug")
@@ -108,7 +139,7 @@ __version__ = '1.3'
 
 
 ##########################################################
-# Ludo Standard library; Version 3.00                    #
+# Ludo Standard library; Version 3.02                    #
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
@@ -139,9 +170,9 @@ except: # If not running on XMC Jython...
 #
 import re
 import os                           # Used by warpBuffer_execute
+import subprocess                   # Used by xmcLinuxCommand
 from java.util import LinkedHashMap # Used by nbiQuery
 import socket                       # Used by addXmcSyslogEvent
-import time
 
 #
 # VARIABLES:
@@ -167,7 +198,9 @@ RegexContextPatterns = { # Ported from acli.pl
 RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
 Indent = 3 # Number of space characters for each indentation
 LastError = None
+LastNbiError = None
 ConfigHistory = []
+AppendBuffer = []
 WarpBuffer = []
 
 # For CLI Rollback functions
@@ -190,15 +223,15 @@ FamilyChildren = { # Children will be rolled into parent family for these script
 #
 # FUNCTIONS:
 #
-def debug(debugOutput): # Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
     if Debug:
         print debugOutput
 
-def exitError(errorOutput): # Exit script with error message and setting status appropriately
+def exitError(errorOutput): # v1 - Exit script with error message and setting status appropriately
     emc_results.setStatus(emc_results.Status.ERROR)
     raise RuntimeError(errorOutput)
 
-def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
+def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
     print "Aborting script due to error on previous command"
     try:
         rollbackStack()
@@ -206,7 +239,7 @@ def abortError(cmd, errorOutput): # A CLI command failed, before bombing out sen
         print "Aborting because this command failed: {}".format(cmd)
         exitError(errorOutput)
 
-def scriptName(): # Returns the assigned name of the Script or Workflow
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
     name = None
     if 'workflowName' in emc_vars: # Workflow
         name = emc_vars['workflowName']
@@ -219,7 +252,7 @@ def scriptName(): # Returns the assigned name of the Script or Workflow
 # Family functions
 #
 
-def setFamily(): # Set global Family variable; automatically handles family children, as far as this script is concerned
+def setFamily(): # v1 - Set global Family variable; automatically handles family children, as far as this script is concerned
     global Family
     if emc_vars["family"] in FamilyChildren:
         Family = FamilyChildren[emc_vars["family"]]
@@ -228,7 +261,6 @@ def setFamily(): # Set global Family variable; automatically handles family chil
     print "Using family type '{}' for this script".format(Family)
     if Family not in CLI_Dict:
         exitError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
-
 
 #
 # CLI Rollback functions
@@ -247,12 +279,20 @@ def rollbackCommand(cmd): # v1 - Add a command to the rollback stack; these comm
     cmdOneLiner = " / ".join(cmdList)
     print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
 
+def rollBackPop(number=0): # v1 - Remove entries from RollbackStack
+    global RollbackStack
+    if number == 0:
+        RollbackStack = []
+        print "Rollback stack emptied"
+    else:
+        del RollbackStack[-number:]
+        print "Rollback stack popped last {} entries".format(number)
 
 #
 # CLI functions
 #
 
-def cleanOutput(outputStr): # Remove echoed command and final prompt from output
+def cleanOutput(outputStr): # v1 - Remove echoed command and final prompt from output
     lastLine = outputStr.splitlines()[-1:][0]
     if RegexPrompt.match(lastLine):
         lines = outputStr.splitlines()[1:-1]
@@ -260,14 +300,14 @@ def cleanOutput(outputStr): # Remove echoed command and final prompt from output
         lines = outputStr.splitlines()[1:]
     return '\n'.join(lines)
 
-def configChain(chainStr): # Produces a list of a set of concatenated commands (either with ';' or newlines)
+def configChain(chainStr): # v1 - Produces a list of a set of concatenated commands (either with ';' or newlines)
     chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
     cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
     cmdList = filter(None, cmdList) # Filter out empty lines, if any
     cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
     return cmdList
 
-def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
     # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
     if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
         mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
@@ -277,7 +317,7 @@ def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_
     cmdList = map(str.strip, cmd.split('&amp;'))
     return mode, cmdList, regex
 
-def formatOutputData(data, mode): # Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+def formatOutputData(data, mode): # v1 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
     if not mode                 : value = data                                   # Legacy behaviour same as list
     elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
     elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
@@ -296,7 +336,7 @@ def formatOutputData(data, mode): # Formats output data for both sendCLI_showReg
         RuntimeError("sendCLI_showRegex: invalid scheme type '{}'".format(mode))
     return value
 
-def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v1 - Send a CLI show command; return output
     global LastError
     resultObj = emc_cli.send(cmd)
     if resultObj.isSuccess():
@@ -313,7 +353,7 @@ def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CL
     else:
         exitError(resultObj.getError())
 
-def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
     # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
     mode, cmdList, regex = parseRegexInput(cmdRegexStr)
     for cmd in cmdList:
@@ -333,7 +373,7 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnErr
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # Send a CLI config command
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a CLI config command
     global LastError
     cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
     if Sanity:
@@ -357,7 +397,7 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPro
     else:
         exitError(resultObj.getError())
 
-def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # Send a semi-colon separated list of config commands
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a semi-colon separated list of config commands
     cmdList = configChain(chainStr)
     for cmd in cmdList[:-1]: # All but last
         success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
@@ -369,14 +409,56 @@ def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitFor
         return False
     return True
 
-def warpBuffer_add(chainStr): # Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
+def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or configChains; buffer can then be appended to config.cfg with appendConfigDotCfg()
+    if Family != 'VSP Series':
+        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    global AppendBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        AppendBuffer.append(cmdAdd)
+
+def appendConfigDotCfg(chainStr=None): # v2 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+    if Family != 'VSP Series':
+        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    global AppendBuffer
+    if chainStr:
+        appendBuffer_add(chainStr)
+    if Sanity:
+        for cmd in AppendBuffer:
+            print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
+            ConfigHistory.append('[after reboot] ' + cmd)
+        LastError = None
+        return True
+    # Edit config.cfg
+    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
+    for cmd in AppendBuffer:
+        cmdStream += cmd + "\n"
+    cmdStream += "\x1bZZ" # Escape edit mode and save file
+    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
+    resultObj = emc_cli.send(cmdStream)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            abortError(cmd, outputStr)
+        else:
+            for cmd in AppendBuffer:
+                print "Added to config.cfg: {}".format(cmd)
+                ConfigHistory.append('[after reboot] ' + cmd)
+            LastError = None
+            AppendBuffer = []
+            return True
+    else:
+        exitError(resultObj.getError())
+
+def warpBuffer_add(chainStr): # v1 - Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
     global WarpBuffer
     cmdList = configChain(chainStr)
     for cmd in cmdList:
         cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
         WarpBuffer.append(cmdAdd)
 
-def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, waitForPrompt=True): # Appends to existing WarpBuffer and then executes it
+def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, waitForPrompt=True): # v3 - Appends to existing WarpBuffer and then executes it
     # Same as sendCLI_configChain() but all commands are placed in a script file on the switch and then sourced there
     # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
     # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
@@ -399,9 +481,9 @@ def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, wai
         'Summit Series': 'terminate process tftpd graceful',
     }
     tftpExecute = { # XMC server IP (TFTP server), Script file to fetch and execute
-        'VSP Series':    'copy {0}:{1} /intflash/.script.src -y; source .script.src debug',
-        'Summit Series': 'tftp get {0} {1} .script.xsf; run script .script.xsf',
-        'ERS Series':    'configure network address {0} filename {1}',
+        'VSP Series':    'copy "{0}:{1}" /intflash/.script.src -y; source .script.src debug',
+        'Summit Series': 'tftp get {0} "{1}" .script.xsf; run script .script.xsf',
+        'ERS Series':    'configure network address {0} filename "{1}"',
     }
 
     if chainStr:
@@ -430,7 +512,7 @@ def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, wai
         return True
 
     # Write the commands to a file under XMC's TFTP root directory
-    tftpFileName = userName + '.' + scriptName() + '.' + switchIP.replace('.', '_')
+    tftpFileName = userName + '.' + scriptName().replace(' ', '_') + '.' + switchIP.replace('.', '_')
     tftpFilePath = xmcTftpRoot + '/' + tftpFileName
     try:
         with open(tftpFilePath, 'w') as f:
@@ -459,7 +541,7 @@ def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, wai
     LastError = None
     return True
 
-def printConfigSummary(): # Print summary of all config commands executed with context indentation
+def printConfigSummary(): # v1 - Print summary of all config commands executed with context indentation
     emc_cli.close()
     if not len(ConfigHistory):
         print "No configuration was performed"
@@ -487,13 +569,16 @@ def printConfigSummary(): # Print summary of all config commands executed with c
 # XMC GraphQl NBI functions
 #
 
-def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+    global LastNbiError
     response = emc_nbi.query(jsonQuery)
     debug("nbiQuery response = {}".format(response))
     if 'errors' in response: # Query response contains errors
-        if returnKeyError:
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
             return None
         abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+    LastNbiError = None
 
     if returnKey: # If a specific key requested, we find it
         def recursionKeySearch(nestedDict):
@@ -524,7 +609,7 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes
         else: debug("nbiQuery response = {}".format(response))
     return response
 
-def nbiMutation(jsonQuery): # Makes a GraphQl mutation query of XMC NBI; returns true on success
+def nbiMutation(jsonQuery): # v1 - Makes a GraphQl mutation query of XMC NBI; returns true on success
     if Sanity:
         print "SANITY - NBI Mutation:\n{}\n".format(jsonQuery)
         LastError = None
@@ -537,11 +622,12 @@ def nbiMutation(jsonQuery): # Makes a GraphQl mutation query of XMC NBI; returns
     else:
         return False
 
+
 #
 # IP address processing functions
 #
 
-def ipToNumber(dottedDecimalStr): # Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
+def ipToNumber(dottedDecimalStr): # v1 - Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
     try: # bytearray ensures that IP bytes are valid (1-255)
         ipByte = list(bytearray([int(byte) for byte in dottedDecimalStr.split('.')]))
     except:
@@ -553,12 +639,12 @@ def ipToNumber(dottedDecimalStr): # Method to convert an IP/Mask dotted decimal 
     debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
     return ipNumber
 
-def numberToIp(ipNumber): # Method to convert a long number into an IP/Mask dotted decimal address
+def numberToIp(ipNumber): # v1 - Method to convert a long number into an IP/Mask dotted decimal address
     dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
     debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
     return dottedDecimalStr
 
-def maskToNumber(mask): # Method to convert a mask (dotted decimal or Cidr number) into a long number
+def maskToNumber(mask): # v1 - Method to convert a mask (dotted decimal or Cidr number) into a long number
     if isinstance(mask, int) or re.match(r'^\d+$', mask): # Mask as number
         if int(mask) &gt; 0 and int(mask) &lt;= 32:
             maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
@@ -570,7 +656,7 @@ def maskToNumber(mask): # Method to convert a mask (dotted decimal or Cidr numbe
         debug("maskNumber = {}".format(hex(maskNumber)))
     return maskNumber
 
-def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
+def subnetMask(ip, mask): # v1 - Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
     ipNumber = ipToNumber(ip)
     maskNumber = maskToNumber(mask)
     subnetNumber = ipNumber &amp; maskNumber
@@ -580,50 +666,54 @@ def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and 
     debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
     return ipSubnet, ipDottedMask, ipCidrMask
 
+def ipGateway(ip, mask, gw): # v1 - Return the gateway IP address, as first or last IP in subnet, based on own IP/mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    if gw == 'first':
+        gwNumber = subnetNumber + 1
+        ip1numb = gwNumber + 1
+        ip2numb = gwNumber + 2
+    elif gw == 'last':
+        gwNumber = subnetNumber + 2**(32-int(mask)) - 2
+        ip1numb = gwNumber - 2
+        ip2numb = gwNumber - 1
+    else: # Error condition
+        exitError('ipGateway(): invalid gw type {}'.format(gw))
+    debug("gwNumber = {} / ip1numb = {} / ip2numb = {}".format(hex(gwNumber), hex(ip1numb), hex(ip2numb)))
+    gatewayIP = numberToIp(gwNumber)
+    ip1 = numberToIp(ip1numb)
+    ip2 = numberToIp(ip2numb)
+    debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
+    return gatewayIP, ip1, ip2
+
+
 #
 # Miscellaneous functions
 #
 
-def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
-    # Only supported for family = 'VSP Series'
-    cmd = 'list://show isis spbm||(?:(B-VID) +PRIMARY +(NICK) +LSDB +(IP)(?: +(IPV6))?(?: +(MULTICAST))?|^\d+ +(?:(\d+)-(\d+) +\d+ +)?(?:([\da-f]\.[\da-f]{2}\.[\da-f]{2}) +)?(?:disable|enable) +(disable|enable)(?: +(disable|enable))?(?: +(disable|enable))?|^\d+ +(?:primary|secondary) +([\da-f:]+)(?: +([\da-f\.]+))?)'
-    data = sendCLI_showRegex(cmd)
-    # VOSS:[(u'B-VID', u'NICK', u'IP', u'IPV6', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''), (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.75', u'enable', u'disable', u'disable', u'', u''),           (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'00:00:00:00:00:00', u'')]
-    # V86: [(u'B-VID', u'NICK', u'IP', u'', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''),     (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.11', u'enable',             u'disable', u'', u'', u''),      (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'82:bb:00:00:11:ff', u'82bb.0000.1200')]
-    # XA:  [(u'B-VID', u'NICK', u'IP', u'', u'', u'', u'', u'', u'', u'', u'', u'', u''),              (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.46', u'enable',                         u'', u'', u'', u'')]
-    dataDict = {
-        'SpbmInstance' : False,
-        'BVIDs'        : [],
-        'Nickname'     : None,
-        'IP'           : None,
-        'IPV6'         : None,
-        'Multicast'    : None,
-        'SmltVirtBmac' : None,
-        'SmltPeerBmac' : None,
-    }
-    if len(data) &gt; 1: # If we did not just match the banner line
-        dataDict['SpbmInstance'] = True
-        if data[1][5] and data[1][6]:
-            dataDict['BVIDs'] = [data[1][5],data[1][6]]
-        else:
-            dataDict['BVIDs'] = []
-        dataDict['Nickname'] = data[1][7]
-        dataDict['IP'] = data[1][8]
-        if data[0][3] == 'IPV6':
-            dataDict['IPV6'] = data[1][9]
-            if data[0][4] == 'MULTICAST':
-                dataDict['Multicast'] = data[1][10]
-        else:
-            if data[0][4] == 'MULTICAST':
-                dataDict['Multicast'] = data[1][9]
-    if len(data) == 3: # We got SMLT data (on XA we don't have the line)
-        if data[2][11] and data[2][11] != '00:00:00:00:00:00':
-            dataDict['SmltVirtBmac'] = data[2][11]
-            dataDict['SmltPeerBmac'] = data[2][12]
-    debug("extractSpbmGlobal() = {}".format(dataDict))
-    return dataDict
+def xmcLinuxCommand(cmdRegexStr, debugKey=None): # v1 - Execute a command on XMC and recover the output
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    cmd = cmdList[0] # We only support single shell command syntax for now
+    cmdList = cmd.split(' ')
+    if execution == 'dev': # I develop on my Windows laptop...
+        cmdList[0] += '.bat'
+    debug("xmcLinuxCommand about to execute : {}".format(cmd))
+    try:
+        outputStr = subprocess.check_output(cmdList)
+    except Exception as e: # Expect OSError
+        print "{}: {}".format(type(e).__name__, str(e))
+        print "Error executing '{}' on XMC shell".format(cmd)
+        return
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("xmcLinuxCommand OUT = {}".format(value))
+    return value
 
-def addXmcSyslogEvent(severity, message, ip=None): # Adds a syslog event to XMC (only needed for Scripts)
+def addXmcSyslogEvent(severity, message, ip=None): # v1 - Adds a syslog event to XMC (only needed for Scripts)
     severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
     severityLevel = severityHash[severity] if severity in severityHash else 6
     session = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
@@ -677,11 +767,20 @@ CLI_Dict = {
         'delete_mgmt_clip'           : 'no mgmt clip',
         'delete_mgmt_vlan'           : 'no mgmt vlan',
         'delete_mgmt_vlan_dvr_leaf'  : 'mgmt vlan; no ip address {}; exit', # IP address
+        'enable_ip_shortcuts'        : 'router isis; spbm 1 ip enable; exit',
+        'disable_ip_shortcuts'       : 'router isis; no spbm 1 ip enable; exit',
         'create_mgmt_clip'           : # VRF name, IP address
                                        '''
                                        mgmt clip vrf {0}
                                           ip address {1}/32
                                           enable
+                                       exit
+                                       ''',
+        'change_sys_name'            : # Sys-name
+                                       '''
+                                       snmp-server name {0}
+                                       router isis
+                                          sys-name {0}
                                        exit
                                        ''',
     },
@@ -781,6 +880,53 @@ NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
     ''',
 }
 
+#
+# Imports:
+#
+import time
+
+#
+# Other Custom Functions:
+#
+def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
+    # Only supported for family = 'VSP Series'
+    cmd = 'list://show isis spbm||(?:(B-VID) +PRIMARY +(NICK) +LSDB +(IP)(?: +(IPV6))?(?: +(MULTICAST))?|^\d+ +(?:(\d+)-(\d+) +\d+ +)?(?:([\da-f]\.[\da-f]{2}\.[\da-f]{2}) +)?(?:disable|enable) +(disable|enable)(?: +(disable|enable))?(?: +(disable|enable))?|^\d+ +(?:primary|secondary) +([\da-f:]+)(?: +([\da-f\.]+))?)'
+    data = sendCLI_showRegex(cmd)
+    # VOSS:[(u'B-VID', u'NICK', u'IP', u'IPV6', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''), (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.75', u'enable', u'disable', u'disable', u'', u''),           (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'00:00:00:00:00:00', u'')]
+    # V86: [(u'B-VID', u'NICK', u'IP', u'', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''),     (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.11', u'enable',             u'disable', u'', u'', u''),      (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'82:bb:00:00:11:ff', u'82bb.0000.1200')]
+    # XA:  [(u'B-VID', u'NICK', u'IP', u'', u'', u'', u'', u'', u'', u'', u'', u'', u''),              (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.46', u'enable',                         u'', u'', u'', u'')]
+    dataDict = {
+        'SpbmInstance' : False,
+        'BVIDs'        : [],
+        'Nickname'     : None,
+        'IP'           : None,
+        'IPV6'         : None,
+        'Multicast'    : None,
+        'SmltVirtBmac' : None,
+        'SmltPeerBmac' : None,
+    }
+    if len(data) &gt; 1: # If we did not just match the banner line
+        dataDict['SpbmInstance'] = True
+        if data[1][5] and data[1][6]:
+            dataDict['BVIDs'] = [data[1][5],data[1][6]]
+        else:
+            dataDict['BVIDs'] = []
+        dataDict['Nickname'] = data[1][7]
+        dataDict['IP'] = data[1][8]
+        if data[0][3] == 'IPV6':
+            dataDict['IPV6'] = data[1][9]
+            if data[0][4] == 'MULTICAST':
+                dataDict['Multicast'] = data[1][10]
+        else:
+            if data[0][4] == 'MULTICAST':
+                dataDict['Multicast'] = data[1][9]
+    if len(data) == 3: # We got SMLT data (on XA we don't have the line)
+        if data[2][11] and data[2][11] != '00:00:00:00:00:00':
+            dataDict['SmltVirtBmac'] = data[2][11]
+            dataDict['SmltPeerBmac'] = data[2][12]
+    debug("extractSpbmGlobal() = {}".format(dataDict))
+    return dataDict
+
 
 #
 # Main:
@@ -796,18 +942,36 @@ def main():
     #
     setFamily() # Sets global Family variable
     currentIp = emc_vars["deviceIP"]
-    newIp = emc_vars["userInput_ip"].strip()
     newVrf = emc_vars["userInput_vrf"].strip()
+    mgmtVlanIpAction = emc_vars["userInput_vrf"].lower()
+    newIp = emc_vars["userInput_ip"].strip()
+    newSysName = emc_vars["userInput_sysname"].strip()
 
     print "Information provided by User:"
-    print " - New CLIP IP = {}".format(newIp)
     print " - New CLIP VRF = {}".format(newVrf)
+    print " - Existing Mgmt VLAN IP action = {}".format(mgmtVlanIpAction)
+    print " - New CLIP IP = {}".format(newIp)
+    print " - New System Name = {}".format(newSysName)
+
+    vossVersion = emc_vars["deviceSoftwareVer"]
+
+    print "Switch information:"
+    print " - VOSS software version = {}".format(vossVersion)
+    print
+
+    # VOSS version validation
+    if re.match(r'(?:[1-7]\.|8\.[01]\.)', vossVersion):
+        exitError('This script only works on VSPs running VOSS 8.2 or later')
 
     # IP validation
     if not ipToNumber(newIp):
         exitError('Invalid VLAN IP address {}'.format(newIp))
     if newIp == currentIp:
         exitError('Given IP {} is already used to manange the switch'.format(newIp))
+
+    # Sys-name validation
+    if re.search(r'\s', newSysName):
+        exitError('System Name provided must not conatain any spaces: "{}"'.format(newSysName))
 
     # VRF validation
     if not newVrf:
@@ -859,17 +1023,16 @@ def main():
             if not vrfExists:
                 exitError("VRF {} does not exist on switch; cannot create a mgmt clip for non-existent VRF".format(newVrf))
 
-        # Verify if IP Shortcuts is enabled
-        spbmGlobalDict = extractSpbmGlobal()
-        if not spbmGlobalDict['IP'] == 'enable':
-            exitError("IP Shortcuts (spbm ip enable) must be enabled before assigning a mgmt clip")
-
         # For a VRF other than GRT, we also need to check that ipvpn is enabled
         if newVrf != 'GlobalRouter':
             vrfL3vsnExists = sendCLI_showRegex(CLI_Dict[Family]['check_vrf_l3vsn'].format(newVrf))
             if not vrfL3vsnExists:
                 exitError("VRF {} must be a L3VSN (ipvpn enabled) before assigning a mgmt clip to it".format(newVrf))
 
+        # Verify if IP Shortcuts is enabled (GRT alone, if it wasn't and a VRF was specified, we would have errored above)
+        spbmGlobalDict = extractSpbmGlobal()
+        if not spbmGlobalDict['IP'] == 'enable':
+            print "IP Shortcuts (spbm ip enable) is not enabled and will be enabled by this script (but no ISIS ip-source-address will be set)"
 
     # Verify whether mgmt clip is already set
     mgmtIfList = sendCLI_showRegex(CLI_Dict[Family]['list_mgmt_interfaces'])
@@ -885,23 +1048,33 @@ def main():
         warpBuffer_add(CLI_Dict[Family]['create_mgmt_clip'].format(newVrf, newIp))
 
     else: # Here no mgmt clip exists, so we can take a safer approach...
+        # For GRT + regular BEB + IP Shortcuts not enabled, we enable IP Shortcuts
+        if (not dvrNodeType == 'leaf' and not spbmGlobalDict['IP'] == 'enable'):
+            sendCLI_configChain(CLI_Dict[Family]['enable_ip_shortcuts'])
+            rollbackCommand(CLI_Dict[Family]['disable_ip_shortcuts'])
+
         # Go ahead and create the new mgmt clip
         sendCLI_configChain(CLI_Dict[Family]['create_mgmt_clip'].format(newVrf, newIp))
         rollbackCommand(CLI_Dict[Family]['delete_mgmt_clip'])
 
         # Now check if the IP is reachable by XMC
-        print "Waitnig 10 seconds before checking if new CLIP Mgmt IP is reachable"
-        time.sleep(10)
-        response = os.system("ping -c 1 " + newIp)
-        if response == 1: # No response from ping
-            abortError("ping {}".format(newIp), "Newly configured clip IP {} not reachable by XMC; rolling back changes".format(newIp))
+        print "Waiting 10 seconds before checking if new CLIP Mgmt IP is reachable"
+        if not Sanity:
+            time.sleep(10)
+            response = os.system("ping -c 1 " + newIp)
+            if response == 1: # No response from ping
+                abortError("ping {}".format(newIp), "Newly configured clip IP {} not reachable by XMC; rolling back changes".format(newIp))
 
     # Queue delete of existing mgmt vlan
-    if 'VLAN' in mgmtIfList:
+    if 'VLAN' in mgmtIfList and mgmtVlanIpAction == 'delete':
         if dvrNodeType == 'leaf':
             warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan_dvr_leaf'].format(currentIp))
         else:
             warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan'])
+
+    # Queue change of sys-name
+    if newSysName:
+        warpBuffer_add(CLI_Dict[Family]['change_sys_name'].format(newSysName))
 
     # Execute queued buffer
     warpBuffer_execute(waitForPrompt=False)
@@ -951,8 +1124,8 @@ main()
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
-    <contexts>,Device,</contexts>
-    <lastUpdateDate>1621603572681</lastUpdateDate>
+    <contexts>,Device,Groups,</contexts>
+    <lastUpdateDate>1624959846589</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
