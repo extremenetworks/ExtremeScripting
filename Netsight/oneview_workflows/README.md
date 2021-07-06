@@ -109,6 +109,7 @@
 | Workflow Name | Description |
 | ------------- | ----------- |
 |[EXOS Switch Audit System Disabled](xwf/EXOS_Switch_Audit_System_Disabled-Partial-21.6.20.4v5.xwf?raw=true)|This workflow is used as part of an educational training video. It does not work as standalone workflow.|
+|[Store Active Clients in Cloud Database](xwf/Store_Active_Clients_in_Cloud_Database-21.4.10.80v71.xwf?raw=true)|This workflow is used as part of an educational training video. It does not work as standalone workflow.|
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
