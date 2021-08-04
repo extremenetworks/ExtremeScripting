@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.4</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.5</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -42,6 +42,12 @@ __version__ = '1.4'
 #       - Can re-name the VSP at the same time; both SNMP and ISIS sys-names are changed
 #       - Decision whether to delete existing mgmt VLAN IP is configurable
 #       - Only runs on VOSS 8.2 or later
+# 1.5   - Option to delete existing mgmt VLAN IP was not working
+#       - CLI session is now established to newly created CLIP IP within script, as check all good, after deleting/re-adding to XMC
+#       - Deletion of existing mgmt VLAN IP is now done only if/once a CLI session can be established to new CLIP IP
+#       - Switch config is now saved from CLI session on newly created CLIP IP
+#       - When deleting the switch from NAC, now the switch is also deleted from any Location Groups too
+
 
 '''
 #@MetaDataStart
@@ -49,13 +55,17 @@ __version__ = '1.4'
 #######################################################################################
 # 
 # Given one or more VSP switches already in XMC, this script will ask user to provide
-# a CLIP IP and VRF which will then be configured as mgmt clip on the VSP. If the VSP
-# already had a mgmt clip the existing mgmt clip will be deleted and replaced with the
-# new one. If the switch had a mgmt vlan IP, this can also be deleted if the user
-# selected to do so in the script input pull-down.
+# a clip IP and VRF which will then be configured as mgmt clip on the switch. If the
+# switch already has a mgmt clip, the existing mgmt clip will be deleted and replaced
+# with the new one. If the switch has a mgmt vlan IP, this can be deleted if the user
+# selects to do so in the script input pull-down.
+# Since the switch is effectively deleted and re-added to XMC, the script allows the
+# switch sysname to be changed at the same time, which will automatically be reflected
+# once the switch is re-added to XMC. Furthermore, the sysname change is perfomed not
+# only on the snmp-server name (prompt), but also for the ISIS sys-name.
 # Before attempting to change the IP on the switch, the script will first of all make
 # sure that the new IP address provided is not already known by XMC and that it does
-# not exist on the network (does not reply to ping)
+# not exist on the network (does not reply to ping).
 # On a regular BEB (not a DVR Leaf) if the new mgmt clip is on GRT, IP Shortcuts will
 # also get automatically enabled if not already enabled. However no ISIS source-address
 # will be set.
@@ -64,19 +74,20 @@ __version__ = '1.4'
 # Otherwise the script will error and make no changes. Likewise, on a DVR Leaf, the
 # script will only accept to create a mgmt clip in GRT, and will error otherwise.
 #
-# If a mgmt clip does not already exist, the script takes a safer approach by creating
-# the new mgmt clip and making sure that this is reachable by XMC before proceeding to
-# delete the mgmt vlan interface. If the newly created mgmt clip is not reachable
-# after 10 seconds, the changes are rolled back and the script will error.
-# But if the mgmt clip does already exist, then the only way to change it is to go
+# If a mgmt clip does not already exist, the script takes a safe approach by creating
+# the new mgmt clip and making sure that this is reachable by XMC before proceeding
+# any further. If the newly created mgmt clip is not reachable after 10 seconds, the
+# changes are rolled back and the script will error.
+# But if a mgmt clip does already exist, then the only way to change it is to go
 # ahead and delete it and create the new mgmt clip IP; but in this case, if the new IP
 # is not reachable after the change, then the switch will be lost.
-# Finally, the switch is deleted from XMC's database as well as XMC Control if there,
-# and re-added to the same site with the new mgmt IP mgmt address.
-# Since the switch is effectively deleted and re-added to XMC, the script allows the
-# switch sysname to be changed at the same time, which will automatically be reflected
-# once the switch is re-added to XMC. Furthermore, the sysname change is perfomed not
-# only on the snmp-server name, but also for ISIS sys-name.
+# Once the new clip mgmt IP is set, the switch is deleted from XMC's database as well
+# as XMC Control if there, and also from any NAC Location Groups. It is then re-added
+# to the same site, with the same admin profile, with the newly configured clip mgmt
+# IP mgmt address.
+# The script then waits a further 10 seconds, before attempting to open a session on
+# the new clip IP. This session is used to delete the existing mgmt VLAN IP, if user
+# had selected the 'delete' pull-down, and to save the config on the switch. 
 #
 #######################################################################################
 #@DetailDescriptionEnd
@@ -139,7 +150,7 @@ __version__ = '1.4'
 
 
 ##########################################################
-# Ludo Standard library; Version 3.02                    #
+# Ludo Standard library; Version 3.03                    #
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
@@ -218,6 +229,8 @@ FamilyChildren = { # Children will be rolled into parent family for these script
     'Extreme Access Series' : 'VSP Series',
     'Unified Switching VOSS': 'VSP Series',
     'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
 }
 
 #
@@ -292,7 +305,9 @@ def rollBackPop(number=0): # v1 - Remove entries from RollbackStack
 # CLI functions
 #
 
-def cleanOutput(outputStr): # v1 - Remove echoed command and final prompt from output
+def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
+    if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
     lastLine = outputStr.splitlines()[-1:][0]
     if RegexPrompt.match(lastLine):
         lines = outputStr.splitlines()[1:-1]
@@ -333,7 +348,7 @@ def formatOutputData(data, mode): # v1 - Formats output data for both sendCLI_sh
     elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
     elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
     else:
-        RuntimeError("sendCLI_showRegex: invalid scheme type '{}'".format(mode))
+        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
     return value
 
 def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v1 - Send a CLI show command; return output
@@ -418,7 +433,8 @@ def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or confi
         cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
         AppendBuffer.append(cmdAdd)
 
-def appendConfigDotCfg(chainStr=None): # v2 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+def appendConfigDotCfg(chainStr=None): # v3 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+    global LastError
     if Family != 'VSP Series':
         exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
     global AppendBuffer
@@ -463,6 +479,7 @@ def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, wai
     # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
     # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
     global WarpBuffer
+    global LastError
     xmcTftpRoot = '/tftpboot'
     xmcServerIP = emc_vars["serverIP"]
     switchIP = emc_vars["deviceIP"]
@@ -609,19 +626,48 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - 
         else: debug("nbiQuery response = {}".format(response))
     return response
 
-def nbiMutation(jsonQuery): # v1 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+def nbiMutation(jsonQuery, returnKeyError=False): # v2 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+    global LastNbiError
     if Sanity:
         print "SANITY - NBI Mutation:\n{}\n".format(jsonQuery)
-        LastError = None
+        LastNbiError = None
         return True
-    else:
-        print "NBI Mutation Query:\n{}\n".format(jsonQuery)
-    status = nbiQuery(jsonQuery, "status", "status", True)
-    if status == "SUCCESS":
-        return True
-    else:
-        return False
+    print "NBI Mutation Query:\n{}\n".format(jsonQuery)
+    response = emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
 
+    def recursionKeySearch(nestedDict):
+        for key, value in nestedDict.iteritems():
+            if key == 'status':
+                if 'message' in nestedDict:
+                    return True, value, nestedDict['message']
+                else:
+                    return True, value, None
+        for key, value in nestedDict.iteritems():
+            if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+                foundKey, foundValue, foundMsg = recursionKeySearch(value)
+                if foundKey:
+                    return True, foundValue, foundMsg
+            return [None, None, None] # If we find nothing
+
+    foundKey, returnStatus, returnMessage = recursionKeySearch(response)
+    if foundKey:
+        debug("nbiMutation status = {} / message = {}".format(returnStatus, returnMessage))
+    elif not returnKeyError:
+        # If status key not found, raise error
+        abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "status" was not found in query response')
+
+    if returnStatus == "SUCCESS":
+        LastNbiError = None
+        return True
+    else:
+        LastNbiError = returnMessage
+        return False
 
 #
 # IP address processing functions
@@ -686,7 +732,6 @@ def ipGateway(ip, mask, gw): # v1 - Return the gateway IP address, as first or l
     ip2 = numberToIp(ip2numb)
     debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
     return gatewayIP, ip1, ip2
-
 
 #
 # Miscellaneous functions
@@ -759,11 +804,13 @@ CLI_Dict = {
         'disable_more_paging'        : 'terminal more disable',
         'enable_context'             : 'enable',
         'config_context'             : 'config term',
+        'end_config'                 : 'end',
         'get_mgmt_ip_mask'           : 'int://show mgmt ip||{}\/(\d\d?) ', # IP address
         'get_dvr_type'               : 'str-lower://show dvr||^Role\s+:\s+(Leaf|Controller)',
         'check_vrf_exists'           : 'bool://show ip vrf||^{} ', # VRF name
         'check_vrf_l3vsn'            : 'bool://show ip ipvpn vrf {0}||^{0} +\d+ +enabled', # VRF name
         'list_mgmt_interfaces'       : 'list://show mgmt interface||^\d +\S+ +([A-Z]+) ',
+        'list_mgmt_ips'              : 'dict://show mgmt ip||^\d +(\S+) +(\d+\.\d+\.\d+\.\d+)/\d',
         'delete_mgmt_clip'           : 'no mgmt clip',
         'delete_mgmt_vlan'           : 'no mgmt vlan',
         'delete_mgmt_vlan_dvr_leaf'  : 'mgmt vlan; no ip address {}; exit', # IP address
@@ -850,11 +897,31 @@ NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
           }
         }
     ''',
+    'getNacLocationGroups': '''
+        {
+          accessControl {
+            groupNamesByType(typeString: "LOCATION")
+          }
+        }
+    ''',
     'accessControlDeleteSwitch': '''
         mutation {
           accessControl {
             deleteSwitch(input: {
               searchKey: "&lt;IP&gt;"
+            }) {
+              message
+              status
+            }
+          }
+        }
+    ''',
+    'accessControlRemoveSwitchFromLocation': '''
+        mutation {
+          accessControl {
+            removeEntryFromGroup(input: {
+              group: "&lt;LOCATIONGROUP&gt;"
+              value: "&lt;IP&gt;"
             }) {
               message
               status
@@ -874,6 +941,15 @@ NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
             }) {
               status
               message
+            }
+          }
+        }
+    ''',
+    'check_device': '''
+        {
+          network {
+            device(ip: "&lt;IP&gt;") {
+              down
             }
           }
         }
@@ -927,6 +1003,39 @@ def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is differe
     debug("extractSpbmGlobal() = {}".format(dataDict))
     return dataDict
 
+def vossSaveConfigRetry(waitTime=10, retries=3, returnCliError=False): # v2 - On VOSS a save config can fail, if another CLI session is doing "show run", so we need to be able to backoff and retry
+    # Only supported for family = 'VSP Series'
+    global LastError
+    cmd = 'save config'
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmd)
+        LastError = None
+        return True
+
+    retryCount = 0
+    while retryCount &lt;= retries:
+        resultObj = emc_cli.send(cmd, True)
+        if resultObj.isSuccess():
+            outputStr = cleanOutput(resultObj.getOutput())
+            if outputStr and re.search(r'Save config to file \S+ successful', outputStr): # Check for message indicating successful save
+                ConfigHistory.append(cmd)
+                LastError = None
+                return True
+            # If we get here, then the save did not happen, possibly because: "Another show or save in progress.  Please try the command later."
+            retryCount += 1
+            if retries &gt; 0:
+                print "==&gt; Save config did not happen. Waiting {} seconds before retry...".format(waitTime)
+                time.sleep(waitTime)
+                print "==&gt; Retry {}\n".format(retryCount)
+        else:
+            exitError(resultObj.getError())
+
+    if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+        LastError = outputStr
+        return False
+    exitError(outputStr)
+
 
 #
 # Main:
@@ -943,7 +1052,7 @@ def main():
     setFamily() # Sets global Family variable
     currentIp = emc_vars["deviceIP"]
     newVrf = emc_vars["userInput_vrf"].strip()
-    mgmtVlanIpAction = emc_vars["userInput_vrf"].lower()
+    mgmtVlanIpAction = emc_vars["userInput_mgmtVlanIp"].lower()
     newIp = emc_vars["userInput_ip"].strip()
     newSysName = emc_vars["userInput_sysname"].strip()
 
@@ -993,7 +1102,7 @@ def main():
     # Find the Admin Profile which was in use for this device
     adminProfile = nbiQuery(NBI_Query['getDeviceAdminProfile'].replace('&lt;IP&gt;', currentIp), 'profileName')
 
-    # Disable more paging (generatePortList might issue a CLI command, so do this before)
+    # Disable more paging
     sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
 
     # Enter privExec
@@ -1036,9 +1145,10 @@ def main():
 
     # Verify whether mgmt clip is already set
     mgmtIfList = sendCLI_showRegex(CLI_Dict[Family]['list_mgmt_interfaces'])
+    mgmtIpDict = sendCLI_showRegex(CLI_Dict[Family]['list_mgmt_ips'])
 
     # Enter Config context
-    sendCLI_showCommand(CLI_Dict[Family]['config_context'])
+    sendCLI_configCommand(CLI_Dict[Family]['config_context'])
 
     if 'CLIP' in mgmtIfList: # Here a mgmt clip already exists, and we are trying to change it
         # Queue delete of existing mgmt clip
@@ -1058,19 +1168,19 @@ def main():
         rollbackCommand(CLI_Dict[Family]['delete_mgmt_clip'])
 
         # Now check if the IP is reachable by XMC
-        print "Waiting 10 seconds before checking if new CLIP Mgmt IP is reachable"
+        print "Waiting up to 10secs for new CLIP Mgmt IP to reply to ping"
         if not Sanity:
-            time.sleep(10)
-            response = os.system("ping -c 1 " + newIp)
+            retries = 0
+            response = None
+            while not retries &gt; 10:
+                response = os.system("ping -c 1 " + newIp)
+                if response == 0: # Response from ping
+                    break
+                retries += 1
+                print " - {} timeout".format(retries)
             if response == 1: # No response from ping
                 abortError("ping {}".format(newIp), "Newly configured clip IP {} not reachable by XMC; rolling back changes".format(newIp))
-
-    # Queue delete of existing mgmt vlan
-    if 'VLAN' in mgmtIfList and mgmtVlanIpAction == 'delete':
-        if dvrNodeType == 'leaf':
-            warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan_dvr_leaf'].format(currentIp))
-        else:
-            warpBuffer_add(CLI_Dict[Family]['delete_mgmt_vlan'])
+            print " - reply from {}".format(newIp)
 
     # Queue change of sys-name
     if newSysName:
@@ -1080,10 +1190,15 @@ def main():
     warpBuffer_execute(waitForPrompt=False)
     addXmcSyslogEvent('info', "Changed IP address to {}".format(newIp), currentIp)
 
+    # Close the connection
+    if not Sanity:
+        emc_cli.close()
+
     # Delete the old IP from XMC
     if not nbiMutation(NBI_Query['delete_device'].replace('&lt;IP&gt;', currentIp)):
         exitError("Failed to delete IP '{}' from XMC's database".format(currentIp))
     addXmcSyslogEvent('info', "Deleted device from XMC database", currentIp)
+    print "Deleted device {} from XMC database".format(currentIp)
 
     # Check whether switch was added to AccessControl
     switchNacExists = nbiQuery(NBI_Query['checkSwitchNacConfig'].replace('&lt;IP&gt;', currentIp), 'switch')
@@ -1093,14 +1208,37 @@ def main():
     # }
     # Or we get None
     if switchNacExists:
-        if not nbiMutation( # Add the switch to AccessControl
+        if not nbiMutation( # Delete the switch from AccessControl
             NBI_Query['accessControlDeleteSwitch']
             .replace('&lt;IP&gt;', currentIp)
         ):
             exitError("Failed to delete existing switch IP '{}' in NAC Engine Group".format(ipAddress))
         addXmcSyslogEvent('info', "Deleted device from XMC Control", currentIp)
+        print "Deleted device {} from XMC NAC engine".format(currentIp)
 
-    # Create the new IP from XMC
+        # Check whether switch was added to any NAC Location Groups
+        # For this we need to get a list of all Location Groups
+        nacLocationGroups = nbiQuery(NBI_Query['getNacLocationGroups'], 'groupNamesByType')
+        # Sample of what we should get back
+        # "groupNamesByType": [
+        #   "Branch3",
+        #   "Branch2",
+        #   "Branch1",
+        # ]
+        # Or we get []
+
+        # And then we methodically delete the switch from all those groups
+        for group in nacLocationGroups:
+            if nbiMutation( # Delete the switch from Location Group
+                NBI_Query['accessControlRemoveSwitchFromLocation']
+                .replace('&lt;LOCATIONGROUP&gt;', group)
+                .replace('&lt;IP&gt;', currentIp)
+            ):
+                addXmcSyslogEvent('info', "Deleted device from XMC Control Location Group: {}".format(group), currentIp)
+                print "Deleted device {} from Location Group: {}".format(currentIp, group)
+            # We don't check for errors, as we don't expect to find the IP in all location groups
+
+    # Create the new IP device in XMC
     if not nbiMutation(
         NBI_Query['create_device']
         .replace('&lt;IP&gt;', newIp)
@@ -1109,6 +1247,46 @@ def main():
     ):
         exitError("Failed to add new device IP '{}' to XMC Site '{}' with admin profile '{}'".format(newIp, sitePath, adminProfile))
     addXmcSyslogEvent('info', "Added device to XMC Site {}".format(sitePath), newIp)
+    print "Re-added device to XMC using new CLIP IP {} and admin profile '{}'".format(newIp, adminProfile)
+
+    # Wait enough time for XMC to process the newly re-added switch
+    print "Waiting for device to be re-added to XMC's database"
+    if not Sanity:
+        retries = 0
+        while not retries &gt; 10:
+            time.sleep(5)
+            if nbiQuery(NBI_Query['check_device'].replace('&lt;IP&gt;', newIp), 'device'):
+                # Sample of what we should get back
+                # "device": {
+                #   "down": false
+                # }
+                # Or we get null
+                break
+            retries += 1
+            print " - retry {}".format(retries)
+
+    # Try and re-open session against the new CLIP IP
+    print "Device is re-added to XMC; attempting to re-connect on new CLIP IP"
+    if not Sanity:
+        emc_cli.setIpAddress(newIp)
+
+    # Enter privExec
+    sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
+
+    # If we wanted to delete the existing VLAN IP
+    if 'VLAN' in mgmtIfList and 'vlan' in mgmtIpDict and mgmtVlanIpAction == 'delete':
+        # Enter Config context
+        sendCLI_configCommand(CLI_Dict[Family]['config_context'])
+        # Delete of existing mgmt vlan
+        if dvrNodeType == 'leaf':
+            sendCLI_configChain(CLI_Dict[Family]['delete_mgmt_vlan_dvr_leaf'].format(mgmtIpDict['vlan']))
+        else:
+            sendCLI_configChain(CLI_Dict[Family]['delete_mgmt_vlan'])
+        # Exit Config context
+        sendCLI_configCommand(CLI_Dict[Family]['end_config'])
+
+    # Save the config
+    vossSaveConfigRetry(waitTime=10, retries=3)
 
     # Print summary of config performed
     printConfigSummary()
@@ -1119,13 +1297,13 @@ def main():
 
 main()
 </content>
-    <creationDate>1621160195628</creationDate>
+    <creationDate>1625148966495</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1624959846589</lastUpdateDate>
+    <lastUpdateDate>1627024930271</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,</nosIds>
