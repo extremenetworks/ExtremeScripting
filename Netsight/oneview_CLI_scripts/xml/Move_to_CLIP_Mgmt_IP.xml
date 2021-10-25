@@ -1306,7 +1306,7 @@ main()
     <lastUpdateDate>1627024930271</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,</nosIds>
+    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
