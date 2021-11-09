@@ -17,7 +17,7 @@
 |[Report configuration changes by email](xwf/Report_Configuration_Changes-8.5.2.6v10.xwf?raw=true)|This workflow sends an email to the recipient with the configuration changes detected. It compares last two archived configurations.|The workflow can be executed by an [alarm](xwf/Report_Configuration_Changes.png). Define the email recipients.|8.4.4.26v1|
 |[Extended Alarm Information to Email](xwf/Extended_Alarm_information_to_Email-8.5.3.66v6.xwf?raw=true)|The workflow contains the dictionary of CLI commands to be executed based on alarm name. The workflow determines the alarm name and based on the information in the dictionary the set of CLI commands are executed. The result is then send to email recipients.|The workflow must be executed by an alarm. Modify the dictionary in the workflow. Define the email recipients.|8.5.3.66v6|
 |[Report Congestions](xwf/GetCongestion-8.5.5.30v67.xwf?raw=true)|The Workflow checks congestions on ports through SNMP and if congestion is detected then the email report is generated.|Define devices inside of the activity and threshold. Define the email recipients.|8.5.5.30v67|
-|[XIQ-SE licensing calculation](xwf/XIQ-SE_Licensing_calculation-v95.xwf?raw=true)|The Workflow reports number of Pilot and Navigator licenses required by ExtremeCloud IQ - Site Engine.|Define the email recipients.|v95|
+|[XIQ-SE licensing calculation](xwf/XIQ-SE_Licensing_calculation-v98.xwf?raw=true)|The Workflow reports number of Pilot and Navigator licenses required by ExtremeCloud IQ - Site Engine.|Define the email recipients.|v98|
 
 # XIQ Site Engine (XMC) Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
