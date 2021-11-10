@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="CLI Custom Action script">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Config,</category>
+    <comments>CLI script which can be assigned under Site Custom Actions - v0.2</comments>
+    <content>List_of_CLI_commands_to_execute_between_triple_quotes = '''
+
+enable
+config terminal
+snmp-server contact abc@zip.com
+snmp-server location ${location}
+end
+
+'''
+If_one_of_above_commands_gives_an_error_stop_sending_remaining_commands = False
+
+###############################################################################
+'''
+This script is provided free of charge by Extreme. We hope such scripts are
+helpful when used in conjunction with Extreme products and technology and can
+be used as examples to modify and adapt for your ultimate requirements.
+Extreme will not provide any official support for these scripts. If you do
+have any questions or queries about any of these scripts you may post on
+Extreme's community website "The Hub" (https://community.extremenetworks.com/)
+under the scripting category.
+
+ANY SCRIPTS PROVIDED BY EXTREME ARE HEREBY PROVIDED "AS IS", WITHOUT WARRANTY
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL EXTREME OR ITS THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
+SCRIPTS.
+'''
+
+##########################################################
+# XMC Script: CLI Custom Action script                   #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+
+__version__ = '0.2'
+
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# A simple CLI script cannot be assigned to Site Actions tab Custom Actions table.
+# This Python script allows a simple list of CLI commands, provided at the very
+# beginning of this script file, to be executed, and this script can be assigned to
+# Site Actions tab Custom Actions table because it is a Python script.
+# Optionally a flag can be set (True or False) to determine what to do if a command
+# produces an error on the switch. If set to False, all remaining commands will be
+# sent anyway; if set to True, then remaining commands will not be sent.
+# The CLI script can include references to site custom variables using syntax
+# ${&lt;site-custom-variable&gt;}. The site of the selected switch will apply. If a variable
+# is not found in the site of the switch, then the variable is looked up in the parent
+# sites all the way up to /World. If it is not found in any of the parent sites then
+# the global version of the variable will be used; and if the variable is not found
+# anywhere then the script will error.
+#
+#######################################################################################
+#@DetailDescriptionEnd
+#@MetaDataEnd
+'''
+
+##########################################################
+# Ludo Standard library; Version 3.05                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host
+
+#
+# IMPORTS:
+#
+import re
+from java.util import LinkedHashMap # Used by nbiQuery
+
+#
+# VARIABLES:
+#
+
+# For CLI functions:
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+
+# For Family functions
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+}
+
+NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
+    'getDeviceSiteVariables': '''
+        {
+          network {
+            device(ip: "&lt;IP&gt;") {
+              sitePath
+              customVariables {
+                globalAttribute
+                name
+                scopeCategory
+                value
+                valueType
+              } 
+            }
+          }
+        }
+    ''',
+    'getSiteVariables': '''
+        {
+          network {
+            siteByLocation(location: "&lt;SITE&gt;") {
+              customVariables {
+                globalAttribute
+                name
+                scopeCategory
+                value
+                valueType
+              } 
+            }
+          }
+        }
+    ''',
+}
+
+#
+# FUNCTIONS:
+#
+def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if Debug:
+        print debugOutput
+
+def exitError(errorOutput): # v1 - Exit script with error message and setting status appropriately
+    emc_results.setStatus(emc_results.Status.ERROR)
+    raise RuntimeError(errorOutput)
+
+def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    try:
+        rollbackStack()
+    finally:
+        print "Aborting because this command failed: {}".format(cmd)
+        exitError(errorOutput)
+
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
+#
+# Family functions
+#
+
+def setFamily(cliDict={}, family=None): # v2 - Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if family:
+        Family = family
+    elif emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if cliDict and Family not in cliDict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
+    return Family
+
+#
+# CLI functions
+#
+
+def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
+    if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def configChain(chainStr): # v1 - Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
+    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a CLI config command
+    global LastError
+    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd, waitForPrompt)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            abortError(cmd, outputStr)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a semi-colon separated list of config commands
+    cmdList = configChain(chainStr)
+    for cmd in cmdList[:-1]: # All but last
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            return False
+    # Last now
+    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
+    if not success:
+        return False
+    return True
+
+def printConfigSummary(): # v1 - Print summary of all config commands executed with context indentation
+    emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+
+#
+# XMC GraphQl NBI functions
+#
+
+def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+    global LastNbiError
+    response = emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+    LastNbiError = None
+
+    if returnKey: # If a specific key requested, we find it
+        def recursionKeySearch(nestedDict):
+            for key, value in nestedDict.iteritems():
+                if key == returnKey:
+                    return True, value
+            for key, value in nestedDict.iteritems():
+                if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+                    foundKey, foundValue = recursionKeySearch(value)
+                    if foundKey:
+                        return True, foundValue
+                return [None, None] # If we find nothing
+
+        foundKey, returnValue = recursionKeySearch(response)
+        if foundKey:
+            if Debug:
+                if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+            return returnValue
+        if returnKeyError:
+            return None
+        # If requested key not found, raise error
+        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
+
+    # Else, return the full response
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, response))
+        else: debug("nbiQuery response = {}".format(response))
+    return response
+
+#
+# Read Custom Site Variables
+#
+
+def readSiteCustomVariables(deviceIp): # v3 - Obtains a dict of custom site variables starting from Site of deviceIp
+    siteVariablesHash = nbiQuery(NBI_Query['getDeviceSiteVariables'].replace('&lt;IP&gt;', deviceIp), 'device', 'siteVariablesHash', True)
+    debug("readSiteCustomVariables customVariables = {}".format(siteVariablesHash))
+    # Sample of what we should get back
+    # "device": {
+    #   "sitePath": "/World/PoC/Zero Touch Fabric/Access",
+    #   "customVariables": [
+    #     {
+    #       "globalAttribute": true,  &lt;== these we accept only if a site-specific version of same var does not exist
+    #       "name": "VoiceVlan",
+    #       "scopeCategory": "SITE",  &lt;== we only look at "SITE" ones
+    #       "value": "200",
+    #       "valueType": "NUMBER"
+    #     },
+    #     {
+    #       "globalAttribute": false,  &lt;== these we prefer as site-specific
+    #       "name": "nacLocation",
+    #       "scopeCategory": "SITE",   &lt;== we only look at "SITE" ones
+    #       "value": "Building1",
+    #       "valueType": "STRING"
+    #     }
+    #   ]
+    # }
+    # Or we get None
+    siteVarDict = {}
+
+    if siteVariablesHash:
+        def value(varHash): # Map valid null values to empty string
+            if varHash["valueType"] == "NUMBER" and varHash["value"] == 0:
+                return ""
+            if varHash["valueType"] == "STRING" and (varHash["value"] == "0" or varHash["value"] == "''" or varHash["value"] == '""'):
+                return ""
+            if varHash["valueType"] == "IP" and varHash["value"] == "0.0.0.0":
+                return ""
+            if varHash["valueType"] == "MAC_ADDRESS" and varHash["value"] == "00:00:00:00:00:00":
+                return ""
+            # Else we take the value
+            return varHash["value"]
+
+        sitePath = siteVarDict['__PATH__'] = siteVariablesHash["sitePath"]
+        # First pass, only read site non-global variables, as we prefer these
+        debug("First pass, site local variables:")
+        for varHash in siteVariablesHash["customVariables"]:
+            if varHash["globalAttribute"] or varHash["scopeCategory"] != 'SITE':
+                continue # Skip these entries
+            siteVarDict[varHash["name"]] = value(varHash)
+            debug("---&gt; {} = {}".format(varHash["name"], siteVarDict[varHash["name"]]))
+
+        # Next, parse all the parent sites, for non-global variables
+        debug("Second pass, parent site local variables:")
+        sitePath = re.sub(r'/[^/]+$', '', sitePath) # Nibble away at the site path to work up parent sites
+        while sitePath:
+            debug("-&gt; {}".format(sitePath))
+            siteVariablesHash = nbiQuery(NBI_Query['getSiteVariables'].replace('&lt;SITE&gt;', sitePath), 'siteByLocation', 'siteVariablesHash', True)
+            # Sample of what we should get back
+            # "siteByLocation": {
+            #   "customVariables": [
+            #     {
+            #       "globalAttribute": true,  &lt;== these we accept only if a site-specific version of same var does not exist
+            #       "name": "VoiceVlan",
+            #       "scopeCategory": "SITE",  &lt;== we only look at "SITE" ones
+            #       "value": "200",
+            #       "valueType": "NUMBER"
+            #     },
+            #   ]
+            # }
+            # Or we get None
+            for varHash in siteVariablesHash["customVariables"]:
+                if varHash["globalAttribute"] or varHash["scopeCategory"] != 'SITE' or varHash["name"] in siteVarDict:
+                    continue # Skip these entries
+                siteVarDict[varHash["name"]] = value(varHash)
+                debug("---&gt; {} = {}".format(varHash["name"], siteVarDict[varHash["name"]]))
+            sitePath = re.sub(r'/[^/]+$', '', sitePath) # Nibble away at the site path to work up parent sites
+
+        # Thrid pass, read global variables but only if a site specific one was not already read in 1st pass
+        debug("Third pass, global variables:")
+        for varHash in siteVariablesHash["customVariables"]:
+            if varHash["scopeCategory"] != 'SITE' or varHash["name"] in siteVarDict:
+                continue # Skip these entries
+            siteVarDict[varHash["name"]] = value(varHash)
+            debug("---&gt; {} = {}".format(varHash["name"], siteVarDict[varHash["name"]]))
+
+    debug("readSiteCustomVariables siteVarDict = {}".format(siteVarDict))
+    return siteVarDict
+
+def siteVarLookup(inputStr, siteVarDict): # v2 - Replaces embedded ${&lt;site-custom-variables&gt;} in the input string
+    siteVarsUsed = {x.group(1):1 for x in re.finditer(r'\$\{(\w+)\}', inputStr)}
+    if siteVarsUsed:
+        debug("siteVarLookup siteVarsUsed = {}".format(siteVarsUsed))
+        missingVarList = [x for x in siteVarsUsed if x not in siteVarDict]
+        if missingVarList:
+            exitError("siteVarLookup: the following variables were not found in Site Path {} nor in its parent sites nor in global variables:\n{}".format(siteVarDict['__PATH__'], missingVarList))
+        for siteVar in siteVarsUsed:
+            inputStr = re.sub(r'\$\{' + siteVar + '\}', siteVarDict[siteVar], inputStr)
+        debug("siteVarLookup {} = {}".format(inputStr, inputStr))
+    return inputStr
+
+#
+# Main:
+#
+def main():
+    print "{} version {} on XMC version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
+    setFamily() # Sets global Family variable
+
+    ipAddress           = emc_vars['deviceIP']
+    siteVarDict         = readSiteCustomVariables(ipAddress)
+    commandsToSend      = str(siteVarLookup(List_of_CLI_commands_to_execute_between_triple_quotes, siteVarDict))
+    actionOnErrorFlag   = If_one_of_above_commands_gives_an_error_stop_sending_remaining_commands
+
+    # Show the command list to execute
+    print "List of commands to execute:\n{}".format(commandsToSend)
+
+    # Send the commands
+    sendCLI_configChain(commandsToSend, returnCliError=actionOnErrorFlag)
+
+    # Print summary of config performed
+    printConfigSummary()
+
+main()
+</content>
+    <creationDate>1631085088078</creationDate>
+    <creator>lstevens</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
+    <contexts>,Groups,</contexts>
+    <lastUpdateDate>1631300505588</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds></nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,NetSight Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
