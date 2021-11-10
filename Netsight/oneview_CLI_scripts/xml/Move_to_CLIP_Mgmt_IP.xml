@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.5</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.6</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -47,7 +47,7 @@ __version__ = '1.5'
 #       - Deletion of existing mgmt VLAN IP is now done only if/once a CLI session can be established to new CLIP IP
 #       - Switch config is now saved from CLI session on newly created CLIP IP
 #       - When deleting the switch from NAC, now the switch is also deleted from any Location Groups too
-
+# 1.6   - System Name input field was mandatory; now is optional
 
 '''
 #@MetaDataStart
@@ -123,7 +123,7 @@ __version__ = '1.5'
 #    @VariableFieldLabel (
 #        description = "System Name",
 #        type = string,
-#        required = yes,
+#        required = no,
 #        name = "userInput_sysname",
 #        scope = device
 #    )
@@ -1080,7 +1080,7 @@ def main():
 
     # Sys-name validation
     if re.search(r'\s', newSysName):
-        exitError('System Name provided must not conatain any spaces: "{}"'.format(newSysName))
+        exitError('System Name provided must not contain any spaces: "{}"'.format(newSysName))
 
     # VRF validation
     if not newVrf:
@@ -1297,16 +1297,16 @@ def main():
 
 main()
 </content>
-    <creationDate>1625148966495</creationDate>
-    <creator>root</creator>
+    <creationDate>1636533079094</creationDate>
+    <creator>lstevens</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1627024930271</lastUpdateDate>
-    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1636533132507</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
+    <nosIds>,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
@@ -1314,7 +1314,7 @@ main()
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,NetSight Administrator,</roles>
+    <roles>,XIQ-SE Administrator,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>

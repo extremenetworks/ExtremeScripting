@@ -19,6 +19,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
 | n/a |[Retrieve Script Log](xml/Retrieve_Script_Log.xml?raw=true)| This script does for XMC scripts what Workflow Dashboard does for workflows. Once the script window is closed, it is hard to go back and see the script output (one has to go and look to XMC's Linux file system). To find a past script log, simply run this script against the switch (or switches) where the seeked script was previously executed. If no inputs are provided the script will list all script logs which were executed against the same switch IP, together with the relative timestamp. Once spotted the desired log, simply hit Back, enter the script name and timestamp and run again. If only 1 matching script log is found, then the script log is dumped in the script window. If no sript logs are found then this script intentionally raises an exception so as to get a red cross next to the device indicating no hit|Python|
+| n/a |[CLI Custom Action script](xml/CLI_Custom_Action_script.xml?raw=true)| A simple CLI script cannot be assigned to Site Actions tab Custom Actions table. This Python script allows a simple list of CLI commands, provided at the very beginning of this script file, to be executed, and this script can be assigned to Site Actions tab Custom Actions table because it is a Python script. Optionally a flag can be set (True or False) to determine what to do if a command produces an error on the switch. If set to False, all remaining commands will be sent anyway; if set to True, then remaining commands will not be sent. The CLI script can include references to site custom variables using syntax ${<site-custom-variable>}. The site of the selected switch will apply. If a variable is not found in the site of the switch, then the variable is looked up in the parent sites all the way up to /World. If it is not found in any of the parent sites then the global version of the variable will be used; and if the variable is not found anywhere then the script will error|Python|
 ## EXOS scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
@@ -52,6 +53,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[Delete L2VSN range](xml/Delete_L2VSN_Range.xml?raw=true)|This script deletes existing L2VSN services. It works with VOSS VSPs in Switched-UNI mode only.|Python|
 | VOSS |[Create L3VSN](xml/Create_L3VSN.xml?raw=true)|This script provisions a L3VSN, which includes VRF,IPVPN,VLAN,IP configuration.|Python|
 | VOSS |[Delete L3VSN](xml/Delete_L3VSN.xml?raw=true)|This script deletes a L3VSN, which includes VRF,IPVPN,VLAN,IP configuration.|Python|
+
 ## Multivendor scripts and others
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
@@ -68,6 +70,12 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[VSP PreUpgrade CleanUp](xml/VOSS_PreUpgrade_CleanUp.xml?raw=true)|Script prepares a VSP or XA1400 for an XMC upgrade, by removing old software versions from the software archive.|Python|
 | Procurve |[Authentication Procurve](xml/Authentication_Procurve.xml?raw=true)|Script will configure Radius and authentication on Procurve devices & ports.|TCL|
 | Linux |[NAC Daemon Commands](xml/NAC_Daemon_Control.xml?raw=true)|Script does stop - start - restart - status the nacctl.|TCL|
+
+## Integrated Application Hosting (Insight VM) scripts
+| OS | Script name   | Description   | Type   |
+| -- | ------------- | ------------- |:------:|
+| VOSS, EXOS |[Delete Insight VMs](xml/Delete_Insight_VMs.xml?raw=true)|Given an insight capable VSP or XOS switch, removes all insight VMs from it. The VMs, if any, are stopped and deleted from the switch config file. The VM files (OVA/QCOW) are also deleted if the pull down to this effect is enabled|Python|
+
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._

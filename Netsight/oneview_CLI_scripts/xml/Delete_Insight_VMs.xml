@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Delete Insight VMs">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Provisioning,</category>
+    <comments>Delete all Insight/IAH VMs on VOSS or EXOS switch - v1.0</comments>
+    <content>'''
+This script is provided free of charge by Extreme. We hope such scripts are
+helpful when used in conjunction with Extreme products and technology and can
+be used as examples to modify and adapt for your ultimate requirements.
+Extreme will not provide any official support for these scripts. If you do
+have any questions or queries about any of these scripts you may post on
+Extreme's community website "The Hub" (https://community.extremenetworks.com/)
+under the scripting category.
+
+ANY SCRIPTS PROVIDED BY EXTREME ARE HEREBY PROVIDED "AS IS", WITHOUT WARRANTY
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL EXTREME OR ITS THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
+SCRIPTS.
+'''
+
+##########################################################
+# XMC Script: Delete Insight (IAH) VMs                   #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+
+__version__ = '1.0'
+
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# Given an insight capable VSP or XOS switch, removes all insight VMs from it.
+# The VMs, if any, are stopped and deleted from the switch config file.
+# The VM files (OVA/QCOW) are also deleted if the pull down to this effect is enabled.
+#
+#######################################################################################
+#@DetailDescriptionEnd
+# ( = &amp;#40;
+# ) = &amp;#41;
+# , = &amp;#44;
+# &lt; = &amp;lt;
+# &gt; = &amp;gt;
+#@SectionStart (description = "Delete all Integrated Application Hosting (IAH) / Insight VMs on switch")
+#    @VariableFieldLabel (
+#        description = "Delete all VM files as well",
+#        type = string,
+#        required = no,
+#        readOnly = no,
+#        validValues = [Enable, Disable],
+#        value = "Enable"
+#        name = "userInput_deleteVmFiles",
+#    )
+#@SectionEnd
+#@SectionStart (description = "Sanity / Debug")
+#    @VariableFieldLabel (
+#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_sanity",
+#    )
+#    @VariableFieldLabel (
+#        description = "Debug: enable if you need to report a problem to the script author",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_debug",
+#    )
+#@SectionEnd
+#@MetaDataEnd
+'''
+
+
+
+##########################################################
+# Ludo Standard library; Version 3.06                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+
+##########################################################
+try:
+    emc_vars
+    execution = 'xmc'
+except: # If not running on XMC Jython...
+    # These lines only needed to run XMC Python script locally (on my laptop)
+    # They can also be pasted to XMC, but will not execute
+    import sys
+    import json
+    import java.util
+    import emc_cli      # Own local replica
+    import emc_nbi      # Own local replica
+    import emc_results  # Own local replica
+    execution = 'dev'
+    if len(sys.argv) &gt; 1: # Json file as 1st argv
+        emc_vars = json.load(open(sys.argv[1]))
+    else:
+        emc_vars = json.load(open('emc_vars.json'))
+##########################################################
+
+#
+# IMPORTS:
+#
+import re
+
+#
+# VARIABLES:
+#
+
+# For CLI functions:
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+
+# For Family functions
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+}
+
+#
+# FUNCTIONS:
+#
+def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if Debug:
+        print debugOutput
+
+def exitError(errorOutput): # v1 - Exit script with error message and setting status appropriately
+    emc_results.setStatus(emc_results.Status.ERROR)
+    raise RuntimeError(errorOutput)
+
+def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    try:
+        rollbackStack()
+    finally:
+        print "Aborting because this command failed: {}".format(cmd)
+        exitError(errorOutput)
+
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
+#
+# Family functions
+#
+
+def setFamily(cliDict={}, family=None): # v2 - Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if family:
+        Family = family
+    elif emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if cliDict and Family not in cliDict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
+    return Family
+
+#
+# CLI functions
+#
+
+def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
+    if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def configChain(chainStr): # v1 - Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
+    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
+    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
+        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
+    else:
+        mode = None
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
+
+def formatOutputData(data, mode): # v2 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+    if not mode                 : value = data                                   # Legacy behaviour same as list
+    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
+    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
+    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
+    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
+    elif mode == 'str-join'     : value = ''.join(data)                          # Regex with max 1 capturing bracket, joins list to string
+    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
+    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
+    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
+    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
+    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets, returns 1st tuple
+    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
+    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    else:
+        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
+    return value
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v1 - Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            abortError(cmd, outputStr)
+        LastError = None
+        return outputStr
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
+    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("sendCLI_showRegex OUT = {}".format(value))
+    return value
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a CLI config command
+    global LastError
+    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd, waitForPrompt)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            abortError(cmd, outputStr)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a semi-colon separated list of config commands
+    cmdList = configChain(chainStr)
+    for cmd in cmdList[:-1]: # All but last
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            return False
+    # Last now
+    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
+    if not success:
+        return False
+    return True
+
+def printConfigSummary(): # v1 - Print summary of all config commands executed with context indentation
+    emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+
+
+#
+# INIT: Init Debug &amp; Sanity flags based on input combos
+#
+try:
+    if emc_vars['userInput_sanity'].lower() == 'enable':
+        Sanity = True
+    elif emc_vars['userInput_sanity'].lower() == 'disable':
+        Sanity = False
+except:
+    pass
+try:
+    if emc_vars['userInput_debug'].lower() == 'enable':
+        Debug = True
+    elif emc_vars['userInput_debug'].lower() == 'disable':
+        Debug = False
+except:
+    pass
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+
+#
+# Variables:
+#
+CLI_Dict = {
+    'VSP Series': {
+        'disable_more_paging'        : 'terminal more disable',
+        'enable_context'             : 'enable',
+        'config_context'             : 'config term',
+        'end_config'                 : 'end',
+        'save_config'                : 'save config',
+        'list_vms'                   : 'list://show virtual-service config||Package: +(\S+) *$',
+        'stop_vm'                    : 'no virtual-service {}', # VM name (config command)
+        'delete_vm'                  : 'virtual-service {} uninstall', # VM name (privExec command)
+        'delete_vm_files'            : 'delete /var/lib/insight/packages/* -y\ny',
+    },
+    'Summit Series': {
+        'disable_more_paging'        : 'disable clipaging',
+        'save_config'                : 'save configuration',
+        'list_vms'                   : 'list://show vm||^\S \S (\S+) +\d',
+        'stop_vm'                    : 'stop vm {}', # VM name
+        'delete_vm'                  : 'delete vm {}', # VM name
+        'delete_vm_files'            : 'rm /usr/local/vm/packages/*\ny',
+    },
+}
+
+
+#
+# Main:
+#
+def main():
+    print "{} version {} on XMC version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
+
+    #
+    # Obtain Info on switch and from XMC
+    #
+    setFamily(CLI_Dict) # Sets global Family variable
+    deleteVmFiles = emc_vars["userInput_deleteVmFiles"].lower()
+
+    print "Information provided by User:"
+    print " - Delete VM files = {}".format(deleteVmFiles)
+
+    # Disable more paging
+    sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
+
+    # Enter privExec
+    if 'enable_context' in CLI_Dict[Family]:
+        sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
+
+    # Get list of VMs
+    vmList = sendCLI_showRegex(CLI_Dict[Family]['list_vms'], 'vmList', True) # Command may error on non Insight capable switches
+
+    if vmList: # If we get here, then we have some VMs to delete
+
+        # Enter Config context
+        if 'config_context' in CLI_Dict[Family]:
+            sendCLI_configCommand(CLI_Dict[Family]['config_context'])
+
+        # Stop all VMs
+        for vm in vmList:
+            sendCLI_configCommand(CLI_Dict[Family]['stop_vm'].format(vm), True) # Command may error if VM package exists but no config for it
+
+        # Exit Config context (on VOSS, VM deletion has to happen in privExec)
+        if 'end_config' in CLI_Dict[Family]:
+            sendCLI_configCommand(CLI_Dict[Family]['end_config'])
+
+        # Delete all VMs
+        for vm in vmList:
+            sendCLI_configCommand(CLI_Dict[Family]['delete_vm'].format(vm))
+
+        # Save config &amp; exit
+        sendCLI_configChain(CLI_Dict[Family]['save_config'])
+
+    # Delete VM files, if input option was enabled
+    if deleteVmFiles == 'enable':
+        sendCLI_configCommand(CLI_Dict[Family]['delete_vm_files'])
+
+    # Print summary of config performed
+    printConfigSummary()
+
+main()
+</content>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
+    <contexts>,Groups,</contexts>
+    <lastUpdateDate>1633706306071</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-exos,nos-id-voss,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,XIQ-SE Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
