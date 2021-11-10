@@ -60,7 +60,7 @@ else:
     <lastUpdateDate>1587031756693</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-exos,</nosIds>
+    <nosIds>,nos-id-exos,nos-id-switchIQ,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>

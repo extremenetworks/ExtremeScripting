@@ -468,7 +468,7 @@ main()</content>
     <lastUpdatedBy>root</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Connect_Config.xml</metaDataPath>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,</nosIds>
+    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
