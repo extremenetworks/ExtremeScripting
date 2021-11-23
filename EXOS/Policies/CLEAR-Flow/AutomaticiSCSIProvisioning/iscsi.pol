@@ -11,7 +11,7 @@
 # Quality of Service, and enable jumbo frames. This pre-provisioned settings in a network allows 
 # iSCSI traffic to be protected in a higher priority queue.
 #
-# Contact			: https://community.extremenetworks.com/extreme
+# Contact			: https://community.extremenetworks.com/
 ###############################################################################
 #  Change Log
 #

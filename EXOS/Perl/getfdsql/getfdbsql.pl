@@ -42,7 +42,7 @@
 ## Any support provided by Extreme is at its sole discretion.
 ## Issues and/or bug fixes may be reported in the Hub:
 ##
-## https://community.extremenetworks.com/extreme
+## https://community.extremenetworks.com/
 ###
 ##
 ##  This is an example on how to use getAllFdb API.
