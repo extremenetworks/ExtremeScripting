@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.6</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.7</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.6'
+__version__ = '1.7'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -48,6 +48,7 @@ __version__ = '1.6'
 #       - Switch config is now saved from CLI session on newly created CLIP IP
 #       - When deleting the switch from NAC, now the switch is also deleted from any Location Groups too
 # 1.6   - System Name input field was mandatory; now is optional
+# 1.7   - Increased retries after re-adding switch to XMC/XIQ-SE to 20 from 10 (XIQ-SE is slower than XMC due to XIQ reporting)
 
 '''
 #@MetaDataStart
@@ -1253,7 +1254,7 @@ def main():
     print "Waiting for device to be re-added to XMC's database"
     if not Sanity:
         retries = 0
-        while not retries &gt; 10:
+        while not retries &gt; 20:
             time.sleep(5)
             if nbiQuery(NBI_Query['check_device'].replace('&lt;IP&gt;', newIp), 'device'):
                 # Sample of what we should get back
@@ -1297,14 +1298,14 @@ def main():
 
 main()
 </content>
-    <creationDate>1636533079094</creationDate>
-    <creator>lstevens</creator>
+    <creationDate>1627154199368</creationDate>
+    <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1636533132507</lastUpdateDate>
-    <lastUpdatedBy>lstevens</lastUpdatedBy>
+    <lastUpdateDate>1641386003956</lastUpdateDate>
+    <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
     <postprocessScript></postprocessScript>

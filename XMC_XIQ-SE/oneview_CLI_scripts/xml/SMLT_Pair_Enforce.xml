@@ -1,0 +1,2347 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="SMLT Pair Enforce">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Provisioning,</category>
+    <comments>SMLT Pair Enforce v2.0</comments>
+    <content>'''
+This script is provided free of charge by Extreme. We hope such scripts are
+helpful when used in conjunction with Extreme products and technology and can
+be used as examples to modify and adapt for your ultimate requirements.
+Extreme will not provide any official support for these scripts. If you do
+have any questions or queries about any of these scripts you may post on
+Extreme's community website "The Hub" (https://community.extremenetworks.com/)
+under the scripting category.
+
+ANY SCRIPTS PROVIDED BY EXTREME ARE HEREBY PROVIDED "AS IS", WITHOUT WARRANTY
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL EXTREME OR ITS THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
+SCRIPTS.
+'''
+
+##########################################################
+# XMC Script: SMLT Pair Enforce                          #
+# Written by Ludovico Stevens, CSE Extreme Networks      #
+##########################################################
+# Does VSP SMLT Clustering in Fabric Connect
+
+__version__ = '2.0'
+
+# 1.0 - Initial
+# 1.2 - When deleting an LACP LAG MLT, the underlying ports now are restored tu untagged
+#       config, so that a new config of them finds them unused
+# 1.3 - Small fix for 8.3 autosense ports
+# 2.0 - Redesigned the inputs and able to enforce vIST creation even if connecting inband
+#     - GRT route-map for suppressing IST IP subnet is now always created, even if no redistribution yet on switches
+#     - Script now disables auto-sense in order to create SMLTs
+#     - Script now expects both VSPs to have a nickname assigned
+#     - Script automaticallt converts auto-sense NNIs between the two peer switches to static NNIs
+#       and if multiple auto-sense NNIs are found between peers (with same speed) then an MLT NNI is created
+# todo:
+# - for delete/remove, need to detect if MLT is flex and has bindings, either error or automatically remove all the bindings
+# - option to use VLACP/LACP on ERS/XOS FA links
+
+#
+# XMC Metadata
+#
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# This script provisions and enforces SMLT vIST clustering on VSP devices including if
+# these are operating in DVR Leaf mode.
+# It must be run against a pair (or multiple pairs) of VSP switches. 
+# It requires the VSP switches to be already configured for Fabric Connect and can be
+# used to perform and update all of the following:
+# - Creation or deletion of vIST SMLT Clustering
+# - Addition of new, or removal of existing, MLT/SMLT interfaces
+#
+# There are several use cases for this script:
+# (1) - Provision SMLT Clustering on a pair (or muliple pairs) of VSPs
+# (2) - Provision up to 5 SMLT/MLT interfaces on one or more VSP SMLT Cluster pairs
+#       this can be combined with (1)
+# (3) - Removal of one or more SMLT interfaces from one or more VSP SMLT Cluster pairs
+# (4) - Complete removal of SMLT Clustering and all SMLT interfaces from one or more
+#       VSP SMLT Cluster pairs
+#
+# The following global input can be provided by the user:
+#
+# - Global Enforce Action: vIST pair enforce for (1),(2)&amp;(3) above; vIST delete for (4)
+# If it is desired to simply SMLT Cluster VSP switch pairs together and not create any
+# SMLT interfaces, the Enforce action can be set and the script can be run immediately.
+# Likewise, if it desired to completely delete SMLT clustering from the selected VSPs
+# then the vIST delete action can be set and the script can be run immediately.
+#
+# - Acknowledge pulldown: This script is able to create/delete the vIST even if the
+# VSP is managed and accessed inband, in spite of having to globally shutdown ISIS
+# to make the necessary config changes, and then re-enable ISIS. However the switch
+# will temporarly stop forwarding traffic during the change, so this should configuration
+# should not be done while in production. If the switch is managed inband and the
+# acknowledge pull down was not set, then the script will take no action.
+#
+# If instead it is desired to create new SMLT interfaces, or delete existing ones, then
+# the optional SMLT interface user inputs will need to be populated accordingly.
+# SMLT Deletion :
+# - List or range of MLT ids to delete: Provide MLT ids to delete. Note that SMLTs
+#                                       using the same ports cannot be deleted and
+#                                       created (with below inputs) in the same run
+#
+# SMLT Creation (maximum of 5 SMLTs can be created per run):
+# - SMLT MLT type: Select the type of MLT to create:
+#                  - Static
+#                  - Static + VLACP
+#                  - LACP LAG
+# - SMLT MLT I-SID/VLAN binding mode: Select the desired binding mode:
+#                 - Manual untagged
+#                 - Manual dot1q-tagged
+#                 - Manual Switched-UNI
+#                 - Fabric Attach
+#                 - Fabric Attach with no message authentication
+#                 - Endpoint-Tracking
+# - Fabric Attach Management VLAN:ISID: This field is only relevant if the previous
+#                 MLT I-SID/VLAN binding mode selected was one of the Fabric Attach modes.
+#                 In this case an FA management VLAN:ISID can be provided for the FA
+#                 configuration of the SMLT. Otherwise leave this field empty.
+# - SMLT 1-5 id:name: Use these optional fields to set the id or name or both id+name for
+#                     the new SMLTs. If no id is provided, the script will automatically
+#                     allocate MLT ids
+# - SMLT 1-5 port(s): Use this table to assign the SMLT port numbers on the selected
+#                     switches. One or more ports can be provided
+#
+# Once user input has been provided, the script does the following.
+#
+# The selected VSP switches are inspected to ensure that they are running ISIS and SPB
+# and that they are members of a Fabric (i.e. they have some ISIS adjacencies). If not,
+# the script will error and invite the user to Fabric enable the VSPs beforehand.
+# DVR and any existing Virtual-IST configuration is also inspected.
+# If the action is Enforce and no vIST config exist (meaning that this script will need
+# to configure vIST) additional data is extracted from the switch: chassis MAC, VSP
+# LLDP neighbours, already used VLAN-ids etc..
+# If the action is Enforce and some SMLT MLTs are to be created, existing MLT config is
+# also examined.
+# The various data collected is then shared across other instances of the same script
+# running against other VSPs. This data then allows on the one hand to be able to pair
+# up VSPs which already form, or will form, an SMLT Cluster pair, and on the other hand
+# will provide the necessary data to configure vIST across the VSP pairs (e.g.
+# smlt-peer-bmac).
+# If the VSP is already vIST configured, the script makes sure that there is another
+# instance of the same script running on the vIST peer VSP as well. If not the script
+# will terminate with an error.
+# If instead the VSP has no prior vIST configuration then the script needs to be able
+# pair the VSP with another VSP in order to configure SMLT clustering on both. The
+# simplest case is where the user only executed the script against only two VSPs, the
+# ones which are to be SMLT Clustered. Some compatibility tests are made (e.g. DVR Leaf
+# can only be paired with another DVR Leaf). If more than two VSPs were selected when
+# the script was executed, then the script tries to pair the VSPs accordingly, based
+# on which VSPs are LLDP neighbours, which ones are DVR Leaf nodes or not, etc..
+# If at this stage a selected VSP cannot be paired with another VSP running another
+# instance of the same script, or no suitable pair can be deteremined, the script
+# will terminate with an error.
+#
+# For SMLT Creation all the following parameters and identifiers are auto-generated:
+# - Smlt-Virt-Bmac: Only set if VSPs have manually configured ISIS System Ids; if
+#                   auto-generated will typically use the bmac of primary node + 1;
+#                   any bmac selected is checked to make sure it does not already
+#                   exist, and all possible bmacs with 1st 5 bytes of Primary node
+#                   will be checked.
+# - DVR Leaf Cluster id: Will use the last 9bits of Primary VSP Nickname
+# - IST VLAN: First available VLAN id in range 4050-4000 will be allocated
+# - IST I-SID: Will be 15000000 + last 19bits of Primary VSP Nickname
+# - IST IP : Will use IP subnet 192.168.255.X/30 where X is the last 6bits of
+#            Secondary VSP nickname; Primary VSP will allocate IP#1 and Secondary VSP
+#            will allocate IP#2
+#
+#######################################################################################
+#@DetailDescriptionEnd
+
+#@SectionStart (description = "Global Virtual-IST Cluster configuration")
+#    @VariableFieldLabel (
+#        description = "Global Enforce Action",
+#        type = string,
+#        required = yes,
+#        validValues = [vIST pair enforce,vIST delete],
+#        value = "vIST pair enforce",
+#        name = "userInput_enforce_action",
+#    )
+#    @VariableFieldLabel (
+#        description = "If the vIST needs to be created or deleted and switch management is inband over the fabric&amp;#44; this operation will cause a brief traffic interruption as ISIS needs to be briefly disabled and then re-enabled",
+#        type = string,
+#        required = yes,
+#        validValues = [Acknowledge],
+#        name = "userInput_ack",
+#    )
+#@SectionEnd
+
+#@SectionStart (description = "SMLT Interface deletion &amp;#40;Optional&amp;#41;")
+#    @VariableFieldLabel (
+#        description = "List or range of MLT ids to delete",
+#        type = string,
+#        required = no,
+#        name = "userInput_mlt_delete_list",
+#    )
+#@SectionEnd
+
+#@SectionStart (description = "SMLT Interface configuration &amp;#40;Optional; up to 5 SMLTs can be created&amp;#41;")
+#    @VariableFieldLabel (
+#        description = "SMLT MLT type",
+#        type = string,
+#        required = yes,
+#        validValues = [static,static + VLACP,LACP LAG],
+#        value = "static",
+#        name = "userInput_mlt_type",
+#    )
+#    @VariableFieldLabel (
+#        description = "SMLT MLT I-SID/VLAN binding mode",
+#        type = string,
+#        required = yes,
+#        validValues = [Manual untagged, Manual dot1q-tagged, Manual Switched-UNI, Fabric Attach, Fabric Attach with no message authentication, Endpoint-Tracking],
+#        value = "Manual untagged",
+#        name = "userInput_mlt_binding_mode",
+#    )
+#    @VariableFieldLabel (
+#        description = "Fabric Attach Management VLAN:ISID &amp;#40;only applicable if selected binding mode is one of Fabric Attach options; enter &amp;lt;VLAN-id&amp;gt;:&amp;lt;I-SID&amp;gt;&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_fa_mgmt_vlan_isid",
+#    )
+
+#    @VariableFieldLabel (
+#        description = "Smlt1 id:name &amp;#40;optional id and/or name; if both id and name provided separate with colon&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt1_idname",
+#    )
+#    @VariableFieldLabel (
+#        description = "Smlt1 port&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt1_ports",
+#        scope = device
+#    )
+
+#    @VariableFieldLabel (
+#        description = "Smlt2 id:name &amp;#40;optional&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt2_idname",
+#    )
+#    @VariableFieldLabel (
+#        description = "Smlt2 port&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt2_ports",
+#        scope = device
+#    )
+
+#    @VariableFieldLabel (
+#        description = "Smlt3 id:name &amp;#40;optional&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt3_idname",
+#    )
+#    @VariableFieldLabel (
+#        description = "Smlt3 port&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt3_ports",
+#        scope = device
+#    )
+
+#    @VariableFieldLabel (
+#        description = "Smlt4 id:name &amp;#40;optional&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt4_idname",
+#    )
+#    @VariableFieldLabel (
+#        description = "Smlt4 port&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt4_ports",
+#        scope = device
+#    )
+
+#    @VariableFieldLabel (
+#        description = "Smlt5 id:name &amp;#40;optional&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt5_idname",
+#    )
+#    @VariableFieldLabel (
+#        description = "Smlt5 port&amp;#40;s&amp;#41;",
+#        type = string,
+#        required = no,
+#        name = "userInput_smlt5_ports",
+#        scope = device
+#    )
+
+#@SectionEnd
+
+
+#@SectionStart (description = "Sanity / Debug")
+#    @VariableFieldLabel (
+#        description = "Sanity: enable if you do not trust this script and wish to first see what it does. In sanity mode config commands are not executed",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_sanity",
+#    )
+#    @VariableFieldLabel (
+#        description = "Debug: enable if you need to report a problem to the script author",
+#        type = string,
+#        required = no,
+#        validValues = [Enable, Disable],
+#        name = "userInput_debug",
+#    )
+#@SectionEnd
+#@MetaDataEnd
+'''
+
+
+
+##########################################################
+# Ludo Standard library; Version 3.04                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+
+##########################################################
+try:
+    emc_vars
+    execution = 'xmc'
+except: # If not running on XMC Jython...
+    # These lines only needed to run XMC Python script locally (on my laptop)
+    # They can also be pasted to XMC, but will not execute
+    import sys
+    import json
+    import java.util
+    import emc_cli      # Own local replica
+    import emc_nbi      # Own local replica
+    import emc_results  # Own local replica
+    execution = 'dev'
+    if len(sys.argv) &gt; 1: # Json file as 1st argv
+        emc_vars = json.load(open(sys.argv[1]))
+    else:
+        emc_vars = json.load(open('emc_vars.json'))
+##########################################################
+
+#
+# IMPORTS:
+#
+import re
+import os                           # Used by warpBuffer_execute
+import subprocess                   # Used by xmcLinuxCommand
+from java.util import LinkedHashMap # Used by nbiQuery
+import socket                       # Used by addXmcSyslogEvent
+
+#
+# VARIABLES:
+#
+
+# For CLI functions:
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+LastNbiError = None
+ConfigHistory = []
+AppendBuffer = []
+WarpBuffer = []
+
+# For CLI Rollback functions
+RollbackStack = []
+
+# For Port functions
+RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
+RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
+SlotPortRange = None # Gets set to dict by getSlotPortRanges()
+
+# For Family functions
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+}
+
+#
+# FUNCTIONS:
+#
+def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if Debug:
+        print debugOutput
+
+def exitError(errorOutput): # v1 - Exit script with error message and setting status appropriately
+    emc_results.setStatus(emc_results.Status.ERROR)
+    raise RuntimeError(errorOutput)
+
+def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    try:
+        rollbackStack()
+    finally:
+        print "Aborting because this command failed: {}".format(cmd)
+        exitError(errorOutput)
+
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
+#
+# Family functions
+#
+
+def setFamily(): # v1 - Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if Family not in CLI_Dict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+
+#
+# CLI Rollback functions
+#
+
+def rollbackStack(): # v1 - Execute all commands on the rollback stack
+    if RollbackStack:
+        print "Applying rollback commands to undo partial config and return device to initial state"
+        while RollbackStack:
+            sendCLI_configChain(RollbackStack.pop(), True)
+
+def rollbackCommand(cmd): # v1 - Add a command to the rollback stack; these commands will get popped and executed should we need to abort
+    RollbackStack.append(cmd)
+    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
+    cmdList = [x for x in cmdList if x] # Weed out empty elements 
+    cmdOneLiner = " / ".join(cmdList)
+    print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
+
+def rollBackPop(number=0): # v1 - Remove entries from RollbackStack
+    global RollbackStack
+    if number == 0:
+        RollbackStack = []
+        print "Rollback stack emptied"
+    else:
+        del RollbackStack[-number:]
+        print "Rollback stack popped last {} entries".format(number)
+
+#
+# CLI functions
+#
+
+def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
+    if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def configChain(chainStr): # v1 - Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
+    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
+    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
+        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
+    else:
+        mode = None
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
+
+def formatOutputData(data, mode): # v2 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+    if not mode                 : value = data                                   # Legacy behaviour same as list
+    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
+    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
+    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
+    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
+    elif mode == 'str-join'     : value = ''.join(data)                          # Regex with max 1 capturing bracket, joins list to string
+    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
+    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
+    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
+    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
+    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets, returns 1st tuple
+    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
+    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    else:
+        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
+    return value
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v1 - Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            abortError(cmd, outputStr)
+        LastError = None
+        return outputStr
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
+    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("sendCLI_showRegex OUT = {}".format(value))
+    return value
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a CLI config command
+    global LastError
+    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd, waitForPrompt)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            abortError(cmd, outputStr)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a semi-colon separated list of config commands
+    cmdList = configChain(chainStr)
+    for cmd in cmdList[:-1]: # All but last
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            return False
+    # Last now
+    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
+    if not success:
+        return False
+    return True
+
+def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or configChains; buffer can then be appended to config.cfg with appendConfigDotCfg()
+    if Family != 'VSP Series':
+        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    global AppendBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        AppendBuffer.append(cmdAdd)
+
+def appendConfigDotCfg(chainStr=None): # v3 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+    global LastError
+    if Family != 'VSP Series':
+        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    global AppendBuffer
+    if chainStr:
+        appendBuffer_add(chainStr)
+    if Sanity:
+        for cmd in AppendBuffer:
+            print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
+            ConfigHistory.append('[after reboot] ' + cmd)
+        LastError = None
+        return True
+    # Edit config.cfg
+    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
+    for cmd in AppendBuffer:
+        cmdStream += cmd + "\n"
+    cmdStream += "\x1bZZ" # Escape edit mode and save file
+    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
+    resultObj = emc_cli.send(cmdStream)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+            abortError(cmd, outputStr)
+        else:
+            for cmd in AppendBuffer:
+                print "Added to config.cfg: {}".format(cmd)
+                ConfigHistory.append('[after reboot] ' + cmd)
+            LastError = None
+            AppendBuffer = []
+            return True
+    else:
+        exitError(resultObj.getError())
+
+def warpBuffer_add(chainStr): # v1 - Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
+    global WarpBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        WarpBuffer.append(cmdAdd)
+
+def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, waitForPrompt=True): # v3 - Appends to existing WarpBuffer and then executes it
+    # Same as sendCLI_configChain() but all commands are placed in a script file on the switch and then sourced there
+    # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
+    # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
+    global WarpBuffer
+    global LastError
+    xmcTftpRoot = '/tftpboot'
+    xmcServerIP = emc_vars["serverIP"]
+    switchIP = emc_vars["deviceIP"]
+    userName = emc_vars["userName"]
+    tftpCheck = {
+        'VSP Series':    'bool://show boot config flags||^flags tftpd true',
+        'Summit Series': 'bool://show process tftpd||Ready',
+        'ERS Series':    True, # Always enabled
+    }
+    tftpActivate = {
+        'VSP Series':    'boot config flags tftpd',
+        'Summit Series': 'start process tftpd',
+    }
+    tftpDeactivate = {
+        'VSP Series':    'no boot config flags tftpd',
+        'Summit Series': 'terminate process tftpd graceful',
+    }
+    tftpExecute = { # XMC server IP (TFTP server), Script file to fetch and execute
+        'VSP Series':    'copy "{0}:{1}" /intflash/.script.src -y; source .script.src debug',
+        'Summit Series': 'tftp get {0} "{1}" .script.xsf; run script .script.xsf',
+        'ERS Series':    'configure network address {0} filename "{1}"',
+    }
+
+    if chainStr:
+        warpBuffer_add(chainStr)
+    if Family not in tftpCheck:
+        exitError('Sourcing commands via TFTP only supported in family types: {}'.format(", ".join(list(tftpCheck.keys()))))
+
+    # Determine whether switch can do TFTP
+    if tftpCheck[Family] == True:
+        tftpEnabled = True
+    else:
+        tftpEnabled = sendCLI_showRegex(tftpCheck[Family])
+    if not tftpEnabled:
+        if Sanity:
+            print "SANITY&gt; {}".format(tftpActivate[Family])
+            ConfigHistory.append(tftpActivate[Family])
+        else:
+            sendCLI_configCommand(tftpActivate[Family], returnCliError, msgOnError) # Activate TFTP now
+        warpBuffer_add(tftpDeactivate[Family])      # Restore TFTP state on completion
+
+    if Sanity:
+        for cmd in WarpBuffer:
+            print "SANITY(warp)&gt; {}".format(cmd)
+            ConfigHistory.append(cmd)
+        LastError = None
+        return True
+
+    # Write the commands to a file under XMC's TFTP root directory
+    tftpFileName = userName + '.' + scriptName().replace(' ', '_') + '.' + switchIP.replace('.', '_')
+    tftpFilePath = xmcTftpRoot + '/' + tftpFileName
+    try:
+        with open(tftpFilePath, 'w') as f:
+            if Family == 'VSP Series': # Always add these 2 lines, as VSP source command does not inherit current context
+                f.write("enable\n")
+                f.write("config term\n")
+            for cmd in WarpBuffer:
+                f.write(cmd + "\n")
+            f.write("\n") # Make sure we have an empty line at the end, or VSP sourcing won't process last line...
+            debug("warpBuffer - write of TFTP config file : {}".format(tftpFilePath))
+    except Exception as e: # Expect IOError
+        print "{}: {}".format(type(e).__name__, str(e))
+        exitError("Unable to write to TFTP file '{}'".format(tftpFilePath))
+
+    # Make the switch fetch the file and execute it
+    success = sendCLI_configChain(tftpExecute[Family].format(xmcServerIP, tftpFileName), returnCliError, msgOnError, waitForPrompt)
+    # Clean up by deleting the file from XMC TFTP directory
+    os.remove(tftpFilePath)
+    debug("warpBuffer - delete of TFTP config file : {}".format(tftpFilePath))
+
+    if not success: # In this case some commands might have executed, before the error; these won't be captured in ConfigHistory
+        WarpBuffer = []
+        return False
+    ConfigHistory.extend(WarpBuffer)
+    WarpBuffer = []
+    LastError = None
+    return True
+
+def printConfigSummary(): # v1 - Print summary of all config commands executed with context indentation
+    emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+
+#
+# XMC GraphQl NBI functions
+#
+
+def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+    global LastNbiError
+    response = emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+    LastNbiError = None
+
+    if returnKey: # If a specific key requested, we find it
+        def recursionKeySearch(nestedDict):
+            for key, value in nestedDict.iteritems():
+                if key == returnKey:
+                    return True, value
+            for key, value in nestedDict.iteritems():
+                if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+                    foundKey, foundValue = recursionKeySearch(value)
+                    if foundKey:
+                        return True, foundValue
+                return [None, None] # If we find nothing
+
+        foundKey, returnValue = recursionKeySearch(response)
+        if foundKey:
+            if Debug:
+                if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+            return returnValue
+        if returnKeyError:
+            return None
+        # If requested key not found, raise error
+        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
+
+    # Else, return the full response
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, response))
+        else: debug("nbiQuery response = {}".format(response))
+    return response
+
+def nbiMutation(jsonQuery, returnKeyError=False): # v2 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+    global LastNbiError
+    if Sanity:
+        print "SANITY - NBI Mutation:\n{}\n".format(jsonQuery)
+        LastNbiError = None
+        return True
+    print "NBI Mutation Query:\n{}\n".format(jsonQuery)
+    response = emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+
+    def recursionKeySearch(nestedDict):
+        for key, value in nestedDict.iteritems():
+            if key == 'status':
+                if 'message' in nestedDict:
+                    return True, value, nestedDict['message']
+                else:
+                    return True, value, None
+        for key, value in nestedDict.iteritems():
+            if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+                foundKey, foundValue, foundMsg = recursionKeySearch(value)
+                if foundKey:
+                    return True, foundValue, foundMsg
+            return [None, None, None] # If we find nothing
+
+    foundKey, returnStatus, returnMessage = recursionKeySearch(response)
+    if foundKey:
+        debug("nbiMutation status = {} / message = {}".format(returnStatus, returnMessage))
+    elif not returnKeyError:
+        # If status key not found, raise error
+        abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "status" was not found in query response')
+
+    if returnStatus == "SUCCESS":
+        LastNbiError = None
+        return True
+    else:
+        LastNbiError = returnMessage
+        return False
+
+#
+# Port processing functions
+#
+
+def portValue(port): # v1 - Function to pass to sorted(key) to sort port lists
+    slotPort = re.split('[/:]', port)
+    if len(slotPort) == 2: # slot/port format
+        idx = int(slotPort[0])*100 + int(slotPort[1])
+    else: # standalone port (no slot)
+        idx = int(slotPort[0])
+    return idx
+
+def getSlotPortRanges(): # v1 - Populates the SlotPortRange dict
+    global SlotPortRange
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
+    if Family not in slotCommand:
+        SlotPortRange = {}
+        return
+    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
+    debug("getSlotPortRanges = {}".format(SlotPortRange))
+
+def generatePortList(portStr, debugKey=None): # v1 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
+    # This version of this function will not handle port ranges which span slots; also does not handle VSP channelized ports
+    debug("generatePortList IN = {}".format(portStr))
+    portDict = {} # Use a dict, will ensure no port duplicate keys
+    for port in portStr.split(','):
+        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
+        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
+        if not len(port): # Skip empty string
+            continue
+        rangeMatch = RegexPortRange.match(port)
+        starMatch = RegexStarRange.match(port)
+        if rangeMatch: # We have a range of ports
+            startSlot = rangeMatch.group(1)
+            separator = rangeMatch.group(2)
+            startPort = int(rangeMatch.group(3))
+            endSlot = rangeMatch.group(4)
+            endPort = int(rangeMatch.group(5))
+            if endSlot and startSlot != endSlot:
+                print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
+            elif startPort &gt;= endPort:
+                print "ERROR! generatePortList invalid range: {}".format(port)
+            else: # WE are good
+                for portCount in range(startPort, endPort + 1):
+                    if startSlot: # slot-based range
+                        portDict[startSlot + separator + str(portCount)] = 1
+                    else: # simple port range (no slot info)
+                        portDict[str(portCount)] = 1
+        elif starMatch: # We have a slot/* range
+            slot = starMatch.group(1)
+            separator = starMatch.group(2)
+            if SlotPortRange == None: # Structure not populated
+                getSlotPortRanges()
+            if SlotPortRange:
+                if slot in SlotPortRange:
+                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
+                        portDict[slot + separator + str(portCount)] = 1
+                else:
+                    print "Warning: no range for slot {}; skipping: {}".format(slot, port)
+            else:
+                print "Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port)
+        elif RegexPort.match(port): # Port is in valid format
+            portDict[port] = 1
+        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
+            print "Warning: generatePortList skipping unexpected port format: {}".format(port)
+
+    # Sort and return the list as a comma separated string
+    portList = sorted(portDict, key=portValue)
+
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portList))
+        else: debug("generatePortList OUT = {}".format(portList))
+    return portList
+
+def generatePortRange(portList, debugKey=None): # v1 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
+    # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
+    debug("generatePortRange IN = {}".format(portList))
+    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
+    elementList = []
+    elementBuild = None
+    currentType = None
+    currentSlot = None
+    currentPort = None
+    rangeLast = None
+
+    # First off, sort the list
+    portList = sorted(portList, key=portValue)
+    for port in portList:
+        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
+        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
+        if len(slotPort) == 3: # slot/port
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
+                    currentPort = slotPort[2]
+                    if rangeMode[Family] == 1:
+                        rangeLast = currentPort
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            elementBuild = port
+
+        if len(slotPort) == 1: # simple port (no slot)
+            if elementBuild:
+                if currentType == 'p' and port == str(int(currentPort)+1):
+                    currentPort = port
+                    rangeLast = currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 'p'
+            currentPort = port
+            elementBuild = port
+
+    if elementBuild: # Close off last element we were holding
+        if rangeLast:
+            elementBuild += '-' + rangeLast
+        elementList.append(elementBuild)
+
+    portStr = ','.join(elementList)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portStr))
+        else: debug("generatePortRange OUT = {}".format(portStr))
+    return portStr                
+
+#
+# IP address processing functions
+#
+
+def ipToNumber(dottedDecimalStr): # v1 - Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
+    try: # bytearray ensures that IP bytes are valid (1-255)
+        ipByte = list(bytearray([int(byte) for byte in dottedDecimalStr.split('.')]))
+    except:
+        return None
+    if len(ipByte) != 4:
+        return None
+    debug("ipByte = {}".format(ipByte))
+    ipNumber = (ipByte[0]&lt;&lt;24) + (ipByte[1]&lt;&lt;16) + (ipByte[2]&lt;&lt;8) + ipByte[3]
+    debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
+    return ipNumber
+
+def numberToIp(ipNumber): # v1 - Method to convert a long number into an IP/Mask dotted decimal address
+    dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
+    debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
+    return dottedDecimalStr
+
+def maskToNumber(mask): # v1 - Method to convert a mask (dotted decimal or Cidr number) into a long number
+    if isinstance(mask, int) or re.match(r'^\d+$', mask): # Mask as number
+        if int(mask) &gt; 0 and int(mask) &lt;= 32:
+            maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
+        else:
+            maskNumber = None
+    else:
+        maskNumber = ipToNumber(mask)
+    if maskNumber:
+        debug("maskNumber = {}".format(hex(maskNumber)))
+    return maskNumber
+
+def subnetMask(ip, mask): # v1 - Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    ipSubnet = numberToIp(subnetNumber)
+    ipDottedMask = numberToIp(maskNumber)
+    ipCidrMask = bin(maskNumber).count('1')
+    debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
+    return ipSubnet, ipDottedMask, ipCidrMask
+
+def ipGateway(ip, mask, gw): # v1 - Return the gateway IP address, as first or last IP in subnet, based on own IP/mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    if gw == 'first':
+        gwNumber = subnetNumber + 1
+        ip1numb = gwNumber + 1
+        ip2numb = gwNumber + 2
+    elif gw == 'last':
+        gwNumber = subnetNumber + 2**(32-int(mask)) - 2
+        ip1numb = gwNumber - 2
+        ip2numb = gwNumber - 1
+    else: # Error condition
+        exitError('ipGateway(): invalid gw type {}'.format(gw))
+    debug("gwNumber = {} / ip1numb = {} / ip2numb = {}".format(hex(gwNumber), hex(ip1numb), hex(ip2numb)))
+    gatewayIP = numberToIp(gwNumber)
+    ip1 = numberToIp(ip1numb)
+    ip2 = numberToIp(ip2numb)
+    debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
+    return gatewayIP, ip1, ip2
+
+#
+# Miscellaneous functions
+#
+
+
+def addXmcSyslogEvent(severity, message, ip=None): # v1 - Adds a syslog event to XMC (only needed for Scripts)
+    severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
+    severityLevel = severityHash[severity] if severity in severityHash else 6
+    session = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    session.connect(('127.0.0.1', 514))
+    if ip:
+        session.send("&lt;{}&gt; XMC Script {} / Device: {} / {}".format(severityLevel,scriptName(),ip,message))
+    else:
+        session.send("&lt;{}&gt; XMC Script {} / {}".format(severityLevel,scriptName(),ip,message))
+    session.close()
+
+
+#
+# INIT: Init Debug &amp; Sanity flags based on input combos
+#
+try:
+    if emc_vars['userInput_sanity'].lower() == 'enable':
+        Sanity = True
+    elif emc_vars['userInput_sanity'].lower() == 'disable':
+        Sanity = False
+except:
+    pass
+try:
+    if emc_vars['userInput_debug'].lower() == 'enable':
+        Debug = True
+    elif emc_vars['userInput_debug'].lower() == 'disable':
+        Debug = False
+except:
+    pass
+
+
+##########################################################
+# Ludo Threads library; Version 2.0                      #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+
+#
+# IMPORTS:
+#
+import os
+import sys
+import time
+import glob
+import json
+
+#
+# VARIABLES:
+#
+StartTime = time.time()
+TimeDeviation = 5.0 # When XMC runs many instances of same script, not all instances will start at exactly the same time; set this to worst case deviation in secs
+DelayStaleDelete = 1.0 # If stale files exists, all threads will be made to wait this minimum delay, before the ThreadMaster is allowed to delete the stale files 
+Timeout = 10   # Seconds we are ready to wait for reading emc_vars from other threads
+SleepTimer = 1 # While waiting for other threads to make their emc_vars avail, this is the sleep timer in the timeout loop
+SeqNumber = 0
+ThreadMaster = None
+ThreadIPs = []
+ThreadVarsDict = {}
+ReturnOnError = False # When reading data from other threads, determines whether we want to bomb out if some threads don't respond or continue with threads which do
+Emc_vars_copy = emc_vars.copy() # Modifying emc_vars is discouraged, so we take a copy of it; shallow copy is enough, emc_vars is single level dict 
+ThisScript = __file__.split(os.path.sep)[-1].split('.')[0]  # Name of our script
+WorkDir = os.getcwd()
+UserName = emc_vars["userName"]
+MyIP = emc_vars["deviceIP"]
+RegexFileIP = re.compile('^\.[^\.]+\.[^\.]+\.([\d_]+)\.')
+GlobStamps = '.' + UserName + '.' + ThisScript + '.*.stamp'
+GlobSeqnce = '.' + UserName + '.' + ThisScript + '.' + MyIP.replace('.', '_') + '.[0-9]*'
+GlobSqJson = '.' + UserName + '.' + ThisScript + '.*.&lt;SEQ&gt;.json'
+# The following files are written to the XMC filesystem (default path: /usr/local/Extreme_Networks/NetSight/wildfly/bin)
+# - Stamp file:    .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.stamp        : modify time of this empty file used to track other threads
+# - Sequence file: .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.&lt;seqNb&gt;      : empty file who's sequence number determines which json file to load
+# - JSON file:     .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.&lt;seqNb&gt;.json : json file containing IP's Emc_vars_copy
+
+
+#
+# FUNCTIONS:
+#
+def threadFile(ip, seqnum=None, suffix=None): # Given IP and suffix, returns the script instance specific filenames
+    fileName = '.' + UserName + '.' + ThisScript + '.' + ip.replace('.', '_')
+    if seqnum != None:
+        fileName += '.' + str(seqnum)
+    if suffix:
+        fileName += '.' + suffix
+    return fileName
+
+def threadIP(filename): # Given a thread filename, returns the thread IP
+    ipMatch = RegexFileIP.match(filename)
+    if not ipMatch:
+        exitError("Unable to extract IP from thread filename '{}'".format(filename))
+    ip = ipMatch.group(1)
+    return ip.replace('_', '.')
+
+def deleteFiles(globStr): # Deletes all existing sequence files for this thread
+    fileList = glob.glob(globStr)
+    if fileList:
+        debug("Threads - deleteFiles() deleting files : {}".format(fileList))
+        for f in fileList:
+            os.remove(f)
+
+def touch(path): # Touches a file (and sets its modify time)
+    try:
+        with open(path, 'a'):
+            os.utime(path, None)
+            debug("Threads - touch() file : {}".format(path))
+    except Exception as e: # Expect IOError
+        print "{}: {}".format(type(e).__name__, str(e))
+        exitError("Unable to touch file '{}'".format(path))
+
+def writeJson(dataDict, path): # Writes a dict to json file
+    try: # Python file locking https://yakking.branchable.com/posts/flocking/
+        with open(path, 'w') as f:
+            json.dump(dataDict, fp=f, indent=4)
+            debug("Threads - writeJson() file : {}".format(path))
+    except Exception as e: # Expect IOError
+        print "{}: {}".format(type(e).__name__, str(e))
+        exitError("Unable to write to json file '{}'".format(path))
+
+def emc_threads(returnOnError=None): # Returns list of IPs for other instances simultaneously running this same script
+    global ThreadIPs
+    global ReturnOnError
+
+    if ThreadIPs: # We only need to call this function once; if it has already run, simply come out
+        return ThreadIPs
+
+    def electMaster(iplist, myip): # Given a list of IPs, returns true if myip is the numerically lowest in the list
+        myipInt = ipToNumber(myip)
+        for ip in iplist:
+            if ipToNumber(ip) &lt; myipInt:
+                return False
+        return True
+
+    if returnOnError != None: # If returnOnError was set to True/False, then we change the global ReturnOnError
+        ReturnOnError = returnOnError
+
+    waitTime = StartTime - time.time() + TimeDeviation
+    if waitTime &gt; 0:
+        debug("Threads - emc_threads() allowing for deviation of start time between threads / sleep = {}".format(waitTime))
+        time.sleep(waitTime)
+
+    # Get a list of all Stamp files for this script
+    stampFileList = glob.glob(GlobStamps)
+    # - there is a chance that ThreadMaster instance actually deletes some of files in stampFileList, while this instance is on the line below
+    # - and we would error on doing os.path.getmtime(x) on a since non-existent file...
+    # - the solution is the code added in the ThreadMaster if section below, where a delay is added to compensate between time of this thread and slowest thread
+    activeStampFiles = [x for x in stampFileList if os.path.getmtime(x) &gt;= (StartTime - TimeDeviation)]
+    staleStampFiles  = [x for x in stampFileList if x not in activeStampFiles]
+    if staleStampFiles:
+        debug("Threads - staleStampFiles:\n{}".format(staleStampFiles))
+
+    # Only retain IPs for Stamp files newer than StartTime
+    ThreadIPs = [threadIP(x) for x in activeStampFiles]
+    debug("Threads - active device IPs = {}".format(ThreadIPs))
+
+    # Write JSON and sequence number file
+    if SeqNumber == 0: # Only do this if emc_threads_put() has not already been called
+        writeJson(Emc_vars_copy, threadFile(MyIP, seqnum=SeqNumber, suffix='json'))
+        touch(threadFile(MyIP, seqnum=SeqNumber))
+
+    if staleStampFiles: # The master thread will take charge of cleanup of stale thread files of this same script (these could be stale from previous runs)
+        # But we let all threads do the wait below, to keep them in sync as much as possible
+        debug("Threads - stale files exist; electing ThreadMaster")
+        staleStampStart = time.time()
+        # Elect a ThreadMaster; we want only one script instance to perform cleanup of stale files
+        ThreadMaster = electMaster(ThreadIPs, MyIP)
+        # Before deleting any files we need to make sure that all other active threads have passed this function
+        # Identify the active thread with the highest time stamp (= slowest thread)
+        slowestStamp = 0
+        for stampFile in activeStampFiles:
+            stamp = os.path.getmtime(stampFile)
+            if stamp &gt; slowestStamp:
+                slowestStamp = stamp
+        debug("Threads - slowest thread timestamp = {}".format(slowestStamp))
+        # Take the delta of that highest time and our initial timestamp (and adjust for processing to get here)
+        waitTime = slowestStamp - int(StartTime) - (time.time() - staleStampStart) + DelayStaleDelete
+        if waitTime &gt; 0:
+            debug("Threads - emc_threads() allowing for delta between this thread and slowest thread / sleep = {}".format(waitTime))
+            time.sleep(waitTime)
+
+        if ThreadMaster: # The master thread will take charge of cleanup of stale thread files of this same script (these could be stale from previous runs)
+            debug("Threads - acting as ThreadMaster and deleting stale files;")
+            # By now, all other threads will have come out of emc_threads(), so is safe to perform clean up of stale files
+            for fnam in staleStampFiles:
+                fglob = re.sub(r'[^\.]+$', '*', fnam) # This glob will catch all 3 file types
+                debug("** Deleting all files for glob = {}".format(fglob))
+                for fdel in glob.glob(fglob):
+                    debug("-&gt; deleting file = {}".format(fdel))
+                    os.remove(fdel)
+    return ThreadIPs
+
+def emc_threads_vars(ip=None, var=None, returnOnError=None): # Returns variable dict from other instances simultaneously running this same script
+    # If both ip and var is set, returns value of variable
+    # If only ip is set, returns dict of ip's Emc_vars_copy
+    # If neither ip nor var is set, returns full dict where 1st key is thread ip and 2nd key are Emc_vars_copy keys
+    # This method will also work if the local thread ip is provided, in which case the local ip Emc_vars_copy is returned
+    # If returnOnError=False or returnOnError not set and global ReturnOnError is False:
+    #     This method expects to obtain Emc_vars_copy from all running instances for which Stamp files were recorded
+    #     Failure to read the JSON file of one or more other instances will result in an exception being raised
+    #     This can happen if some script instances fail after starting; the outcome is that all instances will then fail
+    # If returnOnError=True or returnOnError not set and global ReturnOnError is True:
+    #     In this case, failure to read the JSON file of one or more other instances will not result in an exception
+    #     The method will instead return, but the variables requested may or may not be available.
+    #     If the ip provided is for an instance for which the Emc_vars_copy could not be read, then the method will return
+    #     None if a var was requested and an empty dict otherwise.
+    #     If the method is called without any ip or var set, then a dict is returned, but this dict will have some IP keys
+    #     holding an empty dict
+    global ThreadIPs
+    global ThreadVarsDict
+
+    if returnOnError == None: # Unless override provided in method call, use global setting
+        returnOnError = ReturnOnError
+
+    if not ThreadIPs: # emc_threads() has not been called
+        emc_threads() # global ThreadIPs gets set
+
+    if not ThreadVarsDict: # dict is not populated
+        # Set our own Emc_vars_copy
+        ThreadVarsDict[MyIP] = Emc_vars_copy
+
+        timeoutTime = time.time() + Timeout # Prime the timeout time, in case we have to timeout
+        failedFirstRead = {}                # Init dict to track failed file read
+
+        while set(ThreadIPs) != set(ThreadVarsDict.keys()): # Until we have variables for all IPs
+            # Check for available json files
+            jsonFileList = glob.glob(GlobSqJson.replace('&lt;SEQ&gt;', str(SeqNumber)))
+            jsonIPList = [threadIP(x) for x in jsonFileList]
+            debug("Threads - available JSON files on SeqN {} = {}".format(SeqNumber, jsonIPList))
+            newIPList = [x for x in jsonIPList if x in ThreadIPs and x not in ThreadVarsDict]
+
+            if newIPList: # Read in available JSON files
+                debug("Threads - new JSON files to read in for these IPs = {}".format(newIPList))
+                for newip in newIPList:
+                    try:
+                        path = threadFile(newip, seqnum=SeqNumber, suffix='json')
+                        with open(path, 'r') as f:
+                            debug("-&gt; reading file = {}".format(path))
+                            ThreadVarsDict[newip] = json.load(fp=f)
+                    except Exception as e: # Expect IOError or ValueError
+                        print "{}: {}".format(type(e).__name__, str(e))
+                        if newip not in failedFirstRead: # We allow 1 retry
+                            failedFirstRead[newip] = 1
+                            print "Threads - WARNING: Unable to read Emc_vars_copy for IP instance {} on first try".format(newip)
+                            time.sleep(1) # Delay 1 sec before retry
+                            continue
+                        if returnOnError:
+                            print "Threads - WARNING: Unable to read Emc_vars_copy for IP instance {}".format(newip)
+                            ThreadVarsDict[newip] = {}
+                        else:
+                            exitError("Unable to read to json file '{}'".format(path))
+                # Reset timeout time (we only tick timeout time when we have no JSON to read)
+                timeoutTime = time.time() + Timeout
+
+            else: # No JSON files available; implement timeout
+                if time.time() &gt; timeoutTime: # We timeout
+                    missingIPList = [x for x in ThreadIPs if x not in ThreadVarsDict]
+                    if returnOnError:
+                        print "Threads - WARNING: Unable to read Emc_vars_copy from these thread IPs: {}".format(missingIPList)
+                        for failip in missingIPList:
+                            ThreadVarsDict[failip] = {}
+                    else:
+                        exitError("Timing out due to inability to read Emc_vars_copy from these thread IPs: {}".format(missingIPList))
+                time.sleep(SleepTimer)
+
+    if ip and var: # Both are set
+        if var in ThreadVarsDict[ip]:
+            return ThreadVarsDict[ip][var]
+        else: # Case where returnOnError is set and we are missing the Emc_vars_copy for this IP
+            return None
+    elif ip:
+        return ThreadVarsDict[ip]
+    else:
+        return ThreadVarsDict
+
+def emc_threads_put(**dict): # Set a local Emc_vars_copy variable and ensure this becomes available to other instances simultaneously running this same script
+    global ThreadVarsDict
+    global SeqNumber
+
+    # As we are writing a new variable, every other instance of this script will too, so..
+    ThreadVarsDict = {}         # Clear out the stored thread Emc_vars_copy
+    SeqNumber += 1              # We increase the sequence number
+
+    # Delete any existing sequence number files for this thread IP
+    deleteFiles(GlobSeqnce)
+
+    # Update the value in our local Emc_vars_copy
+    for key, value in dict.items():
+        Emc_vars_copy[key] = value
+
+    # Re-write our thread json file
+    writeJson(Emc_vars_copy, threadFile(MyIP, seqnum=SeqNumber, suffix='json'))
+
+    # Re-post sequence number file
+    touch(threadFile(MyIP, seqnum=SeqNumber))
+
+#
+# INIT: Init code for Threads; signal self thread existence and store Emc_vars_copy as json; we do this as early as possible
+#
+print "Threads - StartTime = {}".format(StartTime)
+debug("Threads - ThisScript = {}".format(ThisScript))
+debug("Threads - WorkDir = {}".format(WorkDir))
+deleteFiles(GlobSeqnce)
+touch(threadFile(MyIP, suffix='stamp'))
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+
+#
+# Variables:
+#
+
+BVLANs = [str(4051), str(4052)]
+IstVLANrange = [4050, 4000] # Try for VLAN 4050, and decrement to 4000 if not available
+IstVLANname = "IST-VLAN"
+IstMLTrange = [512,500]
+IstMLTname = "IST-NNI-MLT"
+VistIsidOffset = 15000000
+VistIPbase = '192.168.255.0'#/30
+SmltMltOffset = 1 # When autogenerating SMLT MLTs, id to to start allocating from
+SlppPacketRxThresholds = [5, 50] # Threshold values to assign on each vIST member (Primary/ Secondary)
+
+CLI_Dict = {
+    'VSP Series': {
+        'disable_more_paging'        : 'terminal more disable',
+        'enable_context'             : 'enable',
+        'config_context'             : 'config term',
+        'port_config_context'        : 'interface gigabitEthernet {}', # Port list
+        'isis_config_context'        : 'router isis',
+        'mlt_config_context'         : 'interface mlt {}', # MLT id
+        'exit_config_context'        : 'exit',
+        'end_config'                 : 'end',
+        'save_config'                : 'save config',
+        'get_isis_global_settings'   : 'dict-diagonal://show isis||(?:(AdminState) : (enabled|disabled)|(System ID) : ?([\da-f]{4}\.[\da-f]{4}\.[\da-f]{4})?|(Router Name) : ?(\S+)?|ip (source-address) : ?(\d+\.\d+\.\d+\.\d+)?|(inband-mgmt-ip) : ?(\d+\.\d+\.\d+\.\d+)?)',
+        'check_isis_adjacencies'     : 'bool://show isis adjacencies||^\S+ +1 UP',
+        'get_virtual_ist_data'       : 'list://show virtual-ist||^(?:\d+\.\d+\.\d+\.\d+ +(\d+) +\S+ +(up|down)|\S+ +\S+ +(Master|Slave))',
+        'get_chassis_mac'            : 'str://show sys-info||BaseMacAddr +: +(\S+)',
+        'list_fabric_bmacs'          : 'list://show isis spbm unicast-fib vlan {0}||^(\S+) +{0}'.format(BVLANs[0]),
+        'get_dvr_type'               : 'str-lower://show dvr||^Role +: +(Leaf|Controller)',
+        'list_voss_neighbour_macs'   : 'dict://show lldp neighbor summary||^(\d+/\d+(?:/\d+)?) +LLDP +\S+ +([\da-f:]+)',
+        'get_platform_vlans_names'   : 'dict://show vlan basic||^(\d+) +(\S.+\S) +\S+ +\d+ +\S',
+        'get_4k_brouter_vlans'       : 'list://show brouter||^\s*\d+/\d+(?:/\d+)? +(4\d{3})',
+        'get_mlt_data'               : 'list://show mlt||^(?:(\d+) +\d+.+?(?:access|trunk) +(norm|smlt) +(?:norm|smlt) *(\S+)?|(\d+) +\d+ +(?:[\d\/]+|null) +(enable|disable)|(\d+) +\d+ +\S+ +\S+ +\S+ +\S+ +\S+ +(enable|disable))',
+        'list_fa_mlts'               : 'list://show fa interface||^Mlt(\d+)',
+        'list_vlacp_ports'           : 'dict://show vlacp interface gigabitethernet {}||^(\d+/\d+(?:/\d+)?) +(true|false) +(?:true|false)', # Port list
+        'list_mlt_lacp_key'          : 'dict://show lacp interface mlt||^(\d+) +\d+ +\d+ +\S+ +\d+ +(\d+)',
+        'list_port_lacp_key'         : 'dict://show lacp actor-admin interface||^(\d+/\d+(?:/\d+)?) +\d+ +\S+ +(\d+)',
+        'check_lacp_enabled'         : 'bool://show lacp||Lacp: +enable',
+        'check_vlacp_enabled'        : 'bool://show vlacp||Vlacp: +enable',
+        'list_vlan_default_ports'    : 'list://show interfaces gigabitEthernet vlan||^(\d+/\d+(?:/\d+)?) +(?:disable +false +false +(?:1 +1|0 +0) +normal +disable|enable +false +false +0 +4048 +normal +disable)',
+        'list_brouter_ports'         : 'list://show brouter||^\s*(\d+/\d+(?:/\d+)?) +\d+',
+        'list_oob_mgmt_ips'          : 'list://show ip interface vrfids 512||^(?:Portmgm\d?|MgmtVirtIp|mgmt-oob) +(\d+\.\d+\.\d+\.\d+)',
+        'list_brouter_ips'           : 'list://show ip interface||^Port\S+ +(\d+\.\d+\.\d+\.\d+)',
+        'get_auto_sense_status'      : 'dict://show interfaces gigabitEthernet auto-sense||^(\d+/\d+(?:/\d+)?) +(\S+)',
+        'list_port_up_speed'         : 'dict://show interfaces gigabitEthernet name {}||^(\d+/\d+(?:/\d+)?).+?up\s+full\s+(\d+)\s+\S+$', # Port list
+        'get_isis_directs_redist'    : 'tuple://show ip isis redistribute||^(LOC) +\d+ +\S+ +\S+ +\S+ +\S+\s*(\S+)?',
+        'get_ist_subnet'             : 'str://show ip route protocol local||^(\S+) +\S+ +\S+ +- +\d+ +{}\s', # IST VLAN
+        'disable_isis'               : 'no router isis enable\ny',
+        'create_isis_interface'      : 'isis; isis spbm 1; isis enable',
+        'set_isis_if_metric'         : 'isis spbm 1 l1-metric {}', # Metric
+        'set_spbm_smlt_peer'         : 'spbm 1 smlt-peer-system-id {}', # SysId
+        'set_spbm_smlt_virt_bmac'    : 'spbm 1 smlt-virtual-bmac {}', # Bmac
+        'delete_ist_vlan'            : 'vlan delete {0}', # {0} = VLAN id
+        'create_ist_vlan'            : # {0} = IST VLAN, {1} = IST VLAN name, {2} = IST ISID, {3} = IST IP
+                                       '''
+                                       vlan create {0} name "{1}" type port-mstprstp 0
+                                       vlan i-sid {0} {2}
+                                       interface Vlan {0}
+                                          ip address {3}/30
+                                       exit
+                                       ''',
+        'disable_autosense_conv2cfg' : 'interface gigabitEthernet {0}; no auto-sense enable convert-to-config; exit', # Port
+        'create_vist'                : 'virtual-ist peer-ip {1} vlan {0}', # {0} = IST VLAN, {1} = IST Peer IP
+        'create_dvr_leaf_vist'       : 'dvr leaf virtual-ist {0}/30 peer-ip {1} cluster-id {2}', # {0} = IST IP, {1} = IST Peer IP, {3} = Cluster id
+        'enable_isis'                : 'router isis enable',
+        'create_grt_redistribution'  : '''
+                                       router isis
+                                          redistribute direct
+                                       exit
+                                       ''',
+        'create_ist_routemap'        : # {0} = IST subnet
+                                       '''
+                                       ip prefix-list "IST" {0}/30
+                                       route-map "Suppress-IST" 1
+                                          no permit
+                                          enable
+                                          match network "IST"
+                                       exit
+                                       route-map "Suppress-IST" 2
+                                          permit
+                                          enable
+                                       exit
+                                       router isis
+                                          redistribute direct route-map "Suppress-IST"
+                                       exit
+                                       ''',
+        'apply_ist_routemap'         : 'isis apply redistribute direct',
+        'set_lacp_smlt_sys_id'       : 'lacp smlt-sys-id {}', # SmltVirtBmac
+        'disable_autosense'          : 'interface gigabitEthernet {0}; no auto-sense enable; exit', # Port
+        'create_mlt'                 : 'mlt {} enable {}', # MLT id, 'name "name"'
+        'set_mlt_ports'              : 'mlt {} member {}', # MLT id, Port list
+        'enable_mlt_tagging'         : 'mlt {} encapsulation dot1q', # MLT id
+        'enable_smlt'                : 'smlt',
+        'set_mlt_lacp_key'           : 'lacp enable key {}', # LACP key
+        'enable_mlt_flex_uni'        : 'flex-uni enable',
+        'enable_fabric_attach'       : 'fa; fa enable',
+        'set_fa_mgmt_vlan_isid'      : 'fa management i-sid {} c-vid {}', # I-SID, VLAN
+        'disable_fa_message_auth'    : 'no fa message-authentication',
+        'enable_endpoint_tracking'   : 'endpoint-tracking enable',
+        'enable_slpp_packet_rx'      : 'slpp packet-rx; slpp packet-rx-threshold {}', # SLPP threshold
+        'port_remove_vlan1'          : 'vlan members remove 1 {}', # Port list
+        'port_enable_tagging'        : 'encapsulation dot1q',
+        'port_disable_tagging'       : 'no encapsulation dot1q',
+        'port_enable_lacp'           : 'lacp key {} aggregation enable timeout-time short; lacp enable', # LACP key
+        'port_enable_vlacp'          : 'vlacp fast-periodic-time 500 timeout short timeout-scale 5 funcmac-addr 01:80:c2:00:00:0f; vlacp enable',
+        'port_disable_vlacp'         : 'default vlacp',
+        'enable_lacp'                : 'lacp enable',
+        'enable_vlacp'               : 'vlacp enable',
+        'port_enable'                : 'no shutdown',
+        'port_disable'               : 'shutdown',
+        'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
+        'port_disable_lacp'          : 'no lacp enable; no lacp aggregation enable; default lacp',
+        'disable_mlt_flex_uni'       : 'no flex-uni enable',
+        'disable_fabric_attach'      : 'no fa',
+        'delete_mlt'                 : 'no mlt {}', # MLT id
+        'clear_spbm_smlt_peer'       : 'no spbm 1 smlt-peer-system-id',
+        'clear_spbm_smlt_virt_bmac'  : 'no spbm 1 smlt-virtual-bmac',
+        'delete_vist'                : 'no virtual-ist peer-ip',
+        'delete_dvr_leaf_vist'       : 'no dvr leaf virtual-ist',
+        'delete_ist_vlan'            : 'vlan delete {0}', # IST VLAN
+        'delete_ist_routemap'        : '''
+                                       no route-map "Suppress-IST" 1
+                                       no route-map "Suppress-IST" 2
+                                       no ip prefix-list "IST"
+                                       ''',
+        'clear_lacp_smlt_mac'        : 'lacp smlt-sys-id 00:00:00:00:00:00',
+    },
+}
+
+NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
+    'nbiAccess': '''
+        {
+          administration {
+            serverInfo {
+              version
+            }
+          }
+        }
+    ''',
+    'rediscover_device': '''
+        mutation {
+          network {
+            rediscoverDevices(input: {devices: {ipAddress: "&lt;IP&gt;"}}) {
+              status
+              message
+            }
+          }
+        }
+    ''',
+}
+
+
+#
+# Functions:
+#
+
+def extractMltData(include=[]): # v2 - Extract MLT data: optionally include = ['fa', 'vlacp', 'lacp-extra']
+    # Only supported for family = 'VSP Series'
+    data = sendCLI_showRegex(CLI_Dict[Family]['get_mlt_data'])
+    mltDict = {}
+    mltPortDict = {}
+    for tpl in data:
+        if tpl[0]:
+            mltDict[tpl[0]] = {'type': tpl[1], 'ports': tpl[2]}
+        elif tpl[3]:
+            mltDict[tpl[3]]['lacp'] = tpl[4]
+        elif tpl[5]:
+            mltDict[tpl[5]]['flex'] = tpl[6]
+    for mltid in mltDict:
+        for port in generatePortList(mltDict[mltid]['ports']):
+            mltPortDict[port] = mltid
+
+    if mltDict:
+        if 'fa' in include:
+            data = sendCLI_showRegex(CLI_Dict[Family]['list_fa_mlts'])
+            for mltid in mltDict:
+                mltDict[mltid]['fa'] = bool(mltid in data)
+        if 'vlacp' in include:
+            for mltid in mltDict:
+                mltDict[mltid]['vlacp'] = False
+            data = sendCLI_showRegex(CLI_Dict[Family]['list_vlacp_ports'].format(generatePortRange(mltPortDict.keys())))
+            for port in data:
+                if data[port] == 'true' and port in mltPortDict:
+                    mltDict[mltPortDict[port]]['vlacp'] = True
+        if 'lacp-extra' in include:
+            for mltid in mltDict:
+                mltDict[mltid]['key'] = None
+            mltKey = sendCLI_showRegex(CLI_Dict[Family]['list_mlt_lacp_key'])
+            portKey = sendCLI_showRegex(CLI_Dict[Family]['list_port_lacp_key'])
+            for mltid in mltKey:
+                mltDict[mltid]['key'] = mltKey[mltid]
+                matchingKeyPortList = [x for x in portKey if portKey[x] == mltKey[mltid]]
+                # This overwrites the ports, but at least we get in there all ports configured with matching LACP key (not just ports active in MLT LAG)
+                mltDict[mltid]['ports'] = generatePortRange(matchingKeyPortList)
+
+    debug("extractMltData() = {}".format(mltDict))
+    return mltDict, mltPortDict
+
+def findUnusedPorts(mltPortDict={}): # v1 - This functions returns a list of "default" ports, i.e. unconfigured ports
+    # Only supported for family = 'VSP Series'
+    # A port is considered here to be default if it is untagged and only member of VLAN 1 or no VLAN at all (this already excludes ISIS ports)
+    # The up/down state of the port is intentionally not considered here (a default port can be already enabled)
+    # Checks are also made to ensure that the returned port list does not contain any:
+    # - Brouter ports
+    # - MLT ports:  In some scripts MLT data needs extracting in greater depth than what needed here; in which case
+    #               an already populated mltPortDict can be supplied; see function extractMltData()
+    vlanDefaultPorts = sendCLI_showRegex(CLI_Dict[Family]['list_vlan_default_ports'], 'vlanDefaultPorts')
+    brouterPorts = sendCLI_showRegex(CLI_Dict[Family]['list_brouter_ports'], 'brouterPorts')
+    if not mltPortDict:
+        mltPortDict = extractMltData(['lacp-extra'])[1] # We just fetch the basic MLT data + lacp enabled ports
+    defaultPorts = [x for x in vlanDefaultPorts if x not in brouterPorts and x not in mltPortDict]
+    debug("findUnusedPorts() = {}".format(defaultPorts))
+    return defaultPorts
+
+def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
+    # Only supported for family = 'VSP Series'
+    cmd = 'list://show isis spbm||(?:(B-VID) +PRIMARY +(NICK) +LSDB +(IP)(?: +(IPV6))?(?: +(MULTICAST))?|^\d+ +(?:(\d+)-(\d+) +\d+ +)?(?:([\da-f]\.[\da-f]{2}\.[\da-f]{2}) +)?(?:disable|enable) +(disable|enable)(?: +(disable|enable))?(?: +(disable|enable))?|^\d+ +(?:primary|secondary) +([\da-f:]+)(?: +([\da-f\.]+))?)'
+    data = sendCLI_showRegex(cmd)
+    # VOSS:[(u'B-VID', u'NICK', u'IP', u'IPV6', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''), (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.75', u'enable', u'disable', u'disable', u'', u''),           (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'00:00:00:00:00:00', u'')]
+    # V86: [(u'B-VID', u'NICK', u'IP', u'', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''),     (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.11', u'enable',             u'disable', u'', u'', u''),      (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'82:bb:00:00:11:ff', u'82bb.0000.1200')]
+    # XA:  [(u'B-VID', u'NICK', u'IP', u'', u'', u'', u'', u'', u'', u'', u'', u'', u''),              (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.46', u'enable',                         u'', u'', u'', u'')]
+    dataDict = {
+        'SpbmInstance' : False,
+        'BVIDs'        : [],
+        'Nickname'     : None,
+        'IP'           : None,
+        'IPV6'         : None,
+        'Multicast'    : None,
+        'SmltVirtBmac' : None,
+        'SmltPeerBmac' : None,
+    }
+    if len(data) &gt; 1: # If we did not just match the banner line
+        dataDict['SpbmInstance'] = True
+        if data[1][5] and data[1][6]:
+            dataDict['BVIDs'] = [data[1][5],data[1][6]]
+        else:
+            dataDict['BVIDs'] = []
+        dataDict['Nickname'] = data[1][7]
+        dataDict['IP'] = data[1][8]
+        if data[0][3] == 'IPV6':
+            dataDict['IPV6'] = data[1][9]
+            if data[0][4] == 'MULTICAST':
+                dataDict['Multicast'] = data[1][10]
+        else:
+            if data[0][4] == 'MULTICAST':
+                dataDict['Multicast'] = data[1][9]
+    if len(data) == 3: # We got SMLT data (on XA we don't have the line)
+        if data[2][11] and data[2][11] != '00:00:00:00:00:00':
+            dataDict['SmltVirtBmac'] = data[2][11]
+            dataDict['SmltPeerBmac'] = data[2][12]
+    debug("extractSpbmGlobal() = {}".format(dataDict))
+    return dataDict
+
+def extractVistData(): # v1 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
+    # Only supported for family = 'VSP Series'
+    data = sendCLI_showRegex(CLI_Dict[Family]['get_virtual_ist_data'])
+    dataDict = {}
+    dataDict['vlan']  = data[0][0] if data else None
+    dataDict['state'] = data[0][1] if data else None
+    dataDict['role']  = data[1][2] if data else None
+    debug("extractVistData() = {}".format(dataDict))
+    return dataDict
+
+def compareMacIsisSysId(chassisMac, isisSysId): # v1 - Determines whether the ISIS System ID was user assigned or is derived from chassis MAC
+    chassisMac = chassisMac.replace(':', '')[0:10] #94:9b:2c:b4:74:00 ==&gt; 949b2cb474
+    isisSysId  = isisSysId.replace('.', '')[0:10]  #949b.2cb4.7484    ==&gt; 949b2cb474
+    result = (chassisMac == isisSysId)
+    debug("compareMacIsisSysId() = {}".format(result))
+    return result
+
+def compareIsisSysId(selfId, peerId): # Returns TRUE if selfId &lt; peerId
+    selfId = int(selfId.replace('.', ''), 16) # Convert from hex
+    peerId = int(peerId.replace('.', ''), 16) # Convert from hex
+    if selfId &lt; peerId:
+        return True
+    return False
+
+def determineIstRole(selfId, peerId): # v1 - Determines role of switch in SMLT Cluster
+    if compareIsisSysId(selfId, peerId):
+        role = 'Primary'
+    else:
+        role = 'Secondary'
+    debug("determineIstRole() = {}".format(role))
+    return role
+
+def allocateSmltVirtBmac(role, selfId, peerId, takenBmacs): # v1 - Given the SysId of the primary vIST node, cycles last byte until it finds a BMAC not in the list provided 
+    baseId = selfId if role == 'Primary' else peerId
+    baseId = baseId.replace('.', '') #949b.2cb4.7484    ==&gt; 949b2cb47484
+    baseMac = ':'.join(re.findall(r'[\da-f]{2}', baseId[:-2])) # All but last hex byte ==&gt; 94:9b:2c:b4:74
+    initLastByte = int(baseId[-2:], 16) # decimal of hex 84
+    lastByte = initLastByte
+    direction = 1 # We try and increment it
+    while 1: # Until we find a unique Bmac
+        if lastByte == 255: # If we reach 0xff, we need to search decrementing
+            direction = -1
+            lastByte = initLastByte # We go the other way
+        elif direction == -1 and lastByte == 0: # Bad sign..
+            exitError('allocateSmltVirtBmac(): unable to allocate smlt-virt-bmac in range {}:xx'.format(baseMac))
+        byteValue = lastByte + direction
+        smltVirtBmac = "{}:{:02x}".format(baseMac, byteValue)
+        if smltVirtBmac not in takenBmacs:
+            break
+        lastByte = byteValue
+    debug("allocateSmltVirtBmac() = {}".format(smltVirtBmac))
+    return smltVirtBmac
+
+def allocateIstVlan(selfList, peerList): # v1 - Given a list of already used VLANs in 4k range, allocates the vIST VLAN
+    step = 1 if IstVLANrange[0] &lt; IstVLANrange[1] else -1
+    istVlan = None
+    for vlan in range(IstVLANrange[0], IstVLANrange[1], step):
+        if str(vlan) not in selfList and str(vlan) not in peerList:
+            istVlan = vlan
+            break
+    if not istVlan:
+        exitError('allocateIstVlan(): unable to allocate available vIST VLAN in range {}-{}'.format(IstVLANrange[0], IstVLANrange[1]))
+    debug("allocateIstVlan() = {}".format(istVlan))
+    return istVlan
+
+def allocateIstMltId(selfList, peerList): # v1 - Given a list of already used MLT ids, allocates the vIST MLT id
+    step = 1 if IstMLTrange[0] &lt; IstMLTrange[1] else -1
+    istMltId = None
+    for mltid in range(IstMLTrange[0], IstMLTrange[1], step):
+        if str(mltid) not in selfList and str(mltid) not in peerList:
+            istMltId = mltid
+            break
+    if not istMltId:
+        exitError('allocateIstMltId(): unable to allocate available vIST MLT id in range {}-{}'.format(IstMLTrange[0], IstMLTrange[1]))
+    debug("allocateIstMltId() = {}".format(istMltId))
+    return istMltId
+
+def allocateClusterId(role, selfNickname, peerNickname): # v1 - Allocates a DVR Leaf Cluster Id by taking the last 9 bits of the Primary node's nickname
+    nickname = selfNickname if role == 'Primary' else peerNickname
+    nicknumber = int(nickname.replace('.', ''), 16)
+    clusterId = nicknumber &amp; 0x1ff # Cluster-id 1-1000 = last 9bits of primary nickname
+    debug("allocateClusterId() = {}".format(clusterId))
+    return clusterId
+
+def allocateIstIsid(role, selfNickname, peerNickname): # v1 - Allocates a vIST I-SID by taking the last 19 bits of the Primary node's nickname
+    nickname = selfNickname if role == 'Primary' else peerNickname
+    nicknumber = int(nickname.replace('.', ''), 16)
+    vistIsid = VistIsidOffset + (nicknumber &amp; 0x7ffff) # IST I-SID (15000000 + last 19bits of Primary Nickname)  
+    debug("allocateIstIsid() = {}".format(vistIsid))
+    return vistIsid
+
+def allocateIstIP(role, selfNickname, peerNickname): # v2 - Allocates the vIST IP by taking 192.168.255.X/30 with last 6bits of Secondary's nickname
+    nickname = peerNickname if role == 'Primary' else selfNickname
+    nicknumber = int(nickname.replace('.', ''), 16)
+    ipSubnet = ipToNumber(VistIPbase) + ((nicknumber &amp; 0x3f) &lt;&lt; 2)
+    ipNumber1 = ipSubnet + 1
+    ipNumber2 = ipSubnet + 2
+    istIp1 = numberToIp(ipNumber1)
+    istIp2 = numberToIp(ipNumber2)
+    istSubnet = numberToIp(ipSubnet)
+    istIPself = istIp2 if role == 'Primary' else istIp1 # Here we ensure Master = Primary
+    istIPpeer = istIp1 if role == 'Primary' else istIp2 # Here we ensure Master = Primary
+    debug("allocateIstIP() subnet = {} / self = {} / peer = {}".format(istSubnet, istIPself, istIPpeer))
+    return istSubnet, istIPself, istIPpeer
+
+def allocateMltId(offsetId, inUseList1, inUseList2=[]): # v1 - Given the list of in use MLTs from both vIST peers, provides a list of free MLT ids to use
+    debug("allocateMltId() inUseList1 = {}".format(inUseList1))
+    debug("allocateMltId() inUseList2 = {}".format(inUseList2))
+    allocatedMltid = None
+    mltid = offsetId
+    while 1:
+        if str(mltid) not in inUseList1 and str(mltid) not in inUseList2:
+            allocatedMltid = mltid
+            break
+        mltid += 1
+    debug("allocateMltId() = {}".format(allocatedMltid))
+    return allocatedMltid
+
+#
+# Main:
+#
+def main():
+
+    print "SMLT-Pair-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
+    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
+    if nbiAccess == None:
+        exitError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
+
+    setFamily() # Sets global Family variable
+
+    # Read in inputs
+    enforceAction = emc_vars['userInput_enforce_action'].lower().split(' ')[-1]  # enforce | delete
+    userAck       = emc_vars['userInput_ack'].strip()
+    try:
+        mltIdDeleteList = generatePortList(emc_vars['userInput_mlt_delete_list'].strip())
+    except:
+        mltIdDeleteList = []
+    mltType = emc_vars['userInput_mlt_type']
+    mltBindingMode = emc_vars['userInput_mlt_binding_mode']
+    try:
+        faMgmtVlan, faMgmtIsid = emc_vars['userInput_fa_mgmt_vlan_isid'].split(':', 1)
+    except:
+        faMgmtVlan = None
+        faMgmtIsid = None
+
+    mltIdList = []
+    mltNameList = []
+    inputMltPortList = []
+    for smlt in range(1, 6):
+        idname = emc_vars['userInput_smlt{}_idname'.format(smlt)].strip() if 'userInput_smlt{}_idname'.format(smlt) in emc_vars else ""
+        ports = emc_vars['userInput_smlt{}_ports'.format(smlt)].strip() if 'userInput_smlt{}_ports'.format(smlt) in emc_vars else ""
+        idnameMatch = re.match(r'(?:(\d+):)?(.+)?', idname)
+        mltIdList.append(idnameMatch.group(1))
+        mltNameList.append(idnameMatch.group(2))
+        inputMltPortList.append(ports)
+
+    print "Information provided by User:"
+    print " Global SMLT action:"
+    print " - Enforce Action = {}".format(enforceAction)
+    print " - User ACK for vIST creation/deletion traffic interruptions = {}".format(userAck)
+    print " SMLT interface deletion:"
+    print " - MLT id list to delete = {}".format(mltIdDeleteList)
+    print " SMLT interface creation:"
+    print " - MLT type = {}".format(mltType)
+    print " - MLT binding mode = {}".format(mltBindingMode)
+    print " - FA Mgmt VLAN:ISID = {}:{}".format(faMgmtVlan, faMgmtIsid)
+    print " - MLT id list = {}".format(mltIdList)
+    print " - MLT name list = {}".format(mltNameList)
+    print " - MLT port list = {}".format(inputMltPortList)
+
+    # Validate SMLT lists provided
+    numberOfMlts = 0
+    smltData = []
+    error = False
+    for smlt in range(5):
+        portRange = generatePortRange(generatePortList(inputMltPortList[smlt]))
+        if portRange:
+            smltData.append({'ports': portRange, 'id': mltIdList[smlt], 'name': mltNameList[smlt], 'input': smlt + 1})
+            numberOfMlts += 1
+        elif mltIdList[smlt] or mltNameList[smlt]:
+            print "Error, provided name/id for SMLT{0} but no ports associated for SMLT{0}".format(smlt + 1)
+            error = True
+    if error:
+        exitError("SMLT name/id inputs with no ports associated for SMLT; aborting")
+
+    print " - Number of SLMTs to create = {}".format(numberOfMlts)
+    debug("smltData = {}".format(smltData))
+
+    # MLT port list processing
+    mltPortList = []
+    portDuplicate = {}
+    invalidMltPorts = False # Assume there wont be
+    for smltDict in smltData:
+        portList = generatePortList(smltDict['ports'])
+        for port in portList:
+            mltPortList.append(port)
+            if port in portDuplicate:
+                print "Port {} in SMLT{} is duplicate; was already specified for SMLT{}".format(port, smltDict['input'], portDuplicate[port])
+                invalidMltPorts = True
+            else:
+                portDuplicate[port] = smltDict['input']
+    if invalidMltPorts:
+        exitError('Invalid MLT ports detected; aborting')
+
+    # Validate local inputs
+    if numberOfMlts:
+        if re.match(r'Fabric Attach', mltBindingMode) and faMgmtVlan and (not faMgmtVlan.isdigit() or not 0 &lt; int(faMgmtVlan) &lt; 4095):
+            exitError('Invalid FA Mgmt VLAN id {}; needs to be a number not higher than 4094'.format(faMgmtVlan))
+        if re.match(r'Fabric Attach', mltBindingMode) and faMgmtIsid and (not faMgmtIsid.isdigit() or not 0 &lt; int(faMgmtIsid) &lt;= 15999999):
+            exitError('Invalid FA Mgmt I-SID {}; needs to be a number not higher than 15999999'.format(faMgmtIsid))
+
+    # Disable more paging (generatePortList might issue a CLI command, so do this before)
+    sendCLI_showCommand(CLI_Dict[Family]['disable_more_paging'])
+
+    # Enter privExec
+    sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
+
+    # Check ISIS admin state is enabled
+    isisGlobalDict = sendCLI_showRegex(CLI_Dict[Family]['get_isis_global_settings'], 'isisGlobalDict')
+        # {u'AdminState': u'enabled', u'System ID': u'82bb.0000.7500'}
+    if isisGlobalDict['AdminState'] != 'enabled' and enforceAction == 'enforce':
+        exitError('ISIS is not running on switch; first provision Fabric Connect using Fabric-Connect-Enforce script')
+
+    # Check ISIS adjacencies exist
+    isisAdjExist = sendCLI_showRegex(CLI_Dict[Family]['check_isis_adjacencies'], 'isisAdjExist')
+    if not isisAdjExist:
+        exitError('Switch has no ISIS adjacencies; impossible to form vIST cluster; first provision Fabric Connect using Fabric-Connect-Enforce script')
+
+    if numberOfMlts or mltIdDeleteList or enforceAction == 'enforce': # Info to collect if creating/deleting SMLTs
+        # Get list of MLT ids in use (also type, port members and flex-uni, etc..)
+        mltDict, mltPortDict = extractMltData(['fa', 'vlacp', 'lacp-extra'])
+    else: # We don't need to retrieve above values
+        mltDict = {}
+
+    if numberOfMlts: # We want to check that user has provided valid ports to create a new MLT/SMLT with
+        # Get global status of LACP
+        lacpEnabled = sendCLI_showRegex(CLI_Dict[Family]['check_lacp_enabled'], 'lacpEnabled')
+        # Get global status of VLACP
+        vlacpEnabled = sendCLI_showRegex(CLI_Dict[Family]['check_vlacp_enabled'], 'vlacpEnabled')
+        # Get list of unused ports (we expect user to have chosen his ports amongst these..)
+        defaultPorts = findUnusedPorts(mltPortDict)
+        # {u'13': {'flex': u'disable', 'lacp': u'enable', 'fa': False, 'vlacp': False, 'key': u'13', 'type': u'smlt', 'ports': u'2/13-2/14'}}
+        for port in mltPortList:
+            if port not in defaultPorts:
+                exitError('Port {} is already configured and cannot be used to create a new MLT/SMLT with; please unconfigure that port or select a different port'.format(port))
+
+    # Get SPB Nickname and SMLT config
+    spbmGlobalDict = extractSpbmGlobal() # {'Nickname': u'0.00.75', 'SmltPeerBmac': u'82bb.0000.2200'}
+    if not spbmGlobalDict['Nickname']:
+        exitError('This VSP switch does not have a Nickname assigned/allocated; please complete the Fabric Connect configuration of this switch before attempting to create SMLT clustering on it')
+
+    # Get DVR node type
+    dvrNodeType = sendCLI_showRegex(CLI_Dict[Family]['get_dvr_type'], 'dvrNodeType')
+    dvrLeaf = True if dvrNodeType == 'leaf' else False
+
+    # Get vIST status
+    vistData = extractVistData()
+
+    if vistData['state'] == None and enforceAction == 'delete':
+        print 'Switch has no vIST/SMLT config'
+        return # No error
+
+    if vistData['state'] == None and enforceAction == 'enforce':
+        configureSmltClustering = True
+    else:
+        configureSmltClustering = False
+
+    # Check if we have auto-sense enabled; get auto-sense status for all ports
+    autoSensePortDict = {}
+    autoSensePortDict = sendCLI_showRegex(CLI_Dict[Family]['get_auto_sense_status'], 'autoSensePortDict', True)
+
+
+    if configureSmltClustering: # Info to collect if creating SMLT Clustering
+        # Get chassis MAC (needed if we want to find our peer among LLDP neighbours)
+        chassisMac = sendCLI_showRegex(CLI_Dict[Family]['get_chassis_mac'], 'chassisMac')
+        chassisMacIsisSysId = compareMacIsisSysId(chassisMac, isisGlobalDict['System ID'])
+        if not chassisMacIsisSysId: # We will need to allocate an smlt-virt-bmac
+            listFabricBmacs = sendCLI_showRegex(CLI_Dict[Family]['list_fabric_bmacs'], 'listFabricBmacs') # Get list of all bmacs in Fabric
+        # Get list of VSP neighbour MACs
+        vossNeighbourDict = sendCLI_showRegex(CLI_Dict[Family]['list_voss_neighbour_macs'], 'vossNeighbourDict')
+        vossNeighbourMacs = vossNeighbourDict.values() # We share only the MACs with other threads
+        debug("vossNeighbourMacs = {}".format(vossNeighbourMacs))
+        # Get list of VLANs
+        vlan4kIdList = []
+        istVlan = None
+        istVlanExists = False
+        if not dvrLeaf:
+            vlanDict = sendCLI_showRegex(CLI_Dict[Family]['get_platform_vlans_names'], 'vlanDict')
+            for vlan in vlanDict:
+                if vlanDict[vlan] == IstVLANname:
+                    istVlan = vlan
+                    istVlanExists = True
+                    debug("istVlan = {}".format(istVlan))
+                    break
+                if int(vlan) &gt;= 4000:
+                    vlan4kIdList.append(vlan)
+            if not istVlan:
+                brouter4kVlans = sendCLI_showRegex(CLI_Dict[Family]['get_4k_brouter_vlans'], 'brouter4kVlans')
+                if brouter4kVlans:
+                    vlan4kIdList.extend(brouter4kVlans)
+                debug("vlan4kIdList = {}".format(vlan4kIdList))
+    else: # We don't need to retrieve above values
+        chassisMac = None
+        chassisMacIsisSysId = None
+        vossNeighbourDict = {}
+        vossNeighbourMacs = []
+        vlan4kIdList = []
+
+    # Make values available to other instances (only info we need to exchange)
+    emc_threads_put(
+        chassisMac          = chassisMac,
+        chassisMacIsisSysId = chassisMacIsisSysId,
+        dvrLeaf             = dvrLeaf,
+        vossNeighbourMacs   = vossNeighbourMacs,
+        mltList             = mltDict.keys(),
+        isisSysId           = isisGlobalDict['System ID'],
+        vistState           = vistData['state'],
+        nickname            = spbmGlobalDict['Nickname'],
+        vlan4kIdList        = vlan4kIdList,
+    )
+    threads = emc_threads(returnOnError = True)
+
+    print "Information across all threads:"
+    print " - Number of threads = {}".format(len(threads))
+    print " - Thread IPs = {}".format(threads)
+
+    # Validate local data against other threads
+    if len(threads) == 1:
+        exitError('This script must be executed against pairs of VSP switches to form SMLT Clusters. Single switch selected, aborting.')
+
+    istPeerIp = None
+    if vistData['state'] == 'up': # Switch is already active member of an SMLT cluster; we need to make sure vIST peer is in other threads
+        # Find the peer thread
+        for ip in threads:
+            if not emc_threads_vars(ip): # ip thread failed without producing json file, skip it
+                continue
+            if spbmGlobalDict['SmltPeerBmac'] == emc_threads_vars(ip, "isisSysId"):
+                istPeerIp = ip
+                break
+        if not istPeerIp:
+            exitError('This switch has an active vIST with SMLT-Peer-SysId {} but script was not executed on that peer switch; aborting.'.format(spbmGlobalDict['SmltPeerBmac']))
+        if emc_threads_vars(istPeerIp, "vistState") != 'up': # Should not happen
+            exitError('This switch has an active vIST but identified vIST peer IP {} does not!'.format(istPeerIp))
+        # We found the vIST peer thread
+
+    else: # Switch is not yet vIST configured; but we also need to pair it up
+        if len(threads) == 2: # Easy, script run against only two devices
+            for ip in threads:
+                if ip != MyIP and emc_threads_vars(ip): # ip thread might have failed to create its json file, in which case emc_threads_vars(ip) will return an empty dict
+                    istPeerIp = ip
+            if not istPeerIp: # Will happen if other thread crashed before creating its json file
+                exitError('Unable to identify peer switch for vIST creation; aborting.')
+            if emc_threads_vars(istPeerIp, "vistState") == 'up': # Could happen
+                exitError('This switch has no vIST config but other selected switch {} does!'.format(istPeerIp))
+            if dvrLeaf != emc_threads_vars(istPeerIp, "dvrLeaf"):
+                if dvrLeaf:
+                    exitError('This switch is a DVR-Leaf but vIST peer IP {} is not a DVR-Leaf; aborting'.format(istPeerIp))
+                else:
+                    exitError('vIST peer IP {} is a DVR-Leaf but this switch is not a DVR-Leaf; aborting'.format(istPeerIp))
+
+        else: # 3 or more threads.. this gets more involved..
+            # We try and see whether we can identify a unique LLDP neighbour amongst threads
+            for ip in threads:
+                if not emc_threads_vars(ip): # ip thread failed without producing json file, skip it
+                    continue
+                # Only pick out possible peer if it is LLDP neighbour + same DVRtype + in same vIST state
+                if emc_threads_vars(ip, "chassisMac") in vossNeighbourMacs and dvrLeaf == emc_threads_vars(ip, "dvrLeaf") and emc_threads_vars(istPeerIp, "vistState") != 'up':
+                    if istPeerIp:
+                        exitError('Unable to identify peer switch for vIST creation among LLDP neighbours; more than 1 possible neighbours exists; aborting.')
+                    else:
+                        istPeerIp = ip
+            if not istPeerIp: # No single LLDP neighbour found
+                exitError('Unable to identify peer switch for vIST creation; no suitable LLDP neighbours found; aborting.')
+        # We found the peer with which to create SMLT clustering
+
+    print '\n===&gt; Identified vIST peer switch IP {}\n'.format(istPeerIp)
+
+    # Additional checks against identified vIST peer
+    if isisGlobalDict['System ID'] == emc_threads_vars(istPeerIp, "isisSysId"):
+        exitError('vIST peer switch IP {} has same ISIS SysId as self {}'.format(istPeerIp, isisGlobalDict['System ID']))
+
+    # Verify User acknowledged that inband mgmt creation/deletion of vIST will cause traffic interruption
+    if configureSmltClustering or enforceAction == 'Delete': # These operations will cause traffic interruption
+        oobIpList = sendCLI_showRegex(CLI_Dict[Family]['list_oob_mgmt_ips'], 'oobIpList')
+        if not oobIpList: # Brouter ports are typically used as OOB on VSPs which have no OOB port (VSP4k &amp; XA1400), pre-8.2...
+            oobIpList = sendCLI_showRegex(CLI_Dict[Family]['list_brouter_ips'], 'oobIpList')
+        if emc_vars["deviceIP"] not in oobIpList and userAck != 'acknowledge':
+            raise RuntimeError('Configuring or Deleting vIST requires temporarily disabling ISIS globally; management of this switch appears to be inband (not OOB) which would result in some traffic loss during the operation. Make sure to acknowledge this fact in the script input pulldown, and then run the script again to proceed')
+
+    # Determine Primary/Secondary role in SMLT Cluster
+    if enforceAction == 'enforce':
+        # Master is the vIST peer with the highest IP address (we decide)
+        # Primary Split-BEB is the vIST peer with the lowest sysId (given)
+        # We will ensure that we have Master+Primary &amp; Slave+Secondary
+        istRole = determineIstRole(isisGlobalDict['System ID'], emc_threads_vars(istPeerIp, "isisSysId"))
+
+    if configureSmltClustering: # Values to derive
+        if not chassisMacIsisSysId or not emc_threads_vars(istPeerIp, "chassisMacIsisSysId"):
+            # Derive an smlt-virt-bmac if needed
+            smltVirtBmac = allocateSmltVirtBmac(istRole, isisGlobalDict['System ID'], emc_threads_vars(istPeerIp, "isisSysId"), listFabricBmacs)
+        if dvrLeaf:
+            # Allocate the vIST I-SID or DVR-Leaf Cluster id
+            clusterId = allocateClusterId(istRole, spbmGlobalDict['Nickname'], emc_threads_vars(istPeerIp, "nickname"))
+        elif not istVlan:
+            # Allocate a VLAN for the IST
+            istVlan = allocateIstVlan(vlan4kIdList, emc_threads_vars(istPeerIp, "vlan4kIdList"))
+            istIsid = allocateIstIsid(istRole, spbmGlobalDict['Nickname'], emc_threads_vars(istPeerIp, "nickname"))
+
+        # Assign the vIST IP addresses
+        istSubnet, istIPself, istIPpeer = allocateIstIP(istRole, spbmGlobalDict['Nickname'], emc_threads_vars(istPeerIp, "nickname"))
+
+        # Check if we have auto-sense ports between peers, and if we need to convert them to static NNIs
+        neighbourStaticNniPort = None
+        neighbourNniMltRange = None
+        if autoSensePortDict:
+            istPeerMac = emc_threads_vars(istPeerIp, "chassisMac")
+            if istPeerMac in vossNeighbourMacs: # Ist Peer is an LLDP neighbour
+                # Get list of ports connecting to ist peer
+                neighbourPortList = []
+                for port in vossNeighbourDict:
+                    if vossNeighbourDict[port] == istPeerMac:
+                        neighbourPortList.append(port)
+                neighbourPortRange = generatePortRange(neighbourPortList, 'neighbourPortRange')
+                # Single port with auto-sense active
+                if len(neighbourPortList) == 1 and autoSensePortDict[neighbourPortList[0]] == 'Enable':
+                    neighbourStaticNniPort == neighbourPortList[0]
+                # Multiple ports
+                elif len(neighbourPortList) &gt; 1:
+                    # Check if they all have auto-sense active
+                    allPortsAutoSenseEnabled = True
+                    for port in neighbourPortList:
+                        if autoSensePortDict[port] == 'Disable':
+                            allPortsAutoSenseEnabled = False
+                            break
+                    debug("allPortsAutoSenseEnabled = {}".format(allPortsAutoSenseEnabled))
+                    if allPortsAutoSenseEnabled:
+                        # Check if all ports have same speed
+                        neighbourPortSpeedDict = sendCLI_showRegex(CLI_Dict[Family]['list_port_up_speed'].format(neighbourPortRange), 'neighbourPortSpeedDict')
+                        if len(neighbourPortList) == len(neighbourPortSpeedDict.keys()): # In case we read a stale LLDP neighbour, which is no longer up
+                            neighbourPortSpeed = None
+                            for port in neighbourPortSpeedDict:
+                                if not neighbourPortSpeed:
+                                    neighbourPortSpeed = neighbourPortSpeedDict[port]
+                                elif neighbourPortSpeed != neighbourPortSpeedDict[port]:
+                                    neighbourPortSpeed = None
+                                    break
+                            debug("neighbourPortSpeed = {}".format(neighbourPortSpeed))
+                            if neighbourPortSpeed:
+                                # If we get here, we have multiple auto-sense ports between ist peers operating at same speed, we can make them an NNI MLT
+                                neighbourNniMltRange = neighbourPortRange
+                                istMltId = allocateIstMltId(mltDict.keys(), emc_threads_vars(istPeerIp, "mltList"))
+                                neighbourPortSpeed = int(neighbourPortSpeed) * len(neighbourPortList)
+
+    if not dvrLeaf:
+        # Determine if ISIS redistribution of directs policy exists
+        directsRedist = sendCLI_showRegex(CLI_Dict[Family]['get_isis_directs_redist'], 'directsRedist')
+        if not configureSmltClustering: # We need to get the IST subnet already there
+            istSubnet = sendCLI_showRegex(CLI_Dict[Family]['get_ist_subnet'].format(vistData['vlan']), 'istSubnet')
+
+    # Determine actual list of MLT ids to delete, if any
+    if enforceAction == 'delete':
+        # Delete all MLTs of type smlt
+        mltDeleteList = [x for x in mltDict.keys() if mltDict[x]['type'] == 'smlt']
+    elif mltIdDeleteList:
+        # Delete user selected MLT ids provided they exist and are of smlt type
+        mltDeleteList = [x for x in mltIdDeleteList if x in mltDict.keys() and mltDict[x]['type'] == 'smlt']
+        if not mltDeleteList:
+            print 'No SMLT/MLTs to delete'
+    else:
+        mltDeleteList = []
+    debug('mltDeleteList = {}'.format(mltDeleteList))
+
+
+    # Enter config mode
+    sendCLI_configChain(CLI_Dict[Family]['config_context'])
+    performConfig = False # Assume we wont
+
+    if enforceAction == 'enforce':
+        if configureSmltClustering:
+            if not dvrLeaf:
+                if istVlanExists: # Delete it
+                    sendCLI_configChain(CLI_Dict[Family]['delete_ist_vlan'].format(istVlan))
+                # Create IST VLAN (before shutting down ISIS)
+                sendCLI_configChain(CLI_Dict[Family]['create_ist_vlan'].format(istVlan, IstVLANname, istIsid, istIPself))
+
+            # If necessary, convert-to-config single auto-sense direct link to peer
+            if neighbourStaticNniPort and autoSensePortDict[neighbourStaticNniPort] == 'Enable':
+                sendCLI_configChain(CLI_Dict[Family]['disable_autosense_conv2cfg'].format(neighbourStaticNniPort))
+
+            # Disable ISIS
+            warpBuffer_add(CLI_Dict[Family]['disable_isis'])
+
+            # If necessary, convert multiple auto-sense direct links to peer into an NNI MLT
+            if neighbourNniMltRange:
+                # Disable auto-sense on ports
+                warpBuffer_add(CLI_Dict[Family]['disable_autosense'].format(neighbourNniMltRange))
+                # Create MLT
+                warpBuffer_add(CLI_Dict[Family]['create_mlt'].format(istMltId, 'name ' + IstMLTname))
+                # Assign MLT ports
+                warpBuffer_add(CLI_Dict[Family]['set_mlt_ports'].format(istMltId, neighbourNniMltRange))
+                # Enter MLT config context
+                warpBuffer_add(CLI_Dict[Family]['mlt_config_context'].format(istMltId))
+                # Configure ISIS on MLT
+                warpBuffer_add(CLI_Dict[Family]['create_isis_interface'])
+                # Set the appropriate ISIS metric
+                metric = 2000000 / int(neighbourPortSpeed)
+                debug("Calculated metric for IST NNI MLT at speed {} = {}".format(neighbourPortSpeed, metric))
+                warpBuffer_add(CLI_Dict[Family]['set_isis_if_metric'].format(metric))
+                # Exit MLT config context
+                warpBuffer_add(CLI_Dict[Family]['exit_config_context'])
+
+            # Enter ISIS config context
+            warpBuffer_add(CLI_Dict[Family]['isis_config_context'])
+            # Set SPBM vIST peer
+            warpBuffer_add(CLI_Dict[Family]['set_spbm_smlt_peer'].format(emc_threads_vars(istPeerIp, "isisSysId")))
+            if not chassisMacIsisSysId: # ISIS SysId is user defined =&gt; this script must set an SmltVirtBmac
+                # Set SPBM SMLT Virt BMAC
+                warpBuffer_add(CLI_Dict[Family]['set_spbm_smlt_virt_bmac'].format(smltVirtBmac))
+            # Exit ISIS config context
+            warpBuffer_add(CLI_Dict[Family]['exit_config_context'])
+            if dvrLeaf:
+                # Create DVR Leaf VIST
+                warpBuffer_add(CLI_Dict[Family]['create_dvr_leaf_vist'].format(istIPself, istIPpeer, clusterId))
+            else:
+                # Create normal VIST
+                warpBuffer_add(CLI_Dict[Family]['create_vist'].format(istVlan, istIPpeer))
+            # Re-enable ISIS
+            warpBuffer_execute(CLI_Dict[Family]['enable_isis'], waitForPrompt=False)
+            emc_cli.send('') # Empty send, to re-sync output buffer
+
+            if chassisMacIsisSysId: # If the ISIS SysId is the chassis mac, we did not set the SmltVirtBmac, but we need to read what it is now
+                spbmGlobalDict = extractSpbmGlobal() # {'Nickname': u'0.00.75', 'SmltVirtBmac': u'82:bb:00:00:21:ff', 'SmltPeerBmac': u'82bb.0000.2200'}
+                smltVirtBmac = spbmGlobalDict['SmltVirtBmac']
+            # Configure LACP globally
+            sendCLI_configChain(CLI_Dict[Family]['set_lacp_smlt_sys_id'].format(smltVirtBmac))
+            # We will need to save the config
+            performConfig = True
+
+        if not dvrLeaf:
+            if not directsRedist:
+                # Create the redistribution record if it does not exist (note we are not enabling it though)
+                sendCLI_configChain(CLI_Dict[Family]['create_grt_redistribution'])
+            if not directsRedist or (directsRedist and not directsRedist[1]):
+                # Create vIST route-map (we create this anyway, even if no GRT redistribution of directs)
+                sendCLI_configChain(CLI_Dict[Family]['create_ist_routemap'].format(istSubnet))
+                # Apply vIST route-map
+                sendCLI_configChain(CLI_Dict[Family]['apply_ist_routemap'])
+
+    if mltDeleteList: # This can haapen either in enforceAction 'enforce' or 'delete'
+        for mltid in mltDeleteList:
+            if mltid in mltDict:
+                if mltDict[mltid]['ports']:
+                    # Enter Port config context
+                    sendCLI_configChain(CLI_Dict[Family]['port_config_context'].format(mltDict[mltid]['ports']))
+                    # Disable MLT ports
+                    sendCLI_configChain(CLI_Dict[Family]['port_disable'])
+                    # Unconfigure SLPP
+                    sendCLI_configChain(CLI_Dict[Family]['disable_slpp_packet_rx'])
+                    if mltDict[mltid]['lacp'] == 'enable':
+                        # Disable LACP on ports
+                        sendCLI_configChain(CLI_Dict[Family]['port_disable_lacp'])
+                        sendCLI_configChain(CLI_Dict[Family]['port_disable_tagging'])
+                    if mltDict[mltid]['vlacp']:
+                        # Disable VLACP on ports
+                        sendCLI_configChain(CLI_Dict[Family]['port_disable_vlacp'])
+                    # Exit Port config context
+                    sendCLI_configChain(CLI_Dict[Family]['exit_config_context'])
+                if mltDict[mltid]['flex'] == 'enable' or mltDict[mltid]['fa']:
+                    # Enter MLT config context
+                    sendCLI_configChain(CLI_Dict[Family]['mlt_config_context'].format(mltid))
+                    if mltDict[mltid]['flex'] == 'enable':
+                        # Disable Flex-uni
+                        sendCLI_configChain(CLI_Dict[Family]['disable_mlt_flex_uni'])
+                    if mltDict[mltid]['fa']:
+                        # Disable FA
+                        sendCLI_configChain(CLI_Dict[Family]['disable_fabric_attach'])
+                    # Exit MLT config context
+                    sendCLI_configChain(CLI_Dict[Family]['exit_config_context'])
+                # Delete the MLT
+                sendCLI_configChain(CLI_Dict[Family]['delete_mlt'].format(mltid))
+                # Delete from MLT dict we extracted from switch
+                del mltDict[mltid]
+            else:
+                print "MLT id {} does not exist on switch, so does not need deleteing".format(mltid)
+        # We will need to save the config
+        performConfig = True
+
+    if enforceAction == 'enforce' and numberOfMlts: # We have SMLT/MLTs to create
+        for m in range(numberOfMlts):
+            if smltData[m]['id']:
+                mltid = smltData[m]['id']
+            else: # Allocate MLT ids (to be the same values on both vIST peer switches)
+                mltid = allocateMltId(SmltMltOffset, mltDict.keys(), emc_threads_vars(istPeerIp, "mltList"))
+            if smltData[m]['name']:
+                mltName = 'name "' + smltData[m]['name'] + '"'
+            else: # No name
+                mltName = ''
+            mltPorts = smltData[m]['ports']
+
+            # Disable autosense (we always do this, even if no auto-sense on the ports or a pre8.2 VOSS version)
+            sendCLI_configChain(CLI_Dict[Family]['disable_autosense'].format(mltPorts), True)
+            # Create the MLT
+            sendCLI_configChain(CLI_Dict[Family]['create_mlt'].format(mltid, mltName))
+            rollbackCommand(CLI_Dict[Family]['delete_mlt'].format(mltid))
+            if mltType != 'LACP LAG':
+                # Configure MLT static ports
+                sendCLI_configChain(CLI_Dict[Family]['set_mlt_ports'].format(mltid, mltPorts))
+                if mltBindingMode == 'Manual dot1q-tagged':
+                    sendCLI_configChain(CLI_Dict[Family]['enable_mlt_tagging'].format(mltid))
+            # Enter MLT config context
+            sendCLI_configChain(CLI_Dict[Family]['mlt_config_context'].format(mltid))
+            rollbackCommand(CLI_Dict[Family]['exit_config_context'])
+            # Enable SMLT
+            sendCLI_configChain(CLI_Dict[Family]['enable_smlt'])
+            if mltType == 'LACP LAG':
+                key = mltid # LACP key always follows MLT id
+                sendCLI_configChain(CLI_Dict[Family]['set_mlt_lacp_key'].format(key))
+            if mltBindingMode in ['Manual Switched-UNI', 'Endpoint-Tracking']:
+                # Configure flex-uni
+                sendCLI_configChain(CLI_Dict[Family]['enable_mlt_flex_uni'])
+                rollbackCommand(CLI_Dict[Family]['disable_mlt_flex_uni'])
+            if re.match(r'Fabric Attach', mltBindingMode):
+                # Enable FA
+                rollbackCommand(CLI_Dict[Family]['disable_fabric_attach'])
+                sendCLI_configChain(CLI_Dict[Family]['enable_fabric_attach'])
+                if faMgmtVlan and faMgmtIsid:
+                    # Assign FA Mgmt VLAN:ISID
+                    sendCLI_configChain(CLI_Dict[Family]['set_fa_mgmt_vlan_isid'].format(faMgmtIsid, faMgmtVlan))
+            if mltBindingMode == 'Fabric Attach with no message authentication':
+                # Disable FA msg auth
+                sendCLI_configChain(CLI_Dict[Family]['disable_fa_message_auth'])
+            if mltBindingMode == 'Endpoint-Tracking':
+                # Enable Endpoint-Tracking
+                sendCLI_configChain(CLI_Dict[Family]['enable_endpoint_tracking'])
+            # Exit MLT config context
+            sendCLI_configChain(CLI_Dict[Family]['exit_config_context'])
+            rollbackCommand(CLI_Dict[Family]['mlt_config_context'].format(mltid))
+            # FA LACP LAG, must remember to remove default VLAN 1 from ports before activating LACP on them
+            if not dvrLeaf and mltType == 'LACP LAG' and re.match(r'Fabric Attach', mltBindingMode):
+                sendCLI_configChain(CLI_Dict[Family]['port_remove_vlan1'].format(mltPorts))
+            # Enter Port config context
+            sendCLI_configChain(CLI_Dict[Family]['port_config_context'].format(mltPorts))
+            rollbackCommand(CLI_Dict[Family]['exit_config_context'])
+            # Configure SLPP
+            if istRole == 'Primary':
+                sendCLI_configChain(CLI_Dict[Family]['enable_slpp_packet_rx'].format(SlppPacketRxThresholds[0]))
+            else:
+                sendCLI_configChain(CLI_Dict[Family]['enable_slpp_packet_rx'].format(SlppPacketRxThresholds[1]))
+            rollbackCommand(CLI_Dict[Family]['disable_slpp_packet_rx'])
+            if mltType == 'LACP LAG':
+                if mltBindingMode == 'Manual dot1q-tagged':
+                    sendCLI_configChain(CLI_Dict[Family]['port_enable_tagging'])
+                    rollbackCommand(CLI_Dict[Family]['port_disable_tagging'])
+                # Enable LACP on ports
+                sendCLI_configChain(CLI_Dict[Family]['port_enable_lacp'].format(key))
+                rollbackCommand(CLI_Dict[Family]['port_disable_lacp'])
+            if mltType == 'static + VLACP':
+                # Enable VLACP on ports
+                sendCLI_configChain(CLI_Dict[Family]['port_enable_vlacp'])
+                rollbackCommand(CLI_Dict[Family]['port_disable_vlacp'])
+            # Enable the ports
+            sendCLI_configChain(CLI_Dict[Family]['port_enable'])
+            rollbackCommand(CLI_Dict[Family]['port_disable'])
+            # Exit Port config context
+            sendCLI_configChain(CLI_Dict[Family]['exit_config_context'])
+            rollbackCommand(CLI_Dict[Family]['port_config_context'].format(mltPorts))
+            # LACP/VLACP global enabling
+            if mltType == 'LACP LAG' and not lacpEnabled:
+                # Enable LACP globally
+                sendCLI_configChain(CLI_Dict[Family]['enable_lacp'])
+                lacpEnabled = True
+            if mltType == 'static + VLACP' and not vlacpEnabled:
+                # Enable VLACP globally
+                sendCLI_configChain(CLI_Dict[Family]['enable_vlacp'])
+                vlacpEnabled = True
+            # Add entry to MLT data structure, so that we don't re-allocate same id
+            mltDict[str(mltid)] = {'type': 'smlt', 'ports': mltPorts}
+            debug("mltDict - {}".format(mltDict))
+        # We will need to save the config
+        performConfig = True
+
+
+    if enforceAction == 'delete':
+        # Disable ISIS
+        warpBuffer_add(CLI_Dict[Family]['disable_isis'])
+        if not dvrLeaf:
+            # Delete normal VIST now
+            warpBuffer_add(CLI_Dict[Family]['delete_vist'])
+        # Enter ISIS config context
+        warpBuffer_add(CLI_Dict[Family]['isis_config_context'])
+        # Clear SPBM vIST peer
+        warpBuffer_add(CLI_Dict[Family]['clear_spbm_smlt_peer'])
+        # Clear SPBM SMLT Virt BMAC
+        warpBuffer_add(CLI_Dict[Family]['clear_spbm_smlt_virt_bmac'])
+        # Exit ISIS config context
+        warpBuffer_add(CLI_Dict[Family]['exit_config_context'])
+        if dvrLeaf:
+            # Delete DVR Leaf VIST, after having done above
+            warpBuffer_add(CLI_Dict[Family]['delete_dvr_leaf_vist'])
+        # Re-enable ISIS
+        warpBuffer_execute(CLI_Dict[Family]['enable_isis'], waitForPrompt=False)
+        emc_cli.send('') # Empty send, to re-sync output buffer
+        # Configure LACP globally
+        sendCLI_configChain(CLI_Dict[Family]['clear_lacp_smlt_mac'])
+        if not dvrLeaf:
+            # Delete IST VLAN
+            sendCLI_configChain(CLI_Dict[Family]['delete_ist_vlan'].format(vistData['vlan']))
+            if directsRedist and directsRedist[1] == 'Suppress-IST':
+                # Delete vIST route-map
+                sendCLI_configChain(CLI_Dict[Family]['delete_ist_routemap'])
+                # Apply vIST route-map
+                sendCLI_configChain(CLI_Dict[Family]['apply_ist_routemap'])
+        # We will need to save the config
+        performConfig = True
+
+    # Save config &amp; exit
+    sendCLI_configChain(CLI_Dict[Family]['end_config'])
+    if performConfig: # Only if we made config changes
+        sendCLI_configChain(CLI_Dict[Family]['save_config'])
+
+    # Print summary of config performed
+    printConfigSummary()
+
+    # Make XMC re-discover the switch
+    if nbiMutation(NBI_Query['rediscover_device'].replace('&lt;IP&gt;', emc_vars['deviceIP'])):
+        print "Initiated XMC rediscovery of switch"
+    else:
+        print "Failed to trigger XMC rediscovery of switch; perform manually"
+
+main()
+</content>
+    <creationDate>1573331099302</creationDate>
+    <creator>lstevens</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
+    <contexts>,Groups,</contexts>
+    <lastUpdateDate>1641396145038</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,XIQ-SE Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+

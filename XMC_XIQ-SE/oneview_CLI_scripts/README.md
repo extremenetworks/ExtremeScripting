@@ -33,6 +33,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
 | VOSS |[Move to CLIP Mgmt IP](xml/Move_to_CLIP_Mgmt_IP.xml?raw=true)| Given a switch already in XMC, this script will ask user to provide a CLIP IP and VRF which will then be configured as mgmt clip on the VSP. If the VSP already had a mgmt clip the existing mgmt clip will be deleted and replaced with the new one. If the switch had a mgmt vlan IP, this can also be deleted, based on script input. At the same time, the switch can be renamed, both under SNMP and ISIS. Finally the switch is deleted from XMC's database as well as XMC Control if there, and re-added to the same site with the new mgmt IP address. Before attempting to change the IP on the switch, the script will first of all make sure that the new IP address provided is not already known by XMC and that it does not exist on the network (does not reply to ping)|Python|
+| VOSS |[SMLT Pair Enforce](xml/SMLT_Pair_Enforce.xml?raw=true)| This script provisions and enforces SMLT vIST clustering on VSP devices including if these are operating in DVR Leaf mode both via inband and OOB management|Python|
 ## ERS scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
