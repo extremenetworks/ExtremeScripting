@@ -322,7 +322,7 @@ main()</content>
     <lastUpdatedBy>root</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Cluster_Create.xml</metaDataPath>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
+    <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>

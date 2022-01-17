@@ -880,7 +880,7 @@ main()
     <lastUpdateDate>1612366292027</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
+    <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
