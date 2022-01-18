@@ -232,6 +232,8 @@ FamilyChildren = { # Children will be rolled into parent family for these script
     'Unified Switching EXOS': 'Summit Series',
     'Universal Platform VOSS': 'VSP Series',
     'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
 }
 
 #

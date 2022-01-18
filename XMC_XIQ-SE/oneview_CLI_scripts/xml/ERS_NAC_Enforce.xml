@@ -396,6 +396,10 @@ FamilyChildren = { # Children will be rolled into parent family for these script
     'Extreme Access Series' : 'VSP Series',
     'Unified Switching VOSS': 'VSP Series',
     'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
 }
 Family = None # This needs to get set by setFamily()
 
