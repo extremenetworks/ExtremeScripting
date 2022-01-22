@@ -385,6 +385,8 @@ FamilyChildren = { # Children will be rolled into parent family for these script
     'Unified Switching EXOS': 'Summit Series',
     'Universal Platform VOSS': 'VSP Series',
     'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
 }
 
 #
@@ -2332,7 +2334,7 @@ main()
     <lastUpdateDate>1641396145038</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabricIQ,</nosIds>
+    <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
