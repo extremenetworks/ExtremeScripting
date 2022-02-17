@@ -23,7 +23,7 @@ import os
 # U S E R   C O N F I G U R A T I O N
 ###############################################################################
 # Preconfigured TFTP Server. Please Set to your TFTP Server
-tftp = '10.68.9.32'
+tftp = '10.1.1.5'
 # Preconfigured Virtual Router. Please Configure
 vrtr  = 'vr-Mgmt'
 # Time of day when backup occurs
@@ -51,8 +51,8 @@ def uploadFiles(fileSuffix, uploadPrefix):
         if line.endswith(fileSuffix):
             fileName = line.split()[-1]
             if len(fileName) > 32:
-                exosCmd('create log entry "Length Error.File name for ' + fileName + ' exceeded 32 byte max length."')
-                exosCmd('create log entry "' + fileName + ' truncated to ' +  fileName[:32] + '"')
+                exosCmd('create log message "Length Error.File name for ' + fileName + ' exceeded 32 byte max length."')
+                exosCmd('create log message "' + fileName + ' truncated to ' +  fileName[:32] + '"')
                 fileName = fileName[:32]
             destFileName = '{yyyy}-{mm}-{dd}_{prefix}{file}{sourceFile}'.format(yyyy=yeardirectory,
                     mm=modirectory,
@@ -65,7 +65,7 @@ def uploadFiles(fileSuffix, uploadPrefix):
                     sourceFile=fileName,
                     dest=destFileName)
             print exosCmd(cmd)
-            exosCmd('create log entry "File ' + fileName + ' exported to ' + tftp  + ' Server as ' + destFileName + '"')
+            exosCmd('create log message "File ' + fileName + ' exported to ' + tftp  + ' Server as ' + destFileName + '"')
 
 def upmConfig():
     result = None
@@ -93,7 +93,7 @@ def upmConfig():
         exosCmd('configure log target upm ' + upmName + ' filter autologfilter')
         exosCmd('enable log target upm ' + upmName)
         exosCmd('enable upm profile ' + upmName)
-        exosCmd('create log entry "UPM ' + upmName + ' successfully created"')
+        exosCmd('create log message "UPM ' + upmName + ' successfully created"')
         result = 1
 # Check UPM timer exists
     for line in exosCmd('show upm timers').splitlines():
@@ -133,5 +133,4 @@ if upmConfig() == None:
 # upload Config files
     uploadFiles('.cfg','c')
 
-    exosCmd('create log entry "Automated Backup Ran"')
-
+    exosCmd('create log message "Automated Backup Ran"')
