@@ -3,9 +3,9 @@
 #############################################################################
 #
 # Script        	: Daily Automatic Backup Script
-# Revision      	: 1.0
-# EXOS Version(s)  	: 15.5.2 (EXOS supports Python)
-# Last Updated  	: 15-Jan-2014
+# Revision      	: 1.1
+# EXOS Version(s)  	: 31.5.1.6 (EXOS supports Python)
+# Last Updated  	: 17-Feb-2022
 #
 # Purpose:
 # Run automated back up on all scripts, including configuration, policies, and scripts. Benefits
