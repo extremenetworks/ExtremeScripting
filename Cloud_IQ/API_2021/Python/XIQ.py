@@ -162,7 +162,12 @@ class API():
         elif type == 'POST':
             return self._decode_response( self.session.post( self.url + subUrl, json = data ) )
         elif type == 'PUT':
-            return self._decode_response( self.session.put( self.url + subUrl, json = data ) )
+            params = ''
+            for item in data:
+                params += "%s=%s&" % (item, data[item])
+            return self._decode_response( self.session.put( self.url + subUrl +'?'+ params  ) )
+        elif type == 'DELETE':
+            return self._decode_response( self.session.delete( self.url + subUrl ) )
         else:
             self.message = "HTML call %s unknow" % type
             self.error = True
