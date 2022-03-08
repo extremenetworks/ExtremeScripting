@@ -3,11 +3,9 @@
 ##############################################################
 # written by Markus Nikulski
 #            mnikulski@extremenetworks.com
-#            April 2020
+#            08 Mar 2022
 ##############################################################
 
-import sys
-import time
 import XMC_NBI
 
 ##############################################################
@@ -19,12 +17,10 @@ session     = None
 ##############################################################
 def login():
     global session
-    
     session = XMC_NBI.XMC_NBI(xmcServerIp,xmcClientID,xmcSecret)
-    
     if session.error:
         print( "ERROR: '%s'" % session.message )
-        sys.exit(1)
+        exit(1)
 
 ##############################################################
 
@@ -33,7 +29,7 @@ login()
 mac_list = session.getMacAddresses()
 if session.error:
     print( "ERROR: get MAC addresses failed '%s'" % session.message )
-    sys.exit(1)
+    exit(1)
 else:
     print("INFO: found %s MACs" % len(mac_list))
     for mac, group in sorted( mac_list.items() ):
