@@ -4,38 +4,31 @@
 #
 # written by Markus Nikulski
 #            mnikulski@extremenetworks.com
-#            1. Sep. 2020
+#            created 01. Sep. 2020
+#            updated 07. Mar. 2022
 # 
-#   tested against XMC 8.5.0 release
+#   tested against XMC 8.5.7 release
+#   tested against XIQ-SE 21.11.11.37 release
 #
 # Note: this is class is not offical supported by Extreme Networks
 #
 ###########################################################################
 
-import sys
-import json
-import logging
-import base64
-import time
+import sys, json, time, base64, logging
 from datetime import datetime
 import requests
-from requests import Request, Session
-from requests.auth import HTTPBasicAuth
-#from http.client import HTTPConnection                  # for debugging only
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)  # supress SSL certificate  warning
+import urllib3
+urllib3.disable_warnings()                                              # supress SSL certificate  warning
 
 logger = None
 debug  = False
-getframe_expr = 'sys._getframe({}).f_code.co_name'      # is required to determinant the call of a routine
-
-#HTTPConnection.debuglevel = 1                           # for debugging only
+getframe_expr = 'sys._getframe({}).f_code.co_name'                      # is required to determinant the call of a routine
 
 #####################################################################################################
 class XMC_NBI():
     '''XMC NBI interface'''
 
-    __version__ = "0.0.1"
+    __version__ = "0.0.2"
     __author__  = "Markus Nikulski (mnikulski@extremenetworks.com)"
 
     #################################################################################################
@@ -44,15 +37,14 @@ class XMC_NBI():
 
         if not logging.getLogger().hasHandlers():
             logging.basicConfig( level = logging.ERROR )
-        
         logger = logging.getLogger()
 
-        if not sys.version_info >= (3, 5):
-            logger.error('XMC NBI class require minimum Python release 3.5')
-            raise Exception("XMC NBI class require minimum Python release 3.5")
-            sys.exit(1)
-        else:
-            logger.debug("XMC NBI version %s" % XMC_NBI.__version__)
+        if debug:
+            from http.client import HTTPConnection
+            HTTPConnection.debuglevel = 1
+            logger.setLevel( logging.DEBUG )
+
+        logger.debug("XMC NBI version %s" % XMC_NBI.__version__)
 
         self.nbiUrl     = 'https://' + host + ':8443/nbi/graphql'       # API URL
         self.host       = host                                          # XMC IP address or FQDN
@@ -60,6 +52,7 @@ class XMC_NBI():
         self.clientId   = clientId                                      # API authentication
         self.secret     = secret                                        # API authentication
         self.timeout    = 10                                            # session timeout in seconds
+        self.token      = None
         self.data       = None                                          # last query result
         self.test       = test                                          # test mode (boolean)
         self.error      = False                                         # error tracker (boolen)
@@ -76,12 +69,10 @@ class XMC_NBI():
 
     #################################################################################################
     def __repr__(self):
-    
         return '%s' % self.__dict__
         
     #################################################################################################
     def __del__(self):
-        
         if self:
             if self.session:
                 self.session.close()
@@ -89,7 +80,6 @@ class XMC_NBI():
     #################################################################################################
     def _computeExpireTime(self, TimeStart, TimeEnd):
         '''internal use only'''
-
         timeDiff = TimeEnd - TimeStart
         unixtime = time.mktime( datetime.today().timetuple() )
         return     unixtime + ( timeDiff.total_seconds() / 100 * self.renewTime )
@@ -97,7 +87,6 @@ class XMC_NBI():
     #################################################################################################
     def _ifExpire(self):
         '''internal use only'''
-
         if self.expire > time.mktime( datetime.today().timetuple() ):
             return False
         else:
@@ -106,7 +95,6 @@ class XMC_NBI():
     #################################################################################################
     def _login(self):
         '''internal use only'''
-
         token_url = 'https://'+ self.host +':'+ str(self.port) +'/oauth/token/access-token?grant_type=client_credentials'
         headers   = {"Content-Type" : "application/x-www-form-urlencoded"}
         
@@ -134,8 +122,7 @@ class XMC_NBI():
             self.token  = result[u'access_token']
 
             xmcTokenElements = self.token.split('.')
-            xmcTokenDataJSON = str(base64.urlsafe_b64decode(xmcTokenElements[1] + "=="), 'utf8')
-            tokenData = json.loads(xmcTokenDataJSON)
+            tokenData = json.loads( base64.b64decode(xmcTokenElements[1]+ "==") )
             self.expire = self._computeExpireTime( datetime.fromtimestamp( tokenData['iat'] ), datetime.fromtimestamp( tokenData['exp'] ) )
 
             logger.debug('            Issuer: %s' % tokenData['iss'] )
@@ -146,7 +133,7 @@ class XMC_NBI():
             logger.debug('   Expiration Time: %s' % datetime.fromtimestamp( tokenData['exp'] ) )
             logger.debug('        Not Before: %s' % datetime.fromtimestamp( tokenData['nbf'] ) )
 
-            session         = Session()
+            session         = requests.Session()
             session.verify  = False
             session.timeout = self.timeout
             session.headers.update({'Accept':           'application/json',
@@ -171,18 +158,17 @@ class XMC_NBI():
     #################################################################################################
     def _call(self, query: str):
         '''internal use only'''
-
         if self._ifExpire():
             logger.debug("XMC NBI session expired, force re-login")
             self.expire  = 0
             self.session = self._login()
 
-        return self._decode_response( self.session.post( self.nbiUrl, json= {'query': query} ), eval(getframe_expr.format(2)) )
-
+        return self._decode_response( self.session.post( self.nbiUrl, json = {'query': query} ), eval(getframe_expr.format(2)) )
+        
     #################################################################################################
     def _decode_response(self, response: str, caller: str):
         '''internal use only'''
-
+        data_out   = None
         self.error = False
         
         if response.status_code != requests.codes.ok:
@@ -215,7 +201,6 @@ class XMC_NBI():
     #################################################################################################
     def _pull_schema(self):
         '''is just a API test call'''
-
         schema_nurl = 'https://'+ self.host +':'+ str(self.port) +'/nbi/graphql/schema.idl'
         
         response = self.session.get(schema_nurl)
@@ -229,16 +214,78 @@ class XMC_NBI():
     #################################################################################################
     def query(self, query: str):
         ''' provide NBI graphql code'''
-
         if self._call( query ):
             return self.data
         else:
             return False
 
     #################################################################################################
+    def getSites(self):
+        '''pull all sites'''
+        query = '{ network { sites { mapPaths siteName } } }'
+        
+        if self._call( query ):
+
+            return self.data['network']['sites'][0]['mapPaths']
+        else:
+            return False
+
+    #################################################################################################
+    def addSite(self, name: str):
+        '''create a site'''
+        query = '''
+mutation {
+  network {
+    createSite(input: {siteLocation: "<NAME>"}) {
+      status
+      message
+    }
+  }
+}
+        '''
+        
+        if self._call( query.replace('<NAME>',  name) ):
+            if self.data['network']['createSite']['status'] == 'SUCCESS':
+                return True
+            else:
+                self.session.message = self.data['network']['createSite']['message']
+                self.error = True
+                return False
+        else:
+            return False
+
+    #################################################################################################
+    def deleteSite(self, name: str):
+        '''delete a site'''
+        query = '''
+mutation {
+  network {
+    deleteSite(input: {siteLocation: "<NAME>"}) {
+      status
+      message
+    }
+  }
+}
+        '''
+        
+        if name == "/World":
+            self.session.message = 'Site /World is not allowed to be deleted'
+            self.error = True
+            return False
+
+        if self._call( query.replace('<NAME>',  name) ):
+            if self.data['network']['deleteSite']['status'] == 'SUCCESS':
+                return True
+            else:
+                self.session.message = self.data['network']['deleteSite']['message']
+                self.error = True
+                return False
+        else:
+            return False
+
+    #################################################################################################
     def getDevices(self):
         '''pull all devices'''
-
         query = '{ network { devices { ip nickName } } }'
         
         if self._call( query ):
@@ -249,7 +296,6 @@ class XMC_NBI():
     #################################################################################################
     def getDevice(self, ip: str):
         '''pull device details based on IP address'''
-
         query = '''
 { network { device(ip: "<IP>") {
       firmware
@@ -290,7 +336,6 @@ class XMC_NBI():
     #################################################################################################
     def getMacAddresses(self):
         '''pull all AMC addresses'''
-
         query = '''
 {
   accessControl {
@@ -317,7 +362,6 @@ class XMC_NBI():
     #################################################################################################
     def getMacAddress(self, mac: str):
         '''pull MAC details based on MAC address'''
-
         query = '''
 { accessControl {
     endSystemInfoByMac(macAddress: "<MAC>") {
@@ -351,7 +395,6 @@ class XMC_NBI():
     #################################################################################################
     def addMacAddress(self, mac, group, description: str = '', custom1: str = ''):
         '''add MAC using MAC address, group'''
-
         query = '''
 mutation {
   accessControl {
@@ -386,7 +429,6 @@ mutation {
     #################################################################################################
     def delMacAddress(self, mac: str, group: str):
         '''delete MAC based on MAC address'''
-
         query = '''
 mutation {
   accessControl {
@@ -417,7 +459,6 @@ mutation {
     #################################################################################################
     def reauthenticateMacAddresses(self, mac: str):
         '''force re-authentication if MAC address in End-System-Event'''
-
         query = '''
 mutation {
   accessControl {
@@ -441,7 +482,6 @@ mutation {
     #################################################################################################
     def getESGroups(self):
         '''pull all NAC groups'''
-
         query = '{ accessControl { endSystemCategoryGroupNames } }'
         
         if self._call( query ):
@@ -475,7 +515,6 @@ mutation {
     #################################################################################################
     def createGroup(self, groupName: str, groupType: str, description: str = ''):
         '''create NAC group'''
-
         query = '''
 mutation {
   accessControl {
@@ -504,7 +543,6 @@ mutation {
     #################################################################################################
     def deleteGroup(self, groupName: str):
         '''delete NAC group'''
-
         query = '''
 mutation {
   accessControl {
@@ -530,7 +568,6 @@ mutation {
     #################################################################################################
     def createGroupRuleProfilePolicy(self, group_name: str, vlanId: int, vlanName: str, cfgDomain: str = 'Default'):
         '''create NAC group, rule, profile, policy'''
-
         query = '''
 mutation {
   accessControl {
@@ -565,7 +602,6 @@ mutation {
     #################################################################################################
     def createSwitch(self, ip: str, attrToSend: str, pGateway: str, sGateway: str = 'null'):
         '''create switch in NAC'''
-
         query = '''
 mutation {
   accessControl {
@@ -603,7 +639,6 @@ mutation {
     #################################################################################################
     def getSwitches(self):
         '''pull all NAC switches'''
-
         query = '''
 {
   accessControl {
@@ -641,7 +676,6 @@ mutation {
     #################################################################################################
     def deleteSwitch(self, ip: str):
         '''delete NAC switch'''
-
         query = '''
 mutation {
   accessControl {
@@ -668,7 +702,6 @@ mutation {
     #################################################################################################
     def enforceNacEnginesAll(self):
         '''enforce all NAC engines'''
-        
         query = '''
 mutation {
   accessControl {
@@ -691,7 +724,6 @@ mutation {
     #################################################################################################
     def enforceNacEngineDomain(self, name: str, ip: str = ''):
         '''enforce specific NAC engines'''
-
         query = '''
 mutation {
   accessControl {
@@ -720,72 +752,9 @@ mutation {
         else:
             return False
 
-        #################################################################################################
-
-    def runWorkFlow(self, wfid: str, deviceList: str):
-        query = """
-mutation {
-  workflows {
-    startWorkflow(input: {id: <ID>, variables: {devices: [<DEVICELIST>]}}) {
-      clientSessionId
-      errorCode
-      executionId
-      message
-      operationId
-      status
-    }
-  }
-}
-        """
-        query = query.replace("<ID>", wfid)
-        query = query.replace("<DEVICELIST>", deviceList)
-        if self._call(query):
-            if self.data["workflows"]["startWorkflow"]["status"] == "SUCCESS":
-                return self.data["workflows"]["startWorkflow"]["executionId"]
-            else:
-                self.message = "workflow " + wfid + " failed to run"
-                self.error = True
-        else:
-            return False
-
-    #################################################################################################
-    def getWorkflowResults(self, executionId: str):
-        query = """
-{
- workflows {
-  execution(executionId:<ID>) {
-    workflowName
-    status
-    message
-    activityResults {
-      deviceResults{
-        variables
-      }
-    }
-        
-  }
-  }
-}
-        """
-        query = query.replace("<ID>", executionId)
-
-        if self._call(query):
-            if self.data["workflows"]["execution"]["status"] == "SUCCESS":
-                return self.data["workflows"]["execution"]["activityResults"][0][
-                    "deviceResults"
-                ]
-            else:
-                self.message = "workflow " + executionId + " failed"
-                self.error = True
-        else:
-            return False
-
-    #################################################################################################
-
 #####################################################################################################
 #######################################      self test      #########################################
 #####################################################################################################
-
 if __name__ == "__main__":
     print(XMC_NBI.getDevices.__doc__)
     print("##############################################################")
@@ -796,7 +765,7 @@ if __name__ == "__main__":
     print("#############################################################")
     print("##                        Self Test                        ##")
     print("#############################################################")
-    
+    debug   = True
     session = XMC_NBI('192.168.162.50', 'DVDnjOaqMQ', '8c12a0e1-87f8-4b18-a8d1-2e8c74d27c65', test=True)
     if session.error:
         print("ERROR: '%s'" % session.message)
@@ -876,7 +845,7 @@ if __name__ == "__main__":
         else:
             print("WARNING: re-authenticate MAC address %s failed: '%s'" % (mac, session.message) )
 
-        if session.delMacAddress( mac ):
+        if session.delMacAddress( mac, group ):
             print("INFO: delete MAC address %s" % mac)
         else:
             print("INFO: delete MAC address %s failed: '%s'" % (mac, session.message) )
