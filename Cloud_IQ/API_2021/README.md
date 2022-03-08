@@ -1,11 +1,8 @@
-# ExtremeCloud IQ Scripting
+# ExtremeCloud IQ REST API Clients
 
-Scripts and utilities for working with ExtremeCloud IQ (XIQ).
+Client applications that utilize the new REST API provided by ExtremeCloud IQ (XIQ).
 
-## Categories
-
-* [2021 REST API Clients (Python)](API_2021/README.md)
-* [REST API Clients](REST_Clients/README.md)
+* [XIQ generic Python class](Python/README.md): generic Python call utilizing the new REST API of ExtremeCloud IQ (XIQ)
 
 ## Support
 
