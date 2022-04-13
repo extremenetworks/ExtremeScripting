@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="read VOSS license">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Example,</category>
+    <comments>Pull by SNMP the license information.</comments>
+    <content>####################################
+# XMC 8.5 Python script
+# written by:   Markus Nikulski
+# e-mail:       mnikulski@extremenetworks.com
+# date:         27. Aug. 2021
+# 
+
+import time
+from xmclib.snmplib import SnmpRequest
+from xmclib.snmplib import SnmpVarbind
+
+license_loaded = {}
+
+###############################################################
+def getDevices():
+    device = {}
+    query = '''
+{ network {
+    devices {
+      ip
+      deviceName
+      deviceDisplayFamily
+      sitePath
+      status
+      baseMac
+      deviceData {
+        serialNumber
+        deviceDisplayType
+        profileName
+} } } }'''
+    
+    result = emc_nbi.query( query )
+    
+    deviceCount = len( result['network']['devices'] )
+    
+    for item in result['network']['devices']:
+        if (item['deviceDisplayFamily'] == 'VSP Series') or (item['deviceDisplayFamily'] == "Unified Switching VOSS"):
+            if not ('VSP70' in item['deviceData']['deviceDisplayType'] or 'VSP90' in item['deviceData']['deviceDisplayType']):
+                device[ item['ip'] ] = {}
+                device[ item['ip'] ]['status']  = item['status']
+                device[ item['ip'] ]['name']    = item['deviceName']
+                device[ item['ip'] ]['site']    = item['sitePath']
+                device[ item['ip'] ]['baseMac'] = item['baseMac'].replace(':','').upper()
+                device[ item['ip'] ]['serial']  = item['deviceData']['serialNumber']
+                device[ item['ip'] ]['type']    = item['deviceData']['deviceDisplayType']
+                device[ item['ip'] ]['profile'] = item['deviceData']['profileName']
+                
+                if int( item['status'] ) == 0:
+                    device[ item['ip'] ]['status'] = 'DOWN'
+                if int( item['status'] ) == 1:
+                    device[ item['ip'] ]['status'] = 'UP'
+                else:
+                    device[ item['ip'] ]['status'] = 'UNKNOWN'
+    
+    print "INFO: found %s VSP's of %s devices" % ( len(device), deviceCount )
+    
+    return device
+
+###############################################################
+def getDeviceStatus( ip ):
+    query = '''
+{
+  network {
+    device(ip: "&lt;IP&gt;") {
+      status
+      deviceData {
+        profileName
+      }
+    }
+  }
+}
+'''
+    result = emc_nbi.query( query.replace('&lt;IP&gt;', ip) )
+    
+    if result['network']['device'] and result['network']['device']['status'] == 1:
+        response = getProfileDetails( result['network']['device']['deviceData']['profileName'] )
+        return response
+    else:
+        return False
+    
+###############################################################
+def getLicense( ip ):
+    data = {}
+    licenseType = ['n/a', 'none', 'base', 'advance', 'premier', 'premierPlusMacsec', 'port', 'premierWithPort',
+                   'premierPlusMacsecWithPort', 'unknown', 'l3v', 'l3vWithMacsec', 'datacenter', 'sdniot', 'insight',
+                   '?', '??', '???', '????', '?????', '??????'
+                  ]
+    durationType = ['n/a', 'none', 'trialFactoryDefault', 'trialLicense', 'timeBased', 'perpetual' ]
+    
+    snmp_request = SnmpRequest( ip )
+    
+    varbinds = [
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.3.0" ),        # rcLicenseFileName
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.4.0" ),        # rcLicenseLicenseType
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.5.0" ),        # rcLicenseDurationType
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.6.0" ),        # rcLicenseFactoryTrialPeriodRemainingDays
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.9.0" ),        # rcLicenseGenerationTime
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.10.0" ),       # rcLicenseExpirationTime
+        SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.12.0" )        # rcLicenseRemainingDays
+    ]
+    
+    response = snmp_request.snmp_get( varbinds, 3 )
+    
+    if response and response.ok:
+        if response.vars[0].val == '.':
+            data['FileName']   = None
+        else:
+            data['FileName']   = response.vars[0].val
+        data['LicenseType']    = licenseType[  int(response.vars[1].val) ]
+        data['DurationType']   = durationType[ int(response.vars[2].val) ]
+        data['FactoryTrialPeriodRemainingDays'] = str( response.vars[3].val)
+        data['GenerationTime'] = response.vars[4].val
+        data['ExpirationTime'] = response.vars[5].val
+        data['RemainingDays']  = str( response.vars[6].val )
+        if type( data['RemainingDays'] ) is not int:
+            data['RemainingDays']  = ''
+    else:
+        print "ERROR: %s no content in SNMP response" % ip
+    
+    return data
+    
+###############################################################
+###############################################################
+def main(): 
+    
+    devices = getDevices()
+    
+    ipAddr = []
+    for ip in devices:
+        if devices[ ip ]['status'] == 'UP':
+            ipAddr.append( ip )
+    
+    print "INFO: from %s VSP devices are %s up and %s down" % (len( devices ), len( ipAddr ), len( devices ) - len( ipAddr ))
+    
+    if not ipAddr:
+        print "WARN: no VSP available"
+        return
+      
+    #################################################
+    license_cur = {}
+    for ip in sorted( devices ):
+        if devices[ ip ]['status'] == 'UP':
+            license_cur[ ip ] = getLicense( ip )
+            
+    #################################################
+    print ""
+    print "__________________________________________________\n"
+    print "                     CVS Report"
+    print "__________________________________________________\n"
+    print "name,ip,type,BaseMAC,serial,LicenseType,DurationType,FactoryTrialPeriodRemainingDays,GenerationTime,ExpirationTime,RemainingDays"
+    for ip in sorted( devices ):
+        if devices[ ip ]['status'] == 'UP':
+            print "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                                                        devices[ ip ]['name'],
+                                                        ip,
+                                                        devices[ ip ]['type'],
+                                                        devices[ ip ]['baseMac'],
+                                                        devices[ ip ]['serial'],
+                                                        license_cur[ ip ]['LicenseType'],
+                                                        license_cur[ ip ]['DurationType'],
+                                                        license_cur[ ip ]['FactoryTrialPeriodRemainingDays'],
+                                                        license_cur[ ip ]['GenerationTime'],
+                                                        license_cur[ ip ]['ExpirationTime'],
+                                                        license_cur[ ip ]['RemainingDays']
+                                                        )
+        else:
+            print "%s,%s,%s,%s,%s,,,,,," % (
+                                            devices[ ip ]['name'],
+                                            ip,
+                                            devices[ ip ]['type'],
+                                            devices[ ip ]['baseMac'],
+                                            devices[ ip ]['serial']
+                                            )
+    
+###############################################################
+
+main()
+</content>
+    <creationDate>1631881667028</creationDate>
+    <creator>mnikulski</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
+    <contexts></contexts>
+    <lastUpdateDate>1649684534144</lastUpdateDate>
+    <lastUpdatedBy>mnikulski</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds></nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,XIQ-SE Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
