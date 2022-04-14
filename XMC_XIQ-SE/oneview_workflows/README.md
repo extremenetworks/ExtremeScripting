@@ -67,6 +67,7 @@
 |[XIQ AP import](xwf/XIQ_AP_import-22.3.10.74v211.xwf?raw=true)|This workflow automatically adds APs from Extreme Cloud IQ to XIQ-SE and to ExtremeControl. Make sure the APs support SNMP using the Network Policies and device templates.| You may consider to update the NAC_GROUP and SHARED_SECRET is needed.|22.3.10.74v211|
 
 
+
 # XIQ Site Engine (XMC) NAC-related Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
