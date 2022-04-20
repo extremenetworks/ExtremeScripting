@@ -1,0 +1,20 @@
+-- Use these scripts to manage Dell devices
+name="Dell Systems - TFTP"
+desc="SSH/TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+%ENABLEPSWD%
+copy running-config tftp:
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+@receive 40
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+-----END SUCCESS-----

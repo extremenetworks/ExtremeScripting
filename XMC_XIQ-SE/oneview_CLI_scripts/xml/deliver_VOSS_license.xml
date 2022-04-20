@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="deliver VOSS license">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,Provisioning,</category>
+    <comments>Rollout licenses</comments>
+    <content>####################################
+# XMC 8.5 / XIQ-SE 21.9 Python script
+# written by:   Markus Nikulski
+# e-mail:       mnikulski@extremenetworks.com
+# date:         23. Mar. 2022
+# 
+
+import os, time, logging, __future__
+from xml.dom import ValidationErr
+from xmcbase import emc_vars 
+from xmcbase import cli as emc_cli 
+from xmcbase import nbi as emc_nbi
+from xmclib.snmplib import SnmpRequest
+from xmclib.snmplib import SnmpVarbind
+
+logging.basicConfig( level=logging.DEBUG, format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s')
+
+TEST   = False                       # don't install the license
+FOLDER = '/root/VOSS-Licenses/'      # folder where the licnese files are located
+log    = logging.getLogger()
+
+###############################################################
+def getDeviceStatus( ip ):
+    query = '''
+{ network {
+    device(ip: "&lt;IP&gt;"){
+      deviceName
+      deviceDisplayFamily
+      status
+      deviceData {
+        serialNumber
+        subFamily
+        profileName
+} } } }'''
+    result = emc_nbi.query( query.replace("&lt;IP&gt;", ip) )
+    
+    if not result['network']['device']:
+        return False
+    else:
+        result['network']['device']['serialNumber'] = result['network']['device']['deviceData']['serialNumber']
+        result['network']['device']['subFamily']    = result['network']['device']['deviceData']['subFamily']
+        result['network']['device']['profile']      = result['network']['device']['deviceData']['profileName']
+        result['network']['device']['deviceData'].pop('profileName')
+        if int( result['network']['device']['status'] ) == 1:
+            result['network']['device']['status'] = 'UP'
+        else:
+            result['network']['device']['status'] = 'DOWN'
+        return result['network']['device']
+    
+###############################################################
+def getProfileDetails( name ):
+    response = {}
+    query = '''
+{ administration {
+    profileByName(name: "&lt;NAME&gt;") {
+      authCred {
+        loginPassword
+        userName
+} } } }'''
+    result = emc_nbi.query( query.replace('&lt;NAME&gt;', name) )
+    response['userName'] = result['administration']['profileByName']['authCred']['userName']
+    response['passwd']   = result['administration']['profileByName']['authCred']['loginPassword']
+    return response
+
+###############################################################
+def getLicenseFiles():
+    files = {}
+
+    if not os.path.isdir( FOLDER ):
+        log.error("license directory '%s' donot exists" % FOLDER)
+        raise ValidationErr("license directory '%s' donot exists" % FOLDER)
+        
+    #filepath = os.listdir(FOLDER)
+    for file_name in os.listdir(FOLDER):
+        file_size = os.path.getsize( FOLDER + '/' + file_name )
+        if file_size &lt;= 10000:
+            files[file_name] = 0
+            log.debug("find license file '%s'" % file_name)
+        else:
+            log.warning("ignore file '%s', because is to big (%s)" % (file_name, file_size) )
+
+    if not files:
+        log.warning("no license files exists")
+        return False
+    else:
+        log.info("%s license files exist" % len( files ) )
+        return files
+
+###############################################################
+def sendConfigCmds(cmds):
+    for cmd in cmds: 
+        if TEST == False:
+            cli_results = emc_cli.send( cmd )
+            if cli_results.isSuccess() is False:
+                log.error('CLI-ERROR: ' + cli_results.getError())
+                return False
+        else:
+            log.debug("test mode enabled, CLI =&gt; '%s'" % cmd)
+    if TEST == False:
+        return cli_results.getOutput().splitlines()    # [1:-2]
+    else:
+        return True
+
+###############################################################
+def close_cli_session():    
+  
+    emc_cli.close()
+    emc_cli.setCliRule(None)
+    #emc_cli.setSSHEnabled(None)
+    
+###############################################################
+def ifDeviceLicensed( ip ):
+    licenseType = ['n/a', 'none', 'base', 'advance', 'premier', 'premierPlusMacsec', 'port', 'premierWithPort',
+                   'premierPlusMacsecWithPort', 'unknown', 'l3v', 'l3vWithMacsec', 'datacenter', 'sdniot', 'insight',
+                   'macsec', '?', '??', '???']
+    durationType = ['n/a', 'none', 'trialFactoryDefault', 'trialLicense', 'timeBased', 'perpetual' ]
+    
+    varbinds = [SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.4.0" ),        # rcLicenseLicenseType
+                SnmpVarbind( oid = "1.3.6.1.4.1.2272.1.56.5.0" )]        # rcLicenseDurationType
+    
+    snmp_request = SnmpRequest( ip )
+    response = snmp_request.snmp_get( varbinds, 3 )
+    
+    if response and response.ok:
+        if 'macsec' in licenseType[  int(response.vars[0].val) ].lower():
+            return True
+    else:
+        log.error("%s no content in SNMP response" % ip)
+    return False
+
+###############################################################
+def sendLicense( ip, device ):
+    login = getProfileDetails( device['profile'] )
+
+    target = login['userName'] + '@' + ip + ':/intflash/' + device['licensesFile']
+    cmd = "/usr/bin/scp -oConnectTimeout=3 -oStrictHostKeyChecking=no -q %s %s" % (FOLDER + device['licensesFile'], target)
+    log.debug("cmd '%s'" % cmd)
+    
+    emc_cli.setIpAddress( emc_vars['serverIP'] )
+    emc_cli.send(cmd, False )
+    
+    time.sleep( 1 )
+    
+    result = emc_cli.send( login['passwd'] )
+    close_cli_session()
+
+    if result.isSuccess() is False:
+        #emc_results.put('activityMessage', '')
+        #emc_results.put('deviceMessage',   '')
+        #emc_results.setStatus( emc_results.Status.SUCCESS )
+        log.error("XMC login faild")
+        raise ValidationErr("XMC login faild")
+    else:
+        log.info("send license %s to device %s" % (device['licensesFile'], ip) )
+        return True
+    
+###############################################################
+def activateLicnese( ip, license_name ):
+    issue = False
+    
+    emc_cli.setIpAddress( ip )
+    
+    config = '''
+enable
+config terminal
+load-license &lt;FILE&gt;
+'''
+    config = config.replace('&lt;FILE&gt;', license_name)
+    result = sendConfigCmds( config.splitlines() )
+    
+    if not TEST:
+        for line in result:
+            log.debug("%s CLI result '%s'" % (ip, line) )
+            if 'no' in line.lower():                        # =&gt; No Valid License found. No license file is loaded.
+                issue = True
+    
+        result = sendConfigCmds( ['delete ' + license_name + ' -y'] )
+        #log.debug("%s delete file result '%s'" % (ip, result) )
+    
+        if issue:
+            log.error("%s license '%s' insatllation failed" % (ip, license_name) )
+            raise ValidationErr("%s license '%s' insatllation failed" % (ip, license_name))
+        else:
+            log.info("%s license '%s' insatllation success" % (ip, license_name) )
+    else:
+        log.info("%s license '%s' insatllation simulated" % (ip, license_name) )
+    close_cli_session()
+
+###############################################################
+def main(): 
+    ip = emc_vars["deviceIP"]
+
+    xmc = getDeviceStatus( emc_vars["serverIP"] )
+    if not xmc:
+        log.error("XIQ-SE (XMC) is not listed as device [%s]" % emc_vars['serverIP'])
+        raise ValidationErr("XIQ-SE (XMC) is not listed as device [%s]" % emc_vars['serverIP'])
+    
+    licenseFiles = getLicenseFiles()
+    if not licenseFiles:
+        return
+    
+    #################################################
+    device = getDeviceStatus( ip )
+    if not ((device['deviceDisplayFamily'] == 'VSP Series') or (device['deviceDisplayFamily'] == "Unified Switching VOSS")):
+        log.info("device is not a VSP, ignore it")
+        return
+    elif device['subFamily'] == 'VSP-9000' or device['subFamily'] == 'VSP-7000':
+        log.info("device is a %s, ignore it" % device['subFamily'])
+        return
+    
+    if not device['status'] == 'UP':
+        log.warning("device is down")
+        return
+        
+    #################################################
+    if ifDeviceLicensed( ip ):
+        log.info("device %s is alreday licensed" % ip)
+        return
+    
+    device['licensesFile'] = False
+    for licenseFile in sorted(licenseFiles, reverse=True):
+        if device['serialNumber'] in licenseFile:
+            if not device['licensesFile']:
+                log.info("%s license file '%s' for device exists" % (ip, device['licensesFile']) )
+                device['licensesFile'] = licenseFile
+            else:
+                log.error("more than one license file exists for device %s exists: %s / %s" % (ip, licenseFile, device['licensesFile']) )
+                raise ValidationErr("more than one license file exists for device %s exists: %s / %s" % (ip, licenseFile, device['licensesFile']) )
+            if licenseFiles[ licenseFile ]:
+                log.warning("license file '%s' have more than one device match" % device['licensesFile'])
+            licenseFiles[ licenseFile ] += 1
+    if not device['licensesFile']:
+        log.warning("no license file for device %s avaiable" % ip)
+        return
+    
+    #################################################
+    log.info("%s installing license %s" % (ip, device['licensesFile']) )
+    sendLicense(ip, device)
+    activateLicnese( ip, device['licensesFile'] )
+            
+###############################################################
+
+main()
+</content>
+    <creationDate>1648209890468</creationDate>
+    <creator>mnikulski</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
+    <contexts>,Groups,Device,</contexts>
+    <lastUpdateDate>1649684775543</lastUpdateDate>
+    <lastUpdatedBy>mnikulski</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds>,nos-id-voss,</nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>30</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,XIQ-SE Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
