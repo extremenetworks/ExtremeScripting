@@ -7,6 +7,7 @@
 # XIQ Site Engine (XMC) Reporting Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
+|[XIQ-SE licensing calculation](xwf/XIQ-SE_Licensing_calculation-v105.xwf?raw=true)|The Workflow reports number of Pilot and Navigator licenses required by ExtremeCloud IQ - Site Engine.|Define the email recipients.|v105|
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.5.1.60v20.xwf?raw=true)|This workflow creates aggregated report over the time. Instead of 300 emails if 300 devices go down, you will get one email with a list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. You can define the aggregation time in minutes in the workflow Input. Define email recipients.|8.5.1.60v20|
 |[Link Aggregate Alarm](xwf/Link_Aggregate_Alarm-8.4.0.115v8.xwf?raw=true)|This workflow creates one email for each link down event. Instead of 2 emails if the link goes down, you will get one email with all link details.|Create Alarm for Link Down based on selected trap (you can copy or modify the original alarm) and as action assign this workflow. Define email recipients.|8.4.0.115v8|
 |[ERS inventory](xwf/ERS_Devices_Report-8.4.2.30v111.xwf?raw=true)|This workflow creates one email with CSV file attached. All ERS devices are there with IP, serial numbers, and many details.|Select ERS devices. Check your ERS devices do have defined Network OS.|8.4.2.30v111|
@@ -17,7 +18,6 @@
 |[Report configuration changes by email](xwf/Report_Configuration_Changes-8.5.2.6v10.xwf?raw=true)|This workflow sends an email to the recipient with the configuration changes detected. It compares last two archived configurations.|The workflow can be executed by an [alarm](xwf/Report_Configuration_Changes.png). Define the email recipients.|8.4.4.26v1|
 |[Extended Alarm Information to Email](xwf/Extended_Alarm_information_to_Email-8.5.3.66v6.xwf?raw=true)|The workflow contains the dictionary of CLI commands to be executed based on alarm name. The workflow determines the alarm name and based on the information in the dictionary the set of CLI commands are executed. The result is then send to email recipients.|The workflow must be executed by an alarm. Modify the dictionary in the workflow. Define the email recipients.|8.5.3.66v6|
 |[Report Congestions](xwf/GetCongestion-8.5.5.30v67.xwf?raw=true)|The Workflow checks congestions on ports through SNMP and if congestion is detected then the email report is generated.|Define devices inside of the activity and threshold. Define the email recipients.|8.5.5.30v67|
-|[XIQ-SE licensing calculation](xwf/XIQ-SE_Licensing_calculation-v105.xwf?raw=true)|The Workflow reports number of Pilot and Navigator licenses required by ExtremeCloud IQ - Site Engine.|Define the email recipients.|v105|
 
 # XIQ Site Engine (XMC) Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
