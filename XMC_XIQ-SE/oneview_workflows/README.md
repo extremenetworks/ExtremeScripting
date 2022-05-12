@@ -116,8 +116,8 @@
 |[Store Active Clients in Cloud Database](xwf/Store_Active_Clients_in_Cloud_Database-21.4.10.80v71.xwf?raw=true)|This workflow is used as part of an educational training video. It does not work as standalone workflow.|
 
 # Integrated Application Hosting (Insight VM) workflows
-| Workflow Name | Description |
-| ------------- | ----------- |
+| Workflow name | Description | Version |
+| ------------- | ----------- | ------- |
 |[Deploy Insight VM](xwf/Deploy_Insight_VM-22.3.10.74v90.xwf?raw=true)|Workflow to deploy an IAH Insight VM on EXOS or VOSS capable switch. For EXOS it works on standalone switches and Stacks. This workflow is designed to be run manually, by selecting the switch and executing the workflow against it. The VM image must be already added to XIQ-SE Firmware under /tftpboot/firmware/images/ ( or as set in workflow variable const_XMC_IAH_IMAGE_PATH ). Note that files larger than 4096MB cannot be transferred using the web interface, in which case the image needs to be FTPed directly to XIQ-SE. The workflow takes care of transferring the VM image to the switch (FTP with VOSS and SCP with EXOS) unless the image, with the right size is already found to be on the switch, in which case the existing file is used to save time (the image transfer with FTP/SCP can take up to 15 minutes). The workflow inputs will determine which sideband port to use as well as CPU and memory resources to assign to the VM. This data is then used to install and start up the VM on the target switch. The workflow can be run on one or more switches at the same time. Input values for EXOS and VOSS will be somewhat different though these can be supplied as ${variable} where the relevant site of the switch will be used to obtain values for the variable.|22.3.10.74v90|
 
 # Support
