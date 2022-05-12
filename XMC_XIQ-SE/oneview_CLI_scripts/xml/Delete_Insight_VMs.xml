@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Delete all Insight/IAH VMs on VOSS or EXOS switch - v1.0</comments>
+    <comments>Delete all Insight/IAH VMs on VOSS or EXOS switch - v1.2</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -27,7 +27,15 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.0'
+__version__ = '1.2'
+
+# Changes
+# 1.1  - On EXOS need to increase the CLI timeout for VM stopping
+#      - On EXOS cannot stop a suspended VM; so now VMs are resumed, just in case they were suspended
+#      - On EXOS stopping a VM might take a while for the VM to actually stop, and it cannot be deleted
+#        untile it stops. Added logic to keep checking the VM until it is seen to have stopped, and only
+#        it is deleted
+# 1.2  - Updated to take advantage of EXOS ability to disable CLI prompting
 
 '''
 #@MetaDataStart
@@ -108,6 +116,7 @@ except: # If not running on XMC Jython...
 # IMPORTS:
 #
 import re
+import time
 
 #
 # VARIABLES:
@@ -117,7 +126,7 @@ import re
 RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
 RegexError  = re.compile(
     '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
-    re.IGNORECASE
+    re.IGNORECASE | re.MULTILINE
 )
 RegexContextPatterns = { # Ported from acli.pl
     'ERS Series' : [
@@ -280,7 +289,7 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnErr
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a CLI config command
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v2 - Send a CLI config command
     global LastError
     cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
     if Sanity:
@@ -291,7 +300,7 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPro
     resultObj = emc_cli.send(cmd, waitForPrompt)
     if resultObj.isSuccess():
         outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
             if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
                 LastError = outputStr
                 if msgOnError:
@@ -379,12 +388,15 @@ CLI_Dict = {
         'delete_vm_files'            : 'delete /var/lib/insight/packages/* -y\ny',
     },
     'Summit Series': {
-        'disable_more_paging'        : 'disable clipaging',
+        'disable_more_paging'        : 'disable cli paging',
+        'disable_cli_prompting'      : 'disable cli prompting',
         'save_config'                : 'save configuration',
-        'list_vms'                   : 'list://show vm||^\S \S (\S+) +\d',
-        'stop_vm'                    : 'stop vm {}', # VM name
+        'list_vms'                   : 'list://show vm||^[\S ] \S (\S+) +\d',
+        'resume_vm'                  : 'resume vm {0}', # VM name
+        'stop_vm'                    : 'stop vm {0}', # VM name
+        'running_vms'                : 'list://show vm||^(\*) \S \S+ +\d',
         'delete_vm'                  : 'delete vm {}', # VM name
-        'delete_vm_files'            : 'rm /usr/local/vm/packages/*\ny',
+        'delete_vm_files'            : 'rm /usr/local/vm/packages/*',
     },
 }
 
@@ -411,6 +423,10 @@ def main():
     if 'enable_context' in CLI_Dict[Family]:
         sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
 
+    # Disable CLI prompting (EXOS only)
+    if 'disable_cli_prompting' in CLI_Dict[Family]:
+        sendCLI_showCommand(CLI_Dict[Family]['disable_cli_prompting'])
+
     # Get list of VMs
     vmList = sendCLI_showRegex(CLI_Dict[Family]['list_vms'], 'vmList', True) # Command may error on non Insight capable switches
 
@@ -420,13 +436,33 @@ def main():
         if 'config_context' in CLI_Dict[Family]:
             sendCLI_configCommand(CLI_Dict[Family]['config_context'])
 
+        if Family == 'Summit Series':
+            emc_cli.setSessionTimeout(60) # On EXOS, stop VM command can take more than the default 30sec timeout
+
         # Stop all VMs
         for vm in vmList:
-            sendCLI_configCommand(CLI_Dict[Family]['stop_vm'].format(vm), True) # Command may error if VM package exists but no config for it
+            if Family == 'Summit Series': # On EXOS if a VM is suspended, it cannot be stopped and then deleted
+                # So this is expected to error if the VM is not suspended
+                sendCLI_configCommand(CLI_Dict[Family]['resume_vm'].format(vm), True, "VM {} is not suspended".format(vm))
+            # Command may error if VM is not actually running
+            sendCLI_configCommand(CLI_Dict[Family]['stop_vm'].format(vm), True, "VM {} is probably not running".format(vm))
 
         # Exit Config context (on VOSS, VM deletion has to happen in privExec)
         if 'end_config' in CLI_Dict[Family]:
             sendCLI_configCommand(CLI_Dict[Family]['end_config'])
+
+        # On XOS VMs can't be deleted if they are still running, so need to loop until they stop
+        if Family == 'Summit Series':
+            print "Waiting for all VMs to stop, before deleting..."
+            retries = 20
+            while retries &gt;= 0:
+                vmsRunning = sendCLI_showRegex(CLI_Dict[Family]['running_vms'], 'vmsRunning')
+                if vmsRunning:
+                    time.sleep(5)
+                    retries -= 1
+                    print "retry = {}".format(retries)
+                else:
+                    break
 
         # Delete all VMs
         for vm in vmList:
@@ -444,14 +480,15 @@ def main():
 
 main()
 </content>
+    <creator></creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Groups,</contexts>
-    <lastUpdateDate>1633706306071</lastUpdateDate>
+    <lastUpdateDate>1650449097509</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-exos,nos-id-voss,nos-id-fabric-engine,nos-id-switch-engine,</nosIds>
+    <nosIds>,nos-id-exos,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
