@@ -3,9 +3,9 @@
 #############################################################################
 #
 # Script        	: Daily Automatic Backup Script
-# Revision      	: 1.1
+# Revision      	: 1.2
 # EXOS Version(s)  	: 31.5.1.6 (EXOS supports Python)
-# Last Updated  	: 17-Feb-2022
+# Last Updated  	: 19-May-2022
 #
 # Purpose:
 # Run automated back up on all scripts, including configuration, policies, and scripts. Benefits
@@ -31,6 +31,8 @@ backupTime = '22:00'
 
 
 ###############################################################################
+
+#Set all or none of these global variables. 
 serial = None
 yeardirectory = None
 modirectory = None
@@ -113,8 +115,8 @@ def upmConfig():
         result = 1
     return result
 
-
-if upmConfig() == None:
+#Setting time if None values are set. 
+if None in (serial,yeardirectory,modirectory,daydirectory,systemTime):
     yeardirectory = time.strftime('%Y')
     modirectory = time.strftime('%m')
     daydirectory = time.strftime('%d')
@@ -124,6 +126,8 @@ if upmConfig() == None:
             tokens = line.split()
             serial = tokens[3]
             break
+
+if upmConfig() == None:
 # upload policy files
     uploadFiles('.pol','p')
 # upload TCL scripts
