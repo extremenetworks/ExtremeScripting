@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.8</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.9</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.8'
+__version__ = '1.9'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -51,6 +51,7 @@ __version__ = '1.8'
 # 1.7   - Increased retries after re-adding switch to XMC/XIQ-SE to 20 from 10 (XIQ-SE is slower than XMC due to XIQ reporting)
 # 1.8   - Updated with latest version of function libraries
 #       - Able to re-try device addition into XIQ-SE; as sometimes the addition seems to fail
+# 1.9   - Above change was not working; not easy to reproduce and thus test...
 
 
 '''
@@ -1214,7 +1215,7 @@ def main():
     # Create the new IP device in XMC
     deviceReAdded = False
     addRetries = 0
-    while not deviceReAdded and addRetries &lt; 1: # We can try twice, as sometimes XIQ-SE fails to add the device...
+    while not deviceReAdded and addRetries &lt; 2: # We can try twice, as sometimes XIQ-SE fails to add the device...
         if not nbiMutation(NBI_Query['create_device'], IP=newIp, SITE=sitePath, PROFILE=adminProfile):
             exitError("Failed to add new device IP '{}' to XMC Site '{}' with admin profile '{}'".format(newIp, sitePath, adminProfile))
         addXmcSyslogEvent('info', "Added device to XMC Site {}".format(sitePath), newIp)
@@ -1273,13 +1274,13 @@ def main():
 
 main()
 </content>
-    <creationDate>1652456300530</creationDate>
+    <creationDate>1652859695873</creationDate>
     <creator>root</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1652684898230</lastUpdateDate>
+    <lastUpdateDate>1652900544141</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
