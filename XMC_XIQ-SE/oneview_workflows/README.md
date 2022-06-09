@@ -82,6 +82,7 @@
 |[Add MAC to the Blaclist to inform user](xwf/Add_MAC_to_Blacklist_to_inform_user-8.5.0.169v6.xwf?raw=true)|This workflow adds MAC address to ES group and creates a event.|Description can be defined and end-system group can be defined.|8.5.0.169v6|
 |[Report 802.1X Rejects](xwf/NAC_report_too_many_1X_Rejects-8.5.5.30v2.xwf?raw=true)|Workflow generates an email with table of User Names with too many rejects in last X hours.|Input: Number of Hours. Threshold. Email Address.|8.5.5.30v2|
 |[Import FDB from ERS to NAC](xwf/Import_FDB_from_ERS_to_NAC-21.9.10.90v19.xwf?raw=true)|Workflow reads the MAC address table from ERS devices and imports those to End-System groups, creates NAC profiles and NAC rules. If duplicate MAC is seen on more VLANs then VoIP vlan makes precedence. If duplicate MAC is not seen on VoIP VLAN then the duplicate MAC is not imported.|Input: Site with VLAN names, NAC config name. VoIP VLAN ID, Name prefix|21.9.10.90v19|
+|[Import PaloAlto IoT devices to NAC](xwf/PAN pull IoT devices-22.3.10.74v58.xwf?raw=true)|Workflow reads the device information form Palo Alto IoT Cloude service and imports those to End-System groups.|Input: Customer name, API-ID, API-Key|22.3.10.74v58|
 
 
 # XIQ Site Engine (XMC) Workflow Combinations
