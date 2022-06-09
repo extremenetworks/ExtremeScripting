@@ -32,7 +32,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 ## VOSS scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
-| VOSS |[Move to CLIP Mgmt IP](xml/Move_to_CLIP_Mgmt_IP.xml?raw=true)| Given a switch already in XMC, this script will ask user to provide a CLIP IP and VRF which will then be configured as mgmt clip on the VSP. If the VSP already had a mgmt clip the existing mgmt clip will be deleted and replaced with the new one. If the switch had a mgmt vlan IP, this can also be deleted, based on script input. At the same time, the switch can be renamed, both under SNMP and ISIS. Finally the switch is deleted from XMC's database as well as XMC Control if there, and re-added to the same site with the new mgmt IP address. Before attempting to change the IP on the switch, the script will first of all make sure that the new IP address provided is not already known by XMC and that it does not exist on the network (does not reply to ping)|Python|
+| VOSS |[Move to CLIP Mgmt IP](xml/Move_to_CLIP_Mgmt_IP.xml?raw=true)| Given a switch already in XMC, this script will ask user to provide a CLIP IP and VRF which will then be configured as mgmt clip on the VSP. If the VSP already had a mgmt clip the existing mgmt clip will be deleted and replaced with the new one. If the switch had a mgmt vlan IP, this can also be deleted, based on script input. At the same time, the switch can be renamed, both under SNMP and ISIS. Finally the switch is deleted from XMC's database as well as XMC Control if there, and re-added to the same site with the new mgmt IP address. Before attempting to change the IP on the switch, the script will first of all make sure that the new IP address provided is not already known by XMC and that it does not exist on the network (does not reply to ping). v1.9|Python|
 | VOSS |[SMLT Pair Enforce](xml/SMLT_Pair_Enforce.xml?raw=true)| This script provisions and enforces SMLT vIST clustering on VSP devices including if these are operating in DVR Leaf mode both via inband and OOB management|Python|
 | VOSS |[read license](xml/read_VOSS_license.xml?raw=true)| This script read the license currently active on the switch. Select only one device, doesn’t mater witch one, the script will take all VOSS switches part of the inventory and read teh data by SNMP. The result is presented like a CSV on the end of the output. |Python|
 | VOSS |[deliver license](xml/deliver_VOSS_license.xml?raw=true)| This script will deliver all licenses stored in /root/VOSS-Licenses/ to the corresponding switch using the bas MAC address witch have to be part of the file name. This applies to the universal VOSS only. |Python|
@@ -70,14 +70,14 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[Automatic Fabric Creation](xml/FC_Config.xml?raw=true)|Select group of switches with the same NNI portlist, specify some basic parameters.|Python|
 | VOSS |[Authentication VOSS](xml/Authentication_VOSS.xml?raw=true)|Configure radius server and accounting for management access.|TCL|
 | VOSS |[VSP EPT Enforce](xml/VSP_EPT_Enforce.xml?raw=true)|This script allows the XMC operator to easily configure a VSP switch for Endpoint-Tracking (EPT) based on the ExtremeControl NAC configuration.|Python|
-| VOSS |[VSP PreUpgrade CleanUp](xml/VOSS_PreUpgrade_CleanUp.xml?raw=true)|Script prepares a VSP or XA1400 for an XMC upgrade, by removing old software versions from the software archive.|Python|
+| VOSS |[VSP PreUpgrade CleanUp](xml/VOSS_PreUpgrade_CleanUp.xml?raw=true)|Script prepares a VSP or XA1400 for an XMC upgrade, by removing old software versions from the software archive. v1.1|Python|
 | Procurve |[Authentication Procurve](xml/Authentication_Procurve.xml?raw=true)|Script will configure Radius and authentication on Procurve devices & ports.|TCL|
 | Linux |[NAC Daemon Commands](xml/NAC_Daemon_Control.xml?raw=true)|Script does stop - start - restart - status the nacctl.|TCL|
 
 ## Integrated Application Hosting (Insight VM) scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
-| VOSS, EXOS |[Delete Insight VMs](xml/Delete_Insight_VMs.xml?raw=true)|Given an insight capable VSP or XOS switch, removes all insight VMs from it. The VMs, if any, are stopped and deleted from the switch config file. The VM files (OVA/QCOW) are also deleted if the pull down to this effect is enabled|Python|
+| VOSS, EXOS |[Delete Insight VMs](xml/Delete_Insight_VMs.xml?raw=true)|Given an insight capable VOSS or EXOS switch, removes all insight VMs from it. The VMs, if any, are stopped and deleted from the switch config file. The VM files (OVA/QCOW) are also deleted if the pull down to this effect is enabled. v1.2|Python|
 
 
 # Support
