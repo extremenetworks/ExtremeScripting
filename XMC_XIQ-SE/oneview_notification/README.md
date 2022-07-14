@@ -7,8 +7,8 @@
 ## XMC scripts
 | Script name   | Description   | Type   |
 | ------------- | ------------- |:------:|
-|[CP notification with user tags](files/CP_Notification.zip?raw=true)| This script support Check Point notification with user tags. The Control Notification is used to execute a external Python code to call the Check Point Firewall API. Detals are you can find here [read me](files/CP_Notification.pdf?raw=true) |cPython|
-|[PAN notification with user tags](files/PAN_Notification.zip?raw=true)| This script support Palo ALto Networks notification with user tags. The Control Notification is used to execute a external Python code to call the Palo ALto Firewall API. Detals are you can find here [read me](files/PAN_Notification.pdf?raw=true) |cPython|
+|[CP notification with user tags](files/CP_Notification.zip?raw=true)| This script support Check Point notification with user tags. The Control Notification is used to execute a external Python code to call the Check Point Firewall API. Detals are you can find here [read me](files/CP_Notification.pdf) |cPython|
+|[PAN notification with user tags](files/PAN_Notification.zip?raw=true)| This script support Palo ALto Networks notification with user tags. The Control Notification is used to execute a external Python code to call the Palo ALto Firewall API. Detals are you can find here [read me](files/PAN_Notification.pdf) |cPython|
 
 # Support
 _The software is provided as-is and [Extreme Networks](http://www.extremenetworks.com/) has no obligation to provide maintenance, support, updates, enhancements, or modifications. Any support provided by [Extreme Networks](http://www.extremenetworks.com/) is at its sole discretion._
