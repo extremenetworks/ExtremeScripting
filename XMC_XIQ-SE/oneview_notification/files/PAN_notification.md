@@ -63,12 +63,12 @@ Got to **Control** -- **Access Control** -- **Configuration** --
 **Notification**
 
 ![Graphical user interface, text, application, email Description
-automatically generated](media/PAN_image1.png)
+automatically generated](media/PAN_image1.png){width="6.567381889763779in" height="4.579919072615923in"}
 
 and add a new record like this
 
-![Graphical user interface, application, email Description automatically
-generated](media/PAN_image2.png)
+![Graphical user interface, application, email Description automatically generated](media/PAN_image2.png){width="4.957199256342957in"
+height="5.7969192913385825in"}
 
 The default content have to be overwritten. Please push the button
 **Edit Content** and provide following string (single line)
