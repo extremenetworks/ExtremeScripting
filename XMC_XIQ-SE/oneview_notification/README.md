@@ -1,7 +1,7 @@
 # How To
 ## XIQ Site Engine and XMC version 8.5
 * Import the sctript = copy all Python files using SCP or SFTP to /root/scripts/ 
-* Execute the script = Control – Access Control – Configuration – Notification (Please read the PDF)
+* Execute the script = Control – Access Control – Configuration – Notification (Please read the linked documentation)
 
 # XIQ Site Engine and Extreme Management Center version 8.0+ Scripts
 ## XMC scripts
