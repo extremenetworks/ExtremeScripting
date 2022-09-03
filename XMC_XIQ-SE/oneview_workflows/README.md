@@ -85,7 +85,7 @@
 |[Report 802.1X Rejects](xwf/NAC_report_too_many_1X_Rejects-8.5.5.30v2.xwf?raw=true)|Workflow generates an email with table of User Names with too many rejects in last X hours.|Input: Number of Hours. Threshold. Email Address.|8.5.5.30v2|
 |[Import FDB from ERS to NAC](xwf/Import_FDB_from_ERS_to_NAC-21.9.10.90v19.xwf?raw=true)|Workflow reads the MAC address table from ERS devices and imports those to End-System groups, creates NAC profiles and NAC rules. If duplicate MAC is seen on more VLANs then VoIP vlan makes precedence. If duplicate MAC is not seen on VoIP VLAN then the duplicate MAC is not imported.|Input: Site with VLAN names, NAC config name. VoIP VLAN ID, Name prefix|21.9.10.90v19|
 |[Import PaloAlto IoT devices to NAC](xwf/PAN_pull_IoT_devices-22.3.10.74v58.xwf?raw=true)|Workflow reads the device information form Palo Alto IoT Cloude service and imports those to End-System groups.|Input: Customer name, API-ID, API-Key|22.3.10.74v58|
-|[Import Policy Mappings from CSV to NAC](xwf/Import_Policy_Mappings_from_CSV_file-22.9.10.35v30.xwf?raw=true)|Workflow reads the policy mappings from CSV file and imports it to the NAC. The format of the CSV file is [fixed](xwf/Import_Policy_Mappings_from_CSV_file.csv?raw=true). Site engine must be minimum version 22.9.|Input: FileName|22.9.10.35v30|
+|[Import Policy Mappings from CSV to NAC](xwf/Import_Policy_Mappings_from_CSV_file-22.9.10.35v35.xwf?raw=true)|Workflow reads the policy mappings from CSV file and imports it to the NAC. The format of the CSV file is [fixed](xwf/Import_Policy_Mappings_from_CSV_file.csv?raw=true). Site engine must be minimum version 22.9.|Input: FileName|22.9.10.35v35|
 
 
 # XIQ Site Engine (XMC) Workflow Combinations
