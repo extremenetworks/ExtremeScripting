@@ -7,6 +7,7 @@ Scripts and Utilities for working with XIQ Site Engine - Extreme Management Cent
 * [Config backup scripts](cfg_backup_scripts/README.md)
 * [OneView scripts](oneview_CLI_scripts/README.md)
 * [OneView workflows](oneview_workflows/README.md)
+* [ExtremeControl Notifications](oneview_notification/README.md)
 * [Northbound API clients](nbi_clients/README.md)
 
 ## Support
