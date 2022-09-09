@@ -4,7 +4,7 @@ Boot universal hardware out of the box directly into VOSS as Fabric Engine
 
 ### History
 v1.0    09-September-2022
-        * initial posting
+* initial posting
 
 ### Files
 * [ztp.py](ztp.py)
