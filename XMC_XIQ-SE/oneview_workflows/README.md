@@ -52,7 +52,7 @@
 |[Fabric Extend Onboard](xwf/Fabric_Extend_Onboard-22.6.12.11v65.xwf?raw=true)|Workflow to onboard newly provisioned VSPs with Fabric Extend. The first two activities will move the mgmt VLAN IP onto newly defined Fabric Extend VLAN and VRF. The middle activity, Apply Config Template, pushes an ASCII config template where variables can be dereferenced against site variables and/or a CSV file. The last activity, if enabled, configures a mgmt CLIP on the device, deletes the device from XIQ-SE and re-adds the device with its new mgmt CLIP IP. Both the ASCII config template and CSV file need to be uploaded to the XIQ-SE filesystem. This workflow is designed to be assigned to a Site, under Action tab, as a Custom Configuration Task|[(How-to-use)](xwf/Fabric_Extend_Onboard_Workflow_v2.pdf)|22.6.12.11v65|
 |[Onboard Mgmt VLAN](xwf/Onboard_Mgmt_VLAN-22.6.12.11v26.xwf?raw=true)|Workflow to onboard a VOSS/Fabric Engine switch onto a dedicated switch mgmt VLAN/L2VSN|[(How-to-use)](xwf/Onboard_Mgmt_VLAN_Workflow.pdf)|22.6.12.11v26|
 |[Onboard Mgmt CLIP](xwf/Onboard_Mgmt_CLIP-22.6.12.11v5.xwf?raw=true)|Workflow to onboard a VOSS/Fabric Engine switch onto a dedicated switch mgmt CLIP|[(How-to-use)](xwf/Onboard_Mgmt_CLIP_Workflow.pdf)|22.6.12.11v5|
-
+|[Disable IQAgent](xwf/Disable_IQAgent-22.6.10.67v10.xwf?raw=true)|Workflow disables IQAgent on devices running Switch Engine, Fabric Engine,  EXOS, VOSS.|Execute the workflow on one or multiple devices.)|22.6.10.67v10|
 
 # XIQ Site Engine (XMC) daily job Workflows
 | Workflow name | Description | Comment | Version |
