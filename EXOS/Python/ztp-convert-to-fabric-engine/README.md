@@ -5,6 +5,8 @@ Boot universal hardware out of the box directly into VOSS as Fabric Engine
 ### History
 v1.0 - 09-September-2022
 * initial posting
+v1.1 - 29-September-2022
+* Modified to run with Python3 as well as Python2; EXOS32.2 introduces Python3 and drops Python2 support
 
 ### Files
 * [ztp.py](ztp.py)
