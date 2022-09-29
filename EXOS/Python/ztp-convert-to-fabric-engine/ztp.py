@@ -3,7 +3,7 @@
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 Description = '''
 Script Version {}. Converts Universal Hardware to Fabric Engine.
@@ -19,6 +19,9 @@ only terminate once the OS conversion has been triggered and the
 switch is reset, or if the USB stick is removed.
 '''.format(__version__)
 
+# Changes
+# 1.0  - Initial version
+# 1.1  - Modified to run with Python3 as well as Python2; EXOS32.2 introduces Python3 and drops Python2 support
 
 #
 # Imports
@@ -70,7 +73,7 @@ def getUserParams(): # Set up argparse
     return parser.parse_args()
 
 def logMessage(logMsg): # Print message on console + append to USB log file
-    print "{}: {}".format(ThisMod, logMsg)
+    print("{}: {}".format(ThisMod, logMsg))
     if LOG: LOG.write("{}: {}\n".format(datetime.datetime.now(), logMsg))
 
 def debug(debugOutput): # Use to include debugging in script; set above Debug variable to True or False to turn on or off debugging
@@ -80,7 +83,7 @@ def debug(debugOutput): # Use to include debugging in script; set above Debug va
         dbgLog.write(debugOutput + "\n")
         dbgLog.close()
     except IOError: # We don't want to bomb out if we cant write the debug log...
-        print "Unable to open ztp debug log file: {}".format(dbgLog)
+        print("Unable to open ztp debug log file: {}".format(dbgLog))
 
 
 def exitError(errmsg): # v1 - Exit script with error message and setting status appropriately
@@ -88,12 +91,12 @@ def exitError(errmsg): # v1 - Exit script with error message and setting status 
     if LOG: LOG.close()
     sys.exit(1)
 
-def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
-    print "Aborting script due to error on previous command"
+def abortError(cmd, errorOutput): # v1.1 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    print("Aborting script due to error on previous command")
     try:
         rollbackStack()
     finally:
-        print "Aborting because this command failed: {}".format(cmd)
+        print("Aborting because this command failed: {}".format(cmd))
         exitError(errorOutput)
 
 def cliCmd(cmd, arg=None, fmt=None): # Send a command, with optional args; fmt = None|raw|xml
@@ -110,7 +113,7 @@ def cliCmd(cmd, arg=None, fmt=None): # Send a command, with optional args; fmt =
         dbgLog = open(DebugLog, "a")
         dbgLog.write("{}# {}\n".format(datetime.datetime.now(), cmd))
     except IOError: # We don't want to bomb out if we cant write the debug log...
-        print "Unable to open ztp debug log file: {}".format(dbgLog)
+        print("Unable to open ztp debug log file: {}".format(dbgLog))
 
     try:
         output = exsh.clicmd(cmd, args=arg, capture=captFlag, xml=xmlFlag)
@@ -136,14 +139,14 @@ def cliError(outputStr): # v1 - Check command output for CLI error message
     else:
         return False
 
-def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+def parseRegexInput(cmdRegexStr): # v1.1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
     # cmdRegexStr format: <type>://<cli-show-command> [& <additional-show-cmd>]||<regex-to-capture-with>
     if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
         mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
     else:
         mode = None
     cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
-    cmdList = map(str.strip, cmd.split('&'))
+    cmdList = list(map(str.strip, cmd.split('&'))) # map() returns list in Python2 but iterator in Python3
     return mode, cmdList, regex
 
 def formatOutputData(data, mode): # v3 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
@@ -168,14 +171,14 @@ def formatOutputData(data, mode): # v3 - Formats output data for both sendCLI_sh
         RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
     return value
 
-def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v2 - Send a CLI show command; return output
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v2.1 - Send a CLI show command; return output
     global LastError
     outputStr = cliCmd(cmd, fmt='raw')
     if outputStr and cliError("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
         if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
             LastError = outputStr
             if msgOnError:
-                print "==> Ignoring above error: {}\n\n".format(msgOnError)
+                print("==> Ignoring above error: {}\n\n".format(msgOnError))
             return None
         abortError(cmd, outputStr)
     LastError = None
@@ -201,11 +204,11 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnErr
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v3 - Send a CLI config command
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v3.1 - Send a CLI config command
     global LastError
     cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
     if Sanity:
-        print "SANITY> {}".format(cmd)
+        print("SANITY> {}".format(cmd))
         ConfigHistory.append(cmdStore)
         LastError = None
         return True
@@ -214,7 +217,7 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPro
         if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
             LastError = outputStr
             if msgOnError:
-                print "==> Ignoring above error: {}\n\n".format(msgOnError)
+                print("==> Ignoring above error: {}\n\n".format(msgOnError))
             return False
         abortError(cmd, outputStr)
     ConfigHistory.append(cmdStore)
@@ -283,7 +286,7 @@ def main():
     try:
         LOG = open(ZtpLog, "a")
     except IOError:
-        print "Unable to open ztp log file on USB: {}".format(ZtpLog) # We don't want to bomb out even if we can't write to USB log file..
+        print("Unable to open ztp log file on USB: {}".format(ZtpLog)) # We don't want to bomb out even if we can't write to USB log file..
 
     logMessage("=~=~=~=~=~=~=~=~=~=~= {} =~=~=~=~=~=~=~=~=~=~=".format(ThisMod))
     logMessage("Executing {} - ZTP conversion to Fabric Engine".format(ThisMod))
