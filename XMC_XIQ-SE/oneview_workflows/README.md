@@ -70,7 +70,7 @@
 |[Refresh Neighbor Devices](xwf/Refresh_Neighbor_Devices-8.2.4.55v2.xwf?raw=true)|This workflow checks neighbor devices based on XMC link database and executes refresh of each neighbor. If the device goes down or up then the map is automatically updated.|Create Status Change Alarm and for both contact lost and contact established add action run task with this workflow. |8.2.4.55v2|
 |[Execute CLI commands in Enable mode](xwf/CLI_Command_Execute_with_Enable-8.5.0.169v11.xwf?raw=true)|This workflow automatically enters the enable mode and passes the enable password. Then it executes user-defined commands. Both Single and Multi-device execution is supported.| The enable password must be configured in the CLI credentials. The Network OS must be one of the defined in the list.|8.5.0.169v11|
 |[XIQ AP import](xwf/XIQ_AP_import-22.6.12.11v262.xwf?raw=true)|This workflow automatically adds APs from Extreme Cloud IQ to XIQ-SE and to ExtremeControl. Make sure the APs support SNMP using the Network Policies and device templates.| You may consider to update the variables like NAC_GROUP or SHARED_SECRET if needed.|22.6.12.11v262|
-
+|[Check XIQ Connectivity Timeout](xwf/Check_the_XIQ_timeout_and_inform_admin-22.9.10.70v16.xwf?raw=true)|The workflow checks if the connection to XIQ is not available for more that X days and in case of the threshold is crossed it informs the recipients by email.| Define the threshold and email recipients. Schedule the workflow execution every day.|22.9.10.70v16|
 
 
 # XIQ Site Engine (XMC) NAC-related Workflows
