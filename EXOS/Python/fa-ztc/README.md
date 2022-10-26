@@ -3,8 +3,8 @@
 This script implements the ERS and VSP FA ZTC functionality on XOS.
 
 ### History
-v1.0    02-May-2020
-        * initial posting
+v1.0 - 02-May-2020
+* initial posting
 
 ### Files
 * [fa-ztc.py](fa-ztc.py)

@@ -29,9 +29,6 @@ exit
 -----BEGIN SUCCESS "Configuration Download"-----
 bytes copied
 -----END SUCCESS-----
-
------BEGIN PRE-SCRIPT "Firmware Download"-----
------END PRE-SCRIPT-----
 -----BEGIN SCRIPT "Firmware Download"-----
 enable
 %ENABLEPSWD%
@@ -52,3 +49,18 @@ reload
 
 exit
 -----END SCRIPT-----
+-----BEGIN SUCCESS "Timed Reset"-----
+enable
+%ENABLEPSWD%
+reload in %TIMED_RESET_DELAY_SECONDS%
+
+
+exit
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Timed Reset Abort"-----
+reload cancel
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Timed Reset Abort"-----
+SHUTDOWN ABORTED
+-----END SUCCESS-----

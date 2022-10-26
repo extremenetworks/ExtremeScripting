@@ -1,0 +1,74 @@
+Onboard VSP
+
+v55
+v57
+v59
+	- Auto-sense Data I-sid config now takes care of creating platform VLAN in activity 04
+	- Auto-sense Data I-sid config performed in activity 05 if possible
+	- Activity 05 now checks the software for a non-committed software, and commits if necessary before rebooting
+	- Activity 05 now also deletes the auto-sense ISIS hello auth encrypted key file before reooting
+	- Activity 01 now able to read site global custom variables, if a site-specific one does not exist
+	- Activity 01 now handles null values from custom variables
+v61
+	- Activity 05 was not correctly matching uncommited software from pre8.2 to post8.2
+v63
+	- Activity 02 now also globally enables radius accounting on switch
+v65
+	- Activity 02, running on already configured switch, deletion of radius servers errors if accounting is enabled
+	- Activity 02, accounting must be enabled after a delay from enabling radius servers
+	- Activity 04, check prior existance of auto-sense voice & data i-sids and clear settings before setting again
+	- Activity 04, a platform VLAN is now automatically allocated for untagged auto-sense voice i-sid on regular BEB
+	- Activity 04, allocated platform VLANs for auto-sense data i-sid and untagged voice i-sid are named accordingly
+v75
+	- Activity 01, readSiteCustomVariables() v3; read variables up site parents
+	- Activity 01 & 03 update nbi mutations with new nbiQuery() and nbiMutation() v2
+	- Activity 01 ${vars} can now get used on the additional CLI script
+	- Activities 02,04,05 disable more paging on VSP from start
+	- Activity 02 added input to create RADIUS server for cli+web in addition to eapol
+	- Activities 01,02 ability to handle RADIUS server creation/deletion also for cli & web 
+	- Activity 02, increase sleep timer to 2 secs before enabling radius accounting
+v77
+	- Activity 01, validation of RADIUS secret, must not contain '?' and max 32 characters
+	- Activity 02, configuration of RADIUS secret is now quoted (key can now contain spaces)
+	- Activity 03, when adding switch to a NAC location group, it is added for Any interface
+v79
+	- Activities 02,04,05 config_term & end are now sent with sendCLI_configCommand()
+	- Activity 04, was trying to create platform VLANs on DVR Leaf, if the workflow was re-executed on the same switch
+	  a second time; this was obviuosly failing
+	- Activity 05 changed order of commands appended to config.cfg; dvr leaf is now set first, otherwise the auto-sense
+	  data i-sid and untagged voice i-sid commands fail to get set, dur to missing platform vlan
+	- Activity 04, was not detecting an already set auto-sense data i-sid
+	- Activity 02 increased sleep timer from 2 to 4sec, before activating RADIUS accounting
+	- Activity 04 when both data i-sid and isis hello auth are set, now sets data i-sid after setting the isis hello auth
+v81
+	- Activity 04 was no longer detecting existing auto-sense voice i-sid with 8.4.2.x due to CLI output changes
+	- Workflow inputs, additional CLI commands field, now has commented out example of Upnp ACL filter for DVR Leaf
+v83
+	- Activity 04; removed code which was globally shutting down ISIS when activating the ISIS Hello Auth key
+	- Activity 02; increased sleep timer before enabling radius accounting from 4sec to 8sec
+v85
+	- Activity 02 disabling/enabling radius accounting command is now wrapped in a loop to retry up 10 times at 4 sec
+	  delay, until the command succeeds without an error
+	- Activity 05; additional 20sec delay before converting switch into DVR-Leaf mode
+	- Added "Fabric Engine" as workflow supported Network OS together with existing VOSS
+v91
+	- Documented how to set a NAC Engine as Primary RADIUS server when configuring the switch
+	- Added better versioning; now the workflow version is displayed in the output log of all activities
+	- Added support for Auto-Sense WAP-Type1 I-SID/VLAN-id and Wait-Interval
+	- Improved the workflow reported messages, at workflow level, activity level and device level, including errors
+v97
+	- Updated all function libraries
+	- Added more combinations for RADIUS server use-by values
+	- Added variable const_cliCmdsFailOnError to control whether workflow should fail on user CLI commands error
+	- Added variable const_cliCmdsSkipOnError to control whether to skip rest of user CLI commands on error 
+v99
+	- MakeVspDvrLeaf_05; now attempts to enable DVR Leaf without doing a switch reboot
+v100 - posted
+	- MakeVspDvrLeaf_05; now deletes any non-default platform VLANs, which might have got added by ZTP+ onboarding
+	  so as to be able to enter DVR Leaf mode without any switch reset
+
+Todo:
+
+	
+
+
