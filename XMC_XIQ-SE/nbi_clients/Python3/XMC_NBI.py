@@ -19,6 +19,8 @@ from datetime import datetime
 import requests
 import urllib3
 urllib3.disable_warnings()                                              # supress SSL certificate  warning
+#import requests_debugger                                               # pip install requests-debugger
+#requests_debugger.set( max_depth = 5 )
 
 logger = None
 debug  = False
@@ -28,7 +30,7 @@ getframe_expr = 'sys._getframe({}).f_code.co_name'                      # is req
 class XMC_NBI():
     '''XMC NBI interface'''
 
-    __version__ = "0.0.2"
+    __version__ = "0.0.3"
     __author__  = "Markus Nikulski (mnikulski@extremenetworks.com)"
 
     #################################################################################################
@@ -36,7 +38,7 @@ class XMC_NBI():
         global logger
 
         if not logging.getLogger().hasHandlers():
-            logging.basicConfig( level = logging.ERROR )
+            logging.basicConfig( level = logging.WARNING )
         logger = logging.getLogger()
 
         if debug:
@@ -162,7 +164,7 @@ class XMC_NBI():
             logger.debug("XMC NBI session expired, force re-login")
             self.expire  = 0
             self.session = self._login()
-
+        logger.debug("query: %s" % query)
         return self._decode_response( self.session.post( self.nbiUrl, json = {'query': query} ), eval(getframe_expr.format(2)) )
         
     #################################################################################################
