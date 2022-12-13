@@ -19,6 +19,7 @@
 |[Dell Blade Switch](Dell_Blade_switch.txt?raw=true)|Configuration backup of Dell Blade Switch.|
 |[Dell Force10](dell-force10?raw=true)|Configuration backup of Dell Force10.|
 |[Extreme BR69xx](BR69xx.txt?raw=true)|Configuration backup and restore and restart of Brocade/Extreme BR69xx.|
+|[Extreme IQEngine](Extreme-Cloud-AP-TFTP.txt?raw=true)|Configuration backup for Aerohive HiveOS, Extreme IQEngine.|
 |[FortiGate Firewall](FortiGate?raw=true)|Configuration backup of FortiGate.|
 |[FortiWLC controller](FortiWLC-FTP.txt?raw=true)|Configuration backup/restore over FTP of FortiWLC / Meru wireless controller. If your FTP server does support chroot then you may need to change %ABSOLUTE_TARGET_FILE_PATH% with %RELATIVE_TARGET_FILE_PATH%.|
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP?raw=true)|Configuration backup/restore & firmware upgrade of Comware 5100.|
