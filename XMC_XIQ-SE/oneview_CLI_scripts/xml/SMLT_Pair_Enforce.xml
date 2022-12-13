@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>SMLT Pair Enforce v2.0</comments>
+    <comments>SMLT Pair Enforce v2.5</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -28,7 +28,7 @@ SCRIPTS.
 ##########################################################
 # Does VSP SMLT Clustering in Fabric Connect
 
-__version__ = '2.0'
+__version__ = '2.5'
 
 # 1.0 - Initial
 # 1.2 - When deleting an LACP LAG MLT, the underlying ports now are restored tu untagged
@@ -40,6 +40,14 @@ __version__ = '2.0'
 #     - Script now expects both VSPs to have a nickname assigned
 #     - Script automaticallt converts auto-sense NNIs between the two peer switches to static NNIs
 #       and if multiple auto-sense NNIs are found between peers (with same speed) then an MLT NNI is created
+# 2.1 - Acknowledge input was not properly considered when operating inband
+# 2.2 - On rollback when removing flex-uni, the ports were not defaulted for tagging, and at next run port would be refused
+#     - Updated all functions
+# 2.3 - IST route map now detect the IST subnet + mask and sets the mask correctly (not hard coded to 30bits)
+# 2.4 - Previous fix was causing the IST prefix list creation to fail when creating the IST; now handled correctly
+# 2.5 - Updated threads library to work with usernames including "."
+
+
 # todo:
 # - for delete/remove, need to detect if MLT is flex and has bindings, either error or automatically remove all the bindings
 # - option to use VLACP/LACP on ERS/XOS FA links
@@ -79,12 +87,13 @@ __version__ = '2.0'
 # - Acknowledge pulldown: This script is able to create/delete the vIST even if the
 # VSP is managed and accessed inband, in spite of having to globally shutdown ISIS
 # to make the necessary config changes, and then re-enable ISIS. However the switch
-# will temporarly stop forwarding traffic during the change, so this should configuration
+# will temporarly stop forwarding traffic during the change, so this configuration
 # should not be done while in production. If the switch is managed inband and the
 # acknowledge pull down was not set, then the script will take no action.
 #
 # If instead it is desired to create new SMLT interfaces, or delete existing ones, then
 # the optional SMLT interface user inputs will need to be populated accordingly.
+#
 # SMLT Deletion :
 # - List or range of MLT ids to delete: Provide MLT ids to delete. Note that SMLTs
 #                                       using the same ports cannot be deleted and
@@ -304,7 +313,7 @@ __version__ = '2.0'
 
 
 ##########################################################
-# Ludo Standard library; Version 3.04                    #
+# Ludo Standard library; Version 4.00                    #
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 Debug = False    # Enables debug messages
@@ -330,73 +339,24 @@ except: # If not running on XMC Jython...
         emc_vars = json.load(open('emc_vars.json'))
 ##########################################################
 
-#
-# IMPORTS:
-#
-import re
-import os                           # Used by warpBuffer_execute
-import subprocess                   # Used by xmcLinuxCommand
-from java.util import LinkedHashMap # Used by nbiQuery
-import socket                       # Used by addXmcSyslogEvent
 
 #
-# VARIABLES:
+# Base functions
 #
+import re                           # Used by scriptName
+import time                         # Used by exitError
+ExitErrorSleep = 10
 
-# For CLI functions:
-RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
-RegexError  = re.compile(
-    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
-    re.IGNORECASE
-)
-RegexContextPatterns = { # Ported from acli.pl
-    'ERS Series' : [
-        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
-        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
-        re.compile('^(?:locale)'), # level2
-    ],
-    'VSP Series' : [
-        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
-        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
-    ],
-}
-RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
-Indent = 3 # Number of space characters for each indentation
-LastError = None
-LastNbiError = None
-ConfigHistory = []
-AppendBuffer = []
-WarpBuffer = []
-
-# For CLI Rollback functions
-RollbackStack = []
-
-# For Port functions
-RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
-RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
-RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
-SlotPortRange = None # Gets set to dict by getSlotPortRanges()
-
-# For Family functions
-Family = None # This needs to get set by setFamily()
-FamilyChildren = { # Children will be rolled into parent family for these scripts
-    'Extreme Access Series' : 'VSP Series',
-    'Unified Switching VOSS': 'VSP Series',
-    'Unified Switching EXOS': 'Summit Series',
-    'Universal Platform VOSS': 'VSP Series',
-    'Universal Platform EXOS': 'Summit Series',
-    'Universal Platform Fabric Engine': 'VSP Series',
-    'Universal Platform Switch Engine': 'Summit Series',
-}
-
-#
-# FUNCTIONS:
-#
 def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
     if Debug:
         print debugOutput
 
-def exitError(errorOutput): # v1 - Exit script with error message and setting status appropriately
+def exitError(errorOutput, sleep=ExitErrorSleep): # v3 - Exit script with error message and setting status appropriately
+    if 'workflowMessage' in emc_vars: # Workflow
+        time.sleep(sleep) # When workflow run on multiple devices, want ones that error to be last to complete, so THEY set the workflow message
+        emc_results.put("deviceMessage", errorOutput)
+        emc_results.put("activityMessage", errorOutput)
+        emc_results.put("workflowMessage", errorOutput)
     emc_results.setStatus(emc_results.Status.ERROR)
     raise RuntimeError(errorOutput)
 
@@ -420,20 +380,34 @@ def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
 #
 # Family functions
 #
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
+}
 
-def setFamily(): # v1 - Set global Family variable; automatically handles family children, as far as this script is concerned
+def setFamily(cliDict={}, family=None): # v2 - Set global Family variable; automatically handles family children, as far as this script is concerned
     global Family
-    if emc_vars["family"] in FamilyChildren:
+    if family:
+        Family = family
+    elif emc_vars["family"] in FamilyChildren:
         Family = FamilyChildren[emc_vars["family"]]
     else:
         Family = emc_vars["family"]
     print "Using family type '{}' for this script".format(Family)
-    if Family not in CLI_Dict:
-        exitError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
+    if cliDict and Family not in cliDict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
+    return Family
 
 #
 # CLI Rollback functions
 #
+RollbackStack = []
 
 def rollbackStack(): # v1 - Execute all commands on the rollback stack
     if RollbackStack:
@@ -460,6 +434,27 @@ def rollBackPop(number=0): # v1 - Remove entries from RollbackStack
 #
 # CLI functions
 #
+import re
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE | re.MULTILINE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
 
 def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
     if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
@@ -545,7 +540,7 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnErr
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a CLI config command
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v2 - Send a CLI config command
     global LastError
     cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
     if Sanity:
@@ -556,7 +551,7 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPro
     resultObj = emc_cli.send(cmd, waitForPrompt)
     if resultObj.isSuccess():
         outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
             if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
                 LastError = outputStr
                 if msgOnError:
@@ -569,17 +564,52 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPro
     else:
         exitError(resultObj.getError())
 
-def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a semi-colon separated list of config commands
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True, abortOnError=True): # v2 - Send a semi-colon separated list of config commands
     cmdList = configChain(chainStr)
+    successStatus = True
     for cmd in cmdList[:-1]: # All but last
         success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
         if not success:
-            return False
+            successStatus = False
+            if abortOnError:
+                return False
     # Last now
     success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
     if not success:
         return False
-    return True
+    return successStatus
+
+def printConfigSummary(): # v3 - Print summary of all config commands executed with context indentation
+    global ConfigHistory
+    emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+    ConfigHistory = []
+
+
+#
+# CLI append to config file functions (requires CLI functions)
+#
+AppendBuffer = []
 
 def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or configChains; buffer can then be appended to config.cfg with appendConfigDotCfg()
     if Family != 'VSP Series':
@@ -590,7 +620,7 @@ def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or confi
         cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
         AppendBuffer.append(cmdAdd)
 
-def appendConfigDotCfg(chainStr=None): # v3 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+def appendConfigDotCfg(chainStr=None): # v4 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
     global LastError
     if Family != 'VSP Series':
         exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
@@ -612,7 +642,7 @@ def appendConfigDotCfg(chainStr=None): # v3 - Appends config commands to config.
     resultObj = emc_cli.send(cmdStream)
     if resultObj.isSuccess():
         outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
             abortError(cmd, outputStr)
         else:
             for cmd in AppendBuffer:
@@ -623,6 +653,13 @@ def appendConfigDotCfg(chainStr=None): # v3 - Appends config commands to config.
             return True
     else:
         exitError(resultObj.getError())
+
+
+#
+# CLI warp buffer functions (requires CLI functions)
+#
+import os                           # Used by warpBuffer_execute
+WarpBuffer = []
 
 def warpBuffer_add(chainStr): # v1 - Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
     global WarpBuffer
@@ -715,38 +752,35 @@ def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, wai
     LastError = None
     return True
 
-def printConfigSummary(): # v1 - Print summary of all config commands executed with context indentation
-    emc_cli.close()
-    if not len(ConfigHistory):
-        print "No configuration was performed"
-        return
-    print "The following configuration was successfully performed on switch:"
-    indent = ''
-    level = 0
-    if Family in RegexContextPatterns:
-        maxLevel = len(RegexContextPatterns[Family])
-    for cmd in ConfigHistory:
-        if Family in RegexContextPatterns:
-            if RegexContextPatterns[Family][level].match(cmd):
-                print "-&gt; {}{}".format(indent, cmd)
-                if level + 1 &lt; maxLevel:
-                    level += 1
-                indent = ' ' * Indent * level
-                continue
-            elif RegexExitInstance.match(cmd):
-                if level &gt; 0:
-                    level -= 1
-                indent = ' ' * Indent * level
-        print "-&gt; {}{}".format(indent, cmd)
 
 #
 # XMC GraphQl NBI functions
 #
+from java.util import LinkedHashMap # Used by nbiQuery
+LastNbiError = None
+NbiUrl = None
 
-def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+def recursionKeySearch(nestedDict, returnKey): # v1 - Used by both nbiQuery() and nbiMutation()
+    for key, value in nestedDict.iteritems():
+        if key == returnKey:
+            return True, value
+    for key, value in nestedDict.iteritems():
+        if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+            foundKey, foundValue = recursionKeySearch(value, returnKey)
+            if foundKey:
+                return True, foundValue
+        return [None, None] # If we find nothing
+
+def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v5 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
     global LastNbiError
-    response = emc_nbi.query(jsonQuery)
+    jsonQuery = jsonQueryDict['json']
+    for key in kwargs:
+        jsonQuery = jsonQuery.replace('&lt;'+key+'&gt;', kwargs[key])
+    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
+    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
     debug("nbiQuery response = {}".format(response))
+    if response == None: # Should only happen from nbiSessionPost if returnKeyError=True
+        return None
     if 'errors' in response: # Query response contains errors
         if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
             LastNbiError = response['errors'][0].message
@@ -755,18 +789,7 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - 
     LastNbiError = None
 
     if returnKey: # If a specific key requested, we find it
-        def recursionKeySearch(nestedDict):
-            for key, value in nestedDict.iteritems():
-                if key == returnKey:
-                    return True, value
-            for key, value in nestedDict.iteritems():
-                if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
-                    foundKey, foundValue = recursionKeySearch(value)
-                    if foundKey:
-                        return True, foundValue
-                return [None, None] # If we find nothing
-
-        foundKey, returnValue = recursionKeySearch(response)
+        foundKey, returnValue = recursionKeySearch(response, returnKey)
         if foundKey:
             if Debug:
                 if debugKey: debug("{} = {}".format(debugKey, returnValue))
@@ -783,14 +806,18 @@ def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # v2 - 
         else: debug("nbiQuery response = {}".format(response))
     return response
 
-def nbiMutation(jsonQuery, returnKeyError=False): # v2 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): # v5 - Makes a GraphQl mutation query of XMC NBI; returns true on success
     global LastNbiError
+    jsonQuery = jsonQueryDict['json']
+    for key in kwargs:
+        jsonQuery = jsonQuery.replace('&lt;'+key+'&gt;', kwargs[key])
+    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
     if Sanity:
         print "SANITY - NBI Mutation:\n{}\n".format(jsonQuery)
         LastNbiError = None
         return True
     print "NBI Mutation Query:\n{}\n".format(jsonQuery)
-    response = emc_nbi.query(jsonQuery)
+    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
     debug("nbiQuery response = {}".format(response))
     if 'errors' in response: # Query response contains errors
         if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
@@ -798,7 +825,7 @@ def nbiMutation(jsonQuery, returnKeyError=False): # v2 - Makes a GraphQl mutatio
             return None
         abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
 
-    def recursionKeySearch(nestedDict):
+    def recursionStatusSearch(nestedDict):
         for key, value in nestedDict.iteritems():
             if key == 'status':
                 if 'message' in nestedDict:
@@ -807,12 +834,12 @@ def nbiMutation(jsonQuery, returnKeyError=False): # v2 - Makes a GraphQl mutatio
                     return True, value, None
         for key, value in nestedDict.iteritems():
             if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
-                foundKey, foundValue, foundMsg = recursionKeySearch(value)
+                foundKey, foundValue, foundMsg = recursionStatusSearch(value)
                 if foundKey:
                     return True, foundValue, foundMsg
             return [None, None, None] # If we find nothing
 
-    foundKey, returnStatus, returnMessage = recursionKeySearch(response)
+    foundKey, returnStatus, returnMessage = recursionStatusSearch(response)
     if foundKey:
         debug("nbiMutation status = {} / message = {}".format(returnStatus, returnMessage))
     elif not returnKeyError:
@@ -821,14 +848,30 @@ def nbiMutation(jsonQuery, returnKeyError=False): # v2 - Makes a GraphQl mutatio
 
     if returnStatus == "SUCCESS":
         LastNbiError = None
+        if returnKey: # If a specific key requested, we find it
+            foundKey, returnValue = recursionKeySearch(response, returnKey)
+            if foundKey:
+                if Debug:
+                    if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                    else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+                return returnValue
+            if returnKeyError:
+                return None
+            # If requested key not found, raise error
+            abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "{}" was not found in mutation response'.format(returnKey))
         return True
     else:
         LastNbiError = returnMessage
         return False
 
+
 #
 # Port processing functions
 #
+RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
+RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
+SlotPortRange = None # Gets set to dict by getSlotPortRanges()
 
 def portValue(port): # v1 - Function to pass to sorted(key) to sort port lists
     slotPort = re.split('[/:]', port)
@@ -965,9 +1008,11 @@ def generatePortRange(portList, debugKey=None): # v1 - Given a list of ports, ge
         else: debug("generatePortRange OUT = {}".format(portStr))
     return portStr                
 
+
 #
 # IP address processing functions
 #
+import re                           # Used by maskToNumber
 
 def ipToNumber(dottedDecimalStr): # v1 - Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
     try: # bytearray ensures that IP bytes are valid (1-255)
@@ -1029,22 +1074,6 @@ def ipGateway(ip, mask, gw): # v1 - Return the gateway IP address, as first or l
     debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
     return gatewayIP, ip1, ip2
 
-#
-# Miscellaneous functions
-#
-
-
-def addXmcSyslogEvent(severity, message, ip=None): # v1 - Adds a syslog event to XMC (only needed for Scripts)
-    severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
-    severityLevel = severityHash[severity] if severity in severityHash else 6
-    session = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-    session.connect(('127.0.0.1', 514))
-    if ip:
-        session.send("&lt;{}&gt; XMC Script {} / Device: {} / {}".format(severityLevel,scriptName(),ip,message))
-    else:
-        session.send("&lt;{}&gt; XMC Script {} / {}".format(severityLevel,scriptName(),ip,message))
-    session.close()
-
 
 #
 # INIT: Init Debug &amp; Sanity flags based on input combos
@@ -1066,7 +1095,7 @@ except:
 
 
 ##########################################################
-# Ludo Threads library; Version 2.0                      #
+# Ludo Threads library; Version 2.1                      #
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
@@ -1095,7 +1124,7 @@ ReturnOnError = False # When reading data from other threads, determines whether
 Emc_vars_copy = emc_vars.copy() # Modifying emc_vars is discouraged, so we take a copy of it; shallow copy is enough, emc_vars is single level dict 
 ThisScript = __file__.split(os.path.sep)[-1].split('.')[0]  # Name of our script
 WorkDir = os.getcwd()
-UserName = emc_vars["userName"]
+UserName = emc_vars["userName"].replace('.', '_')
 MyIP = emc_vars["deviceIP"]
 RegexFileIP = re.compile('^\.[^\.]+\.[^\.]+\.([\d_]+)\.')
 GlobStamps = '.' + UserName + '.' + ThisScript + '.*.stamp'
@@ -1349,7 +1378,7 @@ IstVLANname = "IST-VLAN"
 IstMLTrange = [512,500]
 IstMLTname = "IST-NNI-MLT"
 VistIsidOffset = 15000000
-VistIPbase = '192.168.255.0'#/30
+VistIPbase = ('192.168.255.0', '255.255.255.252') #/30
 SmltMltOffset = 1 # When autogenerating SMLT MLTs, id to to start allocating from
 SlppPacketRxThresholds = [5, 50] # Threshold values to assign on each vIST member (Primary/ Secondary)
 
@@ -1387,7 +1416,7 @@ CLI_Dict = {
         'get_auto_sense_status'      : 'dict://show interfaces gigabitEthernet auto-sense||^(\d+/\d+(?:/\d+)?) +(\S+)',
         'list_port_up_speed'         : 'dict://show interfaces gigabitEthernet name {}||^(\d+/\d+(?:/\d+)?).+?up\s+full\s+(\d+)\s+\S+$', # Port list
         'get_isis_directs_redist'    : 'tuple://show ip isis redistribute||^(LOC) +\d+ +\S+ +\S+ +\S+ +\S+\s*(\S+)?',
-        'get_ist_subnet'             : 'str://show ip route protocol local||^(\S+) +\S+ +\S+ +- +\d+ +{}\s', # IST VLAN
+        'get_ist_subnet'             : 'tuple://show ip route protocol local||^(\S+) +(\S+) +\S+ +- +\d+ +{}\s', # IST VLAN
         'disable_isis'               : 'no router isis enable\ny',
         'create_isis_interface'      : 'isis; isis spbm 1; isis enable',
         'set_isis_if_metric'         : 'isis spbm 1 l1-metric {}', # Metric
@@ -1411,9 +1440,9 @@ CLI_Dict = {
                                           redistribute direct
                                        exit
                                        ''',
-        'create_ist_routemap'        : # {0} = IST subnet
+        'create_ist_routemap'        : # {0} = IST subnet, {1} = IST mask
                                        '''
-                                       ip prefix-list "IST" {0}/30
+                                       ip prefix-list "IST" {0}/{1}
                                        route-map "Suppress-IST" 1
                                           no permit
                                           enable
@@ -1453,7 +1482,7 @@ CLI_Dict = {
         'port_disable'               : 'shutdown',
         'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
         'port_disable_lacp'          : 'no lacp enable; no lacp aggregation enable; default lacp',
-        'disable_mlt_flex_uni'       : 'no flex-uni enable',
+        'disable_mlt_flex_uni'       : 'no flex-uni enable; default encapsulation dot1q',
         'disable_fabric_attach'      : 'no fa',
         'delete_mlt'                 : 'no mlt {}', # MLT id
         'clear_spbm_smlt_peer'       : 'no spbm 1 smlt-peer-system-id',
@@ -1471,25 +1500,30 @@ CLI_Dict = {
 }
 
 NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
-    'nbiAccess': '''
-        {
-          administration {
-            serverInfo {
-              version
-            }
-          }
-        }
-    ''',
-    'rediscover_device': '''
-        mutation {
-          network {
-            rediscoverDevices(input: {devices: {ipAddress: "&lt;IP&gt;"}}) {
-              status
-              message
-            }
-          }
-        }
-    ''',
+    'nbiAccess': {
+        'json': '''
+                {
+                  administration {
+                    serverInfo {
+                      version
+                    }
+                  }
+                }
+                ''',  
+        'key': 'version'
+    },
+    'rediscover_device': {
+        'json': '''
+                mutation {
+                  network {
+                    rediscoverDevices(input: {devices: {ipAddress: "&lt;IP&gt;"}}) {
+                      status
+                      message
+                    }
+                  }
+                }
+                ''',
+    },
 }
 
 
@@ -1611,7 +1645,7 @@ def compareMacIsisSysId(chassisMac, isisSysId): # v1 - Determines whether the IS
     debug("compareMacIsisSysId() = {}".format(result))
     return result
 
-def compareIsisSysId(selfId, peerId): # Returns TRUE if selfId &lt; peerId
+def compareIsisSysId(selfId, peerId): # v1 - Returns TRUE if selfId &lt; peerId
     selfId = int(selfId.replace('.', ''), 16) # Convert from hex
     peerId = int(peerId.replace('.', ''), 16) # Convert from hex
     if selfId &lt; peerId:
@@ -1685,15 +1719,15 @@ def allocateIstIsid(role, selfNickname, peerNickname): # v1 - Allocates a vIST I
     debug("allocateIstIsid() = {}".format(vistIsid))
     return vistIsid
 
-def allocateIstIP(role, selfNickname, peerNickname): # v2 - Allocates the vIST IP by taking 192.168.255.X/30 with last 6bits of Secondary's nickname
+def allocateIstIP(role, selfNickname, peerNickname): # v3 - Allocates the vIST IP by taking 192.168.255.X/30 with last 6bits of Secondary's nickname
     nickname = peerNickname if role == 'Primary' else selfNickname
     nicknumber = int(nickname.replace('.', ''), 16)
-    ipSubnet = ipToNumber(VistIPbase) + ((nicknumber &amp; 0x3f) &lt;&lt; 2)
+    ipSubnet = ipToNumber(VistIPbase[0]) + ((nicknumber &amp; 0x3f) &lt;&lt; 2)
     ipNumber1 = ipSubnet + 1
     ipNumber2 = ipSubnet + 2
     istIp1 = numberToIp(ipNumber1)
     istIp2 = numberToIp(ipNumber2)
-    istSubnet = numberToIp(ipSubnet)
+    istSubnet = (numberToIp(ipSubnet), VistIPbase[1]) # IP/Mask
     istIPself = istIp2 if role == 'Primary' else istIp1 # Here we ensure Master = Primary
     istIPpeer = istIp1 if role == 'Primary' else istIp2 # Here we ensure Master = Primary
     debug("allocateIstIP() subnet = {} / self = {} / peer = {}".format(istSubnet, istIPself, istIPpeer))
@@ -1718,7 +1752,7 @@ def allocateMltId(offsetId, inUseList1, inUseList2=[]): # v1 - Given the list of
 def main():
 
     print "SMLT-Pair-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
-    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
+    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], returnKeyError=True)
     if nbiAccess == None:
         exitError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
 
@@ -1726,7 +1760,7 @@ def main():
 
     # Read in inputs
     enforceAction = emc_vars['userInput_enforce_action'].lower().split(' ')[-1]  # enforce | delete
-    userAck       = emc_vars['userInput_ack'].strip()
+    userAck       = emc_vars['userInput_ack'].strip().lower()
     try:
         mltIdDeleteList = generatePortList(emc_vars['userInput_mlt_delete_list'].strip())
     except:
@@ -1872,6 +1906,8 @@ def main():
         chassisMacIsisSysId = compareMacIsisSysId(chassisMac, isisGlobalDict['System ID'])
         if not chassisMacIsisSysId: # We will need to allocate an smlt-virt-bmac
             listFabricBmacs = sendCLI_showRegex(CLI_Dict[Family]['list_fabric_bmacs'], 'listFabricBmacs') # Get list of all bmacs in Fabric
+        else:
+            listFabricBmacs = []
         # Get list of VSP neighbour MACs
         vossNeighbourDict = sendCLI_showRegex(CLI_Dict[Family]['list_voss_neighbour_macs'], 'vossNeighbourDict')
         vossNeighbourMacs = vossNeighbourDict.values() # We share only the MACs with other threads
@@ -2010,6 +2046,7 @@ def main():
         neighbourNniMltRange = None
         if autoSensePortDict:
             istPeerMac = emc_threads_vars(istPeerIp, "chassisMac")
+            debug("istPeerMac = {}".format(istPeerMac))
             if istPeerMac in vossNeighbourMacs: # Ist Peer is an LLDP neighbour
                 # Get list of ports connecting to ist peer
                 neighbourPortList = []
@@ -2138,7 +2175,7 @@ def main():
                 sendCLI_configChain(CLI_Dict[Family]['create_grt_redistribution'])
             if not directsRedist or (directsRedist and not directsRedist[1]):
                 # Create vIST route-map (we create this anyway, even if no GRT redistribution of directs)
-                sendCLI_configChain(CLI_Dict[Family]['create_ist_routemap'].format(istSubnet))
+                sendCLI_configChain(CLI_Dict[Family]['create_ist_routemap'].format(istSubnet[0], istSubnet[1]))
                 # Apply vIST route-map
                 sendCLI_configChain(CLI_Dict[Family]['apply_ist_routemap'])
 
@@ -2318,7 +2355,7 @@ def main():
     printConfigSummary()
 
     # Make XMC re-discover the switch
-    if nbiMutation(NBI_Query['rediscover_device'].replace('&lt;IP&gt;', emc_vars['deviceIP'])):
+    if nbiMutation(NBI_Query['rediscover_device'], IP=emc_vars['deviceIP']):
         print "Initiated XMC rediscovery of switch"
     else:
         print "Failed to trigger XMC rediscovery of switch; perform manually"
@@ -2331,10 +2368,10 @@ main()
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Groups,</contexts>
-    <lastUpdateDate>1641396145038</lastUpdateDate>
+    <lastUpdateDate>1670941546620</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
+    <nosIds>,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>

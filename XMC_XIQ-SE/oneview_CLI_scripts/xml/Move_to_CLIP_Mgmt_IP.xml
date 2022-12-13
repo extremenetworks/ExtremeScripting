@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v1.9</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v2.1</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.9'
+__version__ = '2.1'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -52,6 +52,10 @@ __version__ = '1.9'
 # 1.8   - Updated with latest version of function libraries
 #       - Able to re-try device addition into XIQ-SE; as sometimes the addition seems to fail
 # 1.9   - Above change was not working; not easy to reproduce and thus test...
+# 2.0   - Improvement to above logic
+# 2.1   - Introduced a 5 sec wait before trying to re-connect to device after it is re-added to XIQ-SE
+#       - Introduced 20sec wait between deleting device from XIQ-SE and re-adding it
+#       - Renamed XMC to XIQ-SE
 
 
 '''
@@ -59,17 +63,17 @@ __version__ = '1.9'
 #@DetailDescriptionStart
 #######################################################################################
 # 
-# Given one or more VSP switches already in XMC, this script will ask user to provide
+# Given one or more VSP switches already in XIQ-SE, this script will ask user to provide
 # a clip IP and VRF which will then be configured as mgmt clip on the switch. If the
 # switch already has a mgmt clip, the existing mgmt clip will be deleted and replaced
 # with the new one. If the switch has a mgmt vlan IP, this can be deleted if the user
 # selects to do so in the script input pull-down.
-# Since the switch is effectively deleted and re-added to XMC, the script allows the
+# Since the switch is effectively deleted and re-added to XIQ-SE, the script allows the
 # switch sysname to be changed at the same time, which will automatically be reflected
-# once the switch is re-added to XMC. Furthermore, the sysname change is perfomed not
+# once the switch is re-added to XIQ-SE. Furthermore, the sysname change is perfomed not
 # only on the snmp-server name (prompt), but also for the ISIS sys-name.
 # Before attempting to change the IP on the switch, the script will first of all make
-# sure that the new IP address provided is not already known by XMC and that it does
+# sure that the new IP address provided is not already known by XIQ-SE and that it does
 # not exist on the network (does not reply to ping).
 # On a regular BEB (not a DVR Leaf) if the new mgmt clip is on GRT, IP Shortcuts will
 # also get automatically enabled if not already enabled. However no ISIS source-address
@@ -80,14 +84,14 @@ __version__ = '1.9'
 # script will only accept to create a mgmt clip in GRT, and will error otherwise.
 #
 # If a mgmt clip does not already exist, the script takes a safe approach by creating
-# the new mgmt clip and making sure that this is reachable by XMC before proceeding
+# the new mgmt clip and making sure that this is reachable by XIQ-SE before proceeding
 # any further. If the newly created mgmt clip is not reachable after 10 seconds, the
 # changes are rolled back and the script will error.
 # But if a mgmt clip does already exist, then the only way to change it is to go
 # ahead and delete it and create the new mgmt clip IP; but in this case, if the new IP
 # is not reachable after the change, then the switch will be lost.
-# Once the new clip mgmt IP is set, the switch is deleted from XMC's database as well
-# as XMC Control if there, and also from any NAC Location Groups. It is then re-added
+# Once the new clip mgmt IP is set, the switch is deleted from XIQ-SE's database as well
+# as XIQ-SE Control if there, and also from any NAC Location Groups. It is then re-added
 # to the same site, with the same admin profile, with the newly configured clip mgmt
 # IP mgmt address.
 # The script then waits a further 10 seconds, before attempting to open a session on
@@ -786,6 +790,7 @@ except:
 #
 # Variables:
 #
+delaySiteReAdd       = 20
 
 CLI_Dict = {
     'VSP Series': {
@@ -1021,13 +1026,13 @@ def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is differe
 # Main:
 #
 def main():
-    print "{} version {} on XMC version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
+    print "{} version {} on XIQ-SE version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
     nbiAccess = nbiQuery(NBI_Query['nbiAccess'], returnKeyError=True)
     if nbiAccess == None:
-        exitError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
+        exitError('This XIQ-SE Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XIQ-SE is running with an Advanced license and that your user profile is authorized for Northbound API.')
 
     #
-    # Obtain Info on switch and from XMC
+    # Obtain Info on switch and from XIQ-SE
     #
     setFamily() # Sets global Family variable
     currentIp           = emc_vars["deviceIP"]
@@ -1066,10 +1071,10 @@ def main():
     if not newVrf:
         newVrf = 'GlobalRouter'
 
-    # Check if given IP is already in XMC
+    # Check if given IP is already in XIQ-SE
     checkNewIpInXmc = nbiQuery(NBI_Query['checkSwitchXmcDb'], IP=newIp)
     if checkNewIpInXmc:
-        exitError("Given IP address {} is already in XMC's database".format(newIp))
+        exitError("Given IP address {} is already in XIQ-SE's database".format(newIp))
 
     # Check if given IP is already out there
     response = os.system("ping -c 1 " + newIp)
@@ -1147,7 +1152,7 @@ def main():
         sendCLI_configChain(CLI_Dict[Family]['create_mgmt_clip'].format(newVrf, newIp))
         rollbackCommand(CLI_Dict[Family]['delete_mgmt_clip'])
 
-        # Now check if the IP is reachable by XMC
+        # Now check if the IP is reachable by XIQ-SE
         print "Waiting up to 10secs for new CLIP Mgmt IP to reply to ping"
         if not Sanity:
             retries = 0
@@ -1159,7 +1164,7 @@ def main():
                 retries += 1
                 print " - {} timeout".format(retries)
             if response == 1: # No response from ping
-                abortError("ping {}".format(newIp), "Newly configured clip IP {} not reachable by XMC; rolling back changes".format(newIp))
+                abortError("ping {}".format(newIp), "Newly configured clip IP {} not reachable by XIQ-SE; rolling back changes".format(newIp))
             print " - reply from {}".format(newIp)
 
     # Queue change of sys-name
@@ -1174,11 +1179,16 @@ def main():
     if not Sanity:
         emc_cli.close()
 
-    # Delete the old IP from XMC
+    # Delete the old IP from XIQ-SE
     if not nbiMutation(NBI_Query['delete_device'], IP=currentIp):
-        exitError("Failed to delete IP '{}' from XMC's database".format(currentIp))
-    addXmcSyslogEvent('info', "Deleted device from XMC database", currentIp)
-    print "Deleted device {} from XMC database".format(currentIp)
+        exitError("Failed to delete IP '{}' from XIQ-SE's database".format(currentIp))
+    addXmcSyslogEvent('info', "Deleted device from XIQ-SE database", currentIp)
+    print "Deleted device {} from XIQ-SE database".format(currentIp)
+
+    # Record time, as we'll need not to re-add the switch too quickly, because...
+    # ... sometimes, XIQ-SE is a bit slow to complete the deletion, and we don't want the re-add below to fail because of "Device already exists"
+    # ... seen occasions where if we re-add too quick XIQ-SE then tanks in acquiring XIQ license for re-added device
+    deleteTime = time.time()
 
     # Check whether switch was added to AccessControl
     switchNacExists = nbiQuery(NBI_Query['checkSwitchNacConfig'], IP=currentIp)
@@ -1190,8 +1200,8 @@ def main():
     if switchNacExists:
         if not nbiMutation(NBI_Query['accessControlDeleteSwitch'], IP=currentIp): # Delete the switch from AccessControl
             exitError("Failed to delete existing switch IP '{}' in NAC Engine Group".format(ipAddress))
-        addXmcSyslogEvent('info', "Deleted device from XMC Control", currentIp)
-        print "Deleted device {} from XMC NAC engine".format(currentIp)
+        addXmcSyslogEvent('info', "Deleted device from XIQ-SE Control", currentIp)
+        print "Deleted device {} from XIQ-SE NAC engine".format(currentIp)
 
         # Check whether switch was added to any NAC Location Groups
         # For this we need to get a list of all Location Groups
@@ -1208,22 +1218,29 @@ def main():
         for group in nacLocationGroups:
             # Delete the switch from Location Group
             if nbiMutation(NBI_Query['accessControlRemoveSwitchFromLocation'], LOCATIONGROUP=group, IP=currentIp):
-                addXmcSyslogEvent('info', "Deleted device from XMC Control Location Group: {}".format(group), currentIp)
+                addXmcSyslogEvent('info', "Deleted device from XIQ-SE Control Location Group: {}".format(group), currentIp)
                 print "Deleted device {} from Location Group: {}".format(currentIp, group)
             # We don't check for errors, as we don't expect to find the IP in all location groups
 
-    # Create the new IP device in XMC
+    # Sleep enough to meet delaySiteReAdd from delete time
+    sleepTime = delaySiteReAdd - ( time.time() - deleteTime ) 
+    if sleepTime &gt; 0:
+        print "\nSleeping {} seconds, to ensure that device can be successfully re-added to XIQ-SE\n".format(sleepTime)
+        if not Sanity:
+            time.sleep(sleepTime)
+
+    # Create the new IP device in XIQ-SE
     deviceReAdded = False
     addRetries = 0
     while not deviceReAdded and addRetries &lt; 2: # We can try twice, as sometimes XIQ-SE fails to add the device...
         if not nbiMutation(NBI_Query['create_device'], IP=newIp, SITE=sitePath, PROFILE=adminProfile):
-            exitError("Failed to add new device IP '{}' to XMC Site '{}' with admin profile '{}'".format(newIp, sitePath, adminProfile))
-        addXmcSyslogEvent('info', "Added device to XMC Site {}".format(sitePath), newIp)
-        print "Re-added device to XMC using new CLIP IP {} and admin profile '{}'".format(newIp, adminProfile)
+            exitError("Failed to add new device IP '{}' to XIQ-SE Site '{}' with admin profile '{}'".format(newIp, sitePath, adminProfile))
+        addXmcSyslogEvent('info', "Added device to XIQ-SE Site {}".format(sitePath), newIp)
+        print "Re-added device to XIQ-SE using new CLIP IP {} and admin profile '{}'".format(newIp, adminProfile)
         addRetries += 1
 
-        # Wait enough time for XMC to process the newly re-added switch
-        print "Waiting for device to be re-added to XMC's database"
+        # Wait enough time for XIQ-SE to process the newly re-added switch
+        print "Waiting for device to be re-added to XIQ-SE's database"
         if Sanity:
             deviceReAdded = True
         else:
@@ -1237,13 +1254,25 @@ def main():
                     # }
                     # Or we get null
                     deviceReAdded = True
+                    print "Device is re-added to XIQ-SE"
                     break
                 retries += 1
                 print " - retry {}".format(retries)
         print
+        if not deviceReAdded:
+            print "Add retries = {}".format(addRetries)
 
     # Try and re-open session against the new CLIP IP
-    print "Device is re-added to XMC; attempting to re-connect on new CLIP IP"
+    if not deviceReAdded:
+        exitError("Failed to re-add device IP '{}' to XIQ-SE after {} retries; try manually.".format(newIp, addRetries))
+
+    waitTime = 5
+    print "Waiting {} seconds before re-connecting".format(waitTime)
+    if not Sanity:
+        time.sleep(5)
+
+    print "Attempting to re-connect on new CLIP IP"
+
     if not Sanity:
         emc_cli.setIpAddress(newIp)
 
@@ -1267,23 +1296,23 @@ def main():
 
     # Print summary of config performed
     printConfigSummary()
-    print "Deleted IP '{}' from XMC's database".format(currentIp)
+    print "Deleted IP '{}' from XIQ-SE's database".format(currentIp)
     if switchNacExists:
         print "Deleted IP '{}' in NAC Engine Group".format(currentIp)
-    print "Added new device IP '{}' to XMC Site '{}' with admin profile '{}'".format(newIp, sitePath, adminProfile)
+    print "Added new device IP '{}' to XIQ-SE Site '{}' with admin profile '{}'".format(newIp, sitePath, adminProfile)
 
 main()
 </content>
-    <creationDate>1652859695873</creationDate>
-    <creator>root</creator>
+    <creationDate>1636533079094</creationDate>
+    <creator>lstevens</creator>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1652900544141</lastUpdateDate>
-    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1662564402333</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
+    <nosIds>,nos-id-fabric-engine,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
