@@ -9,6 +9,7 @@
 | ------------- | ------------- |
 |[Avaya ERS8xxx](ERS8K-TFTP-BACKUP.txt?raw=true)|Configuration backup and restore of Nortel/Avaya ERS8000 family. Restore works only single CPU platforms.|
 |[Barracuda F-Series](Barracuda-SCP.txt?raw=true)|Configuration backup/restore of Barracuda NG Firewall F-Series.|
+|[Cambium cnMatrix](Cambium_TFTP.txt?raw=true)|Configuration backup for Cambium Networks cnMatrix Series device.|
 |[Cisco Catalyst](CiscoCatalyst-withRestore-TFTP.txt?raw=true)|Configuration backup/restore for Cisco Catalyst.|
 |[Cisco Catalyst](CiscoSG500-TFTP.txt?raw=true)|Configuration backup for Cisco SG500.|
 |[Cisco Firmware 2xxx TAR](CiscoCatalyst2xxx_firmware_from_tar.txt?raw=true)|Configuration backup and restore and FW upgrade and reset for Cisco Catalyst 2xxx. TAR file not BIN. Can take 30 minutes based on platform. Be patient.|
