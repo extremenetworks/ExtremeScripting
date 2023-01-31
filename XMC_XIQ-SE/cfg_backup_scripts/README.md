@@ -9,6 +9,7 @@
 | ------------- | ------------- |
 |[Avaya ERS8xxx](ERS8K-TFTP-BACKUP.txt?raw=true)|Configuration backup and restore of Nortel/Avaya ERS8000 family. Restore works only single CPU platforms.|
 |[Barracuda F-Series](Barracuda-SCP.txt?raw=true)|Configuration backup/restore of Barracuda NG Firewall F-Series.|
+|[Cambium cnMatrix](Cambium_TFTP.txt?raw=true)|Configuration backup for Cambium Networks cnMatrix Series device.|
 |[Cisco Catalyst](CiscoCatalyst-withRestore-TFTP.txt?raw=true)|Configuration backup/restore for Cisco Catalyst.|
 |[Cisco Catalyst](CiscoSG500-TFTP.txt?raw=true)|Configuration backup for Cisco SG500.|
 |[Cisco Firmware 2xxx TAR](CiscoCatalyst2xxx_firmware_from_tar.txt?raw=true)|Configuration backup and restore and FW upgrade and reset for Cisco Catalyst 2xxx. TAR file not BIN. Can take 30 minutes based on platform. Be patient.|
@@ -19,6 +20,7 @@
 |[Dell Blade Switch](Dell_Blade_switch.txt?raw=true)|Configuration backup of Dell Blade Switch.|
 |[Dell Force10](dell-force10?raw=true)|Configuration backup of Dell Force10.|
 |[Extreme BR69xx](BR69xx.txt?raw=true)|Configuration backup and restore and restart of Brocade/Extreme BR69xx.|
+|[Extreme IQEngine](Extreme-Cloud-AP-TFTP.txt?raw=true)|Configuration backup for Aerohive HiveOS, Extreme IQEngine.|
 |[FortiGate Firewall](FortiGate?raw=true)|Configuration backup of FortiGate.|
 |[FortiWLC controller](FortiWLC-FTP.txt?raw=true)|Configuration backup/restore over FTP of FortiWLC / Meru wireless controller. If your FTP server does support chroot then you may need to change %ABSOLUTE_TARGET_FILE_PATH% with %RELATIVE_TARGET_FILE_PATH%.|
 |[HP Aruba Comware](Hewlett_Packard_Comware-TFTP?raw=true)|Configuration backup/restore & firmware upgrade of Comware 5100.|

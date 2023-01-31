@@ -1,0 +1,8 @@
+-- Use these scripts to manage Cambium devices
+name="Cambium_TFTP"
+desc="Cambium backup TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+copy running-config tftp://%TFTP_IP%/%RELATIVE_TARGET_FILE_PATH%
+-----END SCRIPT-----

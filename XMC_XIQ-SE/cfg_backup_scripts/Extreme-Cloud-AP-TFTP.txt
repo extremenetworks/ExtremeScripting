@@ -1,0 +1,9 @@
+-- Use these scripts to manage Cloud Access Points
+name="Cloud Access Points - TFTP Final"
+desc="Extreme Cloud Access Point TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+save config current tftp://%TFTP_IP%:%RELATIVE_TARGET_FILE_PATH%
+@receive 30
+-----END SCRIPT-----

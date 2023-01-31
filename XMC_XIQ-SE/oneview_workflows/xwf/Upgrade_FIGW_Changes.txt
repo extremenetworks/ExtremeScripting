@@ -1,0 +1,16 @@
+Upgrade FIGW
+
+v36
+	- first version provided
+v40
+	- BackupFigwConfig_03 and RestoreFigwConfig_07 now also backup the FIGW CLI password files
+v41
+	- CheckVspFigwReady_02 was not checking the VOSS minimum software version
+ 	- Corrected constant variable naming from cosnt_ to const_
+v42 - posted
+	- RestoreFigwConfig_07: Increased wait timer from 10 to 20secs before restarting FIGW VM
+	- BackupFigwConfig_03: Command to empty /intflash/figw/ directory now handles pre and post
+	  VOSS 8.9, where the -y works as of 8.9 but not before
+
+Todo:
+
