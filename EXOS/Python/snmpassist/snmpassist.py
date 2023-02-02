@@ -115,8 +115,7 @@ def main():
                     print('After installing the SSH xmod, please re-run the script to complete configuration '
                           'after SSH is enabled.')
                     pass
-        exsh.clicmd('configure snmpv3 add user {0} authentication {1} {2} privacy {3} {4}'.format
-                    (snmpuser, authtype, authpw, privpw, privtype))
+        exsh.clicmd('configure snmpv3 add user {0} authentication {1} {2} privacy {3} {4}'.format(snmpuser, authtype, authpw, privpw, privtype))
         print
         print('SNMP Group name is used to link multiple SNMP users together. Its not something that '
               'Netsight/ExtremeControl asks for.')
