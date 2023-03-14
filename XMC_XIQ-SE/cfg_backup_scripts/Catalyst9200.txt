@@ -1,0 +1,48 @@
+-- Use these scripts to manage Newer Cisco devices
+-- Tested on Cisco 9200
+name="Cisco 9200 - TFTP"
+desc="Cisco Systems 9200 SSH/TFTP Scripts"
+protocol=TFTP
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+%ENABLEPSWD%
+copy running-config tftp:
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+@receive 40
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+bytes copied
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+%ENABLEPSWD%
+copy %TFTP_URL% startup-config
+startup-config
+@receive 60
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+bytes copied
+-----END SUCCESS-----
+-----BEGIN SCRIPT "Firmware Download"-----
+enable
+%ENABLEPSWD%
+write memory
+@RECEIVE 10
+install remove inactive
+@RECEIVEUNTIL 20 "Do you want to remove the above files? [y/n]"
+@KEY y
+copy tftp flash
+%TFTP_IP%
+%RELATIVE_TARGET_FILE_PATH%
+%TARGET_FILE_NAME%
+@RECEIVEUNTIL 1800 "bytes copied in"
+install add file flash:%TARGET_FILE_NAME% activate commit prompt-level none
+@RECEIVE 300 
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+SUCCESS:
+-----END SUCCESS-----
