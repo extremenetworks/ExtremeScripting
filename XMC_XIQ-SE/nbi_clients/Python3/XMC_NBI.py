@@ -6,6 +6,7 @@
 #            mnikulski@extremenetworks.com
 #            created 01. Sep. 2020
 #            updated 07. Mar. 2022
+#            updated 02. Feb. 2023      issue #155 fix for "empty error message"
 # 
 #   tested against XMC 8.5.7 release
 #   tested against XIQ-SE 21.11.11.37 release
@@ -30,7 +31,7 @@ getframe_expr = 'sys._getframe({}).f_code.co_name'                      # is req
 class XMC_NBI():
     '''XMC NBI interface'''
 
-    __version__ = "0.0.3"
+    __version__ = "0.0.4"
     __author__  = "Markus Nikulski (mnikulski@extremenetworks.com)"
 
     #################################################################################################
@@ -250,7 +251,7 @@ mutation {
             if self.data['network']['createSite']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['network']['createSite']['message']
+                self.message = self.data['network']['createSite']['message']
                 self.error = True
                 return False
         else:
@@ -271,7 +272,7 @@ mutation {
         '''
         
         if name == "/World":
-            self.session.message = 'Site /World is not allowed to be deleted'
+            self.message = 'Site /World is not allowed to be deleted'
             self.error = True
             return False
 
@@ -279,7 +280,7 @@ mutation {
             if self.data['network']['deleteSite']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['network']['deleteSite']['message']
+                self.message = self.data['network']['deleteSite']['message']
                 self.error = True
                 return False
         else:
@@ -422,7 +423,7 @@ mutation {
             if self.data['accessControl']['addMACToEndSystemGroup']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['addMACToEndSystemGroup']['message']
+                self.message = self.data['accessControl']['addMACToEndSystemGroup']['message']
                 self.error = True
                 return False
         else:
@@ -452,7 +453,7 @@ mutation {
             if self.data['accessControl']['removeMACFromEndSystemGroup']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['removeMACFromEndSystemGroup']['message']
+                self.message = self.data['accessControl']['removeMACFromEndSystemGroup']['message']
                 self.error = True
                 return False
         else:
@@ -475,7 +476,7 @@ mutation {
             if self.data['accessControl']['reauthenticate']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['reauthenticate']['message']
+                self.message = self.data['accessControl']['reauthenticate']['message']
                 self.error = True
                 return False
         else:
@@ -536,7 +537,7 @@ mutation {
             if self.data['accessControl']['createGroup']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['createGroup']['message']
+                self.message = self.data['accessControl']['createGroup']['message']
                 self.error = True
                 return False
         else:
@@ -561,7 +562,7 @@ mutation {
             if self.data['accessControl']['deleteGroup']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['deleteGroup']['message']
+                self.message = self.data['accessControl']['deleteGroup']['message']
                 self.error = True
                 return False
         else:
@@ -595,7 +596,7 @@ mutation {
             if self.data['accessControl']['createDCMVirtualAndPhysicalNetwork']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['createDCMVirtualAndPhysicalNetwork']['message']
+                self.message = self.data['accessControl']['createDCMVirtualAndPhysicalNetwork']['message']
                 self.error = True
                 return False
         else:
@@ -632,7 +633,7 @@ mutation {
             if self.data['accessControl']['createSwitch']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['createSwitch']['message']
+                self.message = self.data['accessControl']['createSwitch']['message']
                 self.error = True
                 return False
         else:
@@ -695,7 +696,7 @@ mutation {
             if self.data['accessControl']['deleteSwitch']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['accessControl']['deleteSwitch']['message']
+                self.message = self.data['accessControl']['deleteSwitch']['message']
                 self.error = True
                 return False
         else:
@@ -717,7 +718,7 @@ mutation {
             if self.data['accessControl']['enforceAllAccessControlEnginesForceSwitchesAndPortal']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['enforceAllAccessControlEnginesForceSwitchesAndPortal']['reauthenticate']['message']
+                self.message = self.data['enforceAllAccessControlEnginesForceSwitchesAndPortal']['reauthenticate']['message']
                 self.error = True
                 return False
         else:
@@ -748,7 +749,7 @@ mutation {
             if self.data['accessControl']['enforceAccessControlEngines']['status'] == 'SUCCESS':
                 return True
             else:
-                self.session.message = self.data['enforceAccessControlEngines']['reauthenticate']['message']
+                self.message = self.data['enforceAccessControlEngines']['reauthenticate']['message']
                 self.error = True
                 return False
         else:
