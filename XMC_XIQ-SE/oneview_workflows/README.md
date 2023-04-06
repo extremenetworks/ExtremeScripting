@@ -53,6 +53,7 @@
 |[Onboard Mgmt VLAN](xwf/Onboard_Mgmt_VLAN-23.2.11.10v59.xwf?raw=true)|Workflow to onboard a VOSS/Fabric Engine switch onto a dedicated switch mgmt VLAN/L2VSN|[(How-to-use)](xwf/Onboard_Mgmt_VLAN_Workflow.pdf)[(Changes)](xwf/Onboard_Mgmt_VLAN_Changes.txt)|23.2.11.10v59|
 |[Onboard Mgmt CLIP](xwf/Onboard_Mgmt_CLIP-23.2.11.10v27.xwf?raw=true)|Workflow to onboard a VOSS/Fabric Engine switch onto a dedicated switch mgmt CLIP|[(How-to-use)](xwf/Onboard_Mgmt_CLIP_Workflow.pdf)[(Changes)](xwf/Onboard_Mgmt_CLIP_Changes.txt)|23.2.11.10v27|
 |[Disable IQAgent](xwf/Disable_IQAgent-22.6.10.67v10.xwf?raw=true)|Workflow disables IQAgent on devices running Switch Engine, Fabric Engine,  EXOS, VOSS.|Execute the workflow on one or multiple devices.|22.6.10.67v10|
+|[Fabric MultiArea Migrate](xwf/Fabric_MultiArea_Migrate-23.2.10.82v64.xwf?raw=true)|Workflow allows changing the ISIS area of a switch in a multi-area design where nodes need to be migrated to new areas. |[(How-to-use)](xwf/Fabric_MultiArea_Migrate.pdf)[(Changes)](xwf/Fabric_MultiArea_Migrate_Changes.txt)|23.2.10.82v64|
 
 # XIQ Site Engine (XMC) daily job Workflows
 | Workflow name | Description | Comment | Version |
@@ -115,7 +116,6 @@
 |[Day 2 Delete EPG](xwf/EFA_Delete_EPG-8.4.4.26v5.xwf?raw=true)|Workflow deletes existing EPGs through Extreme Fabric Automation.|EFA must be in the XMC with valid CLI credentials. Modify variable EFAaddress to reflect your environment.|EFA version 2.2.0, XMC version 8.4|
 |[EFAv210 package](xwf/EFA.zip?raw=true)|All EFA workflows zipped to one package.|Unzip and import.| EFA version 2.1.0, XMC version 8.2|
 |[Whole EFA package](xwf/EFA220.zip?raw=true)|All EFA workflows zipped to one package.|Unzip and import.| EFA version 2.2.0, XMC version 8.4|
-|[Fabric MultiArea Migrate](xwf/Fabric_MultiArea_Migrate-23.2.10.82v64.xwf?raw=true) [(How-to-use)](xwf/Fabric_MultiArea_Migrate.pdf)|Workflow allows changing the ISIS area of a switch in a multi-area design where nodes need to be migrated to new areas. [(Changes)](xwf/Fabric_MultiArea_Migrate_Changes.txt)|23.2.10.82v64|
 
 # XIQ Site Engine Training workflows
 | Workflow Name | Description |
