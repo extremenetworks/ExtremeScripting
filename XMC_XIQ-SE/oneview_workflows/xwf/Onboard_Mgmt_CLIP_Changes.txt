@@ -1,0 +1,23 @@
+Onboard Mgmt CLIP
+
+v5
+	- First version shared
+v6
+	- When workflow run second time after re-add to same site, no completion message is displayed
+	- Verification of re-add XIQ-SE was not erroring as expected
+v7
+	- Added MAC address as device lookup in CSV file
+	- A rediscovery is triggered on the newly re-added device IP, to make sure the sysname change is
+	  quickly refreshed on XIQ-SE
+v27 - posted
+	- Added ability to change the accpeted CSV delimiter character; this can now be set in the
+	  new const_CSV_DELIMITER workflow variable
+	- Workflow is now able also to set the mgmt CLIP IP even if the switch initially acquired an OOB IP
+	- Workflow can now be run manually with static input values without providing any CSV file
+	- XIQ-SE device nickname is now cleared after re-adding device to XIQ-SE
+	- Workflow is now also able to change the mgmt CLIP even if a mgmt CLIP was already configured
+	- Auto-sense ISIS Hello auth key can now also be changed during the mgmt IP change
+	- Site and CSV variable names can now include the "-" character
+	- On completion workflow now triggers device config reload via XIQ-SE API
+
+Todo:

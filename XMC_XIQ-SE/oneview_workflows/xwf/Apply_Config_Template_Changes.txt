@@ -1,0 +1,27 @@
+Apply Config Template
+
+v33
+	- First version shared
+v36
+	- Now supports any Family of devices.
+	- Check is made for lookup in csvVarLookup
+v38
+	- Commands ending with "\ny" were not processed correctly if the template text file was in DOS format
+	- Updated CLI functions, which can now handle error message false positives
+v40
+	- Added logic to process #if/#elseif/#else/#end Cisco velocity type statements
+v42
+	- Added logic to process #error fail|stop|continue
+v48
+	- Added input to gracefully skip execution if device not found in CSV file
+v54
+	- Added ability to change the accpeted CSV delimiter character; this can now be set in the
+	  new const_CSV_DELIMITER workflow variable
+	- Added MAC address as device lookup in CSV file
+	- Site and CSV variable names can now include the "-" character
+	- Now automatically enters config context on applicable family types
+v56 - posted
+	- On completion workflow now triggers device rediscovery and config reload via XIQ-SE API
+
+Todo:
+        
