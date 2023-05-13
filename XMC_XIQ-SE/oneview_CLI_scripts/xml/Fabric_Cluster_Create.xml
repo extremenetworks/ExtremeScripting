@@ -3,11 +3,11 @@
     <auditLogEnabled></auditLogEnabled>
     <cacheDate>1557733140331</cacheDate>
     <category>,Fabric Connect,</category>
-    <comments>Creates a VSP cluster (SMLT) with vIST</comments>
+    <comments>Creates a SMLT cluster (VOSS/Fabric Engine) with vIST</comments>
     <content>'''
 Python Scripts provided by Extreme Networks.
 
-This script is provided free of charge by Extreme.  We hope such scripts are
+This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology;
 however, scripts are provided simply as an accommodation and are not
 supported nor maintained by Extreme.  ANY SCRIPTS PROVIDED BY EXTREME ARE
@@ -20,13 +20,13 @@ IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
 
 This script vastly uses functions and logic taken from Ludo Standard Library v1.7
 
-This script creates a VSP cluster (SMLT) with vIST.
+This script creates a SMLT cluster (VOSS/Fabric Engine) with vIST.
 '''
 
 try:
     emc_vars
 except: # If not running on XMC Jython...
-    raise RuntimeError('This script must be used with XMC')
+    raise RuntimeError('This script must be used within Site Engine')
 
 # IMPORTS
 import re
@@ -134,7 +134,7 @@ def sendConfigCmds(cmds, returnCliError=False, msgOnError=None): # Send a list o
 # --&gt; XMC Python script actually starts here &lt;--
 
 ##########################################################
-# XMC Script: Creates a VSP cluster (SMLT) with vIST     #
+# XMC Script: Creates a SMLT cluster (VOSS/Fabric Engine) with vIST     #
 # Written by Stephane Grosjean, PSE Extreme Networks     #
 ##########################################################
 
@@ -149,7 +149,7 @@ __version__ = '0.2'
 #@DetailDescriptionStart
 ######################################################################################
 # 
-# This script creates a VSP cluster (SMLT) with vIST.
+# This script creates a SMLT cluster (VOSS/Fabric Engine) with vIST.
 # 
 #######################################################################################
 #@DetailDescriptionEnd
@@ -257,8 +257,8 @@ def main():
     routerISIS = False
 
     family = emc_vars["family"]
-    if family != "VSP Series":
-        raise RuntimeError('Error: This script needs to be executed on a VSP switch')
+    if family != "VSP Series" and family != "Universal Platform Fabric Engine" and family!= "Universal Platform VOSS":
+        raise RuntimeError('Error: This script needs to be executed on a switch running VOSS/Fabric Engine')
 
     if int(emc_vars["vist"]) &gt; 4094 or int(emc_vars["vist"]) &lt; 2:
         raise RuntimeError('Error: VLAN Id is out of range')
@@ -318,7 +318,7 @@ main()</content>
     <devicesRequired>true</devicesRequired>
     <contexts>,Device,</contexts>
     <id>168</id>
-    <lastUpdateDate>1557733140318</lastUpdateDate>
+    <lastUpdateDate>1683967014069</lastUpdateDate>
     <lastUpdatedBy>root</lastUpdatedBy>
     <metaDataPath>/usr/local/Extreme_Networks/NetSight/appdata/scripting/overrides/Fabric_Cluster_Create.xml</metaDataPath>
     <miscXMLData></miscXMLData>
@@ -331,7 +331,7 @@ main()</content>
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,NetSight Administrator,</roles>
+    <roles>,XIQ-SE Administrator,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>
