@@ -1,0 +1,17 @@
+Fabric Extend Onboard
+
+v52
+	- First version shared
+v65
+	- Integrated the ability to move device to mgmt CLIP
+v66
+	- Added logic to process #error fail|stop|continue
+v67 - posted
+	- Added ability to change the accpeted CSV delimiter character; this can now be set in the
+	  new const_CSV_DELIMITER workflow variable
+	- Added MAC address as device lookup in CSV file
+	- Function to read CSV file now tolerates empty lines in CSV file as well as spaces before/after
+	  commas/values are now stripped
+
+Todo:
+

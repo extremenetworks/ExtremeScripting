@@ -11,7 +11,7 @@ v29
 	- Added MAC address as device lookup in CSV file
 	- A rediscovery is triggered on the newly re-added device IP, to make sure the sysname change is
 	  quickly refreshed on XIQ-SE
-v59 - posted
+v59
 	- Added ability to change the accpeted CSV delimiter character; this can now be set in the
 	  new const_CSV_DELIMITER workflow variable
 	- Workflow is now able also to set the mgmt VLAN IP even if the switch initially acquired an OOB IP
@@ -20,5 +20,8 @@ v59 - posted
 	- Auto-sense ISIS Hello auth key can now also be changed during the mgmt IP change
 	- Site and CSV variable names can now include the "-" character
 	- On completion workflow now triggers device config reload via XIQ-SE API
+v60 - posted
+	- Function to read CSV file now tolerates empty lines in CSV file as well as spaces before/after
+	  commas/values are now stripped
 
 Todo:
