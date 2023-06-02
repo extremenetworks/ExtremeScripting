@@ -18,7 +18,7 @@ THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH SCRIPTS.
 
-This script creates and configures Fabric Attach on an FA Server (VOSS).
+This script creates and configures Fabric Attach on an FA Server (VOSS/Fabric Engine).
 
 This script vastly uses functions and logic taken from Ludo Standard Library v1.7
 
@@ -28,7 +28,7 @@ Several checks are performed to try to avoid mistakes.
 try:
     emc_vars
 except: # If not running on XMC Jython...
-    raise RuntimeError('This script must be used with XMC')
+    raise RuntimeError('This script must be used within Site Engine')
 
 # IMPORTS
 import re
@@ -164,7 +164,7 @@ __version__ = '0.2'
 #@DetailDescriptionStart
 ######################################################################################
 # 
-# This script creates and configures Fabric Attach on an FA Server (VOSS).
+# This script creates and configures Fabric Attach on an FA Server (VOSS/Fabric Engine).
 #
 # Several checks are performed to try to avoid mistakes.
 #
@@ -377,8 +377,8 @@ def CheckMLT(mltid, portmember):
 
 def main():
     family = emc_vars["family"]
-    if family != "VSP Series":
-        raise RuntimeError('Error: This script needs to be executed on a VSP switch')
+    if family != "VSP Series" and family != "Universal Platform Fabric Engine" and family!= "Universal Platform VOSS":
+        raise RuntimeError('Error: This script needs to be executed on a switch running VOSS/Fabric Engine')
 
     if emc_vars["mgmt"] == "yes":
         if int(emc_vars["vid"]) &gt; 4094 or int(emc_vars["vid"]) &lt; 2:

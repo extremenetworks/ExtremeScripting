@@ -1,0 +1,11 @@
+Fabric MultiArea Migrate
+
+v60
+	- First shared version
+v63
+	- Added ability to also change the LACP SMLT MAC
+	- Disabling the ISIS Hello Authentication on workflow inputs was not working
+	- When workflow run on VSP SMLT pair, it was failing on 2nd run dues to missing IP libraries
+v64 - posted
+	- Workflow was failing when trying to retrieve the ISIS areas on VSP4000
+
