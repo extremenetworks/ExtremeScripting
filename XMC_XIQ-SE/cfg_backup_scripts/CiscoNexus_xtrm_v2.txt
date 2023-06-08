@@ -1,0 +1,90 @@
+name="Cisco NX-OS - SCP vrf management XTRM with yes v2"
+desc="Cisco NX-OS SCP vrf management XTRM Scripts v2"
+protocol=SCP
+timed_reset_delay_format="HH:mm"
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 3
+copy running-config scp://%SCP_USER%@%SCP_IP%%ABSOLUTE_TARGET_FILE_PATH% vrf management
+yes
+%SCP_PSWD%
+@# the first copy will either copy or fingerprint the scond copy will either re-copy or not
+copy running-config scp://%SCP_USER%@%SCP_IP%%ABSOLUTE_TARGET_FILE_PATH% vrf management
+%SCP_PSWD%
+@RECEIVEUNTIL 15 "Copy complete."
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+Copy complete.
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "Configuration Download"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 3
+copy scp: startup-config
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+startup-config
+%SCP_PSWD%
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+bytes copied in
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "Firmware Download"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 20
+copy scp: flash:
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+%TARGET_FILE_NAME%
+%SCP_PSWD%
+verify flash:%TARGET_FILE_NAME%
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+Digital signature successfully verified
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "BootPROM Download"-----
+@# default idle time of 1 second is to short for some ISR G2 or very slow WAN links
+@COMMANDDONE 20
+copy scp: flash:
+%SCP_IP%
+%SCP_USER%
+%ABSOLUTE_TARGET_FILE_PATH%
+%TARGET_FILE_NAME%
+%SCP_PSWD%
+verify flash:%TARGET_FILE_NAME%
+@# no way to exit, if verify fails.
+@# upgrade rom-monitor filename flash:%TARGET_FILE_NAME% R0
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "BootPROM Download"-----
+Copy complete.
+-----END SUCCESS-----
+--
+-----BEGIN SCRIPT "Reset"-----
+reload
+y
+y
+exit
+-----END SCRIPT-----
+--
+-----BEGIN SCRIPT "Timed Reset"-----
+reload in %TIMED_RESET_DELAY_SECONDS%
+y
+exit
+-----END SCRIPT-----
+--
+-----BEGIN SCRIPT "Timed Reset Abort"-----
+reload cancel
+exit
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Timed Reset Abort"-----
+SHUTDOWN ABORTED
+-----END SUCCESS-----
