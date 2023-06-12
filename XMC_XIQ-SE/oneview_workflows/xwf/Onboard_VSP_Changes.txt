@@ -73,9 +73,20 @@ v101 - posted
 	- ReadSiteInputs_01: Was failing if no Control Engines found in XIQ-SE, even if the NAC enable input was disabled
 	- Activity 04 was incorrectly trying to create auto-sense platform VLANs when run against a DVR Leaf without
 	  enabling the DVR Leaf input
+v102
+	- If configuring NAC on switch, globally enabling RADIUS now happens at the very end of the workflow, as otherwise
+	  some RADIUS authentications could create dynamic VLANs on the switch even before the Custom CLI commands can get
+	  executed to make those VLANs static. Also if setting RADIUS CLI authentication, this ensures the workflow can
+	  complete without requiring any RADIUS CLI authentications for itself SSH-ing into the switch
+v103
+	- Activity 04 was failing to create auto-sense data/voice/wap platform VLAN, if another VLAN already existed on
+	  the switch with the same name the activity was trying to set on the newly created VLAN; added logic to default
+	  conflicting names and the activity can no longer fail when setting the VLAN name
+v104
+	- Activity 05 was failing to convert the switch to DVR Leaf if the switch already had a mgmt VLAN on a VLAN-id
+	  other than the default 4048, because it was trying to delete that VLAN and failing
 
 Todo:
 
-	
 
 
