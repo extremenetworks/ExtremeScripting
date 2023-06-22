@@ -55,6 +55,7 @@
 |[Onboard Mgmt CLIP](xwf/Onboard_Mgmt_CLIP-23.4.11.15v28.xwf?raw=true)|Workflow to onboard a VOSS/Fabric Engine switch onto a dedicated switch mgmt CLIP|[(How-to-use)](xwf/Onboard_Mgmt_CLIP_Workflow.pdf)[(Changes)](xwf/Onboard_Mgmt_CLIP_Changes.txt)|23.4.11.15v28|
 |[Disable IQAgent](xwf/Disable_IQAgent-22.6.10.67v10.xwf?raw=true)|Workflow disables IQAgent on devices running Switch Engine, Fabric Engine,  EXOS, VOSS.|Execute the workflow on one or multiple devices.|22.6.10.67v10|
 |[Fabric MultiArea Migrate](xwf/Fabric_MultiArea_Migrate-23.2.10.82v64.xwf?raw=true)|Workflow allows changing the ISIS area of a switch in a multi-area design where nodes need to be migrated to new areas. |[(How-to-use)](xwf/Fabric_MultiArea_Migrate.pdf)[(Changes)](xwf/Fabric_MultiArea_Migrate_Changes.txt)|23.2.10.82v64|
+|[XIQ-C PSK update using QR code](xwf/XIQ-C_PSK_QR_Code-23.4.12.3v103.xwf?raw=true)|Workflow is changing the PSK of a specific SSID on a XIQ-C. A QR codes will be generated and the PSK + QR-code is delievered by e-mail| you have to fillout the dialog fileds prompted during exection. The XIQ-C have to be part of the XIQ-SE inventory to get the login crendetials for the API calls. |23.4.12.3v103|
 
 # XIQ Site Engine (XMC) daily job Workflows
 | Workflow name | Description | Comment | Version |
