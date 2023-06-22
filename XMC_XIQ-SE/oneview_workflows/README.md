@@ -18,7 +18,7 @@
 |[Report configuration changes by email](xwf/Report_Configuration_Changes-22.6.13.9v33.xwf?raw=true)|This workflow sends an email to the recipient with the configuration changes detected. It compares last two archived configurations. New addition: it reports which users were logged into the switch in between the differing config archives, by inspecting XIQ-SE's syslog file (this additional function currently only works with EXOS/Switch Engine syslog messages, which need to be configured for severity "Info" in order to send login/logout syslog messages; but the rest of the workflow will still work with non EXOS/SwitchEngine devices as well)|The workflow can be executed by an [alarm](xwf/Report_Configuration_Changes.png). Define the email recipients.|22.6.13.9v33|
 |[Extended Alarm Information to Email](xwf/Extended_Alarm_information_to_Email-8.5.3.66v6.xwf?raw=true)|The workflow contains the dictionary of CLI commands to be executed based on alarm name. The workflow determines the alarm name and based on the information in the dictionary the set of CLI commands are executed. The result is then send to email recipients.|The workflow must be executed by an alarm. Modify the dictionary in the workflow. Define the email recipients.|8.5.3.66v6|
 |[Report Congestions](xwf/GetCongestion-8.5.5.30v67.xwf?raw=true)|The Workflow checks congestions on ports through SNMP and if congestion is detected then the email report is generated.|Define devices inside of the activity and threshold. Define the email recipients.|8.5.5.30v67|
-t_L2VSN
+
 # XIQ Site Engine (XMC) Troubleshooting Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
