@@ -4,6 +4,8 @@ Please use caution when running this script.
 
 '''
 #This function is is used to break cli output into a list of dictionary for easy parsing.
+import exsh
+
 def cmd2data(clicmd):
     import re
     import xml.etree.cElementTree as ElementTree
@@ -30,8 +32,8 @@ def cmd2data(clicmd):
 def start_elrp_script():
     answer = ("")
     if  len(get_vlans()) > 20:
-        print ("Are you sure you want to run elrp on %d VLAN's?") % (len(get_vlans()))
-        answer = raw_input("y/n: ").lower()
+        print (f"Are you sure you want to run elrp on {len(get_vlans())} VLANs?")
+        answer = input("y/n: ").lower()
 
         if answer == 'y':
             print("continuing")
@@ -39,7 +41,7 @@ def start_elrp_script():
 
         elif answer == 'n':
             print
-            print ("Script Canceled, ending elrp status is: %s") % (check_elrp_stat())
+            print (f"Script Canceled, ending elrp status is: {check_elrp_stat()}")
             print
             print
         elif answer != 'y' and answer != 'n':
@@ -99,9 +101,9 @@ def Run_ELRP():
 
     #Running ELRP using the get_vlans function to get a table list of vlans
     for vlan in get_vlans():
-        print ("Running ELRP on VLAN %s.") % (vlan)
-        elrp_output = (exsh.clicmd('configure elrp-client one-shot %s ports all print' % (vlan), True))
-        print elrp_output
+        print (f"Running ELRP on VLAN {vlan}.")
+        elrp_output = (exsh.clicmd(f"configure elrp-client one-shot {vlan} ports all print", True))
+        print (elrp_output)
         print
         print
 
@@ -112,12 +114,12 @@ def Run_ELRP():
         print ("********************")
         print ("*No clean up needed*")
         print ("********************")
-        print ("Ending status of ELRP is: %s") % check_elrp_stat()
+        print (f"Ending status of ELRP is: {check_elrp_stat()}")
     else:
         print ("**************")
         print ("*Cleaning up!*")
         print ("**************")
         (exsh.clicmd('disable elrp', True))
-        print ("Ending status of ELRP is: %s") % check_elrp_stat()
+        print (f"Ending status of ELRP is: {check_elrp_stat()}")
 
 start_elrp_script()

@@ -41,7 +41,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[SNMP v1v2 config](snmpv1v2configpy)|Wizard for SNMP V1/V2 configuration for an ExtremeXOS(TM) switch.|
 |[SNTP config](sntpconfigpy)|Example for Simple Network Time Protocol (SNTP) configuration for an ExtremeXOS(TM) switch.|
 |[Show port vid](show_port_vid)|This script displays the VLAN assignment and tagging configuration for all ports on the switch.|
-|[VLAN ELRP Check](vlan_elrp_check)|This script will run ELRP on all VLANS on an EXOS switch.|
+|[VLAN ELRP Check](vlan_elrp_check)|This script will run ELRP on all VLANS on an EXOS switch running 32.1 and newer.|
 |[Vlan Existence Checker](vlan_existencecheck)|Reads VID and VLAN-Name as key-value-pairs from /usr/local/cfg/vlan_list.csv (delimiter: ";") and checks the Switch for existence of those VLANs.|
 |[VLAN Copy Port](vlan_copy_port)|This EXOS script will copy/move vlans from one port to another.|
 |[Watch Command](watch)|Simple script that repeats a CLI command every *n* seconds|
