@@ -66,7 +66,7 @@ v99
 v100
 	- MakeVspDvrLeaf_05; now deletes any non-default platform VLANs, which might have got added by ZTP+ onboarding
 	  so as to be able to enter DVR Leaf mode without any switch reset
-v101 - posted
+v101
 	- Updated all functions; activity 4 can now use embedded directives #error and #block in the CLI commands
 	- Activity 03 now adds the switch to Access Control with Auth Access Type = Manual RADIUS Configuration
 	  previously it was incorrectly setting Auth Access Type = Network Access
@@ -85,6 +85,8 @@ v103
 v104
 	- Activity 05 was failing to convert the switch to DVR Leaf if the switch already had a mgmt VLAN on a VLAN-id
 	  other than the default 4048, because it was trying to delete that VLAN and failing
+v105 - posted
+	- Activity 04 was failing to configure the auto-sense FA auth key
 
 Todo:
 

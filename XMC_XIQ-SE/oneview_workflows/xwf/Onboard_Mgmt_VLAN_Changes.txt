@@ -20,8 +20,14 @@ v59
 	- Auto-sense ISIS Hello auth key can now also be changed during the mgmt IP change
 	- Site and CSV variable names can now include the "-" character
 	- On completion workflow now triggers device config reload via XIQ-SE API
-v60 - posted
+v60
 	- Function to read CSV file now tolerates empty lines in CSV file as well as spaces before/after
 	  commas/values are now stripped
+v61
+	- Increased const_DELAY_ISISAUTH_CHANGE to default 60 secs
+	- Introduced a 10 sec delay const_DELAY_RECONNECT before attempting to reconnect to device after
+	  site re-add
+v62 - posted
+	- XIQ-SE device nickname is now set to match the provided and switch configured sysname
 
 Todo:
