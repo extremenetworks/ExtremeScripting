@@ -11,8 +11,8 @@ This Script will run ELRP on all VLANS on an EXOS switch.  If ELRP is disabled t
 
 
 ### Requirements
-* Firmware: ExtremeXOS(TM) 32.1 or newer
-* This script was tested on 32.1
+* Firmware: ExtremeXOS(TM) 15.6 or newer
+* This script was tested on 32.1 and 30.7
 
 ### Features
 * This Scrip will run ELRP on all created vlans.
