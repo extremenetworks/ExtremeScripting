@@ -11,7 +11,7 @@ This is a combined view of the EXOS commands:
 * show ports qosmonitor congestion
 
 ## Files
-* [portsum.py](portsum.py?raw=true)
+* [portsum.py](portsum.py)
 * [README.md](README.md)
 
 ## Requirements

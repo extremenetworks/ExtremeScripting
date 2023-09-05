@@ -1,6 +1,6 @@
 # XIQ REST BssidLister (Go)
 
-[BssidLister](BssidLister.go?raw=true) retrieves the list of Access Points and associated (B)SSIDs from [ExtremeCloud IQ](https://extremecloudiq.com/) (XCA) via the provided REST API and prints CSV to stdout.
+[BssidLister](BssidLister.go) retrieves the list of Access Points and associated (B)SSIDs from [ExtremeCloud IQ](https://extremecloudiq.com/) (XCA) via the provided REST API and prints CSV to stdout.
 
 ## Dependencies
 

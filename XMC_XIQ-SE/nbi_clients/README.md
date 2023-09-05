@@ -19,14 +19,14 @@ Setup the API client access via the web GUI -> Administration -> Client API Acce
 
 | Script name   | Description   | Type   |
 | ------------- | ------------- |:------:|
-| [XMC_NBI](Python3/XMC_NBI.py?raw=true)|Python class 0.0.2 used by all the other scripts below. Works for XQI-Site Engine as well XMC 8.5.x|Python class|
-| [get devices](Python3/get_devicese.py?raw=true)| pull all devices managed by XMC.|Python script|
-| [get MACSs](Python3/get_MAC.py?raw=true)|pull all MAC addresses hosted by XMC.|Python script|
-| [manage MAC's](Python3/manage_MAC.py?raw=true)|get / add update / delete MAC address in Printer End-System-Group.|Python script|
-| [query](Python3/query.py?raw=true)|run native NBI query and mutation|Python script|
-| [simple](Python3/simple.py?raw=true)|A simple example how to use the Python class XMC_NBI.py.|Python script|
-| [site export](Python3/site_export.py?raw=true)|Export all site structure to file.|Python script|
-| [site import](Python3/site_import.py?raw=true)|Import and create site structure based on file.|Python script|
+| [XMC_NBI](Python3/XMC_NBI.py)|Python class 0.0.2 used by all the other scripts below. Works for XQI-Site Engine as well XMC 8.5.x|Python class|
+| [get devices](Python3/get_devicese.py)| pull all devices managed by XMC.|Python script|
+| [get MACSs](Python3/get_MAC.py)|pull all MAC addresses hosted by XMC.|Python script|
+| [manage MAC's](Python3/manage_MAC.py)|get / add update / delete MAC address in Printer End-System-Group.|Python script|
+| [query](Python3/query.py)|run native NBI query and mutation|Python script|
+| [simple](Python3/simple.py)|A simple example how to use the Python class XMC_NBI.py.|Python script|
+| [site export](Python3/site_export.py)|Export all site structure to file.|Python script|
+| [site import](Python3/site_import.py)|Import and create site structure based on file.|Python script|
 
 ## Support
 

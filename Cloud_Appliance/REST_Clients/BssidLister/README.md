@@ -1,6 +1,6 @@
 # XCA REST BssidLister (Go)
 
-[BssidLister](BssidLister.go?raw=true) retrieves the list of Access Points and associated (B)SSIDs from [ExtremeCloud Appliance](https://www.extremenetworks.com/product/extremecloud-appliance/) (XCA) via the provided REST API and prints CSV to stdout.
+[BssidLister](BssidLister.go) retrieves the list of Access Points and associated (B)SSIDs from [ExtremeCloud Appliance](https://www.extremenetworks.com/product/extremecloud-appliance/) (XCA) via the provided REST API and prints CSV to stdout.
 
 It started as a rewrite of [the Python script provided by GTAC](https://extremeportal.force.com/ExtrArticleDetail?an=000077243&q=How-can-I-retrieve-a-list-of-BSSIDs-from-an-XCA-controller-using-the-REST-API), but the output of BssidLister includes way more details than the GTAC script by now.
 
