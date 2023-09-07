@@ -1,6 +1,6 @@
 # GenericNbiClient.go
 
-[GenericNbiClient.go](GenericNbiClient.go?raw=true) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center (XMC; formerly known as NetSight) and prints the raw JSON response to stdout.
+[GenericNbiClient.go](GenericNbiClient.go) sends a query to the GraphQL-based API provided by the Northbound Interface (NBI) of Extreme Management Center (XMC; formerly known as NetSight) and prints the raw JSON response to stdout.
 
 ## Dependencies
 

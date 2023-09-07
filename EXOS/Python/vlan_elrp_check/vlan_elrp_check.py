@@ -4,6 +4,14 @@ Please use caution when running this script.
 
 '''
 #This function is is used to break cli output into a list of dictionary for easy parsing.
+try:
+    import exsh
+except:
+    print ("exsh not imported")
+import sys
+
+pyversion = sys.version_info[0]
+
 def cmd2data(clicmd):
     import re
     import xml.etree.cElementTree as ElementTree
@@ -30,8 +38,11 @@ def cmd2data(clicmd):
 def start_elrp_script():
     answer = ("")
     if  len(get_vlans()) > 20:
-        print ("Are you sure you want to run elrp on %d VLAN's?") % (len(get_vlans()))
-        answer = raw_input("y/n: ").lower()
+        print ("Are you sure you want to run elrp on " + str(len(get_vlans())) + " VLANs?")
+        if pyversion < 3:
+            answer = raw_input("y/n: ").lower()
+        else:
+            answer = input("y/n: ").lower()            
 
         if answer == 'y':
             print("continuing")
@@ -39,7 +50,7 @@ def start_elrp_script():
 
         elif answer == 'n':
             print
-            print ("Script Canceled, ending elrp status is: %s") % (check_elrp_stat())
+            print ("Script Canceled, ending elrp status is: " + str(check_elrp_stat()))
             print
             print
         elif answer != 'y' and answer != 'n':
@@ -99,9 +110,10 @@ def Run_ELRP():
 
     #Running ELRP using the get_vlans function to get a table list of vlans
     for vlan in get_vlans():
-        print ("Running ELRP on VLAN %s.") % (vlan)
-        elrp_output = (exsh.clicmd('configure elrp-client one-shot %s ports all print' % (vlan), True))
-        print elrp_output
+        print ("Running ELRP on VLAN " + str(vlan) + ".")
+        cmd = ("configure elrp-client one-shot " + str(vlan) + " ports all print")
+        elrp_output = (exsh.clicmd(cmd, True))
+        print (elrp_output)
         print
         print
 
@@ -112,12 +124,12 @@ def Run_ELRP():
         print ("********************")
         print ("*No clean up needed*")
         print ("********************")
-        print ("Ending status of ELRP is: %s") % check_elrp_stat()
+        print ("Ending status of ELRP is: " + str(check_elrp_stat()))
     else:
         print ("**************")
         print ("*Cleaning up!*")
         print ("**************")
         (exsh.clicmd('disable elrp', True))
-        print ("Ending status of ELRP is: %s") % check_elrp_stat()
+        print ("Ending status of ELRP is: " + str(check_elrp_stat()))
 
 start_elrp_script()

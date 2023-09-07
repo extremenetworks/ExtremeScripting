@@ -1,9 +1,9 @@
 # generic XIQ REST API (Python)
 
-[XIQ](XIQ.py?raw=true) Python class using the [XIQ-API](https://developer.extremecloudiq.com/)
-[get_clients](get_clients.py?raw=true) pull all clients using the XIQ Python class
-[get_devices](get_devices.py?raw=true) pull all devices using the XIQ Python class
-[APs_show_version](ap_show_version.py?raw=true) execute commands against AP using the XIQ Python class
+[XIQ](XIQ.py) Python class using the [XIQ-API](https://developer.extremecloudiq.com/)
+[get_clients](get_clients.py) pull all clients using the XIQ Python class
+[get_devices](get_devices.py) pull all devices using the XIQ Python class
+[APs_show_version](ap_show_version.py) execute commands against AP using the XIQ Python class
 
 ## Dependencies
 

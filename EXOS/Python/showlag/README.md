@@ -4,8 +4,8 @@
 This script provide a summary view of LAG ports on EXOS. It scans the individual LAG member ports and computes the composite value.
 
 ## Files
-* [showlag.py](showlag.py?raw=true)
-* [showlag_1.0.0.3.lst](showlag_1.0.0.3.lst?raw=true)
+* [showlag.py](showlag.py)
+* [showlag_1.0.0.3.lst](showlag_1.0.0.3.lst)
 * [README.md](README.md)
 
 ## Requirements
