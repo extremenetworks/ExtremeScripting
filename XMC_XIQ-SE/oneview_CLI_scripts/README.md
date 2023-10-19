@@ -48,8 +48,8 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[Configuration of a Cluster (vIST)](xml/Fabric_Cluster_Create.xml)|Cluster is created. You need their system-id before executing the script. Script must be executed one unit at a time. This script will disable/enable ISIS = it can disrupt traffic!|Python|
 | VOSS |[Configuring FA Server on BEBs](xml/FAServer_Create.xml)|FA Server configuration|Python|
 | VOSS, EXOS, BOSS |[L2VSN](xml/L2VSN.xml)|This script provisions a L2VSN between several BEBs running VOSS (VSP switches) and/or FA switches (EXOS/BOSS). It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary checks (FA enabled on it or not) but it doesn't create the MLT itself.|Python|
-| VOSS, EXOS, BOSS |[Create L2VSN](xml/Create_L2VSN.xml)|This script provisions a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS.|Python|
-| VOSS, EXOS, BOSS |[Delete L2VSN](xml/Delete_L2VSN.xml)|This script deletes existing L2VSN services. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS.|Python|
+| VOSS, EXOS, BOSS |[Create L2VSN](xml/Create_L2VSN.xml)|This script provisions a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS. v2.3|Python|
+| VOSS, EXOS, BOSS |[Delete L2VSN](xml/Delete_L2VSN.xml)|This script deletes existing L2VSN services. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS. v1.7|Python|
 | VOSS, EXOS, BOSS |[Create L2VSN port context](xml/Create_L2VSN-port_context.xml)|This script provisions a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS.|Python|
 | VOSS, EXOS, BOSS |[Delete L2VSN port context](xml/Delete_L2VSN-port_context.xml)|This script deletes a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS.|Python|
 | VOSS |[Create L2VSN range](xml/Create_L2VSN_Range.xml)|This script provisions a range of L2VSNs on Fabric Connect VSPs using Switched-UNI.|Python|
@@ -73,6 +73,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[VSP PreUpgrade CleanUp](xml/VOSS_PreUpgrade_CleanUp.xml)|Script prepares a VSP or XA1400 for an XMC upgrade, by removing old software versions from the software archive. v1.1|Python|
 | Procurve |[Authentication Procurve](xml/Authentication_Procurve.xml)|Script will configure Radius and authentication on Procurve devices & ports.|TCL|
 | Linux |[NAC Daemon Commands](xml/NAC_Daemon_Control.xml)|Script does stop - start - restart - status the nacctl.|TCL|
+| EXOS, VOSS, ERS, ISW |[PoE_Bounce](xml/PoE_Bounce.xml)|Bounce PoE on the provided ports. Works with all of EXOS, VOSS, ERS, ISW v1.0|Python|
 
 ## Integrated Application Hosting (Insight VM) scripts
 | OS | Script name   | Description   | Type   |
