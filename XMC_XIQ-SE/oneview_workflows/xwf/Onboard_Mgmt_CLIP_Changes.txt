@@ -26,7 +26,13 @@ v30
 	- Increased const_DELAY_ISISAUTH_CHANGE to default 60 secs
 	- Introduced a 10 sec delay const_DELAY_RECONNECT before attempting to reconnect to device after
 	  site re-add
-v31 - posted
+v31
 	- XIQ-SE device nickname is now set to match the provided and switch configured sysname
+v32
+	- Rollback of CLIP creation was not working if the newly created CLIP was not reachable by ping
+v33 - posted
+	- Increased const_PING_NEW_IP_TIMEOUT to 20secs
+	- Configuration of sysname is now performed at the beginning, before changing the switch IP and
+	  deleting and re-adding the switch to XIQ-SE; this way no issue with XIQ not updating the sysname
 
 Todo:
