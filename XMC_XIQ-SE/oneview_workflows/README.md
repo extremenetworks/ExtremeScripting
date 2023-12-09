@@ -59,6 +59,8 @@
 |[reboot AP's](xwf/bounce_AP_PoE-23.7.11.6v29.xwf)| The workflow finds APs by LLDP and disable PoE, wait for 10 seconds, and enable the PoE. All switches like EXOS, ERS, VOSS, Fabric- and Switch-Engine are supported. Also any switch with have the public MIB for LLDP + PoE implemented. | |23.7.11.6v29|
 |[I-SID to Name syncing](xwf/I-SID_Name_bindings-23.7.11.6v52.xwf)|The workflow uses a CSV-like input for I-SID to name binding and applied by SNMP against VOSS and Fabric Engine based switches. | the input is like this "123450,Demo-123450" |23.7.11.6v52|
 |[Bounce PoE](xwf/Bounce_PoE-24.2.10.49v9.xwf)| The workflow disables PoE, wait for 10 seconds, and enable the PoE. | Select port or multiple ports |24.2.10.49v9|
+|[Disable PoE](xwf/Disable_PoE-24.2.10.49v2.xwf)| The workflow disables PoE on selected ports| Select port or multiple ports |24.2.10.49v2|
+|[Enable PoE](xwf/Enable_PoE-24.2.10.49v2.xwf)| The workflow enables PoE on selected ports| Select port or multiple ports |24.2.10.49v2|
 
 
 # XIQ Site Engine (XMC) daily job Workflows
