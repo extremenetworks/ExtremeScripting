@@ -29,9 +29,16 @@ v61
 	  site re-add
 v62
 	- XIQ-SE device nickname is now set to match the provided and switch configured sysname
-v63 - posted
+v63
 	- Increased const_PING_NEW_IP_TIMEOUT to 20secs
 	- Configuration of sysname is now performed at the beginning, before changing the switch IP and
 	  deleting and re-adding the switch to XIQ-SE; this way no issue with XIQ not updating the sysname
+v66 - posted
+	- Added optional input for additional CLI commands
+	- Added variable const_NO_ERROR_ON_FAIL_SAVE which can be enabled to prevent workflow failing if
+	  a final "save config" could not be performed on the switch
+	- Added variable const_AGGRESSIVE_SAVE which can be enabled to kill other CLI sessions if unable
+	  to perform save config
+	- Updated to latestr function versions
 
 Todo:
