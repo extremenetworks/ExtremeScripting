@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script name="Bounce">
+    <abortOnError>true</abortOnError>
+    <auditLogEnabled></auditLogEnabled>
+    <category>,PoE,</category>
+    <comments>Bounce PoE on the provided ports - v1</comments>
+    <content>'''
+This script is provided free of charge by Extreme. We hope such scripts are
+helpful when used in conjunction with Extreme products and technology and can
+be used as examples to modify and adapt for your ultimate requirements.
+Extreme will not provide any official support for these scripts. If you do
+have any questions or queries about any of these scripts you may post on
+Extreme's community website "The Hub" (https://community.extremenetworks.com/)
+under the scripting category.
+
+ANY SCRIPTS PROVIDED BY EXTREME ARE HEREBY PROVIDED "AS IS", WITHOUT WARRANTY
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL EXTREME OR ITS THIRD PARTY LICENSORS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
+SCRIPTS.
+'''
+
+# --&gt; Insert here script description, version and metadata &lt;--
+
+##########################################################
+# XMC Script: PoE Bounce                                 #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+
+__version__ = '1.0'
+
+'''
+#@MetaDataStart
+#@DetailDescriptionStart
+#######################################################################################
+# 
+# Bounce PoE on the provided ports.
+# Works with all of EXOS, VOSS, ERS, ISW
+#
+#######################################################################################
+#@DetailDescriptionEnd
+#@MetaDataEnd
+'''
+
+
+##########################################################
+# Ludo Standard library; Version 3.10                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+
+
+#
+# IMPORTS:
+#
+import re
+import socket                       # Used by addXmcSyslogEvent
+import time
+
+#
+# Base functions
+#
+def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if Debug:
+        print debugOutput
+
+def exitError(errorOutput): # v1 - Exit script with error message and setting status appropriately
+    emc_results.setStatus(emc_results.Status.ERROR)
+    raise RuntimeError(errorOutput)
+
+def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    try:
+        rollbackStack()
+    finally:
+        print "Aborting because this command failed: {}".format(cmd)
+        exitError(errorOutput)
+
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
+#
+# Family functions
+#
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
+}
+
+def setFamily(cliDict={}, family=None): # v2 - Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if family:
+        Family = family
+    elif emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if cliDict and Family not in cliDict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
+    return Family
+
+
+#
+# CLI functions
+#
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
+
+def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
+    if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
+    lastLine = outputStr.splitlines()[-1:][0]
+    if RegexPrompt.match(lastLine):
+        lines = outputStr.splitlines()[1:-1]
+    else:
+        lines = outputStr.splitlines()[1:]
+    return '\n'.join(lines)
+
+def configChain(chainStr): # v1 - Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
+    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
+    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
+        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
+    else:
+        mode = None
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
+
+def formatOutputData(data, mode): # v2 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+    if not mode                 : value = data                                   # Legacy behaviour same as list
+    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
+    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
+    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
+    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
+    elif mode == 'str-join'     : value = ''.join(data)                          # Regex with max 1 capturing bracket, joins list to string
+    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
+    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
+    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
+    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
+    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets, returns 1st tuple
+    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
+    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    else:
+        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
+    return value
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v1 - Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            abortError(cmd, outputStr)
+        LastError = None
+        return outputStr
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
+    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("sendCLI_showRegex OUT = {}".format(value))
+    return value
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v2 - Send a CLI config command
+    global LastError
+    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd, waitForPrompt)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            abortError(cmd, outputStr)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True): # v1 - Send a semi-colon separated list of config commands
+    cmdList = configChain(chainStr)
+    for cmd in cmdList[:-1]: # All but last
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            return False
+    # Last now
+    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
+    if not success:
+        return False
+    return True
+
+def printConfigSummary(): # v1 - Print summary of all config commands executed with context indentation
+    emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if RegexContextPatterns[Family][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                if level + 1 &lt; maxLevel:
+                    level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+
+
+#
+# Port processing functions
+#
+RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
+RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
+RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
+SlotPortRange = None # Gets set to dict by getSlotPortRanges()
+
+def portValue(port): # v1 - Function to pass to sorted(key) to sort port lists
+    slotPort = re.split('[/:]', port)
+    if len(slotPort) == 2: # slot/port format
+        idx = int(slotPort[0])*100 + int(slotPort[1])
+    else: # standalone port (no slot)
+        idx = int(slotPort[0])
+    return idx
+
+def getSlotPortRanges(): # v1 - Populates the SlotPortRange dict
+    global SlotPortRange
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
+    if Family not in slotCommand:
+        SlotPortRange = {}
+        return
+    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
+    debug("getSlotPortRanges = {}".format(SlotPortRange))
+
+def generatePortList(portStr, debugKey=None): # v1 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
+    # This version of this function will not handle port ranges which span slots; also does not handle VSP channelized ports
+    debug("generatePortList IN = {}".format(portStr))
+    portDict = {} # Use a dict, will ensure no port duplicate keys
+    for port in portStr.split(','):
+        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
+        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
+        if not len(port): # Skip empty string
+            continue
+        rangeMatch = RegexPortRange.match(port)
+        starMatch = RegexStarRange.match(port)
+        if rangeMatch: # We have a range of ports
+            startSlot = rangeMatch.group(1)
+            separator = rangeMatch.group(2)
+            startPort = int(rangeMatch.group(3))
+            endSlot = rangeMatch.group(4)
+            endPort = int(rangeMatch.group(5))
+            if endSlot and startSlot != endSlot:
+                print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
+            elif startPort &gt;= endPort:
+                print "ERROR! generatePortList invalid range: {}".format(port)
+            else: # WE are good
+                for portCount in range(startPort, endPort + 1):
+                    if startSlot: # slot-based range
+                        portDict[startSlot + separator + str(portCount)] = 1
+                    else: # simple port range (no slot info)
+                        portDict[str(portCount)] = 1
+        elif starMatch: # We have a slot/* range
+            slot = starMatch.group(1)
+            separator = starMatch.group(2)
+            if SlotPortRange == None: # Structure not populated
+                getSlotPortRanges()
+            if SlotPortRange:
+                if slot in SlotPortRange:
+                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
+                        portDict[slot + separator + str(portCount)] = 1
+                else:
+                    print "Warning: no range for slot {}; skipping: {}".format(slot, port)
+            else:
+                print "Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port)
+        elif RegexPort.match(port): # Port is in valid format
+            portDict[port] = 1
+        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
+            print "Warning: generatePortList skipping unexpected port format: {}".format(port)
+
+    # Sort and return the list as a comma separated string
+    portList = sorted(portDict, key=portValue)
+
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portList))
+        else: debug("generatePortList OUT = {}".format(portList))
+    return portList
+
+def generatePortRange(portList, debugKey=None): # v1 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
+    # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
+    debug("generatePortRange IN = {}".format(portList))
+    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
+    elementList = []
+    elementBuild = None
+    currentType = None
+    currentSlot = None
+    currentPort = None
+    rangeLast = None
+
+    # First off, sort the list
+    portList = sorted(portList, key=portValue)
+    for port in portList:
+        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
+        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
+        if len(slotPort) == 3: # slot/port
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
+                    currentPort = slotPort[2]
+                    if rangeMode[Family] == 1:
+                        rangeLast = currentPort
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            elementBuild = port
+
+        if len(slotPort) == 1: # simple port (no slot)
+            if elementBuild:
+                if currentType == 'p' and port == str(int(currentPort)+1):
+                    currentPort = port
+                    rangeLast = currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 'p'
+            currentPort = port
+            elementBuild = port
+
+    if elementBuild: # Close off last element we were holding
+        if rangeLast:
+            elementBuild += '-' + rangeLast
+        elementList.append(elementBuild)
+
+    portStr = ','.join(elementList)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portStr))
+        else: debug("generatePortRange OUT = {}".format(portStr))
+    return portStr                
+
+
+#
+# Syslog functions
+#
+def addXmcSyslogEvent(severity, message, ip=None): # v1 - Adds a syslog event to XMC (only needed for Scripts)
+    severityHash = {'emerg': 0, 'alert': 1, 'crit': 2, 'err': 3, 'warning': 4, 'notice': 5, 'info': 6, 'debug': 7}
+    severityLevel = severityHash[severity] if severity in severityHash else 6
+    session = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    session.connect(('127.0.0.1', 514))
+    if ip:
+        session.send("&lt;{}&gt; XMC Script {} / Device: {} / {}".format(severityLevel,scriptName(),ip,message))
+    else:
+        session.send("&lt;{}&gt; XMC Script {} / {}".format(severityLevel,scriptName(),ip,message))
+    session.close()
+
+
+
+
+# --&gt; XMC Python script actually starts here &lt;--
+
+
+#
+# Variables:
+#
+CLI_Dict = {
+    'VSP Series': {
+        'enable_context'             : 'enable',
+        'config_context'             : 'config term',
+        'port_disable_poe'           : 'interface gigabitEthernet {}; poe poe-shutdown', # Port list
+        'port_enable_poe'            : 'no poe-shutdown', # Port list
+        'end_config'                 : 'end',
+    },
+    'Summit Series': {
+        'port_disable_poe'           : 'disable inline-power ports {}', # Port list
+        'port_enable_poe'            : 'enable inline-power ports {}', # Port list
+    },
+    'ERS Series': {
+        'enable_context'             : 'enable',
+        'config_context'             : 'config term',
+        'port_disable_poe'           : 'interface fastEthernet {}; poe poe-shutdown', # Port list
+        'port_enable_poe'            : 'no poe-shutdown', # Port list
+        'end_config'                 : 'end',
+    },
+    'ISW-Series': {
+        'config_context'             : 'config term',
+        'port_disable_poe'           : 'interface * 1/{}; poe mode disable', # Port list
+        'port_enable_poe'            : 'poe mode enable', # Port list
+        'end_config'                 : 'end',
+    },
+}
+
+#
+# Main:
+#
+def main():
+    print "{} version {} on XMC version {}".format(scriptName(), __version__, emc_vars["serverVersion"])
+
+    #
+    # Obtain Info on switch and from XMC
+    #
+    setFamily(CLI_Dict) # Sets global Family variable
+    switchIp = emc_vars["deviceIP"]
+    ports = emc_vars["port"]
+
+    print "Information provided by User:"
+    print " - Ports Selected = {}".format(ports)
+
+    if not ports:
+        exitError("No ports selected !")
+
+    # Produce port list and range
+    portList = generatePortList(ports)
+    portRange = generatePortRange(portList)
+    print " - Ports Range = {}".format(portRange)
+
+    # Enter privExec
+    if 'enable_context' in CLI_Dict[Family]:
+        sendCLI_showCommand(CLI_Dict[Family]['enable_context'])
+
+    # Enter Config context
+    if 'config_context' in CLI_Dict[Family]:
+        sendCLI_configCommand(CLI_Dict[Family]['config_context'])
+
+    # Disable POE on ports
+    sendCLI_configChain(CLI_Dict[Family]['port_disable_poe'].format(portRange))
+
+    # Sleep a bit
+    time.sleep(1)
+
+    # Re-enable POE on ports
+    sendCLI_configChain(CLI_Dict[Family]['port_enable_poe'].format(portRange))
+
+    # Exit Config context
+    if 'end_config' in CLI_Dict[Family]:
+        sendCLI_configCommand(CLI_Dict[Family]['end_config'])
+
+    # Print summary of config performed
+    printConfigSummary()
+
+    # Add an entry into XMC's syslog
+    addXmcSyslogEvent('info', "Bounced PoE on ports: {}".format(portRange), switchIp)
+
+main()
+</content>
+    <creationDate>1649536449820</creationDate>
+    <creator>lstevens</creator>
+    <defaultCategory></defaultCategory>
+    <devicesRequired>true</devicesRequired>
+    <encoded>true</encoded>
+    <contexts>,Port,</contexts>
+    <lastUpdateDate>1649536583722</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
+    <miscXMLData></miscXMLData>
+    <nosIds></nosIds>
+    <postprocessScript></postprocessScript>
+    <rollbackScript></rollbackScript>
+    <saveConfigOnExit>false</saveConfigOnExit>
+    <scriptOwner></scriptOwner>
+    <scriptTimeout>60</scriptTimeout>
+    <scriptType>Python</scriptType>
+    <supprotedGroups></supprotedGroups>
+    <roles>,XIQ-SE Administrator,</roles>
+    <vendor></vendor>
+    <version>0</version>
+</script>
+
