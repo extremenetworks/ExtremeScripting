@@ -34,12 +34,18 @@ v33
 	- Increased const_PING_NEW_IP_TIMEOUT to 20secs
 	- Configuration of sysname is now performed at the beginning, before changing the switch IP and
 	  deleting and re-adding the switch to XIQ-SE; this way no issue with XIQ not updating the sysname
-v36 - posted
+v36
 	- Added optional input for additional CLI commands
 	- Added variable const_NO_ERROR_ON_FAIL_SAVE which can be enabled to prevent workflow failing if
 	  a final "save config" could not be performed on the switch
 	- Added variable const_AGGRESSIVE_SAVE which can be enabled to kill other CLI sessions if unable
 	  to perform save config
-	- Updated to latestr function versions
+	- Updated to latest function versions
+v38 - posted
+	- Added input validation for workflow to execute to make sure it is in format '<folder>/<name>'
+	- Additional CLI commands now only processes commands which are not commented out
+	- Additional CLI commands can now process commands with // to feed passwords to interactive prompts
+	- Additional CLI commands has commented out example of how to set EDM user passwords from there
+
 
 Todo:
