@@ -41,11 +41,13 @@ v36
 	- Added variable const_AGGRESSIVE_SAVE which can be enabled to kill other CLI sessions if unable
 	  to perform save config
 	- Updated to latest function versions
-v38 - posted
+v38
 	- Added input validation for workflow to execute to make sure it is in format '<folder>/<name>'
 	- Additional CLI commands now only processes commands which are not commented out
 	- Additional CLI commands can now process commands with // to feed passwords to interactive prompts
 	- Additional CLI commands has commented out example of how to set EDM user passwords from there
-
+v39 - posted
+	- Now checks the sflow agent IP and if it is set to the old IP, it is now changed to new IP
+	- Added ability to set the XIQ-SE Device Topology Role for the device
 
 Todo:
