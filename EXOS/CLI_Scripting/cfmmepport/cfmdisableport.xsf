@@ -25,8 +25,10 @@ disable port $EVENT.LOG_PARAM_5
 create log entry "UPM cfmportshutdown disabled ports"
 .
 
-create log target upm cfmportshutdown
 create log filter cfmlogfilter
 configure log filter cfmportshutdown add event CFM.MEPExp
-configure log target cfmportshutdown filter cfmlogfilter
+
+create log target upm cfmportshutdown
+configure log target upm cfmportshutdown filter cfmlogfilter
+
 enable log target upm cfmportshutdown
