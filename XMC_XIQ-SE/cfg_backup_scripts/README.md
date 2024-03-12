@@ -22,6 +22,8 @@
 |[Dell Blade Switch](Dell_Blade_switch.txt)|Configuration backup of Dell Blade Switch.|
 |[Dell Force10](dell-force10)|Configuration backup of Dell Force10.|
 |[Extreme BR69xx](BR69xx.txt)|Configuration backup and restore and restart of Brocade/Extreme BR69xx.|
+|[Extreme ISW-24W-4X](ISW-24W-4X_TFTP.txt)|Configuration backup and restore and firmware upgrade through TFTP for ISW-24W-4X. Minimum firmware V00.00.01.0005.|
+|[Extreme ISW-24W-4X](ISW-24W-4X_SCP.txt)|Configuration backup and restore and firmware upgrade through SCP for ISW-24W-4X. Minimum firmware V00.00.01.0005.|
 |[Extreme IQEngine](Extreme-Cloud-AP-TFTP.txt)|Configuration backup for Aerohive HiveOS, Extreme IQEngine.|
 |[FortiGate Firewall](FortiGate)|Configuration backup of FortiGate.|
 |[FortiWLC controller](FortiWLC-FTP.txt)|Configuration backup/restore over FTP of FortiWLC / Meru wireless controller. If your FTP server does support chroot then you may need to change %ABSOLUTE_TARGET_FILE_PATH% with %RELATIVE_TARGET_FILE_PATH%.|

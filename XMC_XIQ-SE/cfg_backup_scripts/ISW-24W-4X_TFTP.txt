@@ -1,0 +1,71 @@
+-- Use these scripts to manage Extreme Networks ISW-24W-4X devices
+name="ISW-24W-4X - TFTP"
+desc="TFTP Scripts"
+protocol=TFTP
+--
+-- This script will download a firmware or config to the device.
+-- When upgrading firmware, the device will automatically reboot
+-- when the upgrade is complete.
+--
+-- NOTES:
+--
+-----BEGIN SCRIPT "Firmware Download"-----
+enable
+configure
+firmware write tftp %TFTP_IP% /%RELATIVE_TARGET_FILE_PATH% image noreboot
+@receive 480
+bye
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+Write firmware image successfully
+-----END SUCCESS----
+-----BEGIN FAILURE MAPPINGS "Firmware Download"-----
+Write firmware image file failed
+-----END FAILURE MAPPINGS-----
+--
+--
+-----BEGIN SCRIPT "BootPROM Download"-----
+enable
+configure
+firmware write tftp %TFTP_IP% /%RELATIVE_TARGET_FILE_PATH% bootloader noreboot
+@receive 480
+bye
+-----END SCRIPT-----
+--
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+configure
+runningcfg put tftp %TFTP_IP% /%RELATIVE_TARGET_FILE_PATH%
+@receive 20
+bye
+-----END SCRIPT-----
+--
+--
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+configure
+runningcfg get tftp %TFTP_IP% /%RELATIVE_TARGET_FILE_PATH%
+runningcfg import download
+@receive 20
+exit
+system restart
+@KEY y
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+success!
+-----END SUCCESS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Upload"-----
+failed!
+-----END FAILURE MAPPINGS-----
+-----BEGIN SUCCESS "Configuration Download"-----
+success!
+-----END SUCCESS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Download"-----
+failed!
+-----END FAILURE MAPPINGS-----
+-----BEGIN SCRIPT "Reset"-----
+enable
+system restart
+@KEY y
+-----END SCRIPT-----

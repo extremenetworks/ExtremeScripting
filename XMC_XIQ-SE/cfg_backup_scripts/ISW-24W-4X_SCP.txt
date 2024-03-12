@@ -1,0 +1,72 @@
+-- Use these scripts to manage Extreme Networks ISW-24W-4X devices
+name="ISW-24W-4X - SCP"
+desc="SCP Scripts"
+protocol=SCP
+--
+-- This script will download a firmware or config to the device.
+-- When upgrading firmware, the device will automatically reboot
+-- when the upgrade is complete.
+--
+-- NOTES:
+--
+-----BEGIN SCRIPT "Firmware Download"-----
+enable
+configure
+firmware write scp %SCP_IP% %SCP_USER% %SCP_PSWD% %ABSOLUTE_TARGET_FILE_PATH% image noreboot
+@receive 480
+show firmware status
+bye
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Firmware Download"-----
+Write firmware image successfully
+-----END SUCCESS----
+-----BEGIN FAILURE MAPPINGS "Firmware Download"-----
+Write firmware image file failed
+-----END FAILURE MAPPINGS-----
+--
+--
+-----BEGIN SCRIPT "BootPROM Download"-----
+enable
+configure
+firmware write scp %SCP_IP% %SCP_USER% %SCP_PSWD% %ABSOLUTE_TARGET_FILE_PATH% bootloader noreboot
+@receive 480
+bye
+-----END SCRIPT-----
+--
+--
+-----BEGIN SCRIPT "Configuration Upload"-----
+enable
+configure
+runningcfg put scp %SCP_IP% %SCP_USER% %SCP_PSWD% %ABSOLUTE_TARGET_FILE_PATH%
+@receive 20
+bye
+-----END SCRIPT-----
+--
+--
+-----BEGIN SCRIPT "Configuration Download"-----
+enable
+configure
+runningcfg get scp %SCP_IP% %SCP_USER% %SCP_PSWD% %ABSOLUTE_TARGET_FILE_PATH%
+runningcfg import download
+@receive 20
+exit
+system restart
+@KEY y
+-----END SCRIPT-----
+-----BEGIN SUCCESS "Configuration Download"-----
+success!
+-----END SUCCESS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Upload"-----
+failed!
+-----END FAILURE MAPPINGS-----
+-----BEGIN SUCCESS "Configuration Upload"-----
+success!
+-----END SUCCESS-----
+-----BEGIN FAILURE MAPPINGS "Configuration Upload"-----
+failed!
+-----END FAILURE MAPPINGS-----
+-----BEGIN SCRIPT "Reset"-----
+enable
+system restart
+@KEY y
+-----END SCRIPT-----
