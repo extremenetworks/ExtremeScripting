@@ -19,7 +19,7 @@ configure log filter port_linkdown add events vlan.msgs.portLinkStateDown
 # Finally create a log target, assign it to UPM, and enable it
  
 create log target port_linkdown_disable
-configure log target port_linkdown_disable filter port_linkdown
+configure log target upm port_linkdown_disable filter port_linkdown
 configure log target upm port_linkdown_disable match any
  
 enable log target upm port_linkdown_disable
