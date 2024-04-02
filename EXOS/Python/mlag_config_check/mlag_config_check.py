@@ -115,10 +115,10 @@ def legacy_mlag_check():
             num_ports = int(num_ports[:-1])
         #Check the number of ports added to the ISC vlan
         if num_ports > 1:
-            print 'Multiple ports are added to the ISC vlan (' + isc_vlan + '). Please correct.'
+            print ('Multiple ports are added to the ISC vlan (' + isc_vlan + '). Please correct.')
             return
         elif num_ports == 0:
-            print 'No ports are added to the ISC vlan (' + isc_vlan + '). Please correct.'
+            print ('No ports are added to the ISC vlan (' + isc_vlan + '). Please correct.')
             return
         # At this point, we can assume that there is one port added to the ISC vlan,
         # and continue checking the MLAG configuration.
@@ -132,7 +132,7 @@ def legacy_mlag_check():
             index = index + 1
             isc_port = cli_output[index]
         else:
-            print FMT_ERROR.format('An error occurred. Unable to determine ISC port')
+            print (FMT_ERROR.format('An error occurred. Unable to determine ISC port'))
             return
 
         # if there is a no display string, disp_string_index will be -1. Otherwise, strip everyting after the first paren around the display string
@@ -151,7 +151,7 @@ def legacy_mlag_check():
             isc_port = isc_port[1:]
         elif isc_port.startswith('!'):
             isc_port = isc_port[1:]
-            print 'The ISC port (' + isc_port + ') is disabled. Please correct.'
+            print ('The ISC port (' + isc_port + ') is disabled. Please correct.')
         # Create a list of the vlans that exist on the ISC port
         cli_output = clicmd('show port ' + isc_port + ' info detail', True).split()
         vlan_on_next_iteration = False
@@ -193,7 +193,7 @@ def legacy_mlag_check():
                     else:
                         vlan = i
                     if vlan not in isc_port_vlans:
-                        print 'Vlan ' + vlan + ' is not added to the ISC port (' + isc_port + '), and is found on MLAG port ' + p + '. Please correct.'
+                        print ('Vlan ' + vlan + ' is not added to the ISC port (' + isc_port + '), and is found on MLAG port ' + p + '. Please correct.')
                 if i == 'Name:':
                     vlan_on_next_iteration = True
                 else :
@@ -210,8 +210,8 @@ def legacy_mlag_check():
                 print ('Local and remote FDB checksums match.')
                 break
         if local != remote:
-            print 'Local and remote FDB checksums do not match. Please check config on the other MLAG peer.'
-            print clicmd('debug fdb show globals', True)
+            print ('Local and remote FDB checksums do not match. Please check config on the other MLAG peer.')
+            print (clicmd('debug fdb show globals', True))
 
 
 def yes_no_input(request):
@@ -220,16 +220,16 @@ def yes_no_input(request):
         return True
     elif input in ('n','N',''):
         return False
-    print FMT_ERROR.format('Invalid input.  Please enter \'y\' or \'n\'')
+    print (FMT_ERROR.format('Invalid input.  Please enter \'y\' or \'n\''))
     yes_no_input(request)
 
 
 def main():
-    print FMT_H1.format("Checking MLAG Configuration and Status")
+    print (FMT_H1.format("Checking MLAG Configuration and Status"))
     # Check to see if MLAG is configured
     vsm_config = len(clicmd('show configuration vsm', True).splitlines())
     if vsm_config <= 3:
-        print FMT_ERROR.format('MLAG Not Configured')
+        print (FMT_ERROR.format('MLAG Not Configured'))
         exit()
 
     # Check software version, 15.6 must run legacy MLAG check script
@@ -244,7 +244,7 @@ def main():
             ver = line.split(':')
             ver = ver[1].strip()
     if ver == '':
-        print FMT_ERROR.format('Problem detecting software version')
+        print (FMT_ERROR.format('Problem detecting software version'))
         exit()
     elif ver.startswith('15.6'):
         print('Switch running EXOS 15.6, executing legacy script, multi-peer not supported.')
@@ -263,13 +263,13 @@ def main():
             perror = False
             # Get Peer Name
             pname = peer['peerName']
-            print FMT_H1.format('Checking MLAG Peer "{0}"'.format(pname))
+            print (FMT_H1.format('Checking MLAG Peer "{0}"'.format(pname)))
             # Get ISC VLAN
             isc_vlan = peer['vlan']
             isc_port = ''
             # Check to see if MLAG peer is not configured
             if isc_vlan == 'None':
-                print FMT_H2.format(FMT_CFG.format('Peer "{0}" is not properly configured, ISC VLAN configuration not found'.format(pname)))
+                print (FMT_H2.format(FMT_CFG.format('Peer "{0}" is not properly configured, ISC VLAN configuration not found'.format(pname))))
                 perror = True
                 continue
             # Check the number of ports added to the ISC vlan, and get the port number of the ISC link
@@ -277,17 +277,17 @@ def main():
             plist = ['-', ',']
             # Catch 1 tagged and 1 untagged port added to ISC
             if port_check['untagged'] != 'None' and port_check['tagged'] != 'None':
-                print FMT_H2.format(FMT_CFG.format('ISC vlan "{0}" for peer {1} has more than one port added, please resolve'.format(isc_vlan, pname)))
+                print (FMT_H2.format(FMT_CFG.format('ISC vlan "{0}" for peer {1} has more than one port added, please resolve'.format(isc_vlan, pname))))
                 perror = True
                 continue
             # Check if NO ports are added to ISC
             elif port_check['untagged'] == 'None' and port_check['tagged'] == 'None':
-                print FMT_H2.format(FMT_CFG.format('No port added to ISC vlan "{0}" for peer {1}, please resolve'.format(isc_vlan, pname)))
+                print (FMT_H2.format(FMT_CFG.format('No port added to ISC vlan "{0}" for peer {1}, please resolve'.format(isc_vlan, pname))))
                 perror = True
                 continue
             # Check if untagged or tagged fields contain port list, meaning multiple ports are added
             elif any(s in port_check['untagged'] for s in plist) or any(s in port_check['tagged'] for s in plist):
-                print FMT_H2.format(FMT_CFG.format('ISC vlan "{0}" for peer {1} has more than one port added, please resolve'.format(isc_vlan, pname)))
+                print (FMT_H2.format(FMT_CFG.format('ISC vlan "{0}" for peer {1} has more than one port added, please resolve'.format(isc_vlan, pname))))
                 perror = True
                 continue
             elif port_check['untagged'] == 'None':
@@ -315,7 +315,7 @@ def main():
             for port in mlag_ports:
                 vlan_list = get_port_vlan_list(port)
                 if vlan_list == ['None']:
-                    print FMT_CFG_WRN.format('No VLANs added to MLAG Port {0}'.format(port))
+                    print (FMT_CFG_WRN.format('No VLANs added to MLAG Port {0}'.format(port)))
                     continue
                 for vid in vlan_list:
                     if vid not in mport_vids:
@@ -327,23 +327,23 @@ def main():
                 for port in sharing:
                     if port['loadShareMaster'] == isc_port:
                         if port['linkState'] == '0':
-                            print FMT_CFG.format(
+                            print (FMT_CFG.format(
                                 'Port {0}, a LAG member of the ISC for peer {1}, is down.  Please resolve.'.format(
-                                    port['port'], pname))
+                                    port['port'], pname)))
                             perror = True
                         elif port['agg_membership'] == '0' and port['linkState'] == '1':
-                            print FMT_CFG.format(
+                            print (FMT_CFG.format(
                                 'Port {0}, a LAG member of the ISC for peer {1} is not added to the aggregator.  Please resolve.'.format(
-                                    port['port'], pname))
+                                    port['port'], pname)))
                             perror = True
             else:
-                print FMT_CFG.format(
+                print (FMT_CFG.format(
                     'ISC for {0} is not a LAG.  It is recommended that all ISC connections use link aggregation'.format(
-                        pname))
+                        pname)))
                 perror = True
                 if not port_active(isc_port):
-                    print FMT_CFG.format(
-                        'ISC port {0} for Peer {1} not active. Please resolve.'.format(isc_port, pname))
+                    print (FMT_CFG.format(
+                        'ISC port {0} for Peer {1} not active. Please resolve.'.format(isc_port, pname)))
                     perror = True
             # Check MLAG Ports
             for port in mlag_ports:
@@ -351,27 +351,27 @@ def main():
                     for lag_port in sharing:
                         if lag_port['loadShareMaster'] == port:
                             if lag_port['linkState'] == '0':
-                                print FMT_CFG.format(
+                                print (FMT_CFG.format(
                                     'MLAG port {0} for peer {1} is down.  Please resolve.'.format(
-                                        lag_port['port'], pname))
+                                        lag_port['port'], pname)))
                                 perror = True
                             elif lag_port['agg_membership'] == '0' and lag_port['linkState'] == '1':
-                                print FMT_CFG.format(
+                                print (FMT_CFG.format(
                                     'MLAG port {0} for peer {1} is not added to the aggregator.  Please resolve.'.format(
-                                        lag_port['port'], pname))
+                                        lag_port['port'], pname)))
                                 perror = True
                 else:
                     if not port_active(port):
-                        print FMT_CFG.format(
-                            'MLAG Port {0} for Peer {1} is not active. Please resolve.'.format(port, pname))
+                        print (FMT_CFG.format(
+                            'MLAG Port {0} for Peer {1} is not active. Please resolve.'.format(port, pname)))
                         perror = True
 
             # Check to see if MLAG port VLANs are missing from ISC and add the missing vlans to a list
             for vid in mport_vids:
                 if vid not in isc_vlans:
                     missing_vlans.append(vid)
-                    print FMT_H2.format(FMT_CFG.format('VLAN {0} is found on an MLAG port but not added to ISC port {1}'.format
-                                         (vid, isc_port)))
+                    print (FMT_H2.format(FMT_CFG.format('VLAN {0} is found on an MLAG port but not added to ISC port {1}'.format
+                                         (vid, isc_port))))
                     perror = True
             # If vlans are missing, ask the user if they woud like to resolve
             if missing_vlans != [] and yes_no_input(">> Would you like to add the missing vlans to the ISC? (y/n)"):
@@ -389,7 +389,7 @@ def main():
                     local = checksums[7]
                     remote = checksums[9]
                 else:
-                    print FMT_ERROR.format('Checksum check failed.')
+                    print (FMT_ERROR.format('Checksum check failed.'))
                     exit()
                     # print local
                     # print remote
@@ -397,15 +397,15 @@ def main():
                     # print FMT_H2.format('Local and remote FDB checksums match.')
                     break
                 if local != remote:
-                    print FMT_CFG.format('Local and remote FDB checksums do not match. Please check config on the other MLAG peer.')
-                    print clicmd('debug fdb show globals', True)
+                    print (FMT_CFG.format('Local and remote FDB checksums do not match. Please check config on the other MLAG peer.'))
+                    print (clicmd('debug fdb show globals', True))
                     perror = True
 
 
             if not perror:
-                print FMT_H2.format('No problems found on peer "{0}"'.format(pname))
+                print (FMT_H2.format('No problems found on peer "{0}"'.format(pname)))
 
-    print '\n>> MLAG config check completed.\n'
+    print ('\n>> MLAG config check completed.\n')
 
 if __name__ == '__main__':
     try:
