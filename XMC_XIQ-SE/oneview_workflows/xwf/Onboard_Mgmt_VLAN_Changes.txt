@@ -45,8 +45,10 @@ v68
 	- Additional CLI commands now only processes commands which are not commented out
 	- Additional CLI commands can now process commands with // to feed passwords to interactive prompts
 	- Additional CLI commands has commented out example of how to set EDM user passwords from there
-v69 - posted
+v69
 	- Now checks the sflow agent IP and if it is set to the old IP, it is now changed to new IP
 	- Added ability to set the XIQ-SE Device Topology Role for the device
+v70 - posted
+	- Added ability to set device Asset Tag under device annotation
 
 Todo:

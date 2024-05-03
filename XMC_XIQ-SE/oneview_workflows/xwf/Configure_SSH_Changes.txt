@@ -1,0 +1,20 @@
+Configure SSH
+
+v11
+	- First version shared
+v12
+	- Was not detecting iqAgent enabled; fixed
+v14
+	- Added delay before re-enabling SSH as the SNMP Set would sometimes fail
+v40
+	- Re-designed around updated SNMP functions which can now skip OID which
+	  return "No Such Object" and also implements rollback; so now works even
+	  on older VSPs, which might not have all the SSH MIBs nor iqAgent
+v42 - posted
+	- Re-added Key Exchange cypher diffie-hellman-group1-sha1, as this is still
+	  configurable on older VOSS versions
+	- Cyphers now have comments inline in the workflow inputs
+	- Debug is now shown in case of snmpSet called with returnError=True
+
+
+Todo:
