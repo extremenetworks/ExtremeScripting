@@ -85,8 +85,45 @@ v103
 v104
 	- Activity 05 was failing to convert the switch to DVR Leaf if the switch already had a mgmt VLAN on a VLAN-id
 	  other than the default 4048, because it was trying to delete that VLAN and failing
-v105 - posted
+v105
 	- Activity 04 was failing to configure the auto-sense FA auth key
+v106
+	- MakeVspDvrLeaf_05 when trying to delete non-default platform VLANs could fail to delete a VLAN if ZIQ-SE 23.4
+	  or later ZTP+ created the VLAN as an auto-sense I-SID. The workflow would fail and not enable DVR Leaf on the
+	  switch. Now the workflow will not fail, and will resort to activating DVR Leaf via a switch reboot.
+v112
+	- Added optional CSV file so $<csv-variable> in addition to ${site-custom-variable}
+	- CSV variables also work in format $(csv-variable) as carets are not allowed in combo box inputs
+	- Added activity 06 with ability to add switch to Policy Domain as well as Policy VLAN Island Topology
+	- Activity 04 under additional CLI commands has commented out exemple of how to set EDM user passwords from there
+	- Activity 04 additional CLI commands now only processes commands which are not commented out
+	- Activity 04 additional CLI commands can now process commands with // to feed passwords to interactive prompts
+	- Variable const_cliCmdsSkipOnError, for execution of optional CLI commands, now defaults to false
+	- Activity 02 when configuring RADIUS on switch, will now always configure "radius reachability mode status-server"
+	- Updated all functions
+v113
+	- Updated all functions (# CSV data input was buggy)
+	- Was failing to load CSV variables, $<csv-variable>, due to missing workflow variable const_CSV_DELIMITER
+	- AddToPolicy_06: Introduced a 5 secs sleep timer before enforcing the Policy Domain
+v115
+	- Workflow now has input for switch system-name to configure
+v118
+	- If NAC Engine Group configured with External Load Balancers, now configures Load Balancer IPs as RADIUS server
+	  on the switch instead of actual NAC Engine IPs
+	- Added ability to execute a follow on workflow 
+v126 - posted
+	- Fixed issue with follow-on workflow which was not working at all
+	- Changed the logic used with NAC External Load Balancers; if these are found to be set, the switches are configured
+	  with the load balancer IPs as RADIUS servers, but the dynamic RADIUS client entries are still configured using the 
+	  actual NAC engine IPs
+	- If, with load balancers with NAC, we have more than 2 NAC engine IPs to configure as dynamic RADIUS clients,
+	  error checking is disabled after configuring the 1st two dynamic RADIUS clients; this is because VOSS today can
+	  only configure at most 2 dynamic clients, but newer versions will support more; hence making the workflow future
+	  proof now
+	- As only two dynamic RADIUS clients might be configurable on VOSS, there is a way to ensure that the NAC Engines
+	  associated with the primary NAC Load Balancer are the first to be configured; to achieve this, add the Load Balancer
+	  to XIQ-SE and under Device Annotation, set UserData#1 to "Primary" and UserData#2 to "Pool = <1st IP>, <2nd IP>"
+
 
 Todo:
 
