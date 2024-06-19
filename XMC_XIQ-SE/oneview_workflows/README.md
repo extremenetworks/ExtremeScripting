@@ -61,8 +61,9 @@
 |[I-SID to Name syncing](xwf/I-SID_Name_bindings-23.7.11.6v52.xwf)|The workflow uses a CSV-like input for I-SID to name binding and applied by SNMP against VOSS and Fabric Engine based switches. | the input is like this "123450,Demo-123450" |23.7.11.6v52|
 |[Bounce PoE](xwf/Bounce_PoE-24.2.10.49v9.xwf)| The workflow disables PoE, wait for X seconds, and enables the PoE. | Select port or multiple ports and define the delay |24.2.10.49v9|
 |[Disable PoE](xwf/Disable_PoE-24.2.10.49v2.xwf)| The workflow disables PoE on selected ports| Select port or multiple ports |24.2.10.49v2|
-|[Enable PoE](xwf/Enable_PoE-24.2.10.49v2.xwf)| The workflow enables PoE on selected ports| Select port or multiple ports |24.2.10.49v2|
+|[Enable PoE](xwf/Enable_PoE-24.2.13.11v6.xwf)| The workflow enables PoE on selected ports| Select one port or multiple ports |24.2.13.11v6|
 |[Configure SSH](xwf/Configure_SSH-24.2.12.19v42.xwf)|Workflow to configure SSH on VOSS/FabricEngine via SNMP, as it is hard to do so via SSH itself because any SSH config change requires disabling SSH| |24.2.12.19v42|
+|[IPP provided by XIQ-SE](xwf/onboard_Switch_Engine_with_UPM_Python-24.2.12.19v22.xwf)|Instant Port Profile configuration using XIQ-SE with an onbouarding workflow. The required EMS/UPM will be automaticaly done. The uplink port have to be port number one (1:1). A CSV input is required for the MAC prefix match and the coresponding VLANs if untagged or/and tagged. | A list of all required VLANs are needed as well a comma separated input [(CSV input example)](xwf/MAC2VLAN.csv) |24.2.12.19v22|
 
 
 # XIQ Site Engine (XMC) daily job Workflows
