@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Config,</category>
-    <comments>Create L2VSN across any of VSP,XOS,ERS - v2.3</comments>
+    <comments>Create L2VSN across any of VSP,XOS,ERS - v2.6</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Create a L2VSN across any of VOSS, EXOS, BOSS
 # Written by Ludovico Stevens, CSE Extreme Networks
 
-__version__ = '2.3'
+__version__ = '2.6'
 
 # 1.5 - Changed CLI dict 'get_isid_uni_data' so that it can work on VSP8600 also (no CLI grep)
 #     - Creating a service with no ports and no vlan was giving an error about tagging mode
@@ -63,6 +63,25 @@ __version__ = '2.3'
 #       when you disable auto-sense it has the effect of disabling flex-uni on the port
 # 2.2 - Interim fix by Didier to allow subports in generatePortRange function
 # 2.3 - Updated port processing functions to support channelized ports (slot/port/chan)
+# 2.4 - Change to port processing functions to support channelized ports had broken regualar port
+#       and slot/port list and range processing
+# 2.5 - I-SID name is now only configured if a VLAN name was provided
+#       Added input for user to express preference for using CVLAN-UNI or Switched-UNI on VOSS
+# 2.6 - Enabling flex-UNI was hapening twice for auto-sense ports with nothing connected state
+#     - Logic updated:
+        # Table to determine type of L2VSN we need to create
+        # Input Ports | DVR Leaf | Auto-Sense | Pref Input | Flex-uni   | Type to create
+        #    yes      |   yes    | don't care | don't care | don't care | =&gt; create Switched-UNI
+        #    yes      |   no     |    yes     |  none      | don't care | =&gt; create CVLAN-UNI
+        #    yes      |   no     |    yes     |  Flex-UNI  | don't care | =&gt; create Switched-UNI
+        #    yes      |   no     |    yes     |  CVLAN-UNI | don't care | =&gt; create CVLAN-UNI
+        #    yes      |   no     |    no      | don't care |    yes     | =&gt; create Switched-UNI
+        #    yes      |   no     |    no      | don't care |    no      | =&gt; create CVLAN-UNI
+        #    no       |   yes    |    no      | don't care |    n/a     | =&gt; create Switched-UNI
+        #    no       |   no     |    no      |  none      |    n/a     | =&gt; create CVLAN-UNI
+        #    no       |   no     |    no      |  Flex-UNI  |    n/a     | =&gt; create Switched-UNI
+        #    no       |   no     |    no      |  CVLAN-UNI |    n/a     | =&gt; create CVLAN-UNI
+
 
 #
 # XMC Metadata
@@ -154,6 +173,14 @@ __version__ = '2.3'
 #        validValues = [tag,untag],
 #        name = "userInput_tagGlobal",
 #        value = "tag"
+#    )
+#    @VariableFieldLabel (
+#        description = "For VOSS only&amp;#44 CVLAN-UNI / Switched-UNI preference",
+#        type = string,
+#        required = no,
+#        validValues = [none,CVLAN-UNI,Switched-UNI],
+#        name = "userInput_vossUniPref",
+#        value = "none"
 #    )
 #@SectionEnd
 
@@ -632,7 +659,7 @@ def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): #
 
 #
 # Port processing functions
-# v5
+# v6
 RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+(?:[/:]\d)?$')
 RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)(?:[/:](\d))?-(?:([1-9]\d{0,2})[/:])?(\d+)(?:[/:](\d))?$')
 RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
@@ -657,7 +684,7 @@ def getSlotPortRanges(): # v1 - Populates the SlotPortRange dict
     SlotPortRange = sendCLI_showRegex(slotCommand[Family])
     debug("getSlotPortRanges = {}".format(SlotPortRange))
 
-def generatePortList(portStr, debugKey=None): # v2 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
+def generatePortList(portStr, debugKey=None): # v3 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
     # This version of this function will not handle port ranges which span slots
     debug("generatePortList IN = {}".format(portStr))
     portDict = {} # Use a dict, will ensure no port duplicate keys
@@ -672,10 +699,10 @@ def generatePortList(portStr, debugKey=None): # v2 - Given a port list/range, va
             startSlot = rangeMatch.group(1)
             separator = rangeMatch.group(2)
             startPort = int(rangeMatch.group(3))
-            startChan = int(rangeMatch.group(4))
+            startChan = int(rangeMatch.group(4)) if rangeMatch.group(4) else None
             endSlot = rangeMatch.group(5)
             endPort = int(rangeMatch.group(6))
-            endChan = int(rangeMatch.group(7))
+            endChan = int(rangeMatch.group(7)) if rangeMatch.group(4) else None
             if endSlot and startSlot != endSlot:
                 print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
             elif (startChan or endChan) and endPort and startPort != endPort:
@@ -720,7 +747,7 @@ def generatePortList(portStr, debugKey=None): # v2 - Given a port list/range, va
         else: debug("generatePortList OUT = {}".format(portList))
     return portList
 
-def generatePortRange(portList, debugKey=None): # v2 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
+def generatePortRange(portList, debugKey=None): # v3 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
     # Ported from acli.pl; this version of this function only compacts ranges within same slot
     debug("generatePortRange IN = {}".format(portList))
     rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
@@ -739,7 +766,7 @@ def generatePortRange(portList, debugKey=None): # v2 - Given a list of ports, ge
         # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port / slotPort[4] = channel
         if len(slotPort) == 5: # slot/port/chan
             if elementBuild:
-                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == currentPort and slotPort[4] == str(int(currentChan)+1):
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == currentPort and currentChan and slotPort[4] == str(int(currentChan)+1):
                     currentChan = slotPort[4]
                     if rangeMode[Family] == 1:
                         rangeLast = currentChan
@@ -1064,6 +1091,7 @@ def main():
         taggingDv = emc_vars["userInput_tag"]
     except:
         taggingDv = None
+    vossUniPref = emc_vars["userInput_vossUniPref"]
 
     print "Information provided by User:"
     print " Global settings:"
@@ -1078,6 +1106,7 @@ def main():
     print " - Ports = {}".format(portsDv)
     print " - MLT ids = {}".format(mltsDv)
     print " - Tagging mode = {}".format(taggingDv)
+    print " - VOSS CVLAN-UNI/Switched-UNI preference = {}".format(vossUniPref)
 
     # I-SID validation
     if not isid.isdigit() or int(isid) &gt; 15999999:
@@ -1171,13 +1200,17 @@ def main():
     if Family == 'VSP Series':
 
         # Table to determine type of L2VSN we need to create
-        # Input Ports | DVR Leaf | Auto-Sense | Flex-uni   | Type to create
-        #    yes      |   yes    | don't care | don't care | =&gt; create Switched-UNI
-        #    yes      |   no     |    yes     | don't care | =&gt; create CVLAN-UNI
-        #    yes      |   no     |    no      |    yes     | =&gt; create Switched-UNI
-        #    yes      |   no     |    no      |    no      | =&gt; create CVLAN-UNI
-        #    no       |   yes    |    no      |    no      | =&gt; create Switched-UNI
-        #    no       |   no     |    no      |    no      | =&gt; create CVLAN-UNI
+        # Input Ports | DVR Leaf | Auto-Sense | Pref Input | Flex-uni   | Type to create
+        #    yes      |   yes    | don't care | don't care | don't care | =&gt; create Switched-UNI
+        #    yes      |   no     |    yes     |  none      | don't care | =&gt; create CVLAN-UNI
+        #    yes      |   no     |    yes     |  Flex-UNI  | don't care | =&gt; create Switched-UNI
+        #    yes      |   no     |    yes     |  CVLAN-UNI | don't care | =&gt; create CVLAN-UNI
+        #    yes      |   no     |    no      | don't care |    yes     | =&gt; create Switched-UNI
+        #    yes      |   no     |    no      | don't care |    no      | =&gt; create CVLAN-UNI
+        #    no       |   yes    |    no      | don't care |    n/a     | =&gt; create Switched-UNI
+        #    no       |   no     |    no      |  none      |    n/a     | =&gt; create CVLAN-UNI
+        #    no       |   no     |    no      |  Flex-UNI  |    n/a     | =&gt; create Switched-UNI
+        #    no       |   no     |    no      |  CVLAN-UNI |    n/a     | =&gt; create CVLAN-UNI
 
         # Get DVR node type
         dvrNodeType = sendCLI_showRegex(CLI_Dict[Family]['get_dvr_type'], 'dvrNodeType')
@@ -1201,7 +1234,10 @@ def main():
             else:
                 for port in portList:
                     if autoSensePortDict[port] == 'Enable':
-                        cvlanPortList.append(port)
+                        if vossUniPref == "Switched-UNI":
+                            swuniPortList = portList
+                        else:
+                            cvlanPortList.append(port)
                     elif flexUniPortDict[port] == 'Enable':
                         swuniPortList.append(port)
                     else: # flexUniPortDict[port] == 'Disable'
@@ -1247,6 +1283,10 @@ def main():
             if dvrLeaf:
                 swuniAloneCreate = True
                 print "\nNo input ports provided and switch is DVR Leaf =&gt; Switched-UNI context creation only\n"
+            elif vossUniPref == "CVLAN-UNI":
+                cvlanAloneCreate = True
+            elif vossUniPref == "Switched-UNI":
+                swuniAloneCreate = True
             else:
                 cvlanAloneCreate = True
                 print "\nNo input ports provided and switch is not DVR Leaf =&gt; Platform CVLAN creation only\n"
@@ -1310,7 +1350,7 @@ def main():
                 swuniAutoSensePortsRange = generatePortRange(swuniAutoSensePortsList)
                 print "Selected ports where we need to disable auto-sense = {}".format(swuniAutoSensePortsRange)
 
-            flexUniDisabledList = [x for x in flexUniPortDict if flexUniPortDict[x] == 'Disable']
+            flexUniDisabledList = [x for x in flexUniPortDict if flexUniPortDict[x] == 'Disable' and x not in swuniAutoSensePortsList]
             debug("flexUniDisabledList = {}".format(flexUniDisabledList))
             if flexUniDisabledList:
                 flexUniEnablePortRange = generatePortRange(flexUniDisabledList)
@@ -1431,7 +1471,7 @@ def main():
         sendCLI_configCommand(CLI_Dict[Family]['exit_config_context'])
 
     # Assign I-SID name, VOSS only
-    if 'set_isid_name' in CLI_Dict[Family]:
+    if vlanName and 'set_isid_name' in CLI_Dict[Family]:
         sendCLI_configCommand(CLI_Dict[Family]['set_isid_name'].format(isid, vlanName))
 
     # End and save config
@@ -1468,11 +1508,12 @@ main()
 </content>
     <creationDate>1537273649994</creationDate>
     <creator>lstevens</creator>
+    <credentialsCacheOveride>false</credentialsCacheOveride>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1688472441059</lastUpdateDate>
+    <lastUpdateDate>1718392730775</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds></nosIds>
@@ -1483,7 +1524,7 @@ main()
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,XIQ-SE Administrator,</roles>
+    <roles>,CSE,XIQ-SE Administrator,SE,GCE,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>

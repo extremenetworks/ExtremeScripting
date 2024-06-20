@@ -49,7 +49,14 @@ v38
 v39
 	- Now checks the sflow agent IP and if it is set to the old IP, it is now changed to new IP
 	- Added ability to set the XIQ-SE Device Topology Role for the device
-v40 - posted
+v40
 	- Added ability to set device Asset Tag under device annotation
+v44 - posted
+	- Added workflow variable const_GRACEFUL_EXIT_IF_NO_SN; by default False; can be set to let the
+	  workflow gracefully exit if the device lookup key was not found in the provided CSV file
+	- Added workflow variable const_GRACEFUL_EXIT_IF_NO_IP; by default False; can be set to let the
+	  workflow gracefully exit if no Mgmt CLIP IP value was obtained from Site or CSV inputs
+	- Added logic for 5320-16 & 5320-24 models; if they are found to be SD-WAN enabled and they are
+	  running 9.0.3.0 or later, the workflow will now activate: auto-sense sd-wan vrf GlobalRouter
 
 Todo:
