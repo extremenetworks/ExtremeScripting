@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Delete all Insight/IAH VMs on VOSS or EXOS switch - v1.2</comments>
+    <comments>Delete all Insight/IAH VMs on VOSS or EXOS switch - v1.4</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -27,7 +27,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '1.2'
+__version__ = '1.4'
 
 # Changes
 # 1.1  - On EXOS need to increase the CLI timeout for VM stopping
@@ -36,6 +36,9 @@ __version__ = '1.2'
 #        untile it stops. Added logic to keep checking the VM until it is seen to have stopped, and only
 #        it is deleted
 # 1.2  - Updated to take advantage of EXOS ability to disable CLI prompting
+# 1.3  - VOSS has fixed issue where -y was not processed on file deletion commands; but now we must work
+#        with both new and older VOSS versions; ignoring any CLI errors on VM file deletion
+# 1.4  - Option "Delete all VM files as well" is now by default disabled 
 
 '''
 #@MetaDataStart
@@ -60,7 +63,7 @@ __version__ = '1.2'
 #        required = no,
 #        readOnly = no,
 #        validValues = [Enable, Disable],
-#        value = "Enable"
+#        value = "Disable"
 #        name = "userInput_deleteVmFiles",
 #    )
 #@SectionEnd
@@ -385,7 +388,7 @@ CLI_Dict = {
         'list_vms'                   : 'list://show virtual-service config||Package: +(\S+) *$',
         'stop_vm'                    : 'no virtual-service {}', # VM name (config command)
         'delete_vm'                  : 'virtual-service {} uninstall', # VM name (privExec command)
-        'delete_vm_files'            : 'delete /var/lib/insight/packages/* -y\ny',
+        'delete_vm_files'            : 'delete /var/lib/insight/packages/* -y\ny', # Older VOSS versions don't process -y and prompt anyway
     },
     'Summit Series': {
         'disable_more_paging'        : 'disable cli paging',
@@ -473,22 +476,22 @@ def main():
 
     # Delete VM files, if input option was enabled
     if deleteVmFiles == 'enable':
-        sendCLI_configCommand(CLI_Dict[Family]['delete_vm_files'])
+        sendCLI_configCommand(CLI_Dict[Family]['delete_vm_files'], returnCliError=True)
 
     # Print summary of config performed
     printConfigSummary()
 
-main()
-</content>
+main()</content>
     <creator></creator>
+    <credentialsCacheOveride>false</credentialsCacheOveride>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Groups,</contexts>
-    <lastUpdateDate>1650449097509</lastUpdateDate>
+    <lastUpdateDate>1717508481420</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-exos,nos-id-voss,</nosIds>
+    <nosIds>,nos-id-switch-engine,nos-id-fabric-engine,nos-id-exos,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>

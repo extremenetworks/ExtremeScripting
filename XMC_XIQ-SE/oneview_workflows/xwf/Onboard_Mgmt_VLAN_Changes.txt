@@ -48,7 +48,14 @@ v68
 v69
 	- Now checks the sflow agent IP and if it is set to the old IP, it is now changed to new IP
 	- Added ability to set the XIQ-SE Device Topology Role for the device
-v70 - posted
+v70
 	- Added ability to set device Asset Tag under device annotation
+v72 - posted
+	- Workflow was failing if Mgmt VLAN Default Gateway was not set; now it can handle that case, even
+	  if an unlikely deployment option
+	- Added workflow variable const_GRACEFUL_EXIT_IF_NO_SN; by default False; can be set to let the
+	  workflow gracefully exit if the device lookup key was not found in the provided CSV file
+	- Added workflow variable const_GRACEFUL_EXIT_IF_NO_IP; by default False; can be set to let the
+	  workflow gracefully exit if no Mgmt VLAN IP value was obtained from Site or CSV inputs
 
 Todo:
