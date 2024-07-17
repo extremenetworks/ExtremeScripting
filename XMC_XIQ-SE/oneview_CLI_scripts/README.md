@@ -48,14 +48,14 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 | VOSS |[Configuration of a Cluster (vIST)](xml/Fabric_Cluster_Create.xml)|Cluster is created. You need their system-id before executing the script. Script must be executed one unit at a time. This script will disable/enable ISIS = it can disrupt traffic!|Python|
 | VOSS |[Configuring FA Server on BEBs](xml/FAServer_Create.xml)|FA Server configuration|Python|
 | VOSS, EXOS, BOSS |[L2VSN](xml/L2VSN.xml)|This script provisions a L2VSN between several BEBs running VOSS (VSP switches) and/or FA switches (EXOS/BOSS). It can create a VLAN and associate the provided UNI port/mlt to it, making the necessary checks (FA enabled on it or not) but it doesn't create the MLT itself.|Python|
-| VOSS, EXOS, BOSS |[Create L2VSN](xml/Create_L2VSN.xml)|This script provisions a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS. v2.3|Python|
+| VOSS, EXOS, BOSS |[Create L2VSN](xml/Create_L2VSN.xml)|This script provisions a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS. v2.6|Python|
 | VOSS, EXOS, BOSS |[Delete L2VSN](xml/Delete_L2VSN.xml)|This script deletes existing L2VSN services. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS. v1.7|Python|
 | VOSS, EXOS, BOSS |[Create L2VSN port context](xml/Create_L2VSN-port_context.xml)|This script provisions a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS.|Python|
 | VOSS, EXOS, BOSS |[Delete L2VSN port context](xml/Delete_L2VSN-port_context.xml)|This script deletes a L2VSN between any Fabric Connect or Fabric Attach switch. It works across all of VOSS VSPs (including in DVR Leaf mode), BOSS ERS and EXOS.|Python|
 | VOSS |[Create L2VSN range](xml/Create_L2VSN_Range.xml)|This script provisions a range of L2VSNs on Fabric Connect VSPs using Switched-UNI.|Python|
 | VOSS |[Delete L2VSN range](xml/Delete_L2VSN_Range.xml)|This script deletes existing L2VSN services. It works with VOSS VSPs in Switched-UNI mode only.|Python|
-| VOSS |[Create L3VSN](xml/Create_L3VSN.xml)|This script provisions a L3VSN, which includes VRF,IPVPN,VLAN,IP configuration.|Python|
-| VOSS |[Delete L3VSN](xml/Delete_L3VSN.xml)|This script deletes a L3VSN, which includes VRF,IPVPN,VLAN,IP configuration.|Python|
+| VOSS |[Create L3VSN](xml/Create_L3VSN.xml)|This script provisions a L3VSN, which includes VRF,IPVPN,VLAN,IP configuration. v1.4|Python|
+| VOSS |[Delete L3VSN](xml/Delete_L3VSN.xml)|This script deletes a L3VSN, which includes VRF,IPVPN,VLAN,IP configuration. v1.4|Python|
 
 ## Multivendor scripts and others
 | OS | Script name   | Description   | Type   |
@@ -78,7 +78,7 @@ Some devices do answer with unexpected prompt. For such devices you can create `
 ## Integrated Application Hosting (Insight VM) scripts
 | OS | Script name   | Description   | Type   |
 | -- | ------------- | ------------- |:------:|
-| VOSS, EXOS |[Delete Insight VMs](xml/Delete_Insight_VMs.xml)|Given an insight capable VOSS or EXOS switch, removes all insight VMs from it. The VMs, if any, are stopped and deleted from the switch config file. The VM files (OVA/QCOW) are also deleted if the pull down to this effect is enabled. v1.2|Python|
+| VOSS, EXOS |[Delete Insight VMs](xml/Delete_Insight_VMs.xml)|Given an insight capable VOSS or EXOS switch, removes all insight VMs from it. The VMs, if any, are stopped and deleted from the switch config file. The VM files (OVA/QCOW) are also deleted if the pull down to this effect is enabled. v1.4|Python|
 
 
 # Support

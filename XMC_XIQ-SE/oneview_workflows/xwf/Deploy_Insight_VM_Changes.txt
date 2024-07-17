@@ -1,0 +1,25 @@
+Deploy Insight VM
+
+v84
+	- first version provided
+v86 - shared
+	- Added signal on VM completion
+v90
+	- Updated to latest libraries
+	- Vport mgmt now allowed for VOSS as well
+	- Vport naming is now auto-allocated (since VOSS only)
+v94
+	- Bug in activity CheckInputsSwitch_01 was not allowing I-SID inputs for Vport-2
+	- Bug in DownloadIahVm_02 was preventing FTP downloads to VOSS
+v95
+	- Corrected constant variable naming from cosnt_ to const_
+v97
+	- Voss configurable Max memory is 12288MB on 7400/7520/7720, in spite of 12437MB being reported
+	- Updated to work with Fabric Engine and Switch Engine
+v100 - posted
+	- For OVS/SRIOV providing input VLAN is now optional
+	- Updated to work on DVR Leaf
+
+Todo:
+
+

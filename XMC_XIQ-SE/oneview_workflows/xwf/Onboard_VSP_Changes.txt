@@ -111,7 +111,7 @@ v118
 	- If NAC Engine Group configured with External Load Balancers, now configures Load Balancer IPs as RADIUS server
 	  on the switch instead of actual NAC Engine IPs
 	- Added ability to execute a follow on workflow 
-v126 - posted
+v126
 	- Fixed issue with follow-on workflow which was not working at all
 	- Changed the logic used with NAC External Load Balancers; if these are found to be set, the switches are configured
 	  with the load balancer IPs as RADIUS servers, but the dynamic RADIUS client entries are still configured using the 
@@ -123,6 +123,23 @@ v126 - posted
 	- As only two dynamic RADIUS clients might be configurable on VOSS, there is a way to ensure that the NAC Engines
 	  associated with the primary NAC Load Balancer are the first to be configured; to achieve this, add the Load Balancer
 	  to XIQ-SE and under Device Annotation, set UserData#1 to "Primary" and UserData#2 to "Pool = <1st IP>, <2nd IP>"
+v127
+	- Configuration of 3rd and above dynamic RADIUS clients was not skipping error checking as intended
+v129
+	- Policy Domain Enforcement was failing, if the workflow was executed as part of onboarding Site Actions. There is
+	  now a requirement to add user "NetSightUser" to the "XIQ-SE Administrator" Authorization Group to solve this; added
+	  documentation to workflow inputs under Policy Notes
+	- Policy Domain Enforcement now has logic to try several times with both delay and retries configurable in workflow
+	  variables const_POLICY_ENFORCE_DELAY & const_POLICY_ENFORCE_RETRIES
+	- Error message for Policy Mutations is now handled correctly
+	- Workflow now errors immediately if NAC enabled and no RADIUS secret key provided
+v131
+	- Added new commented commands to proposed addional CLI commands input, to remove SNMPv2 default community strings
+	  and to enable RADIUS CLI profile; and added quotes to snmp-server location "$<Location>"
+	- Clarified comment for follow on workflow input from path/name to category/name
+v133 - posted
+	- Activity AddVspNacEngine_03 now adds switch to Access Control location group with interface set to "Any", no longer
+	  "Wired"
 
 
 Todo:
