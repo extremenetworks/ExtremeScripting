@@ -137,10 +137,17 @@ v131
 	- Added new commented commands to proposed addional CLI commands input, to remove SNMPv2 default community strings
 	  and to enable RADIUS CLI profile; and added quotes to snmp-server location "$<Location>"
 	- Clarified comment for follow on workflow input from path/name to category/name
-v133 - posted
+v133
 	- Activity AddVspNacEngine_03 now adds switch to Access Control location group with interface set to "Any", no longer
 	  "Wired"
-
+v134
+	- RADIUS accounting is now not enabled unless one of RADIUS use-by in "eapol", "cli" or "web", otherwise this was
+	  causing the workflow to fail
+v135 - posted
+	- Activity 02 when trying to disable RADIUS accounting no longer errors if the switch complains that accounting cannot
+	  be disabled due to no eapol/cli/web servers
+	- Activity 03 now waits const_NAC_ENGINE_ENFORCE_DELAY seconds before doing a NAC Engine Enforce; that way if
+	  workflow was run against multiple switches, the first enforce will apply to all switches added
 
 Todo:
 

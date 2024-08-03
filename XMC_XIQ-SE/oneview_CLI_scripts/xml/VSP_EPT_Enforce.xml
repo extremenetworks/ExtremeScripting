@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Config,</category>
-    <comments>Enforce XMC NAC and Endpoint-Tracking config to VSP switch - v1.3</comments>
+    <comments>Enforce XMC NAC and Endpoint-Tracking config to VSP switch - v1.5</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -21,572 +21,6 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE USE OR DISTRIBUTION OF SUCH
 SCRIPTS.
 '''
-##########################################################
-# Ludo Standard library; Version 2.15                    #
-# Written by Ludovico Stevens, CSE Extreme Networks      #
-##########################################################
-Debug = False    # Enables debug messages
-Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
-
-##########################################################
-try:
-    emc_vars
-    execution = 'xmc'
-except: # If not running on XMC Jython...
-    # These lines only needed to run XMC Python script locally
-    # They can also be pasted to XMC, but will not execute
-    import sys
-    import json
-    import java.util
-    import emc_cli      # Own local replica
-    import emc_nbi      # Own local replica
-    import emc_results  # Own local replica
-    execution = 'dev'
-    if len(sys.argv) &gt; 1: # Json file as 1st argv
-        emc_vars = json.load(open(sys.argv[1]))
-    else:
-        emc_vars = json.load(open('emc_vars.json'))
-##########################################################
-
-#
-# IMPORTS:
-#
-import re
-import subprocess
-from java.util import LinkedHashMap
-
-#
-# VARIABLES:
-#
-RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
-RegexError  = re.compile(
-    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
-    re.IGNORECASE
-)
-RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
-RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
-RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
-RegexContextPatterns = { # Ported from acli.pl
-    'ERS Series' : [
-        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
-        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
-        re.compile('^(?:locale)'), # level2
-    ],
-    'VSP Series' : [
-        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
-        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
-    ],
-}
-RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
-Indent = 3 # Number of space characters for each indentation
-LastError = None
-ConfigHistory = []
-RollbackStack = []
-SlotPortRange = None # Gets set to dict by getSlotPortRanges()
-FamilyChildren = { # Children will be rolled into parent family for these scripts
-    'Extreme Access Series' : 'VSP Series',
-    'Unified Switching VOSS': 'VSP Series',
-    'Unified Switching EXOS': 'Summit Series',
-    'Universal Platform VOSS': 'VSP Series',
-    'Universal Platform EXOS': 'Summit Series',
-    'Universal Platform Fabric Engine': 'VSP Series',
-    'Universal Platform Switch Engine': 'Summit Series',
-}
-Family = None # This needs to get set by setFamily()
-
-#
-# FUNCTIONS:
-#
-def debug(debugOutput): # Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
-    if Debug:
-        print debugOutput
-
-def setFamily(): # Set global Family variable; automatically handles family children, as far as this script is concerned
-    global Family
-    if emc_vars["family"] in FamilyChildren:
-        Family = FamilyChildren[emc_vars["family"]]
-    else:
-        Family = emc_vars["family"]
-    print "Using family type '{}' for this script".format(Family)
-    if not Family in CLI_Dict:
-        raise RuntimeError('This scripts only supports family types: {}'.format(", ".join(list(CLI_Dict.keys()))))
-
-def portValue(port): # Function to pass to sorted(key) to sort port lists
-    slotPort = re.split('[/:]', port)
-    if len(slotPort) == 2: # slot/port format
-        idx = int(slotPort[0])*100 + int(slotPort[1])
-    else: # standalone port (no slot)
-        idx = int(slotPort[0])
-    return idx
-
-def cleanOutput(outputStr): # Remove echoed command and final prompt from output
-    lastLine = outputStr.splitlines()[-1:][0]
-    if RegexPrompt.match(lastLine):
-        lines = outputStr.splitlines()[1:-1]
-    else:
-        lines = outputStr.splitlines()[1:]
-    return '\n'.join(lines)
-
-def configChain(chainStr): # Produces a list of a set of concatenated commands (either with ';' or newlines)
-    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
-    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
-    cmdList = filter(None, cmdList) # Filter out empty lines, if any
-    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
-    return cmdList
-
-def parseRegexInput(cmdRegexStr): # Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
-    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
-        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
-    else:
-        mode = None
-    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
-    cmdList = map(str.strip, cmd.split('&amp;'))
-    return mode, cmdList, regex
-
-def formatOutputData(data, mode): # Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
-    if not mode                 : value = data                                   # Legacy behaviour same as list
-    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
-    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
-    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
-    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
-    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
-    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
-    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
-    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
-    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets, returns 1st tuple
-    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
-    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
-    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
-    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
-    else:
-        RuntimeError("sendCLI_showRegex: invalid scheme type '{}'".format(mode))
-    return value
-
-def abortError(cmd, errorOutput): # A CLI command failed, before bombing out send any rollback commands which may have been set
-    print "Aborting script due to error on previous command"
-    rollbackStack()
-    print "Aborting because this command failed: {}".format(cmd)
-    raise RuntimeError(errorOutput)
-
-def rollbackStack(): # Execute all commands on the rollback stack
-    if RollbackStack:
-        print "Applying rollback commands to undo partial config and return device to initial state"
-        while RollbackStack:
-            sendCLI_configChain(RollbackStack.pop(), True)
-
-def rollbackCommand(cmd): # Add a command to the rollback stack; these commands will get popped and executed should we need to abort
-    RollbackStack.append(cmd)
-    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
-    cmdList = [x for x in cmdList if x] # Weed out empty elements 
-    cmdOneLiner = " / ".join(cmdList)
-    print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
-
-def rollBackPop(number=0): # Remove entries from RollbackStack
-    global RollbackStack
-    if number == 0:
-        RollbackStack = []
-        print "Rollback stack emptied"
-    else:
-        del RollbackStack[-number:]
-        print "Rollback stack popped last {} entries".format(number)
-
-def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI show command; return output
-    global LastError
-    resultObj = emc_cli.send(cmd)
-    if resultObj.isSuccess():
-        outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
-            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
-                LastError = outputStr
-                if msgOnError:
-                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
-                return None
-            abortError(cmd, outputStr)
-        LastError = None
-        return outputStr
-    else:
-        raise RuntimeError(resultObj.getError())
-
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None): # Send a CLI config command
-    global LastError
-    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
-    if Sanity:
-        print "SANITY&gt; {}".format(cmd)
-        ConfigHistory.append(cmdStore)
-        LastError = None
-        return True
-    resultObj = emc_cli.send(cmd)
-    if resultObj.isSuccess():
-        outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
-            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
-                LastError = outputStr
-                if msgOnError:
-                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
-                return False
-            abortError(cmd, outputStr)
-        ConfigHistory.append(cmdStore)
-        LastError = None
-        return True
-    else:
-        raise RuntimeError(resultObj.getError())
-
-def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None): # Send a semi-colon separated list of config commands
-    cmdList = configChain(chainStr)
-    for cmd in cmdList:
-        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
-        if not success:
-            return False
-    return True
-
-def appendConfigDotCfg(chainStr): # Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
-    if Family != 'VSP Series':
-        raise RuntimeError('appendConfigDotCfg(): only supported with "VSP Series" family type')
-    cmdList = configChain(chainStr)
-    if Sanity:
-        for cmd in cmdList:
-            print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
-        ConfigHistory.append('[after reboot] ' + cmd)
-        LastError = None
-        return True
-    # Edit config.cfg
-    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
-    for cmd in cmdList:
-        cmdStream += cmd + "\n"
-    cmdStream += "\x1bZZ" # Escape edit mode and save file
-    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
-    resultObj = emc_cli.send(cmdStream)
-    if resultObj.isSuccess():
-        outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:2])): # If there is output, check for error in 1st 2 lines only
-            abortError(cmd, outputStr)
-        else:
-            for cmd in cmdList:
-                print "Added to config.cfg: {}".format(cmd)
-                ConfigHistory.append('[after reboot] ' + cmd)
-            LastError = None
-            return True
-    else:
-        raise RuntimeError(resultObj.getError())
-
-def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # Send show command and extract values from output using regex
-    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt;||&lt;regex-with-capturing-brackets&gt;
-    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
-    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
-    for cmd in cmdList:
-        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
-        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
-        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
-        if outputStr:
-            break
-    if not outputStr: # returnCliError true
-        return None
-    data = re.findall(regex, outputStr, re.MULTILINE)
-    debug("sendCLI_showRegex() raw data = {}".format(data))
-    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
-    value = formatOutputData(data, mode)
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, value))
-        else: debug("sendCLI_showRegex OUT = {}".format(value))
-    return value
-
-def nbiQuery(jsonQuery, returnKey, debugKey=None, returnKeyError=False): # Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
-    response = emc_nbi.query(jsonQuery)
-    if 'errors' in response: # Query response contains errors
-        if returnKeyError:
-            return None
-        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
-
-    if returnKey: # If a specific key requested, we find it
-        def recursionKeySearch(nestedDict):
-            for key, value in nestedDict.iteritems():
-                if key == returnKey:
-                    return True, value
-            for key, value in nestedDict.iteritems():
-                if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
-                    foundKey, foundValue = recursionKeySearch(value)
-                    if foundKey:
-                        return True, foundValue
-                return [None, None] # If we find nothing
-
-        foundKey, returnValue = recursionKeySearch(response)
-        if foundKey:
-            if Debug:
-                if debugKey: debug("{} = {}".format(debugKey, returnValue))
-                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
-            return returnValue
-        if returnKeyError:
-            return None
-        # If requested key not found, raise error
-        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
-
-    # Else, return the full response
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, response))
-        else: debug("nbiQuery response = {}".format(response))
-    return response
-
-def nbiMutation(jsonQuery): # Makes a GraphQl mutation query of XMC NBI; returns true on success
-    status = nbiQuery(jsonQuery, "status", "status", True)
-    if status == "SUCCESS":
-        return True
-    else:
-        return False
-
-def xmcLinuxCommand(cmdRegexStr, debugKey=None): # Execute a command on XMC and recover the output
-    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
-    cmd = cmdList[0] # We only support single shell command syntax for now
-    cmdList = cmd.split(' ')
-    if execution == 'dev': # I develop on my Windows laptop...
-        cmdList[0] += '.bat'
-    debug("xmcLinuxCommand about to execute : {}".format(cmd))
-    try:
-        outputStr = subprocess.check_output(cmdList)
-    except Exception as e: # Expect OSError
-        print "{}: {}".format(type(e).__name__, str(e))
-        print "Error executing '{}' on XMC shell".format(cmd)
-        return
-    data = re.findall(regex, outputStr, re.MULTILINE)
-    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
-    value = formatOutputData(data, mode)
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, value))
-        else: debug("xmcLinuxCommand OUT = {}".format(value))
-    return value
-
-def getSlotPortRanges(): # Populates the SlotPortRange dict
-    global SlotPortRange
-    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
-    if Family not in slotCommand:
-        SlotPortRange = {}
-        return
-    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
-    debug("getSlotPortRanges = {}".format(SlotPortRange))
-
-def generatePortList(portStr, debugKey=None): # Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
-    # This version of this function will not handle port ranges which span slots; also does not handle VSP channelized ports
-    debug("generatePortList IN = {}".format(portStr))
-    portDict = {} # Use a dict, will ensure no port duplicate keys
-    for port in portStr.split(','):
-        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
-        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
-        if not len(port): # Skip empty string
-            continue
-        rangeMatch = RegexPortRange.match(port)
-        starMatch = RegexStarRange.match(port)
-        if rangeMatch: # We have a range of ports
-            startSlot = rangeMatch.group(1)
-            separator = rangeMatch.group(2)
-            startPort = int(rangeMatch.group(3))
-            endSlot = rangeMatch.group(4)
-            endPort = int(rangeMatch.group(5))
-            if endSlot and startSlot != endSlot:
-                print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
-            elif startPort &gt;= endPort:
-                print "ERROR! generatePortList invalid range: {}".format(port)
-            else: # WE are good
-                for portCount in range(startPort, endPort + 1):
-                    if startSlot: # slot-based range
-                        portDict[startSlot + separator + str(portCount)] = 1
-                    else: # simple port range (no slot info)
-                        portDict[str(portCount)] = 1
-        elif starMatch: # We have a slot/* range
-            slot = starMatch.group(1)
-            separator = starMatch.group(2)
-            if SlotPortRange == None: # Structure not populated
-                getSlotPortRanges()
-            if SlotPortRange:
-                if slot in SlotPortRange:
-                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
-                        portDict[slot + separator + str(portCount)] = 1
-                else:
-                    print "Warning: no range for slot {}; skipping: {}".format(slot, port)
-            else:
-                print "Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port)
-        elif RegexPort.match(port): # Port is in valid format
-            portDict[port] = 1
-        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
-            print "Warning: generatePortList skipping unexpected port format: {}".format(port)
-
-    # Sort and return the list as a comma separated string
-    portList = sorted(portDict, key=portValue)
-
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, portList))
-        else: debug("generatePortList OUT = {}".format(portList))
-    return portList
-
-def generatePortRange(portList, debugKey=None): # Given a list of ports, generates a compacted port list/range string for use on CLI commands
-    # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
-    debug("generatePortRange IN = {}".format(portList))
-    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
-    elementList = []
-    elementBuild = None
-    currentType = None
-    currentSlot = None
-    currentPort = None
-    rangeLast = None
-
-    # First off, sort the list
-    portList = sorted(portList, key=portValue)
-    for port in portList:
-        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
-        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
-        if len(slotPort) == 3: # slot/port
-            if elementBuild:
-                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
-                    currentPort = slotPort[2]
-                    if rangeMode[Family] == 1:
-                        rangeLast = currentPort
-                    else: # rangeMode = 2
-                        rangeLast = currentSlot + slotPort[1] + currentPort
-                    continue
-                else: # Range complete
-                    if rangeLast:
-                        elementBuild += '-' + rangeLast
-                    elementList.append(elementBuild)
-                    elementBuild = None
-                    rangeLast = None
-                    # Fall through below
-            currentType = 's/p'
-            currentSlot = slotPort[0]
-            currentPort = slotPort[2]
-            elementBuild = port
-
-        if len(slotPort) == 1: # simple port (no slot)
-            if elementBuild:
-                if currentType == 'p' and port == str(int(currentPort)+1):
-                    currentPort = port
-                    rangeLast = currentPort
-                    continue
-                else: # Range complete
-                    if rangeLast:
-                        elementBuild += '-' + rangeLast
-                    elementList.append(elementBuild)
-                    elementBuild = None
-                    rangeLast = None
-                    # Fall through below
-            currentType = 'p'
-            currentPort = port
-            elementBuild = port
-
-    if elementBuild: # Close off last element we were holding
-        if rangeLast:
-            elementBuild += '-' + rangeLast
-        elementList.append(elementBuild)
-
-    portStr = ','.join(elementList)
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, portStr))
-        else: debug("generatePortRange OUT = {}".format(portStr))
-    return portStr                
-
-def ipToNumber(dottedDecimalStr): # Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
-    try: # bytearray ensures that IP bytes are valid (1-255)
-        ipByte = list(bytearray([int(byte) for byte in dottedDecimalStr.split('.')]))
-    except:
-        return None
-    if len(ipByte) != 4:
-        return None
-    debug("ipByte = {}".format(ipByte))
-    ipNumber = (ipByte[0]&lt;&lt;24) + (ipByte[1]&lt;&lt;16) + (ipByte[2]&lt;&lt;8) + ipByte[3]
-    debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
-    return ipNumber
-
-def numberToIp(ipNumber): # Method to convert a long number into an IP/Mask dotted decimal address
-    dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
-    debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
-    return dottedDecimalStr
-
-def maskToNumber(mask): # Method to convert a mask (dotted decimal or Cidr number) into a long number
-    if re.match(r'^\d+$', mask): # Mask as number
-        if int(mask) &gt; 0 and int(mask) &lt;= 32:
-            maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
-        else:
-            maskNumber = None
-    else:
-        maskNumber = ipToNumber(mask)
-    if maskNumber:
-        debug("maskNumber = {}".format(hex(maskNumber)))
-    return maskNumber
-
-def subnetMask(ip, mask): # Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
-    ipNumber = ipToNumber(ip)
-    maskNumber = maskToNumber(mask)
-    subnetNumber = ipNumber &amp; maskNumber
-    ipSubnet = numberToIp(subnetNumber)
-    ipDottedMask = numberToIp(maskNumber)
-    ipCidrMask = bin(maskNumber).count('1')
-    debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
-    return ipSubnet, ipDottedMask, ipCidrMask
-
-def ipGateway(ip, mask, gw): # Return the gateway IP address, as first or last IP in subnet, based on own IP/mask
-    ipNumber = ipToNumber(ip)
-    maskNumber = maskToNumber(mask)
-    subnetNumber = ipNumber &amp; maskNumber
-    if gw == 'first':
-        gwNumber = subnetNumber + 1
-        ip1numb = gwNumber + 1
-        ip2numb = gwNumber + 2
-    elif gw == 'last':
-        gwNumber = subnetNumber + 2**(32-int(mask)) - 2
-        ip1numb = gwNumber - 2
-        ip2numb = gwNumber - 1
-    else: # Error condition
-        raise RuntimeError('ipGateway(): invalid gw type {}'.format(gw))
-    debug("gwNumber = {} / ip1numb = {} / ip2numb = {}".format(hex(gwNumber), hex(ip1numb), hex(ip2numb)))
-    gatewayIP = numberToIp(gwNumber)
-    ip1 = numberToIp(ip1numb)
-    ip2 = numberToIp(ip2numb)
-    debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
-    return gatewayIP, ip1, ip2
-
-def printConfigSummary(): # Print summary of all config commands executed with context indentation
-    emc_cli.close()
-    print "The following configuration was successfully performed on switch:"
-    indent = ''
-    level = 0
-    if Family in RegexContextPatterns:
-        maxLevel = len(RegexContextPatterns[Family])
-    for cmd in ConfigHistory:
-        if Family in RegexContextPatterns:
-            if RegexContextPatterns[Family][level].match(cmd):
-                print "-&gt; {}{}".format(indent, cmd)
-                if level + 1 &lt; maxLevel:
-                    level += 1
-                indent = ' ' * Indent * level
-                continue
-            elif RegexExitInstance.match(cmd):
-                if level &gt; 0:
-                    level -= 1
-                indent = ' ' * Indent * level
-        print "-&gt; {}{}".format(indent, cmd)
-
-
-#
-# INIT: Init code
-#
-try:
-    if emc_vars['userInput_sanity'] == 'Enable':
-        Sanity = True
-    elif emc_vars['userInput_sanity'] == 'Disable':
-        Sanity = False
-except:
-    pass
-try:
-    if emc_vars['userInput_debug'] == 'Enable':
-        Debug = True
-    elif emc_vars['userInput_debug'] == 'Disable':
-        Debug = False
-except:
-    pass
-
-
-# --&gt; Insert Ludo Threads library here if required &lt;--
-
-
-# --&gt; XMC Python script actually starts here &lt;--
-
 
 ##########################################################
 # XMC Script: VSP-EPT-Enforce                            #
@@ -594,15 +28,17 @@ except:
 ##########################################################
 # Push Endpoint-Tracking (EPT) configuration to VSP switch
 
-__version__ = '1.3'
+__version__ = '1.5'
 
 # 1.0 - Initial
 # 1.1 - VOSS 8.2 introduces the Segmented Mgmt Stack; configuration of RADIUS server must no longer specify a source-ip
 # 1.2 - Modifications so that it can be used on VSP ports initially set as auto-sense ports
 # 1.3 - Added MLT-id list input field so that MLTs can be more easily selected
+# 1.4 - Added Universal Hardware support and updated to latest function versions
+# 1.5 - Now detects and disables auto-sense on ports where EPT enabled
+#     - Can now simply update RADIUS server secret key, without having to delete and re-create the server
+
 # Todo:
-# On auto-sense port we get: Information: User selected ports 1/1 were not EPT configured as these ports are FA ports
-# We need to detect autosense ports and on these we turn off fa before enabling ept
 
 
 #
@@ -782,115 +218,653 @@ __version__ = '1.3'
 #@MetaDataEnd
 '''
 
+
+
+##########################################################
+# Ludo Standard library; Version 4.05d                    #
+# Written by Ludovico Stevens, TME Extreme Networks      #
+##########################################################
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+
 #
-# Imports:
-#
-from distutils.version import LooseVersion
+# Base functions
+# v7
+import re                           # Used by scriptName
+import time                         # Used by exitError
+ExitErrorSleep = 10
+
+def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if Debug:
+        print debugOutput
+
+def exitError(errorOutput, sleep=ExitErrorSleep): # v3 - Exit script with error message and setting status appropriately
+    if 'workflowMessage' in emc_vars: # Workflow
+        time.sleep(sleep) # When workflow run on multiple devices, want ones that error to be last to complete, so THEY set the workflow message
+        emc_results.put("deviceMessage", errorOutput)
+        emc_results.put("activityMessage", errorOutput)
+        emc_results.put("workflowMessage", errorOutput)
+    emc_results.setStatus(emc_results.Status.ERROR)
+    raise RuntimeError(errorOutput)
+
+def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    print "Aborting script due to error on previous command"
+    try:
+        rollbackStack()
+    finally:
+        print "Aborting because this command failed: {}".format(cmd)
+        exitError(errorOutput)
+
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
+def workflow_DeviceMessage(msg): # v1 - Set workflow messages appropriately; '&lt;&gt;' is replaced with device IP or list
+    singleDeviceMsg = manyDevicesMsg = msg
+    if '&lt;&gt;' in msg:
+        devicesListStr = emc_vars['devices'][1:-1]
+        singleDeviceMsg = msg.replace('&lt;&gt;', emc_vars['deviceIP']).replace('(s)', '').replace('(es)', '')
+        if len(devicesListStr.split(',')) &gt; 1:
+            manyDevicesMsg = msg.replace('&lt;&gt;', devicesListStr).replace('(s)', 's').replace('(es)', 'es')
+        else:
+            manyDevicesMsg = singleDeviceMsg
+    emc_results.put("deviceMessage", singleDeviceMsg)
+    emc_results.put("activityMessage", manyDevicesMsg)
+    emc_results.put("workflowMessage", manyDevicesMsg)
 
 
 #
-# Variables:
-#
-
-NtpList  = [] #['10.8.255.160', '10.8.255.159'] # Set statically if you cannot use NBI to obtain from XMC
-TimeZone = [] #['GMT', '+00', '00']             # Set statically if you cannot use NBI to obtain from XMC
-
-NBI_Query = { # GraphQl query used to obtain NAC config for switch with IP = {0}; curlies need to be doubled not to interfere with .format()
-    'nbiAccess': '''
-        {
-          administration {
-            serverInfo {
-              version
-            }
-          }
-        }
-    ''',
-    'nacConfig': '''
-        {
-          accessControl {
-            switch(ipAddress: "&lt;IP&gt;") {
-              primaryGateway
-              secondaryGateway
-              overrideSharedSecret
-              sharedSecret
-            }
-          }
-        }
-    ''',
+# Family functions
+# v3
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
+    'ISW-24W-4X': 'ISW-Series-Marvell',
 }
 
-CLI_Dict = {
-    'VSP Series': {
-        'disable_more_paging'        : 'terminal more disable',
-        'enable_context'             : 'enable',
-        'config_context'             : 'config term',
-        'port_config_context'        : 'interface gigabitEthernet {}', # Port list
-        'mlt_config_context'         : 'interface mlt {}', # MLT id
-        'exit_config_context'        : 'exit',
-        'end_save_config'            : 'end; save config',
-
-        'list_radius_ept_servers'    : 'list://show radius-server ||^(\d+\.\d+\.\d+\.\d+) +endpoint-tracking',
-        'list_radius_clients'        : 'list://show radius dynamic-server ||^(\d+\.\d+\.\d+\.\d+) +',
-        'get_mlt_data'               : 'list://show mlt||^(?:(\d+) +\d+.+?(?:access|trunk) +(norm|smlt) +(?:norm|smlt) *(\S+)?|(\d+) +\d+ +(?:[\d\/]+|null) +(enable|disable)|(\d+) +\d+ +\S+ +\S+ +\S+ +\S+ +\S+ +(enable|disable))',
-        'list_fa_interfaces'         : 'list://show fa interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +(enabled|disabled) +(\d+) +(\d+) +(enabled|disabled)',
-        'get_lacp_port_data'         : 'list://show lacp actor-oper interface||^(\d+/\d+(?:/\d+)?) +(\d+) +\d+ +\d+ +(true|false)',
-        'list_mlt_lacp_key'          : 'dict://show lacp interface mlt||^(\d+) +\d+ +\d+ +\S+ +\d+ +(\d+)',
-        'list_nni_interfaces'        : 'list://show isis interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +',
-        'list_brouter_ports'         : 'list://show brouter||^\s*(\d+/\d+(?:/\d+)?) +\d+',
-        'list_slpp_ports'            : 'list://show slpp interface gigabitEthernet||^(\d+/\d+(?:/\d+)?) +enabled',
-        'get_flex_uni'               : 'dict://show interfaces gigabitEthernet config {}||^(\d+/\d+(?:/\d+)?) +\S+ +\S+ +\S+ +\S+ +\S+ +(Enable|Disable)', # Port
-        'list_ntp_servers'           : 'list://show ntp server ||^(\d+\.\d+\.\d+\.\d+)',
-        'delete_ntp_server'          : 'no ntp server {}', # IP
-        'create_ntp_server'          : 'ntp server {} enable', # IP
-        'enable_ntp'                 : 'ntp',
-        'set_timezone'               : 'clock time-zone {} {}', # Zone
-        'delete_radius_server'       : 'no radius server host {} used-by endpoint-tracking', # IP
-        'delete_radius_client'       : 'no radius dynamic-server client {}', # IP
-        'create_radius_server'       : # {0} = Radius Server IP, {1} = Radius secret, {2} = Source IP
-                                       '''
-                                       radius server host {0} key {1} used-by endpoint-tracking source-ip {2}
-                                       radius sourceip-flag
-                                       radius dynamic-server client {0} secret {1} enable
-                                       ''',
-        'create_radius_server_lns'   : # {0} = Radius Server IP, {1} = Radius secret
-                                       '''
-                                       radius server host {0} key {1} used-by endpoint-tracking
-                                       radius dynamic-server client {0} secret {1} enable
-                                       ''',
-        'enable_radius'              : 'radius enable',
-        'enable_ept_isid_offset'     : 'endpoint-tracking auto-isid-offset {}; endpoint-tracking auto-isid-offset enable', # I-SID
-        'disable_ept_isid_offset'    : 'no endpoint-tracking auto-isid-offset enable; default endpoint-tracking auto-isid-offset',
-        'enable_ept_visibility_mode' : 'endpoint-tracking visibility-mode',
-        'disable_ept_visibility_mode': 'no endpoint-tracking visibility-mode',
-        'enable_ept'                 : 'endpoint-tracking enable',
-        'disable_ept'                : 'no endpoint-tracking enable',
-        'delete_ept'                 : 'no endpoint-tracking',
-        'enable_flex_uni'            : 'flex-uni enable',
-        'disable_autosense'          : 'interface gigabitEthernet {0}; no auto-sense enable; exit', # Port
-        'create_flex_uni'            : 'vlan members remove 1 {0}; interface gigabitEthernet {0}; flex-uni enable; exit', # Port
-        'ports_enable_ept'           : 'interface gigabitEthernet {0}; endpoint-tracking enable; exit', # Port
-        'ports_disable_ept'          : 'interface gigabitEthernet {0}; no endpoint-tracking enable; exit', # Port
-        'ports_delete_ept'           : 'interface gigabitEthernet {0}; no endpoint-tracking; exit', # Port
-        'port_enable_spoof_detect'   : 'spoof-detect',
-        'port_disable_spoof_detect'  : 'no spoof-detect',
-        'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
-        'port_enable_slpp_guard'     : 'slpp-guard enable',
-        'port_disable_slpp_guard'    : 'no slpp-guard enable',
-        'port_enable'                : 'no shutdown',
-    },
-}
-
-Shell_Dict = { # Dictionary of all Linux shell commands used by this script
-    'list_ntp_servers'           : 'list://ntpq -pn ||^[*+](\d+\.\d+\.\d+\.\d+)',
-    'list_ntp_servers_84'        : 'list://chronyc -n sources ||^\^[*+-]\s*(\d+\.\d+\.\d+\.\d+)',
-    'get_time_zone'              : 'tuple:// timedatectl ||Time zone: (\S+?)(?:/(\S+?))? \((\w+?), ([-+]\d\d)(\d\d)\)',
-}
+def setFamily(cliDict={}, family=None): # v3 - Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if family:
+        Family = family
+    elif emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    elif emc_vars["deviceType"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["deviceType"]]
+    else:
+        Family = emc_vars["family"]
+    print "Using family type '{}' for this script".format(Family)
+    if cliDict and Family not in cliDict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
+    return Family
 
 
 #
-# Functions:
-#
+# CLI functions
+# v25
+import re
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE | re.MULTILINE
+)
+RegexNoError  = re.compile( # Messages which would be false positives for an error condition, when they are just a warning..
+    '(?:'
+    + 'Both ends of MACsec link cannot have the same key-parity value'
+    + '|% Saving \d+ bytes to flash:startup-config' # ISW: copy running-config startup-config
+    + ')',
+    re.IGNORECASE | re.MULTILINE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt (?:\d|clip|vlan|oob)|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+    'ISW-Series' : [
+        re.compile('^ *(?:ringv2-group |interface )'), # level0
+    ],
+    'ISW-Series-Marvell' : [
+        re.compile('^ *(?:ringv2-group |interface )'), # level0
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end|config|save)(?:\s|$)')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+ConfigHistory = []
 
+def cliError(outputStr): # v1 - Check command output for CLI error message
+    if not RegexNoError.search(outputStr) and RegexError.search(outputStr):
+        return True
+    else:
+        return False
+
+def cleanOutput(outputStr): # v5 - Remove echoed command and final prompt from output
+    if re.match(r'Error:', outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
+    outputLines = outputStr.splitlines()
+    lastLine = outputLines[-1]
+    if RegexPrompt.match(lastLine):
+        return '\n'.join(outputLines[1:-1])
+    else:
+        return '\n'.join(outputLines[1:])
+
+def configChain(chainStr): # v2 - Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\x0d?\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    # Checking for \x0d? is necessary when DOS text files are transferred to XIQ-SE, and read and processed locally..
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
+    cmdList = [re.sub(r'\x00(\w)(\x0d?\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
+    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
+        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
+    else:
+        mode = None
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
+
+def formatOutputData(data, mode): # v3 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+    if not mode                 : value = data                                   # Legacy behaviour same as list
+    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
+    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
+    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
+    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
+    elif mode == 'str-join'     : value = ''.join(data)                          # Regex with max 1 capturing bracket, joins list to string
+    elif mode == 'str-nwlnjoin' : value = "\n".join(data)                        # Regex with max 1 capturing bracket, joins list to multi-line string
+    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
+    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
+    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
+    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
+    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets on same line, returns 1st tuple
+    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
+    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    elif mode == 'dict-sequence': value = dict((data[x*2][0],data[x*2+1][1]) for x in range(len(data)/2)) # {[0][0]:[1][1], [2][0]:[3][1], etc}
+    else:
+        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
+    return value
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v2 - Send a CLI show command; return output
+    global LastError
+    resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and cliError("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return None
+            abortError(cmd, outputStr)
+        LastError = None
+        return outputStr
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
+    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("sendCLI_showRegex OUT = {}".format(value))
+    return value
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v4 - Send a CLI config command
+    global LastError
+    cmd = re.sub(r':\/\/', ':' + chr(0) + chr(0), cmd) # Mask any https:// type string
+    cmd = re.sub(r' *\/\/ *', r'\n', cmd) # Convert "//" to "\n" for embedded // passwords
+    cmd = re.sub(r':\x00\x00', r'://', cmd) # Unmask after // replacemt
+    cmdStore = re.sub(r'\n.+$', '', cmd, flags=re.DOTALL) # Strip added "\n"+[yn] or // passwords
+    if Sanity:
+        print "SANITY&gt; {}".format(cmd)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd, waitForPrompt)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and cliError("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
+                return False
+            abortError(cmd, outputStr)
+        ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True, abortOnError=True): # v4 - Send a list of config commands
+    # Syntax: chainStr can be a multi-line string where individual commands are on new lines or separated by the semi-colon ";" character
+    # Some embedded directive commands are allowed, these must always begin with the hash "#" character:
+    # #error fail       : If a subsequent command generates an error, make the entire script fail
+    # #error stop       : If a subsequent command generates an error, do not fail the script but stop processing firther commands
+    # #error continue   : If a subsequent command generates an error, ignore it and continue executing remaining commands
+    cmdList = configChain(chainStr)
+    successStatus = True
+    for cmd in cmdList[:-1]: # All but last
+        embedded = re.match(r'^#error +(fail|stop|continue) *$', cmd)
+        if embedded:
+            errorMode = embedded.group(1)
+            returnCliError = False if errorMode == 'fail' else True
+            abortOnError = True if errorMode == 'stop' else False
+            continue # After setting the above, we skip the embedded command
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
+        if not success:
+            successStatus = False
+            if abortOnError:
+                return False
+    # Last now
+    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
+    if not success:
+        return False
+    return successStatus
+
+def printConfigSummary(): # v4 - Print summary of all config commands executed with context indentation
+    global ConfigHistory
+    emc_cli.close()
+    if not len(ConfigHistory):
+        print "No configuration was performed"
+        return
+    print "The following configuration was successfully performed on switch:"
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if level &lt; maxLevel and RegexContextPatterns[Family][level].match(cmd):
+                print "-&gt; {}{}".format(indent, cmd)
+                level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        print "-&gt; {}{}".format(indent, cmd)
+    ConfigHistory = []
+
+
+#
+# XMC GraphQl &amp; RESTCONF required functions
+# v3
+from java.util import LinkedHashMap
+
+def recursionKeySearch(nestedDict, returnKey): # v1 - Used by both nbiQuery() and nbiMutation() and restconfCall()
+    for key, value in nestedDict.iteritems():
+        if key == returnKey:
+            return True, value
+    for key, value in nestedDict.iteritems():
+        if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+            foundKey, foundValue = recursionKeySearch(value, returnKey)
+            if foundKey:
+                return True, foundValue
+        return [None, None] # If we find nothing
+
+def recursionStatusSearch(nestedDict): # v2 - Used by nbiMutation()
+    for key, value in nestedDict.iteritems():
+        if key == 'status':
+            if 'message' in nestedDict and nestedDict['message']:
+                return True, value, nestedDict['message']
+            elif 'result' in nestedDict and 'msg' in nestedDict['result']: # For Policy mutations..
+                return True, value, nestedDict['result']['msg']
+            else:
+                return True, value, None
+    for key, value in nestedDict.iteritems():
+        if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+            foundKey, foundValue, foundMsg = recursionStatusSearch(value)
+            if foundKey:
+                return True, foundValue, foundMsg
+        return [None, None, None] # If we find nothing
+
+def replaceKwargs(queryString, kwargs): # v1 - Used by both nbiQuery() and nbiMutation() and restconfCall()
+    for key in kwargs:
+        replaceValue = str(kwargs[key]).lower() if type(kwargs[key]) == bool else str(kwargs[key])
+        queryString = queryString.replace('&lt;'+key+'&gt;', replaceValue)
+    return queryString
+
+
+#
+# XMC GraphQl NBI functions
+# v14
+LastNbiError = None
+NbiUrl = None
+
+def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v7 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+    global LastNbiError
+    jsonQuery = replaceKwargs(jsonQueryDict['json'], kwargs)
+    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
+    debug("NBI Query:\n{}\n".format(jsonQuery))
+    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if response == None: # Should only happen from nbiSessionPost if returnKeyError=True
+        return None
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+    LastNbiError = None
+
+    if returnKey: # If a specific key requested, we find it
+        foundKey, returnValue = recursionKeySearch(response, returnKey)
+        if foundKey:
+            if Debug:
+                if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+            return returnValue
+        if returnKeyError:
+            return None
+        # If requested key not found, raise error
+        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
+
+    # Else, return the full response
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, response))
+        else: debug("nbiQuery response = {}".format(response))
+    return response
+
+def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): # v7 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+    global LastNbiError
+    jsonQuery = replaceKwargs(jsonQueryDict['json'], kwargs)
+    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
+    if Sanity:
+        print "SANITY - NBI Mutation:\n{}\n".format(jsonQuery)
+        LastNbiError = None
+        return True
+    print "NBI Mutation Query:\n{}\n".format(jsonQuery)
+    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+
+    foundKey, returnStatus, returnMessage = recursionStatusSearch(response)
+    if foundKey:
+        debug("nbiMutation status = {} / message = {}".format(returnStatus, returnMessage))
+    elif not returnKeyError:
+        # If status key not found, raise error
+        abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "status" was not found in query response')
+
+    if returnStatus == "SUCCESS":
+        LastNbiError = None
+        if returnKey: # If a specific key requested, we find it
+            foundKey, returnValue = recursionKeySearch(response, returnKey)
+            if foundKey:
+                if Debug:
+                    if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                    else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+                return returnValue
+            if returnKeyError:
+                return None
+            # If requested key not found, raise error
+            abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "{}" was not found in mutation response'.format(returnKey))
+        return True
+    else:
+        LastNbiError = returnMessage
+        return False
+
+
+#
+# Port processing functions
+# v6
+RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+(?:[/:]\d)?$')
+RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)(?:[/:](\d))?-(?:([1-9]\d{0,2})[/:])?(\d+)(?:[/:](\d))?$')
+RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
+SlotPortRange = None # Gets set to dict by getSlotPortRanges()
+
+def portValue(port): # v1 - Function to pass to sorted(key) to sort port lists
+    slotPort = re.split('[/:]', port)
+    if len(slotPort) == 3: # slot/port/chan format
+        idx = int(slotPort[0])*400 + int(slotPort[1])*4 + int(slotPort[2])
+    elif len(slotPort) == 2: # slot/port format
+        idx = int(slotPort[0])*400 + int(slotPort[1])*4
+    else: # standalone port (no slot)
+        idx = int(slotPort[0])*4
+    return idx
+
+def getSlotPortRanges(): # v1 - Populates the SlotPortRange dict
+    global SlotPortRange
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
+    if Family not in slotCommand:
+        SlotPortRange = {}
+        return
+    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
+    debug("getSlotPortRanges = {}".format(SlotPortRange))
+
+def generatePortList(portStr, debugKey=None): # v3 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
+    # This version of this function will not handle port ranges which span slots
+    debug("generatePortList IN = {}".format(portStr))
+    portDict = {} # Use a dict, will ensure no port duplicate keys
+    for port in portStr.split(','):
+        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
+        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
+        if not len(port): # Skip empty string
+            continue
+        rangeMatch = RegexPortRange.match(port)
+        starMatch = RegexStarRange.match(port)
+        if rangeMatch: # We have a range of ports
+            startSlot = rangeMatch.group(1)
+            separator = rangeMatch.group(2)
+            startPort = int(rangeMatch.group(3))
+            startChan = int(rangeMatch.group(4)) if rangeMatch.group(4) else None
+            endSlot = rangeMatch.group(5)
+            endPort = int(rangeMatch.group(6))
+            endChan = int(rangeMatch.group(7)) if rangeMatch.group(4) else None
+            if endSlot and startSlot != endSlot:
+                print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
+            elif (startChan or endChan) and endPort and startPort != endPort:
+                print "ERROR! generatePortList no support for ranges spanning channelized ports: {}".format(port)
+            elif not (startChan or endChan) and startPort &gt;= endPort:
+                print "ERROR! generatePortList invalid range: {}".format(port)
+            elif (startChan or endChan) and startChan &gt;= endChan:
+                print "ERROR! generatePortList invalid range: {}".format(port)
+            else: # We are good
+                if startChan:
+                    for portCount in range(startChan, endChan + 1):
+                        portDict[startSlot + separator + str(startPort) + separator + str(portCount)] = 1
+                else:
+                    for portCount in range(startPort, endPort + 1):
+                        if startSlot: # slot-based range
+                            portDict[startSlot + separator + str(portCount)] = 1
+                        else: # simple port range (no slot info)
+                            portDict[str(portCount)] = 1
+        elif starMatch: # We have a slot/* range
+            slot = starMatch.group(1)
+            separator = starMatch.group(2)
+            if SlotPortRange == None: # Structure not populated
+                getSlotPortRanges()
+            if SlotPortRange:
+                if slot in SlotPortRange:
+                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
+                        portDict[slot + separator + str(portCount)] = 1
+                else:
+                    print "Warning: no range for slot {}; skipping: {}".format(slot, port)
+            else:
+                print "Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port)
+        elif RegexPort.match(port): # Port is in valid format
+            portDict[port] = 1
+        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
+            print "Warning: generatePortList skipping unexpected port format: {}".format(port)
+
+    # Sort and return the list as a comma separated string
+    portList = sorted(portDict, key=portValue)
+
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portList))
+        else: debug("generatePortList OUT = {}".format(portList))
+    return portList
+
+def generatePortRange(portList, debugKey=None): # v3 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
+    # Ported from acli.pl; this version of this function only compacts ranges within same slot
+    debug("generatePortRange IN = {}".format(portList))
+    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
+    elementList = []
+    elementBuild = None
+    currentType = None
+    currentSlot = None
+    currentPort = None
+    currentChan = None
+    rangeLast = None
+
+    # First off, sort the list
+    portList = sorted(portList, key=portValue)
+    for port in portList:
+        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
+        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port / slotPort[4] = channel
+        if len(slotPort) == 5: # slot/port/chan
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == currentPort and currentChan and slotPort[4] == str(int(currentChan)+1):
+                    currentChan = slotPort[4]
+                    if rangeMode[Family] == 1:
+                        rangeLast = currentChan
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort + slotPort[1] + currentChan
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            currentChan = slotPort[4]
+            elementBuild = port
+
+        if len(slotPort) == 3: # slot/port
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1) and not currentChan:
+                    currentPort = slotPort[2]
+                    if rangeMode[Family] == 1:
+                        rangeLast = currentPort
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            currentChan = None
+            elementBuild = port
+
+        if len(slotPort) == 1: # simple port (no slot)
+            if elementBuild:
+                if currentType == 'p' and port == str(int(currentPort)+1):
+                    currentPort = port
+                    rangeLast = currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 'p'
+            currentPort = port
+            elementBuild = port
+
+    if elementBuild: # Close off last element we were holding
+        if rangeLast:
+            elementBuild += '-' + rangeLast
+        elementList.append(elementBuild)
+
+    portStr = ','.join(elementList)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portStr))
+        else: debug("generatePortRange OUT = {}".format(portStr))
+    return portStr
+
+
+#
+# Linux shell functions (requires CLI functions)
+# v3
+import re
+import os
+import subprocess
+
+def xmcLinuxExecute(cmd): # v1 - Execute a command on XMC for which no output expected
+    debug("xmcLinuxExecute about to execute : {}".format(cmd))
+    try:
+        os.system(cmd)
+        return True
+    except Exception as e: # Expect OSError
+        print "{}: {}".format(type(e).__name__, str(e))
+        print "Error executing '{}' on XMC shell".format(cmd)
+        return False
+
+def xmcLinuxCommand(cmdRegexStr, debugKey=None): # v2 - Execute a command on XMC and recover the output
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    cmd = cmdList[0] # We only support single shell command syntax for now
+    cmdList = cmd.split(' ')
+    try:
+        emc_vars
+    except: # If not running on XMC Jython...I develop on my Windows laptop...
+        cmdList[0] += '.bat'
+    debug("xmcLinuxCommand about to execute : {}".format(cmd))
+    try:
+        outputStr = subprocess.check_output(cmdList)
+    except Exception as e: # Expect OSError
+        print "{}: {}".format(type(e).__name__, str(e))
+        print "Error executing '{}' on XMC shell".format(cmd)
+        return
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("xmcLinuxCommand OUT = {}".format(value))
+    return value
+
+
+#
+# Other Custom Functions
+#
 def extractMltAndPortData(mltInclude=[], portInclude=[]): # Extract MLT data (include = ['fa','lacp','vlacp']) / and Port data (include = ['fa','lacp','vlacp'])
     # Only supported for family = 'VSP Series'
     mltDict = {}
@@ -975,11 +949,146 @@ def extractMltAndPortData(mltInclude=[], portInclude=[]): # Extract MLT data (in
 
 
 #
+# INIT: Init code
+#
+try:
+    if emc_vars['userInput_sanity'] == 'Enable':
+        Sanity = True
+    elif emc_vars['userInput_sanity'] == 'Disable':
+        Sanity = False
+except:
+    pass
+try:
+    if emc_vars['userInput_debug'] == 'Enable':
+        Debug = True
+    elif emc_vars['userInput_debug'] == 'Disable':
+        Debug = False
+except:
+    pass
+
+
+#
+# Imports:
+#
+from distutils.version import LooseVersion
+
+
+#
+# Variables:
+#
+
+NtpList  = [] #['10.8.255.160', '10.8.255.159'] # Set statically if you cannot use NBI to obtain from XMC
+TimeZone = [] #['GMT', '+00', '00']             # Set statically if you cannot use NBI to obtain from XMC
+
+NBI_Query = { # GraphQl query / outValue = nbiQuery(NBI_Query['getDeviceUserData'], IP=deviceIp)
+# QUERIES (General):
+    'nbiAccess': {
+        'json': '''
+                {
+                  administration {
+                    serverInfo {
+                      version
+                    }
+                  }
+                }
+                ''',  
+        'key': 'version'
+    },
+    'nacConfig': {
+        'json': '''
+                {
+                  accessControl {
+                    switch(ipAddress: "&lt;IP&gt;") {
+                      primaryGateway
+                      secondaryGateway
+                      overrideSharedSecret
+                      sharedSecret
+                    }
+                  }
+                }
+                ''',
+        'key': 'switch'
+    },
+}
+
+
+CLI_Dict = {
+    'VSP Series': {
+        'disable_more_paging'        : 'terminal more disable',
+        'enable_context'             : 'enable',
+        'config_context'             : 'config term',
+        'port_config_context'        : 'interface gigabitEthernet {}', # Port list
+        'mlt_config_context'         : 'interface mlt {}', # MLT id
+        'exit_config_context'        : 'exit',
+        'end_save_config'            : 'end; save config',
+
+        'list_radius_ept_servers'    : 'list://show radius-server ||^(\d+\.\d+\.\d+\.\d+) +endpoint-tracking',
+        'list_radius_clients'        : 'list://show radius dynamic-server ||^(\d+\.\d+\.\d+\.\d+) +',
+        'get_mlt_data'               : 'list://show mlt||^(?:(\d+) +\d+.+?(?:access|trunk) +(norm|smlt) +(?:norm|smlt) *(\S+)?|(\d+) +\d+ +(?:[\d\/]+|null) +(enable|disable)|(\d+) +\d+ +\S+ +\S+ +\S+ +\S+ +\S+ +(enable|disable))',
+        'list_fa_interfaces'         : 'list://show fa interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +(enabled|disabled) +(\d+) +(\d+) +(enabled|disabled)',
+        'get_lacp_port_data'         : 'list://show lacp actor-oper interface||^(\d+/\d+(?:/\d+)?) +(\d+) +\d+ +\d+ +(true|false)',
+        'list_mlt_lacp_key'          : 'dict://show lacp interface mlt||^(\d+) +\d+ +\d+ +\S+ +\d+ +(\d+)',
+        'list_nni_interfaces'        : 'list://show isis interface||^(?:Mlt|Port)(\d+(?:/\d+(?:/\d+)?)?) +',
+        'list_brouter_ports'         : 'list://show brouter||^\s*(\d+/\d+(?:/\d+)?) +\d+',
+        'list_slpp_ports'            : 'list://show slpp interface gigabitEthernet||^(\d+/\d+(?:/\d+)?) +enabled',
+        'get_auto_sense_status'      : 'dict://show interfaces gigabitEthernet auto-sense {}||^(\d+/\d+(?:/\d+)?) +(\S+)', # Port
+        'get_flex_uni'               : 'dict://show interfaces gigabitEthernet config {}||^(\d+/\d+(?:/\d+)?) +\S+ +\S+ +\S+ +\S+ +\S+ +(Enable|Disable)', # Port
+        'list_ntp_servers'           : 'list://show ntp server ||^(\d+\.\d+\.\d+\.\d+)',
+        'delete_ntp_server'          : 'no ntp server {}', # IP
+        'create_ntp_server'          : 'ntp server {} enable', # IP
+        'enable_ntp'                 : 'ntp',
+        'set_timezone'               : 'clock time-zone {} {}', # Zone
+        'delete_radius_server'       : 'no radius server host {} used-by endpoint-tracking', # IP
+        'delete_radius_client'       : 'no radius dynamic-server client {}', # IP
+        'update_radius_server'       : # {0} = Radius Server IP, {1} = Radius secret
+                                       '''
+                                       radius server host {0} used-by endpoint-tracking key {1}
+                                       radius sourceip-flag
+                                       ''',
+        'update_radius_server_lns'   : 'radius server host {0} used-by endpoint-tracking key {1}', # {0} = Radius Server IP, {1} = Radius secret
+        'create_radius_server'       : # {0} = Radius Server IP, {1} = Radius secret, {2} = Source IP
+                                       '''
+                                       radius server host {0} key {1} used-by endpoint-tracking source-ip {2}
+                                       radius sourceip-flag
+                                       ''',
+        'create_radius_server_lns'   : 'radius server host {0} key {1} used-by endpoint-tracking', # {0} = Radius Server IP, {1} = Radius secret
+        'create_radius_client'       : 'radius dynamic-server client {0} secret {1} enable', # {0} = Radius Server IP, {1} = Radius secret
+        'enable_radius'              : 'radius enable',
+        'enable_ept_isid_offset'     : 'endpoint-tracking auto-isid-offset {}; endpoint-tracking auto-isid-offset enable', # I-SID
+        'disable_ept_isid_offset'    : 'no endpoint-tracking auto-isid-offset enable; default endpoint-tracking auto-isid-offset',
+        'enable_ept_visibility_mode' : 'endpoint-tracking visibility-mode',
+        'disable_ept_visibility_mode': 'no endpoint-tracking visibility-mode',
+        'enable_ept'                 : 'endpoint-tracking enable',
+        'disable_ept'                : 'no endpoint-tracking enable',
+        'delete_ept'                 : 'no endpoint-tracking',
+        'enable_flex_uni'            : 'flex-uni enable',
+        'disable_autosense'          : 'interface gigabitEthernet {0}; no auto-sense enable; exit', # Port
+        'create_flex_uni'            : 'vlan members remove 1 {0}; interface gigabitEthernet {0}; flex-uni enable; exit', # Port
+        'ports_enable_ept'           : 'interface gigabitEthernet {0}; endpoint-tracking enable; exit', # Port
+        'ports_disable_ept'          : 'interface gigabitEthernet {0}; no endpoint-tracking enable; exit', # Port
+        'ports_delete_ept'           : 'interface gigabitEthernet {0}; no endpoint-tracking; exit', # Port
+        'port_enable_spoof_detect'   : 'spoof-detect',
+        'port_disable_spoof_detect'  : 'no spoof-detect',
+        'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
+        'port_enable_slpp_guard'     : 'slpp-guard enable',
+        'port_disable_slpp_guard'    : 'no slpp-guard enable',
+        'port_enable'                : 'no shutdown',
+    },
+}
+
+Shell_Dict = { # Dictionary of all Linux shell commands used by this script
+    'list_ntp_servers'           : 'list://ntpq -pn ||^[*+](\d+\.\d+\.\d+\.\d+)',
+    'list_ntp_servers_84'        : 'list://chronyc -n sources ||^\^[*+-]\s*(\d+\.\d+\.\d+\.\d+)',
+    'get_time_zone'              : 'tuple:// timedatectl ||Time zone: (\S+?)(?:/(\S+?))? \((\w+?), ([-+]\d\d)(\d\d)\)',
+}
+
+
+#
 # Main:
 #
 def main():
     print "VSP-EPT-Enforce version {} on XMC version {}".format(__version__, emc_vars["serverVersion"])
-    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], 'version', None, True)
+    nbiAccess = nbiQuery(NBI_Query['nbiAccess'], returnKeyError=True)
     if nbiAccess == None:
         raise RuntimeError('This XMC Script requires access to the GraphQl North Bound Interface (NBI). Make sure that XMC is running with an Advanced license and that your user profile is authorized for Northbound API.')
 
@@ -1041,7 +1150,7 @@ def main():
         print " - Switch IP = {}".format(vspIP)
 
         # This GraphQl query will fail if the switch IP is not already configured as a NAC switch in XMC Control
-        nacConfig = nbiQuery(NBI_Query['nacConfig'].replace('&lt;IP&gt;', vspIP), 'switch', 'nacConfig')
+        nacConfig = nbiQuery(NBI_Query['nacConfig'], IP=vspIP)
         #  "switch": { # Sample of what we get back
         #    "primaryGateway": "10.8.255.17",
         #    "secondaryGateway": null,
@@ -1093,6 +1202,13 @@ def main():
     if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
         # Extract RADIUS server config
         radiusEptServerList = sendCLI_showRegex(CLI_Dict[Family]['list_radius_ept_servers'], 'radiusEptServerList')
+        radiusEptServerDeleteList = [x for x in radiusEptServerList if x != nacConfig['primaryGateway'] and x != nacConfig['secondaryGateway']]
+        radiusEptServerUpdateList = [x for x in radiusEptServerList if x == nacConfig['primaryGateway'] or  x == nacConfig['secondaryGateway']]
+        radiusEptServerCreateList = [x for x in (nacConfig['primaryGateway'], nacConfig['secondaryGateway']) if x not in radiusEptServerUpdateList]
+        debug("radiusEptServerDeleteList = {}".format(radiusEptServerDeleteList))
+        debug("radiusEptServerUpdateList = {}".format(radiusEptServerUpdateList))
+        debug("radiusEptServerCreateList = {}".format(radiusEptServerCreateList))
+
         radiusClientsList = sendCLI_showRegex(CLI_Dict[Family]['list_radius_clients'], 'radiusClientsList')
         radiusClientsDeleteList = [x for x in radiusClientsList if x == nacConfig['primaryGateway'] or x == nacConfig['secondaryGateway']]
         debug("radiusClientsDeleteList = {}".format(radiusClientsDeleteList))
@@ -1184,11 +1300,19 @@ def main():
         debug("eptPortRange = {}".format(eptPortRange))
 
         if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
-            # Check which of the future EPT ports will also require Flex-Uni enabling
+            # Check which of the future EPT ports will also require Auto-sense disabling and Flex-Uni enabling
+            autoSenseEnabledRange = None
             flexUniDisabledRange = None
             if eptPortList:
+                # Get auto-sense status for selected ports
+                autoSensePortDict = sendCLI_showRegex(CLI_Dict[Family]['get_auto_sense_status'].format(eptPortRange), 'autoSensePortDict', True)
+                autoSenseEnabledList = [x for x in autoSensePortDict if autoSensePortDict[x] == 'Enable']
+                debug("autoSenseEnabledList = {}".format(autoSenseEnabledList))
+                autoSenseEnabledRange = generatePortRange(autoSenseEnabledList)
+
+                # Get flex-uni status for selected ports
                 flexUniList = sendCLI_showRegex(CLI_Dict[Family]['get_flex_uni'].format(eptPortRange), 'flexUniList')
-                flexUniDisabledList = [x for x in flexUniList if flexUniList[x] == 'Disable']
+                flexUniDisabledList = [x for x in flexUniList if x in autoSenseEnabledList or flexUniList[x] == 'Disable']
                 debug("flexUniDisabledList = {}".format(flexUniDisabledList))
                 flexUniDisabledRange = generatePortRange(flexUniDisabledList)
 
@@ -1204,6 +1328,7 @@ def main():
             print " - EPT MLTs to configure = {}".format(generatePortRange(eptMltList))
             print " - EPT ports to configure = {}".format(eptPortRange)
             if eptPortMode == 'Enable': # Not needed if we are just going to delete/disable EPT on selcted ports
+                print " - EPT ports to Auto-Sense disable = {}".format(autoSenseEnabledRange)
                 print " - EPT ports to Flex-Uni enable = {}".format(flexUniDisabledRange)
                 print " - EPT ports to bring up (no shut) = {}".format(prunedPortRange)
                 if spoofDetect:
@@ -1214,6 +1339,12 @@ def main():
                         print " - EPT ports where to remove regular SLPP before setting SLPP-Guard = {}".format(regSlppRemoveRange)
         if eptPortMode == 'Enable' and xmcNtpList: # Only if XMC is configured with NTP server(s)
             print " - Existing NTP Servers = {}".format(', '.join(switchNtpList))
+        print " - EPT RADIUS servers configured = {}".format(', '.join(radiusEptServerList))
+        print " - EPT RADIUS servers to delete = {}".format(', '.join(radiusEptServerDeleteList))
+        print " - EPT RADIUS servers to update = {}".format(', '.join(radiusEptServerUpdateList))
+        print " - EPT RADIUS servers to create = {}".format(', '.join(radiusEptServerCreateList))
+        print " - EPT Dynamic RADIUS clients configured = {}".format(', '.join(radiusClientsList))
+        print " - EPT Dynamic RADIUS clients to re-create = {}".format(', '.join(radiusClientsDeleteList))
         print
 
     #
@@ -1243,24 +1374,29 @@ def main():
             # Set the time-zone
             sendCLI_configCommand(CLI_Dict[Family]['set_timezone'].format(xmcTimeZone[0], xmcTimeZone[1]))
 
+        debug("radiusEptServerDeleteList = {}".format(radiusEptServerDeleteList))
+        debug("radiusEptServerUpdateList = {}".format(radiusEptServerUpdateList))
+        debug("radiusEptServerCreateList = {}".format(radiusEptServerCreateList))
+
         # Delete existing EPT RADIUS servers
-        for server in radiusEptServerList:
+        for server in radiusEptServerDeleteList:
             sendCLI_configChain(CLI_Dict[Family]['delete_radius_server'].format(server))
         for server in radiusClientsDeleteList:
             sendCLI_configChain(CLI_Dict[Family]['delete_radius_client'].format(server))
 
-        # Configure Primary RADIUS server
-        if vossSegMgmt:
-            sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret']))
-        else:
-            sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['primaryGateway'], nacConfig['sharedSecret'], vspIP))
-
-        # Configure Secondary RADIUS server, if defined for switch
-        if nacConfig['secondaryGateway']:
+        # Update RADIUS servers
+        for server in radiusEptServerUpdateList:
             if vossSegMgmt:
-                sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret']))
+                sendCLI_configChain(CLI_Dict[Family]['update_radius_server_lns'].format(server, nacConfig['sharedSecret']))
             else:
-                sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(nacConfig['secondaryGateway'], nacConfig['sharedSecret'], vspIP))
+                sendCLI_configChain(CLI_Dict[Family]['update_radius_server'].format(server, nacConfig['sharedSecret'], vspIP))
+
+        # Configure RADIUS servers
+        for server in radiusEptServerCreateList:
+            if vossSegMgmt:
+                sendCLI_configChain(CLI_Dict[Family]['create_radius_server_lns'].format(server, nacConfig['sharedSecret']))
+            else:
+                sendCLI_configChain(CLI_Dict[Family]['create_radius_server'].format(server, nacConfig['sharedSecret'], vspIP))
 
         # Enable RADIUS
         sendCLI_configChain(CLI_Dict[Family]['enable_radius'])
@@ -1372,14 +1508,15 @@ main()
 </content>
     <creationDate>1584546599552</creationDate>
     <creator>lstevens</creator>
+    <credentialsCacheOveride>false</credentialsCacheOveride>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
-    <encoded>false</encoded>
+    <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1606467317799</lastUpdateDate>
+    <lastUpdateDate>1720529026916</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
+    <nosIds>,nos-id-fabric-engine,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
@@ -1387,7 +1524,7 @@ main()
     <scriptTimeout>60</scriptTimeout>
     <scriptType>Python</scriptType>
     <supprotedGroups></supprotedGroups>
-    <roles>,NetSight Administrator,CSE,SE,</roles>
+    <roles>,XIQ-SE Administrator,</roles>
     <vendor></vendor>
     <version>0</version>
 </script>
