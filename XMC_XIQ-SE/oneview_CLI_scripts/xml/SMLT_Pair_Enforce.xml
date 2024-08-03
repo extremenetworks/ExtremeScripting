@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>SMLT Pair Enforce v2.5</comments>
+    <comments>SMLT Pair Enforce v2.8</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -28,7 +28,7 @@ SCRIPTS.
 ##########################################################
 # Does VSP SMLT Clustering in Fabric Connect
 
-__version__ = '2.5'
+__version__ = '2.8'
 
 # 1.0 - Initial
 # 1.2 - When deleting an LACP LAG MLT, the underlying ports now are restored tu untagged
@@ -38,7 +38,7 @@ __version__ = '2.5'
 #     - GRT route-map for suppressing IST IP subnet is now always created, even if no redistribution yet on switches
 #     - Script now disables auto-sense in order to create SMLTs
 #     - Script now expects both VSPs to have a nickname assigned
-#     - Script automaticallt converts auto-sense NNIs between the two peer switches to static NNIs
+#     - Script automatically converts auto-sense NNIs between the two peer switches to static NNIs
 #       and if multiple auto-sense NNIs are found between peers (with same speed) then an MLT NNI is created
 # 2.1 - Acknowledge input was not properly considered when operating inband
 # 2.2 - On rollback when removing flex-uni, the ports were not defaulted for tagging, and at next run port would be refused
@@ -46,6 +46,10 @@ __version__ = '2.5'
 # 2.3 - IST route map now detect the IST subnet + mask and sets the mask correctly (not hard coded to 30bits)
 # 2.4 - Previous fix was causing the IST prefix list creation to fail when creating the IST; now handled correctly
 # 2.5 - Updated threads library to work with usernames including "."
+# 2.6 - On completion workflow now triggers device config reload via XIQ-SE API
+# 2.7 - Rollback was incorrectly trying to default dot1q encap on MLT interface
+#     - SLPP-Guard is now automatically disabled before trying to enable SLPP packet-rx
+# 2.8 - Fabric Attach Management VLAN:ISID input now allows only an I-SID number to be provided, for untagged use
 
 
 # todo:
@@ -115,6 +119,7 @@ __version__ = '2.5'
 #                 MLT I-SID/VLAN binding mode selected was one of the Fabric Attach modes.
 #                 In this case an FA management VLAN:ISID can be provided for the FA
 #                 configuration of the SMLT. Otherwise leave this field empty.
+#                 The VLAN value can be omitted, if an untagged FA binding is preferred
 # - SMLT 1-5 id:name: Use these optional fields to set the id or name or both id+name for
 #                     the new SMLTs. If no id is provided, the script will automatically
 #                     allocate MLT ids
@@ -212,7 +217,7 @@ __version__ = '2.5'
 #        name = "userInput_mlt_binding_mode",
 #    )
 #    @VariableFieldLabel (
-#        description = "Fabric Attach Management VLAN:ISID &amp;#40;only applicable if selected binding mode is one of Fabric Attach options; enter &amp;lt;VLAN-id&amp;gt;:&amp;lt;I-SID&amp;gt;&amp;#41;",
+#        description = "Fabric Attach Management [VLAN:]ISID &amp;#40;only applicable if selected binding mode is one of Fabric Attach options; enter &amp;lt;VLAN-id&amp;gt;:&amp;lt;I-SID&amp;gt; or &amp;lt;I-SID&amp;gt;&amp;#41;",
 #        type = string,
 #        required = no,
 #        name = "userInput_fa_mgmt_vlan_isid",
@@ -338,6 +343,12 @@ except: # If not running on XMC Jython...
     else:
         emc_vars = json.load(open('emc_vars.json'))
 ##########################################################
+
+
+#
+# IMPORTS:
+#
+from distutils.version import LooseVersion
 
 
 #
@@ -1467,9 +1478,10 @@ CLI_Dict = {
         'enable_mlt_flex_uni'        : 'flex-uni enable',
         'enable_fabric_attach'       : 'fa; fa enable',
         'set_fa_mgmt_vlan_isid'      : 'fa management i-sid {} c-vid {}', # I-SID, VLAN
+        'set_fa_mgmt_isid'           : 'fa management i-sid {}', # I-SID
         'disable_fa_message_auth'    : 'no fa message-authentication',
         'enable_endpoint_tracking'   : 'endpoint-tracking enable',
-        'enable_slpp_packet_rx'      : 'slpp packet-rx; slpp packet-rx-threshold {}', # SLPP threshold
+        'enable_slpp_packet_rx'      : 'no slpp-guard enable; slpp packet-rx; slpp packet-rx-threshold {}', # SLPP threshold
         'port_remove_vlan1'          : 'vlan members remove 1 {}', # Port list
         'port_enable_tagging'        : 'encapsulation dot1q',
         'port_disable_tagging'       : 'no encapsulation dot1q',
@@ -1482,7 +1494,7 @@ CLI_Dict = {
         'port_disable'               : 'shutdown',
         'disable_slpp_packet_rx'     : 'no slpp packet-rx; default slpp packet-rx-threshold',
         'port_disable_lacp'          : 'no lacp enable; no lacp aggregation enable; default lacp',
-        'disable_mlt_flex_uni'       : 'no flex-uni enable; default encapsulation dot1q',
+        'disable_mlt_flex_uni'       : 'no flex-uni enable',
         'disable_fabric_attach'      : 'no fa',
         'delete_mlt'                 : 'no mlt {}', # MLT id
         'clear_spbm_smlt_peer'       : 'no spbm 1 smlt-peer-system-id',
@@ -1519,6 +1531,22 @@ NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
                     rediscoverDevices(input: {devices: {ipAddress: "&lt;IP&gt;"}}) {
                       status
                       message
+                    }
+                  }
+                }
+                ''',
+    },
+   'reload_device': {
+        'json': '''
+                mutation {
+                  network {
+                    reloadDevices(input: {
+                      devices:{
+                        ipAddress: "&lt;IP&gt;"
+                      }
+                    }) {
+                      message
+                      status
                     }
                   }
                 }
@@ -1771,7 +1799,7 @@ def main():
         faMgmtVlan, faMgmtIsid = emc_vars['userInput_fa_mgmt_vlan_isid'].split(':', 1)
     except:
         faMgmtVlan = None
-        faMgmtIsid = None
+        faMgmtIsid = emc_vars['userInput_fa_mgmt_vlan_isid']
 
     mltIdList = []
     mltNameList = []
@@ -2256,9 +2284,13 @@ def main():
                 # Enable FA
                 rollbackCommand(CLI_Dict[Family]['disable_fabric_attach'])
                 sendCLI_configChain(CLI_Dict[Family]['enable_fabric_attach'])
-                if faMgmtVlan and faMgmtIsid:
-                    # Assign FA Mgmt VLAN:ISID
-                    sendCLI_configChain(CLI_Dict[Family]['set_fa_mgmt_vlan_isid'].format(faMgmtIsid, faMgmtVlan))
+                if faMgmtIsid:
+                    if faMgmtVlan:
+                        # Assign FA Mgmt VLAN:ISID
+                        sendCLI_configChain(CLI_Dict[Family]['set_fa_mgmt_vlan_isid'].format(faMgmtIsid, faMgmtVlan))
+                    else:
+                        # Assign FA Mgmt ISID
+                        sendCLI_configChain(CLI_Dict[Family]['set_fa_mgmt_isid'].format(faMgmtIsid))
             if mltBindingMode == 'Fabric Attach with no message authentication':
                 # Disable FA msg auth
                 sendCLI_configChain(CLI_Dict[Family]['disable_fa_message_auth'])
@@ -2360,18 +2392,24 @@ def main():
     else:
         print "Failed to trigger XMC rediscovery of switch; perform manually"
 
-main()
-</content>
+    # Make XIQ-SE reload the switch configuration
+    if LooseVersion(emc_vars["serverVersion"]) &gt;= LooseVersion("23.2"): # This API call was added in XIQ-SE 23.2
+        nbiMutation(NBI_Query['reload_device'], IP=emc_vars['deviceIP'])
+    else:
+        print "Unable to initialte XIQ-SE config reload of device as this requires XIQ-SE version 23.2 or later; please perform manually"
+
+main()</content>
     <creationDate>1573331099302</creationDate>
     <creator>lstevens</creator>
+    <credentialsCacheOveride>false</credentialsCacheOveride>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Groups,</contexts>
-    <lastUpdateDate>1670941546620</lastUpdateDate>
+    <lastUpdateDate>1721050927552</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
-    <nosIds>,nos-id-voss,</nosIds>
+    <nosIds>,nos-id-fabric-engine,nos-id-voss,</nosIds>
     <postprocessScript></postprocessScript>
     <rollbackScript></rollbackScript>
     <saveConfigOnExit>false</saveConfigOnExit>
