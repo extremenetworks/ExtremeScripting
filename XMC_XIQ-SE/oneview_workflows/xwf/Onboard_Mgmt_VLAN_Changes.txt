@@ -63,11 +63,14 @@ v73
 	  via const_AUTOSENSE_NNI_CHECK
 	- Small corrections to error messages
 	- Default const_DELAY_SITE_READD increased to 30sec
-v74 - posted
+v74
 	- When deleting the switch from XIQ-SE, if it was present under NAC, it is also removed there.
 	  During this process the switch is deleted from all and any Location Groups; it was found that
 	  if some of those Location Groups were named using unicode characters the workflow would fail with:
 	  'ascii' codec can't encode character
 	  The workflow is now modified to correctly handle unicode characters during that process
+v75 - posted
+	- Check for auto-sense ports in state NNI-ISIS-UP is now skipped if the workflow was provided with
+	  an auto-sense ISIS Auth key
 
 Todo:
