@@ -33,6 +33,7 @@
 |[HP Aruba ArubaOS-CX](Hewlett_Packard_ArubaOS-CX-TFTP-MGMT.txt)|Backup and restore HPE ArubaOS-CX through MGMT vrf. Reboot is also supported.|
 |[HP Aruba ArubaOS-CX](Hewlett_Packard_ArubaOS-CX-TFTP-Default.txt)|Backup and restore HPE ArubaOS-CX through Default vrf. Reboot is also supported.|
 |[HP Aruba](Hewlett_Packard-SFTP.txt)|Backup and restore, firmware upgrade and reboot for [HPE switches](Hewlett_Packard-SFTP-info.txt).|
+|[Huawei](Huawei.txt)|Backup and restore, firmware upgrade Huawei 5720 over TFTP.|
 |[Juniper EX SCP](juniper_EX-SCP)|Configuration backup/restore of Juniper EX over SCP.|
 |[Juniper EX TFTP](juniper_EX-TFTP)|Configuration backup/restore of Juniper EX over TFTP.|
 |[Microsens G6](Microsens_G6-TFTP.txt)|Configuration backup/restore over TFTP, firmware upgrade & reboot of Microsens G6.|

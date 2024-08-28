@@ -50,12 +50,27 @@ v69
 	- Added ability to set the XIQ-SE Device Topology Role for the device
 v70
 	- Added ability to set device Asset Tag under device annotation
-v72 - posted
+v72
 	- Workflow was failing if Mgmt VLAN Default Gateway was not set; now it can handle that case, even
 	  if an unlikely deployment option
 	- Added workflow variable const_GRACEFUL_EXIT_IF_NO_SN; by default False; can be set to let the
 	  workflow gracefully exit if the device lookup key was not found in the provided CSV file
 	- Added workflow variable const_GRACEFUL_EXIT_IF_NO_IP; by default False; can be set to let the
 	  workflow gracefully exit if no Mgmt VLAN IP value was obtained from Site or CSV inputs
+v73
+	- A check is now performed to see if there are any auto-sense ports in state NNI-ISIS-UP, and if not
+	  the workflow aborts, as there is normally no chance for it to succeed; this check can be disabled
+	  via const_AUTOSENSE_NNI_CHECK
+	- Small corrections to error messages
+	- Default const_DELAY_SITE_READD increased to 30sec
+v74
+	- When deleting the switch from XIQ-SE, if it was present under NAC, it is also removed there.
+	  During this process the switch is deleted from all and any Location Groups; it was found that
+	  if some of those Location Groups were named using unicode characters the workflow would fail with:
+	  'ascii' codec can't encode character
+	  The workflow is now modified to correctly handle unicode characters during that process
+v75 - posted
+	- Check for auto-sense ports in state NNI-ISIS-UP is now skipped if the workflow was provided with
+	  an auto-sense ISIS Auth key
 
 Todo:
