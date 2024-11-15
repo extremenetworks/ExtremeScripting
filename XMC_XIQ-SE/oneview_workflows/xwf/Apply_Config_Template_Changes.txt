@@ -29,8 +29,39 @@ v61
 	- Was not working on Product Families other than: VSP Series, Summit Series, ERS Series and ISW Series
 	- Added basic commands to enable PrivExec, and Config mode for Family "200 Series"
 	- Added basic commands to enable no paging for Family "ISW-Series"
-v62 - posted
+v62
 	- Updated to latest library functions; can now accept CLI commands with feed data, separated by "//"
+v64
+	- Added support for block statements in config template which allow for sending commands which would otherwise
+	  temporarily compromise SSH/Telnet connectivity to the switch
+	  #block start [n]  : Mark the beginning of a block of commands which will need to be sourced locally on the switch
+	                      [n] = Optional number of seconds to sleep after block execution
+	  #block execute [n]: Mark the end of block of commands which are to sourced locally on the switch
+	                      If this directive is not seen, and the "#block start" was seen, all commands from the start of
+	                      block section to the last command in the template file will be sourced locally on the switch
+	                      [n] = Optional number of seconds to sleep after block execution
+	- Added to variable const_EXPORT_EMC_VARS these additional emc_vars keys: deviceName, deviceSoftwareVer, deviceSysOid,
+	 deviceType, family, ports
+v65
+	- Removed from variable const_EXPORT_EMC_VARS key "ports" as it is not available anyway
+	- warpBuffer_execute() was failing to retrieve the TFTP file if username contained "@" character
+v67
+	- Added support for path variables %rootDir%, %sitePath% and %siteName% on CSV and config template file inputs
+	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
+v71
+	- Block statements no longer temporarily enable tftpd on VOSS
+	- Improved debug messages
+v81
+	- CSV file can now be primed to fetch a "peer" device for the same variables. Row 0 Column 0 can now accept ":<var>"
+	  suffix. Within the CSV file two entries can be fetched if they have the same value of var. The prime lookup entry
+	  will have variables $<varX> and the peer entry same value can be fetched with $<peer:varX>
+	- Velocity parsing error reporting improved
+v82
+	- Fix to CSV "peer" device lookup; if lookup device has no value for ":<var>" then no peer device is sought
+	- If the CSV file is an empty file, now a meaningful error message is generated
+v83 - posted
+	- Added support for #eval embedded command
+
 
 Todo:
         

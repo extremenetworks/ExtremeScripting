@@ -6,6 +6,9 @@ v63
 	- Added ability to also change the LACP SMLT MAC
 	- Disabling the ISIS Hello Authentication on workflow inputs was not working
 	- When workflow run on VSP SMLT pair, it was failing on 2nd run dues to missing IP libraries
-v64 - posted
+v64
 	- Workflow was failing when trying to retrieve the ISIS areas on VSP4000
-
+v66 - posted
+	- Revert IDs activity completion message was incorrect (referring to RADIUS and EAPoL)
+	- Convert to new area activity now performs a config backup on the switch before making changes
+	  The archive filename is set in workflow variable const_backupArchiveName

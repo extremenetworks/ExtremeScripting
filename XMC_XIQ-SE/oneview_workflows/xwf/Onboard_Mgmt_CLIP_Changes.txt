@@ -70,8 +70,16 @@ v46
 	  if some of those Location Groups were named using unicode characters the workflow would fail with:
 	  'ascii' codec can't encode character
 	  The workflow is now modified to correctly handle unicode characters during that process
-v47 - posted
+v47
 	- Check for auto-sense ports in state NNI-ISIS-UP is now skipped if the workflow was provided with
 	  an auto-sense ISIS Auth key
+v50
+	- Check for auto-sense ports in state NNI-ISIS-UP is now replaced with a check for ISIS adjacency up
+	- Parsing of CLI commands was incorrectly stripping #error pragma commands
+	- Cisco velocity type #if/#elseif/#else/#end statements are now allowed in additional CLI commands box
+v52 - posted
+	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
+	- Fixed bug on error messages which would only display if failing to delete the switch from XIQ-SE or Access Control
 
 Todo:
+
