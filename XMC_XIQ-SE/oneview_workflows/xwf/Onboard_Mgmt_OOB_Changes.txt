@@ -2,7 +2,7 @@ Onboard Mgmt OOB
 
 v4
 	- First version shared
-v5 - posted
+v6 - posted
 	- Syncronized with Onboard Mgmt VLAN v91 & Onboard Mgmt CLIP v52
 
 

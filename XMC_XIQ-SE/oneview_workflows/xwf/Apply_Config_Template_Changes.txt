@@ -59,9 +59,10 @@ v81
 v82
 	- Fix to CSV "peer" device lookup; if lookup device has no value for ":<var>" then no peer device is sought
 	- If the CSV file is an empty file, now a meaningful error message is generated
-v83 - posted
+v83
 	- Added support for #eval embedded command
-
+v88 - posted
+	- Added device notes input field and added to variable const_EXPORT_EMC_VARS additional emc_vars key "date"
 
 Todo:
         

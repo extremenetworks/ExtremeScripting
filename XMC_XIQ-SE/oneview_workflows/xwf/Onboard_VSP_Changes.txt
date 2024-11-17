@@ -169,7 +169,7 @@ v141
 	- Lock reservation is now 100 sec + any applicable const_POLICY_START_DELAY or const_POLICY_ENFORCE_DELAY *
 	  const_POLICY_ENFORCE_RETRIES
 	- Add to Policy activity now closes the policy domain if it finds the switch already in the requested VLAN island
-v142 - posted
+v143 - posted
 	- Updated all functions
 
 Todo:
