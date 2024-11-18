@@ -69,8 +69,31 @@ v74
 	  if some of those Location Groups were named using unicode characters the workflow would fail with:
 	  'ascii' codec can't encode character
 	  The workflow is now modified to correctly handle unicode characters during that process
-v75 - posted
+v75
 	- Check for auto-sense ports in state NNI-ISIS-UP is now skipped if the workflow was provided with
 	  an auto-sense ISIS Auth key
+v79
+	- Added input for Mgmt VLAN UNI ethernet port, which allows configuring mgmt VLAN on non-fabric
+	  connected switches. If the new mgmt VLAN IP is in the same subnet as the existing Onboarding VLAN IP
+	  then the mgmt VLAN is added to the port untagged, else tagged
+	- Check for auto-sense ports in state NNI-ISIS-UP is now replaced with a check for ISIS adjacency up
+	- Parsing of CLI commands was incorrectly stripping #error pragma commands
+	- Cisco velocity type #if/#elseif/#else/#end statements are now allowed in additional CLI commands box
+v81
+	- If a Mgmt VLAN Port is supplied, and if the mgmt VLAN is to be assigned to that port as tagged, the
+	  Onboarding VLAN will be added as untagged and as Promiscuous to the same port; this can be controlled
+	  via variable const_ONBVLAN_ON_TAGD_MGMTPORT which is by default true
+v82
+	- Increased const_PING_NEW_IP_TIMEOUT to 45 secs, while testing new Mgmt VLAN Port input
+v83
+	- Fix to CLI regex pattern to capture VLAN ids and associated I-SIDs
+v84
+	- Setting a mgmt VLAN UNI ethernet port was failing if the mgmt VLAN was already existing on the switch
+v85
+	- Setting a mgmt VLAN UNI ethernet port was failing if the mgmt VLAN was already existing on the switch
+	  for a different reason
+v92 - posted
+	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
+	- Fixed bug on error messages which would only display if failing to delete the switch from XIQ-SE or Access Control
 
 Todo:

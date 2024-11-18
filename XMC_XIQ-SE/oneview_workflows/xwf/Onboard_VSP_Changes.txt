@@ -148,6 +148,29 @@ v135 - posted
 	  be disabled due to no eapol/cli/web servers
 	- Activity 03 now waits const_NAC_ENGINE_ENFORCE_DELAY seconds before doing a NAC Engine Enforce; that way if
 	  workflow was run against multiple switches, the first enforce will apply to all switches added
+v137
+	- Fix in v133 was incorrect for activity AddVspNacEngine_03 now adds switch to Access Control location group with
+	  interface set to "Any", no longer "Wired"; the proper API call is now used
+	- Fix to CLI regex pattern to capture VLAN ids and associated I-SIDs
+	- Add to Policy activity now implements locks, so workflow can now be run against multiple switches
+	- Parsing of CLI commands was incorrectly stripping #error pragma commands
+	- Cisco velocity type #if/#elseif/#else/#end statements are now allowed in additional CLI commands box
+	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
+v138
+	- Debug of add to policy activity now includes time stamps
+	- Lock reservation increased to 120 sec, to take into account possible 60 sec to acquire policy NBI lock
+	- Failure to acquire policy NBI lock, now removes general lock
+v141
+	- Add to Policy activity now has a variable const_POLICY_ENFORCE to control whether a policy domain enforce is performed
+	  at the end of the activity or not. By default set to true
+	- Add to Policy activity now has a variable const_POLICY_START_DELAY which implements a delay before starting the policy
+	  configuration via NBI API; can be used if many instances of workflow expected to run simultaneously. By default set to
+	  5 sec
+	- Lock reservation is now 100 sec + any applicable const_POLICY_START_DELAY or const_POLICY_ENFORCE_DELAY *
+	  const_POLICY_ENFORCE_RETRIES
+	- Add to Policy activity now closes the policy domain if it finds the switch already in the requested VLAN island
+v143 - posted
+	- Updated all functions
 
 Todo:
 
