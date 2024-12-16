@@ -4,7 +4,7 @@
 ##############################################################################
 # Imports
 ##############################################################################
-import re
+import re,exsh
 #############################################################################
 # SNMP v3 Variable definitions
 #############################################################################
@@ -54,9 +54,9 @@ def main():
             print("Deleting groups...")
             for line in config.splitlines():
                 p = re.compile(ur'configure\ssnmpv3\sadd\sgroup\s\"(\S+)"')
-                x = re.search(p, line)
-                if x != None:
-                    exsh.clicmd('configure snmpv3 delete group ' + x.group(1) + ' user all-non-default', capture=True)
+                match = re.search(p, line)
+                if match:
+                    exsh.clicmd('configure snmpv3 delete group '+ match.group(1) +' user all-non-default', capture=True)
             print("Enabling SNMPv3 default group...")
             exsh.clicmd('enable snmpv3 default-group')
             print("Enabling SNMPv3 default user...")
@@ -70,7 +70,7 @@ def main():
     ####################################################################################
     if dec == 'c':
         exsh.clicmd('create log message \"Starting configuration of SNMPv3 using SNMPassist.py\"', capture=True)
-        snmpuser = raw_input("Please enter your SNMPv3 User name: ")
+        snmpuser = input("Please enter your SNMPv3 User name: ")
         authpw = get_input("Please enter your SNMPv3 User password (8 to 49 char): ", 1)
         privpw = get_input("Please enter your SNMPv3 privacy password (8 to 49 char): ", 1)
         authtype = get_input("Please enter your authentication type (SHA/MD5): ", 3)
@@ -119,9 +119,9 @@ def main():
         print
         print('SNMP Group name is used to link multiple SNMP users together. Its not something that '
               'Netsight/ExtremeControl asks for.')
-        snmpgroupname = raw_input("Please enter your SNMPv3 Group name: ")
+        snmpgroupname = input("Please enter your SNMPv3 Group name: ")
         exsh.clicmd('configure snmpv3 add group {0} user {1} sec-model usm'.format(snmpgroupname,snmpuser), capture=True)
-        snmpaccessname = raw_input("Please enter your SNMPv3 Access preferences: ") #Optional to enter a new access name
+        snmpaccessname = input("Please enter your SNMPv3 Access preferences: ") #Optional to enter a new access name
         exsh.clicmd('configure snmpv3 add access %s sec-model usm sec-level priv read-view defaultAdminView '
                     'write-view defaultAdminView notify-view defaultAdminView' % snmpaccessname, capture=True)
         yndisablev1v2access = get_input("Would you like to disable SNMP v1v2c access? (y/n): ", 0)
@@ -154,49 +154,49 @@ def get_input(request, fmt_chk):
     2 = Args check
     :return:
     '''
-    input = raw_input(request)
+    userInput = input(request)
     if fmt_chk == 0:
-        if input in ('y', 'Y'):
+        if userInput in ('y', 'Y'):
             return True
-        elif input in ('n', 'N', ''):
+        elif userInput in ('n', 'N', ''):
             return False
-        print 'Invalid input.  Please enter \'y\' or \'n\''
+        print('Invalid input.  Please enter \'y\' or \'n\'')
         get_input(request, fmt_chk)
     if fmt_chk == 1:
-        if 7 < len(input) < 49:
-            return input
-        print 'Invalid input.  Password must be between 8 and 49 characters'
+        if 7 < len(userInput) < 49:
+            return userInput
+        print('Invalid input.  Password must be between 8 and 49 characters')
         get_input(request, fmt_chk)
     if fmt_chk == 2:
-        if input in ('d', 'D'):
+        if userInput in ('d', 'D'):
             return "d"
-        elif input in ('c', 'C', ''):
+        elif userInput in ('c', 'C', ''):
             return "c"
-        print 'Invalid input.  Please enter \'D\' or \'C\''
+        print('Invalid input.  Please enter \'D\' or \'C\'')
         get_input(request, fmt_chk)
     if fmt_chk == 3:
-        if input in ('md5', 'MD5', 'Md5', 'mD5'):
+        if userInput in ('md5', 'MD5', 'Md5', 'mD5'):
             return "md5"
-        elif input in ('SHA', 'sha', 'sHa', 'Sha', 'sHA', 'SHa'):
+        elif userInput in ('SHA', 'sha', 'sHa', 'Sha', 'sHA', 'SHa'):
             return "sha"
-        print 'Invalid input. Please enter \'sha\' or \'md5\''
+        print('Invalid input. Please enter \'sha\' or \'md5\'')
         get_input(request, fmt_chk)
     if fmt_chk == 4:
-        if input in ('3DES', '3des', '3Des', '3DEs', '3dES', '3DeS', '3DeS'):
+        if userInput in ('3DES', '3des', '3Des', '3DEs', '3dES', '3DeS', '3DeS'):
             return "3des"
-        if input in ('aes', 'AES', 'Aes', 'AEs', 'aeS', 'AeS'):
+        if userInput in ('aes', 'AES', 'Aes', 'AEs', 'aeS', 'AeS'):
             return "aes"
-        if input in ('hex', 'Hex', 'hEx', 'heX', 'HEx', 'hEX', 'HeX'):
+        if userInput in ('hex', 'Hex', 'hEx', 'heX', 'HEx', 'hEX', 'HeX'):
             return "hex"
-        elif input in ('des', 'DES', 'DEs', 'Des', 'dES'):
+        elif userInput in ('des', 'DES', 'DEs', 'Des', 'dES'):
             return "des"
-        print 'Invalid input.  Please enter \'sha\' or \'md5\''
+        print('Invalid input.  Please enter \'sha\' or \'md5\'')
     if fmt_chk == 5:
-        if input in ('des', 'DES', 'DEs', 'Des', 'dES'):
+        if userInput in ('des', 'DES', 'DEs', 'Des', 'dES'):
             return "des"
-        elif input in ('hex', 'Hex', 'hEx', 'heX', 'HEx', 'hEX', 'HeX'):
+        elif userInput in ('hex', 'Hex', 'hEx', 'heX', 'HEx', 'hEX', 'HeX'):
             return "hex"
-        print 'Invalid input. Please enter \'hex\' or \'des\''
+        print('Invalid input. Please enter \'hex\' or \'des\'')
 
 if __name__ == '__main__':
     try:
