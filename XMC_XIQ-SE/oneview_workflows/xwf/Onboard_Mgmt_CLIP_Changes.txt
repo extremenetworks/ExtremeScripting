@@ -77,9 +77,34 @@ v50
 	- Check for auto-sense ports in state NNI-ISIS-UP is now replaced with a check for ISIS adjacency up
 	- Parsing of CLI commands was incorrectly stripping #error pragma commands
 	- Cisco velocity type #if/#elseif/#else/#end statements are now allowed in additional CLI commands box
-v53 - posted
+v53
 	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
 	- Fixed bug on error messages which would only display if failing to delete the switch from XIQ-SE or Access Control
+v56
+	- Error messages in case of NBI mutations now display LastNbiError
+	- Added variable const_EXPORT_EMC_VARS which can be populated with emc_vars keys to make available
+	  in ${<varname>} variables, with special treatment of keys "deviceIP" & "deviceName" which will be
+	  set to the target VLAN mgmt IP and System name; these variables can be used in the Additional
+	  CLI commands input box
+	- Sometimes emc_vars['deviceSoftwareVer'] is not available after ZTP+ onboarding; workflow now
+	  gets version from switch directly if that happens instead of failing
+	- Added variable const_FOLLOW_WORKFLOW_DELAY to be able to add a delay before calling follow on
+	  workflow
+v60
+	- Added support for path variables %rootDir%, %sitePath% and %siteName% on CSV file input
+	- Ability to parse #if/#elseif/#else/#end, #eval, #sleep, #last statements in additional CLI commands input
+	- Timer const_DELAY_RECONNECT increased from 10 to 15sec
+	- Workflow now can take a mgmt VRF L3VSN I-SID input, and is capable to create the mgmt VRF and L3 I-SID
+v61
+	- Workflow Mgmt CLIP VRF inupt can now take VRF name + optionally the VRF-id with syntax: <vrfname>:<vrfid>
+v62 - posted
+	- VRF IPVPN creation was not working when VRF and I-SID provided
+	- If an auto-sense ISIS Hello auth key is provided, the workflow now only proceeds if it sees auto-sense
+	  interfaces in state NNI-AUTH-FAIL, otherwise it delays execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY
+	  (default 300sec); the NNI-AUTH-FAIL is new in VOSS 9.1.1.0, so this check & delay will only happen if the
+	  switch software version is 9.1.1.0 or later; for earlier software versions nothing has changed, but setting
+	  the ISIS auth key on them will remain best effort and typically will only work if the onboarding switch is
+	  directly connected to the core/distribution; for fabric "stacks" 9.1.1.0 is required with above changes.
 
 Todo:
 

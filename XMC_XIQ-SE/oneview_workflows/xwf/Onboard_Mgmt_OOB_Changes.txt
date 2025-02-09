@@ -2,8 +2,23 @@ Onboard Mgmt OOB
 
 v4
 	- First version shared
-v6 - posted
+v6
 	- Syncronized with Onboard Mgmt VLAN v91 & Onboard Mgmt CLIP v52
+v9
+	- Error messages in case of NBI mutations now display LastNbiError
+	- Added variable const_EXPORT_EMC_VARS which can be populated with emc_vars keys to make available
+	  in ${<varname>} variables, with special treatment of keys "deviceIP" & "deviceName" which will be
+	  set to the target VLAN mgmt IP and System name; these variables can be used in the Additional
+	  CLI commands input box
+	- Sometimes emc_vars['deviceSoftwareVer'] is not available after ZTP+ onboarding; workflow now
+	  gets version from switch directly if that happens instead of failing
+	- Added variable const_FOLLOW_WORKFLOW_DELAY to be able to add a delay before calling follow on
+	  workflow
+v12 - posted
+	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
+	- Added support for path variables %rootDir%, %sitePath% and %siteName% on CSV file input
+	- Ability to parse #if/#elseif/#else/#end, #eval, #sleep, #last statements in additional CLI commands input
+	- Timer const_DELAY_RECONNECT increased from 10 to 15sec
 
 
 Todo:
