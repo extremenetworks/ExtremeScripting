@@ -61,8 +61,23 @@ v82
 	- If the CSV file is an empty file, now a meaningful error message is generated
 v83
 	- Added support for #eval embedded command
-v88 - posted
+v88
 	- Added device notes input field and added to variable const_EXPORT_EMC_VARS additional emc_vars key "date"
+v89
+	- #if/#elseif/#else/#end statements can now be nested
+	- If tab characters are used for indentation in the template file, these will now be removed in the final config 
+	- #eval command can now be used to set variable values using syntax: #eval varname=()
+	- Variables set with #eval varname=() can be de-refenced anywhere in the template (including in #if, #elseif & #eval
+	  evaluations) as $[varname] using square brackets
+	- ASCII Config Template input can now also contain a CSV variable in the format $<var> or $(var); this can allow
+	  a different config template file to be used as specified for the device in the CSV file
+	- New #sleep <sec> statement to introduce a delay (does not work inside #block statements)
+	- New #last statement allows not waiting for CLI prompt on last command in config template
+v90
+	- Fixes to $[varname] processing within #if/#elseif/#else/#end nested logic
+	- Improved debugging messages
+v91 - posted
+	- #last statement can now also be placed in line right before #block execute
 
 Todo:
         

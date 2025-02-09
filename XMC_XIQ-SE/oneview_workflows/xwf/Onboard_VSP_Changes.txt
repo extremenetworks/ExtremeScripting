@@ -143,7 +143,7 @@ v133
 v134
 	- RADIUS accounting is now not enabled unless one of RADIUS use-by in "eapol", "cli" or "web", otherwise this was
 	  causing the workflow to fail
-v135 - posted
+v135
 	- Activity 02 when trying to disable RADIUS accounting no longer errors if the switch complains that accounting cannot
 	  be disabled due to no eapol/cli/web servers
 	- Activity 03 now waits const_NAC_ENGINE_ENFORCE_DELAY seconds before doing a NAC Engine Enforce; that way if
@@ -169,8 +169,26 @@ v141
 	- Lock reservation is now 100 sec + any applicable const_POLICY_START_DELAY or const_POLICY_ENFORCE_DELAY *
 	  const_POLICY_ENFORCE_RETRIES
 	- Add to Policy activity now closes the policy domain if it finds the switch already in the requested VLAN island
-v143 - posted
+v143
 	- Updated all functions
+v147
+	- Added variable const_FOLLOW_WORKFLOW_DELAY to be able to add a delay before calling follow on workflow
+	- Added variable const_EXPORT_EMC_VARS which can be populated with emc_vars keys to make available
+	  in ${<varname>} variables; these variables can be used in the Additional CLI commands input box
+	- Workflow input "NAC Engine Group name" is now renamed to "NAC Engine Group name or Engine IP list" as it can now
+	  either take an Engine Group Name as before or a list of Engine IP addresses which is new; the new syntax can be
+	  used to override the normal logic of deriving the Engine IPs from the Engine Group Name via API lookup
+v152
+	- Add to Policy activity, if const_POLICY_ENFORCE is at default true, will now only do a Policy Enforce if it sees
+	  that there are no other instances queuing up to take the lock for the same Policy add config on other switches;
+	  this allows us to only perform 1 Policy Domain Enforce, at the very end, after the last switch gets added
+	- Added support for path variables %rootDir%, %sitePath% and %siteName% on CSV file input
+	- Ability to parse #if/#elseif/#else/#end, #eval, #sleep, #last statements in additional CLI commands input
+	- Input validation cleaned up; workflow was failing on NAC inputs even if NAC was disabled
+v155 - posted
+	- Correction to Additional CLI commands default inupt
+	- Updated all function libraries
+
 
 Todo:
 

@@ -1,0 +1,41 @@
+Onboard Mgmt EXOS
+
+v3
+	- First version shared; forked from Onboard Mgmt VLAN v92
+v13
+	- Lots of bug fixes!
+v15
+	- Added logic to change the IP address on the same existing mgmt VLAN
+	- Also added logic for replicing the untagged VLAN on optional UNI static port
+v16
+	- Implemented const_NO_ERROR_ON_FAIL_SAVE
+v22
+	- Setting a UNI access port input is now mutually exclusive with setting a VLAN I-SID
+	- After setting the VLAN I-SID, workflow now waits for that binding to be active before proceeding
+v29
+	- Error messages in case of NBI mutations now display LastNbiError
+	- Creation of new mgmt VLAN IP, Gateway and removal of existing mgmt IP and gateway are now done
+	  via TFTP script
+	- Added variable const_EXPORT_EMC_VARS which can be populated with emc_vars keys to make available
+	  in ${<varname>} variables, with special treatment of keys "deviceIP" & "deviceName" which will be
+	  set to the target VLAN mgmt IP and System name; these variables can be used in the Additional
+	  CLI commands input box
+	- FA Message Authentication input combo now has variable inputs
+	- On EXOS switches which do not support mirror from auto-source-ip, the app-telemetry EAN ERSPAN
+	  mirror is deleted and re-created using the new mgmt VLAN IP as from IP
+	- Sometimes emc_vars['deviceSoftwareVer'] is not available after ZTP+ onboarding; workflow now
+	  gets version from switch directly if that happens instead of failing
+v37
+	- Summary of executed commands no longer includes the TFTP file transfer, cat and execution
+	- Added variable const_FOLLOW_WORKFLOW_DELAY to be able to add a delay before calling follow on
+	  workflow
+	- Workflow was failing in Sanity mode waiting for FA I-SID to become active
+v38
+	- Message printing delay to execute follow on workflow was printing the wrong timer
+v42 - posted
+	- CSV parsing code is now forgiving with invalid CSV files where an entry has less records than declared in the top row
+	- Added support for path variables %rootDir%, %sitePath% and %siteName% on CSV file input
+	- Ability to parse #if/#elseif/#else/#end, #eval, #sleep, #last statements in additional CLI commands input
+	- Timer const_DELAY_RECONNECT increased from 10 to 15sec
+
+Todo:
