@@ -9,8 +9,8 @@ This widget provides a method of deleting and creating the SNMP configuration of
 
 
 ### Requirements
-* Tested on 21.1.1.4
-* Platform(s): Any ExtremeXOS switch
+* Tested on 32.6
+* Platform(s): Any Switch Engine (AKA ExtremeXOS switch)
 
 ## Example
 ```
@@ -96,7 +96,7 @@ In this current iteration, this script does not:
 
 
 ## License
-Copyright© 2016, Extreme Networks.  All rights reserved.
+Copyright© 2024, Extreme Networks.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
