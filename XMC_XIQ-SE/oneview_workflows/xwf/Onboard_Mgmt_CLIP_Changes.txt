@@ -97,7 +97,7 @@ v60
 	- Workflow now can take a mgmt VRF L3VSN I-SID input, and is capable to create the mgmt VRF and L3 I-SID
 v61
 	- Workflow Mgmt CLIP VRF inupt can now take VRF name + optionally the VRF-id with syntax: <vrfname>:<vrfid>
-v62 - posted
+v62
 	- VRF IPVPN creation was not working when VRF and I-SID provided
 	- If an auto-sense ISIS Hello auth key is provided, the workflow now only proceeds if it sees auto-sense
 	  interfaces in state NNI-AUTH-FAIL, otherwise it delays execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY
@@ -105,6 +105,8 @@ v62 - posted
 	  switch software version is 9.1.1.0 or later; for earlier software versions nothing has changed, but setting
 	  the ISIS auth key on them will remain best effort and typically will only work if the onboarding switch is
 	  directly connected to the core/distribution; for fabric "stacks" 9.1.1.0 is required with above changes.
+v63 - posted
+	- Check above for NNI-AUTH-FAIL was happeneing on software verions before 9.1.1.0 instead of 9.1.1.0 or later
 
 Todo:
 
