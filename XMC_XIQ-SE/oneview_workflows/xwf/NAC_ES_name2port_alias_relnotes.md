@@ -1,4 +1,4 @@
-# Release notes for Workflow **NAC End System name tp port alias**
+# Release notes for Workflow **NAC End System name to port alias**
 ### written by:   Markus Nikulski
 ### e-mail:       mnikulski@extremenetworks.com
 ### date:         20. March 2025
