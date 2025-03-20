@@ -7,4 +7,4 @@ This workflow read the XIQ-SE Control end system table and use the IP address an
 
 | Build | Description |
 | ------------- | ------- |
-|25.2.11.23v53|*new features*<br • first release<br><br>*maintenance*<br><br>*fixed issues*<br>|
+|25.2.11.23v53|*new features*<br> • first release<br><br>*maintenance*<br><br>*fixed issues*<br>|
