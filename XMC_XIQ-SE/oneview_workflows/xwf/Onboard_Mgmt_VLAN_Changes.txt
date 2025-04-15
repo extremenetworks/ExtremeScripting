@@ -118,7 +118,56 @@ v100
 	  switch software version is 9.1.1.0 or later; for earlier software versions nothing has changed, but setting
 	  the ISIS auth key on them will remain best effort and typically will only work if the onboarding switch is
 	  directly connected to the core/distribution; for fabric "stacks" 9.1.1.0 is required with above changes.
-v101 - posted
-	- Check above for NNI-AUTH-FAIL was happeneing on software verions before 9.1.1.0 instead of 9.1.1.0 or later
+v101
+	- Check above for NNI-AUTH-FAIL was happening on software verions before 9.1.1.0 instead of 9.1.1.0 or later
+v103
+	- Changed workflow so that it can take the data for the $<variables> not from a CSV file but directly from
+	  either another activity added to the workflow, or by calling this workflow via NBI call. In both cases
+	  the new workflow variable wrkfl_deviceJsonData just needs to be set in JSON format to the equivalent data
+	  that is extracted from the CSV file; this is so that some customers can hook up the workflow directly with
+	  their IPAM database instead of using a CSV file.
+v104/1.00
+	- Python within activities is now versioned, since people are taking the Python code and using it within their
+	  own, different workflows
+	- Python within activities are now able to set their own const_xxx variables to defaults even if those variables
+	  are not defined under workflow variables; for same reason, people are taking the Python code and using it within
+	  their own, different workflows which may not have those variables set
+	- CLI functions enhances so that failure to connect at first attempt no longer makes the entire workflow fail.
+	  Now the CLI will retry by default 6 times at 10 sec intervals; so will only fail if no CLI connection can be
+	  established after 1min and 10sec. Defaults can be changed with variables const_CLI_RETRIES and const_CLI_RETRY_DELAY
+	- As of XIQ-SE 25.2, when deleting a switch from the database, XIQ-SE wants to connect to the switch to withdraw
+	  the Pilot license, but if the switch is unreachable, then the delete process takes 5 minutes. The old logic
+	  of this workflow was to change the mgmt IP on the switch, then delete the switch with its old IP from the site
+	  and then re-add the same switch with the new IP. But this means that when the switch is being deleted, it is no
+	  longer reachable by XIQ-SE. The new workflow logic is to first delete the switch from XIQ-SE + now wait for that
+	  to complete, only then the mgmt IP on the switch is changed (as well as setting ISIS Auth key if applicable) and
+	  then we wait for that IP to be reachable. If the IP is not reachable, then the switch is re-added to XIQ-SE
+	  with its old IP (as the mgmt convert will rollback anyway) and the workflow aborts. Whereas if the new mgmt IP
+	  is reachable, then the existing CLI session (on no longer existing IP) is closed; the workflow then proceeds
+	  to delete the old IP from Access Control and all and any Access Control Location Groups, and after the site
+	  re-add delay finally re-adds the switch with its new mgmt IP into XIQ-SE, in the same or desired site.
+	  CLI connection is the re-established with the new mgmt IP, and the new mgmt IP is committed (so that it won't
+	  rollback), if app-telemetry was configured, the sflow source IP is changed, and the rest of the custom CLI
+	  commands is applied.
+	- New variable 	const_WAIT_TIME_SITE_DELETE at default 120 sec, is max time to wait for device deletion from
+	  XIQ-SE to complete
+	- When updating the app-telemetry sflow config, a check is now made to make sure we are not on a 4220 with
+	  basic CLI, and if so this config is skipped, as it is not possible to configure add-telemetry without the full
+	  CLI; this however should not happen; even if the 4220 did not get a Plot license (it can take 24 hours worse
+	  case), XIQ-SE should have created the special sitemanager credentials that give it full CLI access from
+	  XIQ-SE scripts/workflows.
+v108/1.01
+	- CSV data (file and index) can now be exported to follow on workflow
+v109/1.02
+	- const_WAIT_TIME_SITE_DELETE increased from 120 to 360 secs, as device deletion might take that long with
+	  XIQ-SE 25.2 if the device in not reachable for any reason
+	- In case of failure, if a Site to re-add was given, the workflows was re-adding there, instead of rolling back
+	  to the original site
+v111/1.03
+	- Processing of CSV variables was giving an error if it did not find the "__PATH__" key in the JSON data
+v113/1.04 - posted
+	- CSV data exported to follow on workflow is now exported as JSON using launch variable wrkfl_deviceJsonData
+	- If a different site to re-add device to is given, this site is now used to resolve ${site-variables}
+	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
 
 Todo:

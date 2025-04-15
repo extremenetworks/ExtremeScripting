@@ -1,0 +1,10 @@
+Onboard Mgmt VOSS
+
+v9
+	- First version shared
+v11 - posted
+	- CSV data exported to follow on workflow is now exported as JSON using launch variable wrkfl_deviceJsonData
+	- If a different site to re-add device to is given, this site is now used to resolve ${site-variables}
+	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
+
+Todo:

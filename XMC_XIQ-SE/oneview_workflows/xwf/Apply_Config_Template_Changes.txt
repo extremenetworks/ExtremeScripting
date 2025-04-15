@@ -76,8 +76,26 @@ v89
 v90
 	- Fixes to $[varname] processing within #if/#elseif/#else/#end nested logic
 	- Improved debugging messages
-v91 - posted
+v91
 	- #last statement can now also be placed in line right before #block execute
+v94/1.01
+	- Changed workflow so that it can take the data for the $<variables> not from a CSV file but directly from
+	  either another activity added to the workflow, or by calling this workflow via NBI call. In both cases
+	  the new workflow variable wrkfl_deviceJsonData just needs to be set in JSON format to the equivalent data
+	  that is extracted from the CSV file; this is so that some customers can hook up the workflow directly with
+	  their IPAM database instead of using a CSV file.
+	- Python within activities is now versioned, since people are taking the Python code and using it within their
+	  own, different workflows
+	- Python within activities are now able to set their own const_xxx variables to defaults even if those variables
+	  are not defined under workflow variables; for same reason, people are taking the Python code and using it within
+	  their own, different workflows which may not have those variables set
+	- CLI functions enhances so that failure to connect at first attempt no longer makes the entire workflow fail.
+	  Now the CLI will retry by default 6 times at 10 sec intervals; so will only fail if no CLI connection can be
+	  established after 1min and 10sec. Defaults can be changed with variables const_CLI_RETRIES and const_CLI_RETRY_DELAY
+v97/1.02 - posted
+	- CSV $<variable> values read infrom CSV file now have double quotes automatically removed; using double quotes on
+	CSV input values is required when the value includes the CSV record separator character (comma), like for instance
+	providing a list of ports
+	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
 
 Todo:
-        
