@@ -1,11 +1,11 @@
 # Release notes for Workflow **Sync_PVI_to_Policy_Mappings**
 ### written by:   Markus Nikulski
 ### e-mail:       mnikulski@extremenetworks.com
-### date:         19. March 2025
+### date:         02. May 2025
 
 | Build | Description |
 | ------------- | ------- |
-|25.2.11.23v363|*new features*<br> • <br><br>*maintenance*<br> • <br><br>*fixed issues*<br> • critical copy past issue fixed <br> • fix REGEX issue if multible VLAN/I-SID assignment is used<br><br>|
+|25.2.12.13v376|*new features*<br> • implement QOS support<br> • implement  Filter support <br><br>*maintenance*<br> • <br><br>*fixed issues*<br> • global attributes had a higher precedence than role specific.<br> • critical copy past issue fixed <br> • fix REGEX issue if multible VLAN/I-SID assignment is used<br><br>|
 |25.2.11.23v359|*new features*<br> • add non VLAN/I-SID support, no VLAN Islands required anymore<br> • remove Debug LOG form user input dialog, keep it true by default<br><br>*maintenance*<br> • optimise common routines using compression, fix issue with version tracking<br> • cleanup debug messages across the workflow<br> • dump emc_vars to debug folder<br> • update documentation<br> • remove cancel notification if common Python classes gets replaced<br> • strip VLAN-ID in VLAN name<br> • strip VLAN-ID in I-SID name, add VLAN Island location in fornt of the I-SID name<br><br>*fixed issues*<br> • issue using private VLANs malform the Radius return attributes<br> • compare existing policy mappings with indented config failed if policy mapping are empty<br> • logging facility dies some time if the claim the STDOUT<br> • prevent sharding data lock clash, by adding random delay<br> • if privat VLAN is defined, force a non platforn VLAN configuration, but is not valid<br><br>|
 |24.10.13.5v344|*new features*<br>  • <br><br>*maintenance*<br> • add workflow messages to provide more details about the status and result<br> • remove AP aware funtion (Extreme-Dynamic-MHSA='1') because is set already by XIQ-SE if %PER_USER_ACL_VOSS% is configured <br><br>*fixed issues*<br> • LOG formatting issue in 'update_Policy_Mappings'<br><br>|
 |24.10.13.5v342|*new features*<br> • add non VLAN/I-SID support, no VLAN Islands required anymore<br> • remove Debug LOG form user input dialog, keep it true by default<br><br>*maintenance*<br> • optimise common routines using compression, fix issue with version tracking<br> • cleanup debug messages across the workflow<br> • dump emc_vars to debug folder<br> • update documentation<br><br>*fixed issues*<br> • compare existing policy mappings with indented config failed if policy mapping are empty<br><br>|
