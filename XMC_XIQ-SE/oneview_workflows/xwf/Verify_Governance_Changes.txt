@@ -1,0 +1,27 @@
+Verify Governance Changes
+
+v88
+	- First version shared
+v89
+	- Discards the S/Ns it finds in XIQ-SE if they are not in the CSV file
+	- Always sets the "family" key in the XIQ-SE extracted data now, even if just to None
+	- Input box for NAC Auth Type is now a pull down with discrete values ALL, NETWORK, MANAGEMENT, MONITORING, NONE
+v95
+	- Debug logging to /dev/shm
+v104
+	- Pyhton scripts are versioned
+	- Input for NAC RADIUS template can now take inputs in format: VOSS|EXOS|ISW:<template-name>
+v105
+	- Was incorrectly detecting wrong RADIUS config on EXOS
+v109
+	- Added remediation support; patterns can now have commands to rectify added
+	- Patterns can now be provided in a text file
+	- Check for sysLocation and sysContact; if the input value is "ztp" then the device sysLocation and sysContact
+	  are checked to see if they match against the device's site sysLocation and sysContact
+	- Workflow now sends email with CSV file attachment with all warnings
+	- Email recipient is now a workflow input
+v122 - posted
+	- Was failing on sysLocation/sysContact for devices for which no site was set
+	- Improved debugging
+
+Todo:

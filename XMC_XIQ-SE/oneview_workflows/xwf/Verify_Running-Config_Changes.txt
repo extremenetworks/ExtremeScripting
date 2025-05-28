@@ -1,0 +1,15 @@
+Veriphy Running-Config
+
+v31
+	- First version shared
+v32
+	- Pyhton scripts are versioned
+v33
+	- Updated lock functions
+v37
+	- Added remediation support; patterns can now have commands to rectify added
+	- Patterns can now be provided in a text file
+v40 - posted
+	- Improvements to remediation config logic
+
+Todo:

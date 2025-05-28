@@ -185,10 +185,76 @@ v152
 	- Added support for path variables %rootDir%, %sitePath% and %siteName% on CSV file input
 	- Ability to parse #if/#elseif/#else/#end, #eval, #sleep, #last statements in additional CLI commands input
 	- Input validation cleaned up; workflow was failing on NAC inputs even if NAC was disabled
-v155 - posted
+v155
 	- Correction to Additional CLI commands default inupt
 	- Updated all function libraries
-
+v156
+	- Workflow can now configure more than two and up to four RADIUS servers per switch. The VOSS max number of RADIUS
+	  servers being 10, across all the used-by use caases : eapol, cli, web, endpoint-tracking, snmp
+	- Access Control Enforce now is done only by last activity gaining an exclusive lock and seeing that no further
+	  instances queuing up to take the same lock; basically the same approach used for doing a Policy Domain Enforce.
+v157
+	- Workflow was not configuring the auto-sense voice i-sid untagged if the VLAN-id was not provided
+v161
+	- Python within activities is now versioned, since people are taking the Python code and using it within their
+	  own, different workflows
+	- Python within activities are now able to set their own const_xxx variables to defaults even if those variables
+	  are not defined under workflow variables; for same reason, people are taking the Python code and using it within
+	  their own, different workflows which may not have those variables set
+	- Policy APIs have their own locking mechanism. The API to grab the lock has a force option. Originally this
+	  workflow would try to get the lock initially without forcing, and would only force if it could see no other
+	  instances of the same workflow running; but if it did see other instances of the same workflow running, then
+	  it would never force, and after a number of retries would fail. This design was assuming that if multiple instances
+	  of this workflow were running, all configuring the policy API, only one should get the lock, and the rest should
+	  never force it. However, since implementing the general (non-policy) locks, there is no longer any chance of the 
+	  policy activities actually running the policy API at the same time. However we would still observe the workflow
+	  occasionally failing because it could not grab the policy API lock. These failures to get the policy API lock were
+	  seen when another, 1st instance of the workflow had already completed the policy configuration and, not seeing any
+	  queuing workflows on the general lock, would trigger a Policy Enforce for the entire domain, and release the
+	  general lock before waiting for that enforce to complete, which, with EXOS switches in the domain, could take
+	  minutes. The next, 2nd workflow to run would thus be able to grab the general lock, and would proceed to try and
+	  grab the policy API lock, while the Policy Enforce was still running and not completed. If at the same time
+	  a 3rd workflow was running (waiting for general lock) the 2nd workflow would never force the policy API lock,
+	  and would thus never be able to take it and eventually fail. Whereas if there was no 3rd workflow then the 2nd
+	  workflow would be able to take the policy lock, by forcing it, and complete successfully. The logic for the
+	  policy API lock is now changed; taking the lock is first tried without forcing and after
+	  const_POLICY_APILOCK_FORCE_AT retries (default 2) will try forcing; attempts are performed every
+	  const_POLICY_APILOCK_DELAY (default 10) seconds and up to const_POLICY_APILOCK_RETRIES (default 4) retries.
+	- Policy Domain enforcement is now by default done only for the single switch (if VOSS, will avoid doing a policy
+	  enforce for the whole domain, which if it includes EXOS switches, can take a long time). This can be controlled
+	  via const_POLICY_ENFORCE_ONE_DEVICE variable, which is by default true
+	- After doing a Policy Domain enforce, script now holds general lock until the policy enforce has completed; the
+	  checks to see if the policy enforce has completed are performed every const_POLICY_ENFORCE_CHECK_TIME seconds,
+	  by default 10 seconds
+	- Since the lock time is now increased by the policy enforce time, the policy lock reservation time is increased
+	  from 100sec to 240sec and can now be set via const_POLICY_LOCK_RESERVE_TIME variable
+	- Locks for Policy and NAC Enforce are now no longer taken in context of workflow activity name, as this can be
+	  different when this workflow is re-spun for EXOS, but instead for custom context names PolicyEnforce & NacEnforce 
+v164
+	- Policy activity general lock timeout increased from 120sec to default 900 sec (15min) which should be enough
+	  for onboarding up to 60 switches at the same time, as each takes about 15sec; the timeout can now also be set
+	  by variable const_POLICY_LOCK_TIMEOUT
+	- General lock while loop was flawed and would never come out if the lock timeout would expire
+	- Policy activity, which use the general lock, will now abort and fail if acquiring the lock times out
+	- Add to NAC activity, which use the general lock, will now not perform NAC Enforce if acquiring the lock times out
+	- General lock acquireLock now implements randomaized sleep times, to prevent multiple tasks all trying to grab
+	  the lock at exactly the same time
+v167 - posted
+	- Python within activities is now versioned, since people are taking the Python code and using it within their
+	  own, different workflows
+	- Python within activities are now able to set their own const_xxx variables to defaults even if those variables
+	  are not defined under workflow variables; for same reason, people are taking the Python code and using it within
+	  their own, different workflows which may not have those variables set
+	- CLI functions enhances so that failure to connect at first attempt no longer makes the entire workflow fail.
+	  Now the CLI will retry by default 6 times at 10 sec intervals; so will only fail if no CLI connection can be
+	  established after 1min and 10sec. Defaults can be changed with variables const_CLI_RETRIES and const_CLI_RETRY_DELAY
+	- CSV data (file and index) can now be exported to follow on workflow as JSON using launch variable wrkfl_deviceJsonData
+	- Changed workflow so that it can take the data for the $<variables> not from a CSV file but directly from
+	  either another activity added to the workflow, or by calling this workflow via NBI call. In both cases
+	  the new workflow variable wrkfl_deviceJsonData just needs to be set in JSON format to the equivalent data
+	  that is extracted from the CSV file; this is so that some customers can hook up the workflow directly with
+	  their IPAM database instead of using a CSV file.
+	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
 
 Todo:
 
