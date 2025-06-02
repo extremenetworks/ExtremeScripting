@@ -92,10 +92,14 @@ v94/1.01
 	- CLI functions enhances so that failure to connect at first attempt no longer makes the entire workflow fail.
 	  Now the CLI will retry by default 6 times at 10 sec intervals; so will only fail if no CLI connection can be
 	  established after 1min and 10sec. Defaults can be changed with variables const_CLI_RETRIES and const_CLI_RETRY_DELAY
-v97/1.02 - posted
+v97/1.02
 	- CSV $<variable> values read infrom CSV file now have double quotes automatically removed; using double quotes on
-	CSV input values is required when the value includes the CSV record separator character (comma), like for instance
-	providing a list of ports
+	  CSV input values is required when the value includes the CSV record separator character (comma), like for instance
+	  providing a list of ports
 	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
+v98/1.05 - posted
+	- Nested #if/#elseif statements being skipped, because within an #if/#elseif/#else/#end block that evaluated false,
+	  would still try and evaluate their condition, and this could fail if an undefined #eval variable was used there
+	- #eval() pragmas were not working if more than one was included on the same line
 
 Todo:
