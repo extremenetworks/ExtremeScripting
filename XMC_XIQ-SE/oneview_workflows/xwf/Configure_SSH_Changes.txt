@@ -10,11 +10,20 @@ v40
 	- Re-designed around updated SNMP functions which can now skip OID which
 	  return "No Such Object" and also implements rollback; so now works even
 	  on older VSPs, which might not have all the SSH MIBs nor iqAgent
-v42 - posted
+v42
 	- Re-added Key Exchange cypher diffie-hellman-group1-sha1, as this is still
 	  configurable on older VOSS versions
 	- Cyphers now have comments inline in the workflow inputs
 	- Debug is now shown in case of snmpSet called with returnError=True
-
+v44
+	- Added variable const_START_DELAY to apply a sleep timer before commencing
+	  SNMP configuration; by default timer is set to 0 for no delay
+v47
+	- Added new timer const_RE_ENABLE_IQAGENT_DELAY at default 5sec to delay
+	  re-enabling of IQ Agent
+v48/1.01 - posted
+	- Added in workflow description that VOSS versions 9.x requre an SSH lockup
+	  fix which is present in versions 9.3.0.0, 9.2.1.0 and 9.1.2.0
+	- Added versioning and updated all functions
 
 Todo:
