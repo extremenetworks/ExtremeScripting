@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>SMLT Pair Enforce v2.8</comments>
+    <comments>SMLT Pair Enforce v2.9</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -28,7 +28,7 @@ SCRIPTS.
 ##########################################################
 # Does VSP SMLT Clustering in Fabric Connect
 
-__version__ = '2.8'
+__version__ = '2.9'
 
 # 1.0 - Initial
 # 1.2 - When deleting an LACP LAG MLT, the underlying ports now are restored tu untagged
@@ -50,6 +50,7 @@ __version__ = '2.8'
 # 2.7 - Rollback was incorrectly trying to default dot1q encap on MLT interface
 #     - SLPP-Guard is now automatically disabled before trying to enable SLPP packet-rx
 # 2.8 - Fabric Attach Management VLAN:ISID input now allows only an I-SID number to be provided, for untagged use
+# 2.9 - Was failing to fetch ISIS admin state and system-id on multi-area capable boundary nodes
 
 
 # todo:
@@ -1404,7 +1405,7 @@ CLI_Dict = {
         'exit_config_context'        : 'exit',
         'end_config'                 : 'end',
         'save_config'                : 'save config',
-        'get_isis_global_settings'   : 'dict-diagonal://show isis||(?:(AdminState) : (enabled|disabled)|(System ID) : ?([\da-f]{4}\.[\da-f]{4}\.[\da-f]{4})?|(Router Name) : ?(\S+)?|ip (source-address) : ?(\d+\.\d+\.\d+\.\d+)?|(inband-mgmt-ip) : ?(\d+\.\d+\.\d+\.\d+)?)',
+        'get_isis_global_settings'   : 'dict-diagonal://show isis||(?:(AdminState) : (enabled|disabled)|  (System ID) : ?([\da-f]{4}\.[\da-f]{4}\.[\da-f]{4})?|(Router Name) : ?(\S+)?|ip (source-address) : ?(\d+\.\d+\.\d+\.\d+)?|(inband-mgmt-ip) : ?(\d+\.\d+\.\d+\.\d+)?)',
         'check_isis_adjacencies'     : 'bool://show isis adjacencies||^\S+ +1 UP',
         'get_virtual_ist_data'       : 'list://show virtual-ist||^(?:\d+\.\d+\.\d+\.\d+ +(\d+) +\S+ +(up|down)|\S+ +\S+ +(Master|Slave))',
         'get_chassis_mac'            : 'str://show sys-info||BaseMacAddr +: +(\S+)',
@@ -2398,7 +2399,8 @@ def main():
     else:
         print "Unable to initialte XIQ-SE config reload of device as this requires XIQ-SE version 23.2 or later; please perform manually"
 
-main()</content>
+main()
+</content>
     <creationDate>1573331099302</creationDate>
     <creator>lstevens</creator>
     <credentialsCacheOveride>false</credentialsCacheOveride>
@@ -2406,7 +2408,7 @@ main()</content>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Groups,</contexts>
-    <lastUpdateDate>1721050927552</lastUpdateDate>
+    <lastUpdateDate>1724655857086</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-fabric-engine,nos-id-voss,</nosIds>
