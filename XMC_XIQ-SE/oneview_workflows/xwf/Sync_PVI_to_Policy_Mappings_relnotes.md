@@ -1,7 +1,7 @@
 # Release notes for Workflow **Sync_PVI_to_Policy_Mappings**
 ### written by:   Markus Nikulski
 ### e-mail:       mnikulski@extremenetworks.com
-### date:         02. May 2025
+### date:         10. Jun 2025
 
 | Build | Description |
 | ------------- | ------- |
