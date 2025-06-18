@@ -78,9 +78,11 @@ v48/1.03
 	  EXOS does not have a "mgmt convert" command...; added a check to bomb out from workflow if the requested
 	  mgmt VLAN id is the same as the existing mgmt VLAN id
 	- Was failing on X435 because "show process tftpd" gives error
-v50/1.04 - posted
+v50/1.04
 	- CSV data exported to follow on workflow is now exported as JSON using launch variable wrkfl_deviceJsonData
 	- If a different site to re-add device to is given, this site is now used to resolve ${site-variables}
 	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
+v51/1.05 - posted
+	- Regex was failing to scrape VLAN IP and mask from "show vlan" if the IP address had 3 digits for all 4 bytes
 
 Todo:
