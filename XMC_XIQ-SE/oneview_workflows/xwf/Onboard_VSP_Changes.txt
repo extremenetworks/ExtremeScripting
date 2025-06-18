@@ -239,7 +239,7 @@ v164
 	- Add to NAC activity, which use the general lock, will now not perform NAC Enforce if acquiring the lock times out
 	- General lock acquireLock now implements randomaized sleep times, to prevent multiple tasks all trying to grab
 	  the lock at exactly the same time
-v167 - posted
+v167
 	- Python within activities is now versioned, since people are taking the Python code and using it within their
 	  own, different workflows
 	- Python within activities are now able to set their own const_xxx variables to defaults even if those variables
@@ -255,6 +255,8 @@ v167 - posted
 	  that is extracted from the CSV file; this is so that some customers can hook up the workflow directly with
 	  their IPAM database instead of using a CSV file.
 	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
+v168 - posted
+	- Use of CSV file for values was not working properly when workflow manually run against multiple devices
 
 Todo:
 
