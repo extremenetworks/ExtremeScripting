@@ -19,10 +19,12 @@ v97
 v100
 	- For OVS/SRIOV providing input VLAN is now optional
 	- Updated to work on DVR Leaf
-v102 - posted
+v102
 	- Start VM activity was failing if no VLAN was provided, for sideband port config only
 	- Added some additional checks in case two Vports entered using same sideband port
 	- Updated all libraries
+v103 - posted
+	- Updated to implement const_CLI_RETRIES and const_CLI_RETRY_DELAY
 
 Todo:
 
