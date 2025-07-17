@@ -1,10 +1,11 @@
 # Release notes for Workflow **Sync_PVI_to_Policy_Mappings**
 ### written by:   Markus Nikulski
 ### e-mail:       mnikulski@extremenetworks.com
-### date:         16. July 2025
+### date:         17. July 2025
 
 | Build | Description |
 | ------------- | ------- |
+|25.2.11.23v432|*new features*<br> • Optimise the Workflow waiting queue and implement a graceful end if too many workflows running at the same time.<br><br>*maintenance*<br> • Adjust log facility initialization.<br><br>*fixed issues*<br> • <br><br>|
 |25.2.11.23v427|*new features*<br> • common Python class integrity checking added<br> • If Workflow runs more than once, the later executed Workflows wait in the queue until the priore Workflow finished or the timeout is reached. This allowes a better parralel onboarding of new switches. Variable called 'WAIT_TIMER' in minutes determinat how long to wait. By default is 30 minutes.<br><br>*maintenance*<br> • Python class performance improvements<br> • update common class library to 0.2.0<br> • automate Python class compilation during the coding process<br><br>*fixed issues*<br> • <br><br>|
 |25.2.11.23v386|*new features*<br> • <br><br>*maintenance*<br> • <br><br>*fixed issues*<br> • drop out records if I-SID and VLAN-ID equal null.<br> • in policy mapping location 'any' was a unpredicted VLAN and I-SID injection<br><br>|
 |25.2.11.23v376|*new features*<br> • implement QOS support<br> • implement  Filter support <br><br>*maintenance*<br> • <br><br>*fixed issues*<br> • global attributes had a higher precedence than role specific.<br><br>|
