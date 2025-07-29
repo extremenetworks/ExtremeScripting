@@ -1,0 +1,7 @@
+Update serial number 
+
+v59
+	- First version shared
+v145
+	- Added debuging information
+	- Added Reset UserData1 field in database
