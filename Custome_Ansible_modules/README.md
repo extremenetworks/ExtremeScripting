@@ -1,6 +1,6 @@
 # Custome Ansible Modules
 
-a module collection provided form the community for Extreme Network products like Fabric Engine or XIQ-SE.
+a module collection provided from the community for Extreme Network products like Fabric Engine or XIQ-SE.
 
 
 ## Support
