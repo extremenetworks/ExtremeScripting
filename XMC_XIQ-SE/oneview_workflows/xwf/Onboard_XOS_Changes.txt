@@ -1,0 +1,24 @@
+Onboard XOS
+
+v1
+	- First version based off Onboard VSP v171
+v6 - posted
+	- VLAN and I-SID input values now have leading zeros stripped if necessary
+	- If input data is fed into variable wrkfl_deviceJsonData, the lookup index is extracted from the same data, under
+	  key ["__LOOKUP__"], if present in the data; else it is obtianed from workflow inputs and NBI lookup as usual
+	- If a key listed in variable const_EXPORT_EMC_VARS is found to not exist in emc_vars, now a warning message is
+	  displayed, instead of failing the workflow. For some of the default keys ("deviceName","deviceSysOid","deviceType",
+	  "family",..) this can happen if this workflow is called by one of the Onboard Mgmt VLAN/CLIP/etc.. workflows
+	  right after these have re-added the device to XIQ-SE, and XIQ-SE has not had enough time to fully re-discover the
+	  device and set those emc_vars keys. If this workflow is not actually using any of those keys as site variables in
+	  the template file, it made no sense to fail the workflow. However, if those keys are used on workflow inputs
+	  then the workflow will still fail when the variable needs to be replaced; in this case consider increasing the
+	  const_FOLLOW_WORKFLOW_DELAY variable on the calling Onboard Mgmt VLAN/CLIP/etc.. workflow to give XIQ-SE enough
+	  time to re-discover the device
+	- Implemented retries on performing save config, as seems a save config can sometimes fail with
+	  "Error: This command cannot be executed during configuration save."
+
+Todo:
+
+
+
