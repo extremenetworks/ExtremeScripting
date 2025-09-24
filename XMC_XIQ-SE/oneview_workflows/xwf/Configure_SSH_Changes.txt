@@ -21,9 +21,12 @@ v44
 v47
 	- Added new timer const_RE_ENABLE_IQAGENT_DELAY at default 5sec to delay
 	  re-enabling of IQ Agent
-v48/1.01 - posted
+v48/1.01
 	- Added in workflow description that VOSS versions 9.x requre an SSH lockup
 	  fix which is present in versions 9.3.0.0, 9.2.1.0 and 9.1.2.0
 	- Added versioning and updated all functions
+v49/1.02 - posted
+	- Workflow was not behaving correctly upon SNMP timeout
+
 
 Todo:

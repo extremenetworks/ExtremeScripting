@@ -2,9 +2,28 @@ Onboard Mgmt VOSS
 
 v9
 	- First version shared
-v11 - posted
+v11
 	- CSV data exported to follow on workflow is now exported as JSON using launch variable wrkfl_deviceJsonData
 	- If a different site to re-add device to is given, this site is now used to resolve ${site-variables}
 	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
+v12
+	- If an auto-sense ISIS Hello auth key is provided, the workflow now only proceeds if it sees auto-sense
+	  interfaces in state NNI-AUTH-FAIL or (new check) if the switch has no ISIS adjacencies; otherwise it delays
+	  execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY (default 300sec) as before
+v13
+	- CSV now also extracts the device's lookup (serial number or MAC address) to be used as $<> variable
+v14 - posted
+	- Added more logic to v11 change: if a different site to re-add device to is given, this site is now used
+	  to resolve ${site-variables}
+	  But, the initial site of the switch is still going to be used (instead of re-add site) if any of these
+	  conditions are true:
+	  1 - No re-add site input provided
+	  2 - Re-add site input and/or CSV file input is provided but as a ${site-var} itself
+	  3 - Re-add site input is provided but as a $<csv-var> but yields an empty value
+	  4 - New workflow variable const_SITE_VAR_FORCE_INIT_SITE is set to true (by default it is false)
+	- When calling a follow on workflow, the NBI call also specifies key wrkfl_deviceFamily and sets it to
+	  the family type used by this workflow; this can facilitate the next workflow, e.g. Apply Config Template,
+	  to set the correct family type, even if XIQ-SE does not yet have it set for the device
+
 
 Todo:

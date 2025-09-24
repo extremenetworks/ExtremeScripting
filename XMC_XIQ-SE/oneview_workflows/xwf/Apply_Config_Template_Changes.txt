@@ -97,9 +97,38 @@ v97/1.02
 	  CSV input values is required when the value includes the CSV record separator character (comma), like for instance
 	  providing a list of ports
 	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
-v98/1.05 - posted
+v98/1.05
 	- Nested #if/#elseif statements being skipped, because within an #if/#elseif/#else/#end block that evaluated false,
 	  would still try and evaluate their condition, and this could fail if an undefined #eval variable was used there
 	- #eval() pragmas were not working if more than one was included on the same line
+v99/1.06
+	- Config template file is now read in line by line and if any lines are found to contain non-ASCII characters
+	  the workflow reports those line numbers and fails with a meaningful error message
+	- Workflow will now error if it is unable to obtain the device's serial number or MAC address from XIQ-SE NBI; this
+	  is sometimes seen, if this workflow is called by one of the "Onboard Mgmt VLAN/CLIP/etc" workflows which delete
+	  and re-add the device into XIQ-SE, and it seems XIQ-SE takes some time before it re-populates that data; use the
+	  const_FOLLOW_WORKFLOW_DELAY variable on those preceding workflows to increase the delay before running this workflow
+	- CSV now also extracts the device's lookup (serial number or MAC address) to be used as $<> variable
+	- If input data is fed into variable wrkfl_deviceJsonData, the lookup index is extracted from the same data, under
+	  key ["__LOOKUP__"], if present in the data; else it is obtianed from workflow inputs and NBI lookup as usual
+v100/1.07
+	- Family type can now be fed into variable wrkfl_deviceFamily by calling workflow; this allows the workflow to be
+	  able to run even the family type of the device has not yet been set by XIQ-SE, for example if the calling workflow
+	  is one of Onboard Mgmt VLAN/CLIP/etc.. which has just re-added the device to XIQ-SE before calling this workflow
+v101/1.08
+	- Enhanced block execution syntax with "#block execute [wait|reconnect] [n]"; "wait" is same as before, in that
+	  [n] secs are waited and then the same CLI session is resumed; "reconnect" is new; this will now tear down the CLI
+	  session, after the [n] secs wait, and will then re-start a new CLI session (leveraging const_CLI_RETRIES and
+	  const_CLI_RETRY_DELAY)
+v102/1.10 - posted
+	- If a key listed in variable const_EXPORT_EMC_VARS is found to not exist in emc_vars, now a warning message is
+	  displayed, instead of failing the workflow. For some of the default keys ("deviceName","deviceSysOid","deviceType",
+	  "family",..) this can happen if this workflow is called by one of the Onboard Mgmt VLAN/CLIP/etc.. workflows
+	  right after these have re-added the device to XIQ-SE, and XIQ-SE has not had enough time to fully re-discover the
+	  device and set those emc_vars keys. If this workflow is not actually using any of those keys as site variables in
+	  the template file, it made no sense to fail the workflow. However, if the template file does need to use those keys
+	  then the workflow will still fail when the variable needs to be replaced; in this case consider increasing the
+	  const_FOLLOW_WORKFLOW_DELAY variable on the calling Onboard Mgmt VLAN/CLIP/etc.. workflow to give XIQ-SE enough
+	  time to re-discover the device
 
 Todo:

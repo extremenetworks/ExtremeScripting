@@ -165,9 +165,36 @@ v109/1.02
 	  to the original site
 v111/1.03
 	- Processing of CSV variables was giving an error if it did not find the "__PATH__" key in the JSON data
-v113/1.04 - posted
+v113/1.04
 	- CSV data exported to follow on workflow is now exported as JSON using launch variable wrkfl_deviceJsonData
 	- If a different site to re-add device to is given, this site is now used to resolve ${site-variables}
 	- Added to variable const_EXPORT_EMC_VARS additional emc_vars key deviceNosId
+v114/1.05
+	- If an auto-sense ISIS Hello auth key is provided, the workflow now only proceeds if it sees auto-sense
+	  interfaces in state NNI-AUTH-FAIL or (new check) if the switch has no ISIS adjacencies; otherwise it delays
+	  execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY (default 300sec) as before
+v115/1.06
+	- CSV now also extracts the device's lookup (serial number or MAC address) to be used as $<> variable
+v116/1.07
+	- Added more logic to v113 change: if a different site to re-add device to is given, this site is now used
+	  to resolve ${site-variables}
+	  The initial site of the switch is still going to be used (instead of re-add site) if any of these
+	  conditions are true:
+	  1 - No re-add site input provided
+	  2 - Re-add site input is provided but as a ${site-var} itself
+	  3 - Re-add site input is provided but as a $<csv-var> but yields an empty value
+	  4 - New workflow variable const_SITE_VAR_FORCE_INIT_SITE is set to true (by default it is false)
+v117/1.09 - posted
+	- When calling a follow on workflow, the NBI call also specifies key wrkfl_deviceFamily and sets it to
+	  the family type used by this workflow; this can facilitate the next workflow, e.g. Apply Config Template,
+	  to set the correct family type, even if XIQ-SE does not yet have it set for the device
+	- Modified again logic to v113 change: if a different site to re-add device to is given, this site is now used
+	  to resolve ${site-variables}
+	  But, the initial site of the switch is still going to be used (instead of re-add site) if any of these
+	  conditions are true:
+	  1 - No re-add site input provided
+	  2 - Re-add site input and/or CSV file input is provided but as a ${site-var} itself
+	  3 - Re-add site input is provided but as a $<csv-var> but yields an empty value
+	  4 - New workflow variable const_SITE_VAR_FORCE_INIT_SITE is set to true (by default it is false)
 
 Todo:
