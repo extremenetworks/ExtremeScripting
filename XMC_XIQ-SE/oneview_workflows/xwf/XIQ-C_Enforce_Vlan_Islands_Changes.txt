@@ -1,0 +1,18 @@
+XIQ-C Enforce
+
+v39
+	- First version
+v43
+	- Now also adds the roles using VLAN Islands to the same Device Group Profiles
+	  where the VLAN topologies were added
+v61 - posted
+	- Completey new workflow with 3 activities, absorbs previous single activity workflow
+	- Islands roles which have VLAN-id or I-SID set to None are now ignored
+	- Added functionality where Police Role Rules of type "Wireless Controller" can now be
+	  pushed by workflow onto corresponding XIQ-C Role; this gets around issue of certain
+	  rules not being natively supported on XIQ-SE Policy for XIQ-C: (a) L3 FQDN rules,
+	  (b) Egress any source rules, (c) HTTP/HTTPS redirect rules
+
+Todo:
+
+
