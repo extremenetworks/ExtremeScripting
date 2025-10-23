@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>SMLT Pair Enforce v2.9</comments>
+    <comments>SMLT Pair Enforce v3.0</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -28,7 +28,7 @@ SCRIPTS.
 ##########################################################
 # Does VSP SMLT Clustering in Fabric Connect
 
-__version__ = '2.9'
+__version__ = '3.0'
 
 # 1.0 - Initial
 # 1.2 - When deleting an LACP LAG MLT, the underlying ports now are restored tu untagged
@@ -51,11 +51,11 @@ __version__ = '2.9'
 #     - SLPP-Guard is now automatically disabled before trying to enable SLPP packet-rx
 # 2.8 - Fabric Attach Management VLAN:ISID input now allows only an I-SID number to be provided, for untagged use
 # 2.9 - Was failing to fetch ISIS admin state and system-id on multi-area capable boundary nodes
+# 3.0 - Updated to latest functions
+#     - Added variable MakeVistNeighbourAutoSensePortsStatic with default value False; if false this will now
+#       not try and convert to static direct auto-sense ports between the vIST peers; this is no longer desired
+#       from VOSS 9.3 onwards anyway as auto-mlt NNI are now supported with auto-sense
 
-
-# todo:
-# - for delete/remove, need to detect if MLT is flex and has bindings, either error or automatically remove all the bindings
-# - option to use VLACP/LACP on ERS/XOS FA links
 
 #
 # XMC Metadata
@@ -316,1074 +316,12 @@ __version__ = '2.9'
 #@MetaDataEnd
 '''
 
-
-
-##########################################################
-# Ludo Standard library; Version 4.00                    #
-# Written by Ludovico Stevens, TME Extreme Networks      #
-##########################################################
-Debug = False    # Enables debug messages
-Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
-
-##########################################################
-try:
-    emc_vars
-    execution = 'xmc'
-except: # If not running on XMC Jython...
-    # These lines only needed to run XMC Python script locally (on my laptop)
-    # They can also be pasted to XMC, but will not execute
-    import sys
-    import json
-    import java.util
-    import emc_cli      # Own local replica
-    import emc_nbi      # Own local replica
-    import emc_results  # Own local replica
-    execution = 'dev'
-    if len(sys.argv) &gt; 1: # Json file as 1st argv
-        emc_vars = json.load(open(sys.argv[1]))
-    else:
-        emc_vars = json.load(open('emc_vars.json'))
-##########################################################
-
-
-#
-# IMPORTS:
-#
-from distutils.version import LooseVersion
-
-
-#
-# Base functions
-#
-import re                           # Used by scriptName
-import time                         # Used by exitError
-ExitErrorSleep = 10
-
-def debug(debugOutput): # v1 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
-    if Debug:
-        print debugOutput
-
-def exitError(errorOutput, sleep=ExitErrorSleep): # v3 - Exit script with error message and setting status appropriately
-    if 'workflowMessage' in emc_vars: # Workflow
-        time.sleep(sleep) # When workflow run on multiple devices, want ones that error to be last to complete, so THEY set the workflow message
-        emc_results.put("deviceMessage", errorOutput)
-        emc_results.put("activityMessage", errorOutput)
-        emc_results.put("workflowMessage", errorOutput)
-    emc_results.setStatus(emc_results.Status.ERROR)
-    raise RuntimeError(errorOutput)
-
-def abortError(cmd, errorOutput): # v1 - A CLI command failed, before bombing out send any rollback commands which may have been set
-    print "Aborting script due to error on previous command"
-    try:
-        rollbackStack()
-    finally:
-        print "Aborting because this command failed: {}".format(cmd)
-        exitError(errorOutput)
-
-def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
-    name = None
-    if 'workflowName' in emc_vars: # Workflow
-        name = emc_vars['workflowName']
-    elif 'javax.script.filename' in emc_vars: # Script
-        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
-        name = nameMatch.group(1) if nameMatch else None
-    return name
-
-#
-# Family functions
-#
-Family = None # This needs to get set by setFamily()
-FamilyChildren = { # Children will be rolled into parent family for these scripts
-    'Extreme Access Series' : 'VSP Series',
-    'Unified Switching VOSS': 'VSP Series',
-    'Unified Switching EXOS': 'Summit Series',
-    'Universal Platform VOSS': 'VSP Series',
-    'Universal Platform EXOS': 'Summit Series',
-    'Universal Platform Fabric Engine': 'VSP Series',
-    'Universal Platform Switch Engine': 'Summit Series',
-}
-
-def setFamily(cliDict={}, family=None): # v2 - Set global Family variable; automatically handles family children, as far as this script is concerned
-    global Family
-    if family:
-        Family = family
-    elif emc_vars["family"] in FamilyChildren:
-        Family = FamilyChildren[emc_vars["family"]]
-    else:
-        Family = emc_vars["family"]
-    print "Using family type '{}' for this script".format(Family)
-    if cliDict and Family not in cliDict:
-        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
-    return Family
-
-#
-# CLI Rollback functions
-#
-RollbackStack = []
-
-def rollbackStack(): # v1 - Execute all commands on the rollback stack
-    if RollbackStack:
-        print "Applying rollback commands to undo partial config and return device to initial state"
-        while RollbackStack:
-            sendCLI_configChain(RollbackStack.pop(), True)
-
-def rollbackCommand(cmd): # v1 - Add a command to the rollback stack; these commands will get popped and executed should we need to abort
-    RollbackStack.append(cmd)
-    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
-    cmdList = [x for x in cmdList if x] # Weed out empty elements 
-    cmdOneLiner = " / ".join(cmdList)
-    print "Pushing onto rollback stack: {}\n".format(cmdOneLiner)
-
-def rollBackPop(number=0): # v1 - Remove entries from RollbackStack
-    global RollbackStack
-    if number == 0:
-        RollbackStack = []
-        print "Rollback stack emptied"
-    else:
-        del RollbackStack[-number:]
-        print "Rollback stack popped last {} entries".format(number)
-
-#
-# CLI functions
-#
-import re
-RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
-RegexError  = re.compile(
-    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
-    re.IGNORECASE | re.MULTILINE
-)
-RegexContextPatterns = { # Ported from acli.pl
-    'ERS Series' : [
-        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
-        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
-        re.compile('^(?:locale)'), # level2
-    ],
-    'VSP Series' : [
-        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt [\dcvo]|ovsdb$)'), # level0
-        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
-    ],
-}
-RegexExitInstance = re.compile('^ *(?:exit|back|end)(?:\s|$)')
-Indent = 3 # Number of space characters for each indentation
-LastError = None
-ConfigHistory = []
-
-def cleanOutput(outputStr): # v2 - Remove echoed command and final prompt from output
-    if RegexError.match(outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
-        return outputStr
-    lastLine = outputStr.splitlines()[-1:][0]
-    if RegexPrompt.match(lastLine):
-        lines = outputStr.splitlines()[1:-1]
-    else:
-        lines = outputStr.splitlines()[1:]
-    return '\n'.join(lines)
-
-def configChain(chainStr): # v1 - Produces a list of a set of concatenated commands (either with ';' or newlines)
-    chainStr = re.sub(r'\n(\w)(\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
-    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
-    cmdList = filter(None, cmdList) # Filter out empty lines, if any
-    cmdList = [re.sub(r'\x00(\w)(\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
-    return cmdList
-
-def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
-    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
-    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
-        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
-    else:
-        mode = None
-    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
-    cmdList = map(str.strip, cmd.split('&amp;'))
-    return mode, cmdList, regex
-
-def formatOutputData(data, mode): # v2 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
-    if not mode                 : value = data                                   # Legacy behaviour same as list
-    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
-    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
-    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
-    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
-    elif mode == 'str-join'     : value = ''.join(data)                          # Regex with max 1 capturing bracket, joins list to string
-    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
-    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
-    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
-    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
-    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets, returns 1st tuple
-    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
-    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
-    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
-    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
-    else:
-        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
-    return value
-
-def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None): # v1 - Send a CLI show command; return output
-    global LastError
-    resultObj = emc_cli.send(cmd)
-    if resultObj.isSuccess():
-        outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
-            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
-                LastError = outputStr
-                if msgOnError:
-                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
-                return None
-            abortError(cmd, outputStr)
-        LastError = None
-        return outputStr
-    else:
-        exitError(resultObj.getError())
-
-def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
-    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
-    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
-    for cmd in cmdList:
-        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
-        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
-        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
-        if outputStr:
-            break
-    if not outputStr: # returnCliError true
-        return None
-    data = re.findall(regex, outputStr, re.MULTILINE)
-    debug("sendCLI_showRegex() raw data = {}".format(data))
-    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
-    value = formatOutputData(data, mode)
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, value))
-        else: debug("sendCLI_showRegex OUT = {}".format(value))
-    return value
-
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True): # v2 - Send a CLI config command
-    global LastError
-    cmdStore = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar
-    if Sanity:
-        print "SANITY&gt; {}".format(cmd)
-        ConfigHistory.append(cmdStore)
-        LastError = None
-        return True
-    resultObj = emc_cli.send(cmd, waitForPrompt)
-    if resultObj.isSuccess():
-        outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
-            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
-                LastError = outputStr
-                if msgOnError:
-                    print "==&gt; Ignoring above error: {}\n\n".format(msgOnError)
-                return False
-            abortError(cmd, outputStr)
-        ConfigHistory.append(cmdStore)
-        LastError = None
-        return True
-    else:
-        exitError(resultObj.getError())
-
-def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True, abortOnError=True): # v2 - Send a semi-colon separated list of config commands
-    cmdList = configChain(chainStr)
-    successStatus = True
-    for cmd in cmdList[:-1]: # All but last
-        success = sendCLI_configCommand(cmd, returnCliError, msgOnError)
-        if not success:
-            successStatus = False
-            if abortOnError:
-                return False
-    # Last now
-    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt)
-    if not success:
-        return False
-    return successStatus
-
-def printConfigSummary(): # v3 - Print summary of all config commands executed with context indentation
-    global ConfigHistory
-    emc_cli.close()
-    if not len(ConfigHistory):
-        print "No configuration was performed"
-        return
-    print "The following configuration was successfully performed on switch:"
-    indent = ''
-    level = 0
-    if Family in RegexContextPatterns:
-        maxLevel = len(RegexContextPatterns[Family])
-    for cmd in ConfigHistory:
-        if Family in RegexContextPatterns:
-            if RegexContextPatterns[Family][level].match(cmd):
-                print "-&gt; {}{}".format(indent, cmd)
-                if level + 1 &lt; maxLevel:
-                    level += 1
-                indent = ' ' * Indent * level
-                continue
-            elif RegexExitInstance.match(cmd):
-                if level &gt; 0:
-                    level -= 1
-                indent = ' ' * Indent * level
-        print "-&gt; {}{}".format(indent, cmd)
-    ConfigHistory = []
-
-
-#
-# CLI append to config file functions (requires CLI functions)
-#
-AppendBuffer = []
-
-def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or configChains; buffer can then be appended to config.cfg with appendConfigDotCfg()
-    if Family != 'VSP Series':
-        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
-    global AppendBuffer
-    cmdList = configChain(chainStr)
-    for cmd in cmdList:
-        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
-        AppendBuffer.append(cmdAdd)
-
-def appendConfigDotCfg(chainStr=None): # v4 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
-    global LastError
-    if Family != 'VSP Series':
-        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
-    global AppendBuffer
-    if chainStr:
-        appendBuffer_add(chainStr)
-    if Sanity:
-        for cmd in AppendBuffer:
-            print "SANITY(appended to config.cfg)&gt; {}".format(cmd)
-            ConfigHistory.append('[after reboot] ' + cmd)
-        LastError = None
-        return True
-    # Edit config.cfg
-    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
-    for cmd in AppendBuffer:
-        cmdStream += cmd + "\n"
-    cmdStream += "\x1bZZ" # Escape edit mode and save file
-    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
-    resultObj = emc_cli.send(cmdStream)
-    if resultObj.isSuccess():
-        outputStr = cleanOutput(resultObj.getOutput())
-        if outputStr and RegexError.search("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
-            abortError(cmd, outputStr)
-        else:
-            for cmd in AppendBuffer:
-                print "Added to config.cfg: {}".format(cmd)
-                ConfigHistory.append('[after reboot] ' + cmd)
-            LastError = None
-            AppendBuffer = []
-            return True
-    else:
-        exitError(resultObj.getError())
-
-
-#
-# CLI warp buffer functions (requires CLI functions)
-#
-import os                           # Used by warpBuffer_execute
-WarpBuffer = []
-
-def warpBuffer_add(chainStr): # v1 - Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
-    global WarpBuffer
-    cmdList = configChain(chainStr)
-    for cmd in cmdList:
-        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
-        WarpBuffer.append(cmdAdd)
-
-def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, waitForPrompt=True): # v3 - Appends to existing WarpBuffer and then executes it
-    # Same as sendCLI_configChain() but all commands are placed in a script file on the switch and then sourced there
-    # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
-    # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
-    global WarpBuffer
-    global LastError
-    xmcTftpRoot = '/tftpboot'
-    xmcServerIP = emc_vars["serverIP"]
-    switchIP = emc_vars["deviceIP"]
-    userName = emc_vars["userName"]
-    tftpCheck = {
-        'VSP Series':    'bool://show boot config flags||^flags tftpd true',
-        'Summit Series': 'bool://show process tftpd||Ready',
-        'ERS Series':    True, # Always enabled
-    }
-    tftpActivate = {
-        'VSP Series':    'boot config flags tftpd',
-        'Summit Series': 'start process tftpd',
-    }
-    tftpDeactivate = {
-        'VSP Series':    'no boot config flags tftpd',
-        'Summit Series': 'terminate process tftpd graceful',
-    }
-    tftpExecute = { # XMC server IP (TFTP server), Script file to fetch and execute
-        'VSP Series':    'copy "{0}:{1}" /intflash/.script.src -y; source .script.src debug',
-        'Summit Series': 'tftp get {0} "{1}" .script.xsf; run script .script.xsf',
-        'ERS Series':    'configure network address {0} filename "{1}"',
-    }
-
-    if chainStr:
-        warpBuffer_add(chainStr)
-    if Family not in tftpCheck:
-        exitError('Sourcing commands via TFTP only supported in family types: {}'.format(", ".join(list(tftpCheck.keys()))))
-
-    # Determine whether switch can do TFTP
-    if tftpCheck[Family] == True:
-        tftpEnabled = True
-    else:
-        tftpEnabled = sendCLI_showRegex(tftpCheck[Family])
-    if not tftpEnabled:
-        if Sanity:
-            print "SANITY&gt; {}".format(tftpActivate[Family])
-            ConfigHistory.append(tftpActivate[Family])
-        else:
-            sendCLI_configCommand(tftpActivate[Family], returnCliError, msgOnError) # Activate TFTP now
-        warpBuffer_add(tftpDeactivate[Family])      # Restore TFTP state on completion
-
-    if Sanity:
-        for cmd in WarpBuffer:
-            print "SANITY(warp)&gt; {}".format(cmd)
-            ConfigHistory.append(cmd)
-        LastError = None
-        return True
-
-    # Write the commands to a file under XMC's TFTP root directory
-    tftpFileName = userName + '.' + scriptName().replace(' ', '_') + '.' + switchIP.replace('.', '_')
-    tftpFilePath = xmcTftpRoot + '/' + tftpFileName
-    try:
-        with open(tftpFilePath, 'w') as f:
-            if Family == 'VSP Series': # Always add these 2 lines, as VSP source command does not inherit current context
-                f.write("enable\n")
-                f.write("config term\n")
-            for cmd in WarpBuffer:
-                f.write(cmd + "\n")
-            f.write("\n") # Make sure we have an empty line at the end, or VSP sourcing won't process last line...
-            debug("warpBuffer - write of TFTP config file : {}".format(tftpFilePath))
-    except Exception as e: # Expect IOError
-        print "{}: {}".format(type(e).__name__, str(e))
-        exitError("Unable to write to TFTP file '{}'".format(tftpFilePath))
-
-    # Make the switch fetch the file and execute it
-    success = sendCLI_configChain(tftpExecute[Family].format(xmcServerIP, tftpFileName), returnCliError, msgOnError, waitForPrompt)
-    # Clean up by deleting the file from XMC TFTP directory
-    os.remove(tftpFilePath)
-    debug("warpBuffer - delete of TFTP config file : {}".format(tftpFilePath))
-
-    if not success: # In this case some commands might have executed, before the error; these won't be captured in ConfigHistory
-        WarpBuffer = []
-        return False
-    ConfigHistory.extend(WarpBuffer)
-    WarpBuffer = []
-    LastError = None
-    return True
-
-
-#
-# XMC GraphQl NBI functions
-#
-from java.util import LinkedHashMap # Used by nbiQuery
-LastNbiError = None
-NbiUrl = None
-
-def recursionKeySearch(nestedDict, returnKey): # v1 - Used by both nbiQuery() and nbiMutation()
-    for key, value in nestedDict.iteritems():
-        if key == returnKey:
-            return True, value
-    for key, value in nestedDict.iteritems():
-        if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
-            foundKey, foundValue = recursionKeySearch(value, returnKey)
-            if foundKey:
-                return True, foundValue
-        return [None, None] # If we find nothing
-
-def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v5 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
-    global LastNbiError
-    jsonQuery = jsonQueryDict['json']
-    for key in kwargs:
-        jsonQuery = jsonQuery.replace('&lt;'+key+'&gt;', kwargs[key])
-    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
-    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
-    debug("nbiQuery response = {}".format(response))
-    if response == None: # Should only happen from nbiSessionPost if returnKeyError=True
-        return None
-    if 'errors' in response: # Query response contains errors
-        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
-            LastNbiError = response['errors'][0].message
-            return None
-        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
-    LastNbiError = None
-
-    if returnKey: # If a specific key requested, we find it
-        foundKey, returnValue = recursionKeySearch(response, returnKey)
-        if foundKey:
-            if Debug:
-                if debugKey: debug("{} = {}".format(debugKey, returnValue))
-                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
-            return returnValue
-        if returnKeyError:
-            return None
-        # If requested key not found, raise error
-        abortError("nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
-
-    # Else, return the full response
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, response))
-        else: debug("nbiQuery response = {}".format(response))
-    return response
-
-def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): # v5 - Makes a GraphQl mutation query of XMC NBI; returns true on success
-    global LastNbiError
-    jsonQuery = jsonQueryDict['json']
-    for key in kwargs:
-        jsonQuery = jsonQuery.replace('&lt;'+key+'&gt;', kwargs[key])
-    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
-    if Sanity:
-        print "SANITY - NBI Mutation:\n{}\n".format(jsonQuery)
-        LastNbiError = None
-        return True
-    print "NBI Mutation Query:\n{}\n".format(jsonQuery)
-    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
-    debug("nbiQuery response = {}".format(response))
-    if 'errors' in response: # Query response contains errors
-        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
-            LastNbiError = response['errors'][0].message
-            return None
-        abortError("nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
-
-    def recursionStatusSearch(nestedDict):
-        for key, value in nestedDict.iteritems():
-            if key == 'status':
-                if 'message' in nestedDict:
-                    return True, value, nestedDict['message']
-                else:
-                    return True, value, None
-        for key, value in nestedDict.iteritems():
-            if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
-                foundKey, foundValue, foundMsg = recursionStatusSearch(value)
-                if foundKey:
-                    return True, foundValue, foundMsg
-            return [None, None, None] # If we find nothing
-
-    foundKey, returnStatus, returnMessage = recursionStatusSearch(response)
-    if foundKey:
-        debug("nbiMutation status = {} / message = {}".format(returnStatus, returnMessage))
-    elif not returnKeyError:
-        # If status key not found, raise error
-        abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "status" was not found in query response')
-
-    if returnStatus == "SUCCESS":
-        LastNbiError = None
-        if returnKey: # If a specific key requested, we find it
-            foundKey, returnValue = recursionKeySearch(response, returnKey)
-            if foundKey:
-                if Debug:
-                    if debugKey: debug("{} = {}".format(debugKey, returnValue))
-                    else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
-                return returnValue
-            if returnKeyError:
-                return None
-            # If requested key not found, raise error
-            abortError("nbiMutation for\n{}".format(jsonQuery), 'Key "{}" was not found in mutation response'.format(returnKey))
-        return True
-    else:
-        LastNbiError = returnMessage
-        return False
-
-
-#
-# Port processing functions
-#
-RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+$')
-RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)-(?:([1-9]\d{0,2})[/:])?(\d+)$')
-RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
-SlotPortRange = None # Gets set to dict by getSlotPortRanges()
-
-def portValue(port): # v1 - Function to pass to sorted(key) to sort port lists
-    slotPort = re.split('[/:]', port)
-    if len(slotPort) == 2: # slot/port format
-        idx = int(slotPort[0])*100 + int(slotPort[1])
-    else: # standalone port (no slot)
-        idx = int(slotPort[0])
-    return idx
-
-def getSlotPortRanges(): # v1 - Populates the SlotPortRange dict
-    global SlotPortRange
-    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
-    if Family not in slotCommand:
-        SlotPortRange = {}
-        return
-    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
-    debug("getSlotPortRanges = {}".format(SlotPortRange))
-
-def generatePortList(portStr, debugKey=None): # v1 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
-    # This version of this function will not handle port ranges which span slots; also does not handle VSP channelized ports
-    debug("generatePortList IN = {}".format(portStr))
-    portDict = {} # Use a dict, will ensure no port duplicate keys
-    for port in portStr.split(','):
-        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
-        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
-        if not len(port): # Skip empty string
-            continue
-        rangeMatch = RegexPortRange.match(port)
-        starMatch = RegexStarRange.match(port)
-        if rangeMatch: # We have a range of ports
-            startSlot = rangeMatch.group(1)
-            separator = rangeMatch.group(2)
-            startPort = int(rangeMatch.group(3))
-            endSlot = rangeMatch.group(4)
-            endPort = int(rangeMatch.group(5))
-            if endSlot and startSlot != endSlot:
-                print "ERROR! generatePortList no support for ranges spanning slots: {}".format(port)
-            elif startPort &gt;= endPort:
-                print "ERROR! generatePortList invalid range: {}".format(port)
-            else: # WE are good
-                for portCount in range(startPort, endPort + 1):
-                    if startSlot: # slot-based range
-                        portDict[startSlot + separator + str(portCount)] = 1
-                    else: # simple port range (no slot info)
-                        portDict[str(portCount)] = 1
-        elif starMatch: # We have a slot/* range
-            slot = starMatch.group(1)
-            separator = starMatch.group(2)
-            if SlotPortRange == None: # Structure not populated
-                getSlotPortRanges()
-            if SlotPortRange:
-                if slot in SlotPortRange:
-                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
-                        portDict[slot + separator + str(portCount)] = 1
-                else:
-                    print "Warning: no range for slot {}; skipping: {}".format(slot, port)
-            else:
-                print "Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port)
-        elif RegexPort.match(port): # Port is in valid format
-            portDict[port] = 1
-        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
-            print "Warning: generatePortList skipping unexpected port format: {}".format(port)
-
-    # Sort and return the list as a comma separated string
-    portList = sorted(portDict, key=portValue)
-
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, portList))
-        else: debug("generatePortList OUT = {}".format(portList))
-    return portList
-
-def generatePortRange(portList, debugKey=None): # v1 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
-    # Ported from acli.pl; this version of this function only compacts ranges within same slot, and does not support VSP channelized ports
-    debug("generatePortRange IN = {}".format(portList))
-    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
-    elementList = []
-    elementBuild = None
-    currentType = None
-    currentSlot = None
-    currentPort = None
-    rangeLast = None
-
-    # First off, sort the list
-    portList = sorted(portList, key=portValue)
-    for port in portList:
-        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
-        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port
-        if len(slotPort) == 3: # slot/port
-            if elementBuild:
-                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1):
-                    currentPort = slotPort[2]
-                    if rangeMode[Family] == 1:
-                        rangeLast = currentPort
-                    else: # rangeMode = 2
-                        rangeLast = currentSlot + slotPort[1] + currentPort
-                    continue
-                else: # Range complete
-                    if rangeLast:
-                        elementBuild += '-' + rangeLast
-                    elementList.append(elementBuild)
-                    elementBuild = None
-                    rangeLast = None
-                    # Fall through below
-            currentType = 's/p'
-            currentSlot = slotPort[0]
-            currentPort = slotPort[2]
-            elementBuild = port
-
-        if len(slotPort) == 1: # simple port (no slot)
-            if elementBuild:
-                if currentType == 'p' and port == str(int(currentPort)+1):
-                    currentPort = port
-                    rangeLast = currentPort
-                    continue
-                else: # Range complete
-                    if rangeLast:
-                        elementBuild += '-' + rangeLast
-                    elementList.append(elementBuild)
-                    elementBuild = None
-                    rangeLast = None
-                    # Fall through below
-            currentType = 'p'
-            currentPort = port
-            elementBuild = port
-
-    if elementBuild: # Close off last element we were holding
-        if rangeLast:
-            elementBuild += '-' + rangeLast
-        elementList.append(elementBuild)
-
-    portStr = ','.join(elementList)
-    if Debug:
-        if debugKey: debug("{} = {}".format(debugKey, portStr))
-        else: debug("generatePortRange OUT = {}".format(portStr))
-    return portStr                
-
-
-#
-# IP address processing functions
-#
-import re                           # Used by maskToNumber
-
-def ipToNumber(dottedDecimalStr): # v1 - Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
-    try: # bytearray ensures that IP bytes are valid (1-255)
-        ipByte = list(bytearray([int(byte) for byte in dottedDecimalStr.split('.')]))
-    except:
-        return None
-    if len(ipByte) != 4:
-        return None
-    debug("ipByte = {}".format(ipByte))
-    ipNumber = (ipByte[0]&lt;&lt;24) + (ipByte[1]&lt;&lt;16) + (ipByte[2]&lt;&lt;8) + ipByte[3]
-    debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
-    return ipNumber
-
-def numberToIp(ipNumber): # v1 - Method to convert a long number into an IP/Mask dotted decimal address
-    dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
-    debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
-    return dottedDecimalStr
-
-def maskToNumber(mask): # v1 - Method to convert a mask (dotted decimal or Cidr number) into a long number
-    if isinstance(mask, int) or re.match(r'^\d+$', mask): # Mask as number
-        if int(mask) &gt; 0 and int(mask) &lt;= 32:
-            maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
-        else:
-            maskNumber = None
-    else:
-        maskNumber = ipToNumber(mask)
-    if maskNumber:
-        debug("maskNumber = {}".format(hex(maskNumber)))
-    return maskNumber
-
-def subnetMask(ip, mask): # v1 - Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
-    ipNumber = ipToNumber(ip)
-    maskNumber = maskToNumber(mask)
-    subnetNumber = ipNumber &amp; maskNumber
-    ipSubnet = numberToIp(subnetNumber)
-    ipDottedMask = numberToIp(maskNumber)
-    ipCidrMask = bin(maskNumber).count('1')
-    debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
-    return ipSubnet, ipDottedMask, ipCidrMask
-
-def ipGateway(ip, mask, gw): # v1 - Return the gateway IP address, as first or last IP in subnet, based on own IP/mask
-    ipNumber = ipToNumber(ip)
-    maskNumber = maskToNumber(mask)
-    subnetNumber = ipNumber &amp; maskNumber
-    if gw == 'first':
-        gwNumber = subnetNumber + 1
-        ip1numb = gwNumber + 1
-        ip2numb = gwNumber + 2
-    elif gw == 'last':
-        gwNumber = subnetNumber + 2**(32-int(mask)) - 2
-        ip1numb = gwNumber - 2
-        ip2numb = gwNumber - 1
-    else: # Error condition
-        exitError('ipGateway(): invalid gw type {}'.format(gw))
-    debug("gwNumber = {} / ip1numb = {} / ip2numb = {}".format(hex(gwNumber), hex(ip1numb), hex(ip2numb)))
-    gatewayIP = numberToIp(gwNumber)
-    ip1 = numberToIp(ip1numb)
-    ip2 = numberToIp(ip2numb)
-    debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
-    return gatewayIP, ip1, ip2
-
-
-#
-# INIT: Init Debug &amp; Sanity flags based on input combos
-#
-try:
-    if emc_vars['userInput_sanity'].lower() == 'enable':
-        Sanity = True
-    elif emc_vars['userInput_sanity'].lower() == 'disable':
-        Sanity = False
-except:
-    pass
-try:
-    if emc_vars['userInput_debug'].lower() == 'enable':
-        Debug = True
-    elif emc_vars['userInput_debug'].lower() == 'disable':
-        Debug = False
-except:
-    pass
-
-
-##########################################################
-# Ludo Threads library; Version 2.1                      #
-# Written by Ludovico Stevens, TME Extreme Networks      #
-##########################################################
-
-#
-# IMPORTS:
-#
-import os
-import sys
-import time
-import glob
-import json
-
-#
-# VARIABLES:
-#
-StartTime = time.time()
-TimeDeviation = 5.0 # When XMC runs many instances of same script, not all instances will start at exactly the same time; set this to worst case deviation in secs
-DelayStaleDelete = 1.0 # If stale files exists, all threads will be made to wait this minimum delay, before the ThreadMaster is allowed to delete the stale files 
-Timeout = 10   # Seconds we are ready to wait for reading emc_vars from other threads
-SleepTimer = 1 # While waiting for other threads to make their emc_vars avail, this is the sleep timer in the timeout loop
-SeqNumber = 0
-ThreadMaster = None
-ThreadIPs = []
-ThreadVarsDict = {}
-ReturnOnError = False # When reading data from other threads, determines whether we want to bomb out if some threads don't respond or continue with threads which do
-Emc_vars_copy = emc_vars.copy() # Modifying emc_vars is discouraged, so we take a copy of it; shallow copy is enough, emc_vars is single level dict 
-ThisScript = __file__.split(os.path.sep)[-1].split('.')[0]  # Name of our script
-WorkDir = os.getcwd()
-UserName = emc_vars["userName"].replace('.', '_')
-MyIP = emc_vars["deviceIP"]
-RegexFileIP = re.compile('^\.[^\.]+\.[^\.]+\.([\d_]+)\.')
-GlobStamps = '.' + UserName + '.' + ThisScript + '.*.stamp'
-GlobSeqnce = '.' + UserName + '.' + ThisScript + '.' + MyIP.replace('.', '_') + '.[0-9]*'
-GlobSqJson = '.' + UserName + '.' + ThisScript + '.*.&lt;SEQ&gt;.json'
-# The following files are written to the XMC filesystem (default path: /usr/local/Extreme_Networks/NetSight/wildfly/bin)
-# - Stamp file:    .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.stamp        : modify time of this empty file used to track other threads
-# - Sequence file: .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.&lt;seqNb&gt;      : empty file who's sequence number determines which json file to load
-# - JSON file:     .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.&lt;seqNb&gt;.json : json file containing IP's Emc_vars_copy
-
-
-#
-# FUNCTIONS:
-#
-def threadFile(ip, seqnum=None, suffix=None): # Given IP and suffix, returns the script instance specific filenames
-    fileName = '.' + UserName + '.' + ThisScript + '.' + ip.replace('.', '_')
-    if seqnum != None:
-        fileName += '.' + str(seqnum)
-    if suffix:
-        fileName += '.' + suffix
-    return fileName
-
-def threadIP(filename): # Given a thread filename, returns the thread IP
-    ipMatch = RegexFileIP.match(filename)
-    if not ipMatch:
-        exitError("Unable to extract IP from thread filename '{}'".format(filename))
-    ip = ipMatch.group(1)
-    return ip.replace('_', '.')
-
-def deleteFiles(globStr): # Deletes all existing sequence files for this thread
-    fileList = glob.glob(globStr)
-    if fileList:
-        debug("Threads - deleteFiles() deleting files : {}".format(fileList))
-        for f in fileList:
-            os.remove(f)
-
-def touch(path): # Touches a file (and sets its modify time)
-    try:
-        with open(path, 'a'):
-            os.utime(path, None)
-            debug("Threads - touch() file : {}".format(path))
-    except Exception as e: # Expect IOError
-        print "{}: {}".format(type(e).__name__, str(e))
-        exitError("Unable to touch file '{}'".format(path))
-
-def writeJson(dataDict, path): # Writes a dict to json file
-    try: # Python file locking https://yakking.branchable.com/posts/flocking/
-        with open(path, 'w') as f:
-            json.dump(dataDict, fp=f, indent=4)
-            debug("Threads - writeJson() file : {}".format(path))
-    except Exception as e: # Expect IOError
-        print "{}: {}".format(type(e).__name__, str(e))
-        exitError("Unable to write to json file '{}'".format(path))
-
-def emc_threads(returnOnError=None): # Returns list of IPs for other instances simultaneously running this same script
-    global ThreadIPs
-    global ReturnOnError
-
-    if ThreadIPs: # We only need to call this function once; if it has already run, simply come out
-        return ThreadIPs
-
-    def electMaster(iplist, myip): # Given a list of IPs, returns true if myip is the numerically lowest in the list
-        myipInt = ipToNumber(myip)
-        for ip in iplist:
-            if ipToNumber(ip) &lt; myipInt:
-                return False
-        return True
-
-    if returnOnError != None: # If returnOnError was set to True/False, then we change the global ReturnOnError
-        ReturnOnError = returnOnError
-
-    waitTime = StartTime - time.time() + TimeDeviation
-    if waitTime &gt; 0:
-        debug("Threads - emc_threads() allowing for deviation of start time between threads / sleep = {}".format(waitTime))
-        time.sleep(waitTime)
-
-    # Get a list of all Stamp files for this script
-    stampFileList = glob.glob(GlobStamps)
-    # - there is a chance that ThreadMaster instance actually deletes some of files in stampFileList, while this instance is on the line below
-    # - and we would error on doing os.path.getmtime(x) on a since non-existent file...
-    # - the solution is the code added in the ThreadMaster if section below, where a delay is added to compensate between time of this thread and slowest thread
-    activeStampFiles = [x for x in stampFileList if os.path.getmtime(x) &gt;= (StartTime - TimeDeviation)]
-    staleStampFiles  = [x for x in stampFileList if x not in activeStampFiles]
-    if staleStampFiles:
-        debug("Threads - staleStampFiles:\n{}".format(staleStampFiles))
-
-    # Only retain IPs for Stamp files newer than StartTime
-    ThreadIPs = [threadIP(x) for x in activeStampFiles]
-    debug("Threads - active device IPs = {}".format(ThreadIPs))
-
-    # Write JSON and sequence number file
-    if SeqNumber == 0: # Only do this if emc_threads_put() has not already been called
-        writeJson(Emc_vars_copy, threadFile(MyIP, seqnum=SeqNumber, suffix='json'))
-        touch(threadFile(MyIP, seqnum=SeqNumber))
-
-    if staleStampFiles: # The master thread will take charge of cleanup of stale thread files of this same script (these could be stale from previous runs)
-        # But we let all threads do the wait below, to keep them in sync as much as possible
-        debug("Threads - stale files exist; electing ThreadMaster")
-        staleStampStart = time.time()
-        # Elect a ThreadMaster; we want only one script instance to perform cleanup of stale files
-        ThreadMaster = electMaster(ThreadIPs, MyIP)
-        # Before deleting any files we need to make sure that all other active threads have passed this function
-        # Identify the active thread with the highest time stamp (= slowest thread)
-        slowestStamp = 0
-        for stampFile in activeStampFiles:
-            stamp = os.path.getmtime(stampFile)
-            if stamp &gt; slowestStamp:
-                slowestStamp = stamp
-        debug("Threads - slowest thread timestamp = {}".format(slowestStamp))
-        # Take the delta of that highest time and our initial timestamp (and adjust for processing to get here)
-        waitTime = slowestStamp - int(StartTime) - (time.time() - staleStampStart) + DelayStaleDelete
-        if waitTime &gt; 0:
-            debug("Threads - emc_threads() allowing for delta between this thread and slowest thread / sleep = {}".format(waitTime))
-            time.sleep(waitTime)
-
-        if ThreadMaster: # The master thread will take charge of cleanup of stale thread files of this same script (these could be stale from previous runs)
-            debug("Threads - acting as ThreadMaster and deleting stale files;")
-            # By now, all other threads will have come out of emc_threads(), so is safe to perform clean up of stale files
-            for fnam in staleStampFiles:
-                fglob = re.sub(r'[^\.]+$', '*', fnam) # This glob will catch all 3 file types
-                debug("** Deleting all files for glob = {}".format(fglob))
-                for fdel in glob.glob(fglob):
-                    debug("-&gt; deleting file = {}".format(fdel))
-                    os.remove(fdel)
-    return ThreadIPs
-
-def emc_threads_vars(ip=None, var=None, returnOnError=None): # Returns variable dict from other instances simultaneously running this same script
-    # If both ip and var is set, returns value of variable
-    # If only ip is set, returns dict of ip's Emc_vars_copy
-    # If neither ip nor var is set, returns full dict where 1st key is thread ip and 2nd key are Emc_vars_copy keys
-    # This method will also work if the local thread ip is provided, in which case the local ip Emc_vars_copy is returned
-    # If returnOnError=False or returnOnError not set and global ReturnOnError is False:
-    #     This method expects to obtain Emc_vars_copy from all running instances for which Stamp files were recorded
-    #     Failure to read the JSON file of one or more other instances will result in an exception being raised
-    #     This can happen if some script instances fail after starting; the outcome is that all instances will then fail
-    # If returnOnError=True or returnOnError not set and global ReturnOnError is True:
-    #     In this case, failure to read the JSON file of one or more other instances will not result in an exception
-    #     The method will instead return, but the variables requested may or may not be available.
-    #     If the ip provided is for an instance for which the Emc_vars_copy could not be read, then the method will return
-    #     None if a var was requested and an empty dict otherwise.
-    #     If the method is called without any ip or var set, then a dict is returned, but this dict will have some IP keys
-    #     holding an empty dict
-    global ThreadIPs
-    global ThreadVarsDict
-
-    if returnOnError == None: # Unless override provided in method call, use global setting
-        returnOnError = ReturnOnError
-
-    if not ThreadIPs: # emc_threads() has not been called
-        emc_threads() # global ThreadIPs gets set
-
-    if not ThreadVarsDict: # dict is not populated
-        # Set our own Emc_vars_copy
-        ThreadVarsDict[MyIP] = Emc_vars_copy
-
-        timeoutTime = time.time() + Timeout # Prime the timeout time, in case we have to timeout
-        failedFirstRead = {}                # Init dict to track failed file read
-
-        while set(ThreadIPs) != set(ThreadVarsDict.keys()): # Until we have variables for all IPs
-            # Check for available json files
-            jsonFileList = glob.glob(GlobSqJson.replace('&lt;SEQ&gt;', str(SeqNumber)))
-            jsonIPList = [threadIP(x) for x in jsonFileList]
-            debug("Threads - available JSON files on SeqN {} = {}".format(SeqNumber, jsonIPList))
-            newIPList = [x for x in jsonIPList if x in ThreadIPs and x not in ThreadVarsDict]
-
-            if newIPList: # Read in available JSON files
-                debug("Threads - new JSON files to read in for these IPs = {}".format(newIPList))
-                for newip in newIPList:
-                    try:
-                        path = threadFile(newip, seqnum=SeqNumber, suffix='json')
-                        with open(path, 'r') as f:
-                            debug("-&gt; reading file = {}".format(path))
-                            ThreadVarsDict[newip] = json.load(fp=f)
-                    except Exception as e: # Expect IOError or ValueError
-                        print "{}: {}".format(type(e).__name__, str(e))
-                        if newip not in failedFirstRead: # We allow 1 retry
-                            failedFirstRead[newip] = 1
-                            print "Threads - WARNING: Unable to read Emc_vars_copy for IP instance {} on first try".format(newip)
-                            time.sleep(1) # Delay 1 sec before retry
-                            continue
-                        if returnOnError:
-                            print "Threads - WARNING: Unable to read Emc_vars_copy for IP instance {}".format(newip)
-                            ThreadVarsDict[newip] = {}
-                        else:
-                            exitError("Unable to read to json file '{}'".format(path))
-                # Reset timeout time (we only tick timeout time when we have no JSON to read)
-                timeoutTime = time.time() + Timeout
-
-            else: # No JSON files available; implement timeout
-                if time.time() &gt; timeoutTime: # We timeout
-                    missingIPList = [x for x in ThreadIPs if x not in ThreadVarsDict]
-                    if returnOnError:
-                        print "Threads - WARNING: Unable to read Emc_vars_copy from these thread IPs: {}".format(missingIPList)
-                        for failip in missingIPList:
-                            ThreadVarsDict[failip] = {}
-                    else:
-                        exitError("Timing out due to inability to read Emc_vars_copy from these thread IPs: {}".format(missingIPList))
-                time.sleep(SleepTimer)
-
-    if ip and var: # Both are set
-        if var in ThreadVarsDict[ip]:
-            return ThreadVarsDict[ip][var]
-        else: # Case where returnOnError is set and we are missing the Emc_vars_copy for this IP
-            return None
-    elif ip:
-        return ThreadVarsDict[ip]
-    else:
-        return ThreadVarsDict
-
-def emc_threads_put(**dict): # Set a local Emc_vars_copy variable and ensure this becomes available to other instances simultaneously running this same script
-    global ThreadVarsDict
-    global SeqNumber
-
-    # As we are writing a new variable, every other instance of this script will too, so..
-    ThreadVarsDict = {}         # Clear out the stored thread Emc_vars_copy
-    SeqNumber += 1              # We increase the sequence number
-
-    # Delete any existing sequence number files for this thread IP
-    deleteFiles(GlobSeqnce)
-
-    # Update the value in our local Emc_vars_copy
-    for key, value in dict.items():
-        Emc_vars_copy[key] = value
-
-    # Re-write our thread json file
-    writeJson(Emc_vars_copy, threadFile(MyIP, seqnum=SeqNumber, suffix='json'))
-
-    # Re-post sequence number file
-    touch(threadFile(MyIP, seqnum=SeqNumber))
-
-#
-# INIT: Init code for Threads; signal self thread existence and store Emc_vars_copy as json; we do this as early as possible
-#
-print "Threads - StartTime = {}".format(StartTime)
-debug("Threads - ThisScript = {}".format(ThisScript))
-debug("Threads - WorkDir = {}".format(WorkDir))
-deleteFiles(GlobSeqnce)
-touch(threadFile(MyIP, suffix='stamp'))
-
-
-# --&gt; XMC Python script actually starts here &lt;--
-
-
 #
 # Variables:
 #
-
+Debug = False    # Enables debug messages
+Sanity = False   # If enabled, config commands are not sent to host (show commands are operational)
+MakeVistNeighbourAutoSensePortsStatic = False
 BVLANs = [str(4051), str(4052)]
 IstVLANrange = [4050, 4000] # Try for VLAN 4050, and decrement to 4000 if not available
 IstVLANname = "IST-VLAN"
@@ -1557,8 +495,945 @@ NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
 
 
 #
-# Functions:
+# IMPORTS:
 #
+from distutils.version import LooseVersion
+
+
+#
+# Base functions
+# base.py v12
+#
+import re                           # Used by scriptName
+import time                         # Used by debug &amp; exitError
+ExitErrorSleep = 10
+DebugLogger = None
+
+def printLog(message): # v1 - Print message to stdout but also into debug log file
+    if DebugLogger:
+        DebugLogger.info(message)
+    else:
+        print message
+
+def debug(debugOutput): # v4 - Use function to include debugging in script; set above Debug variable to True or False to turn on or off debugging
+    if not Debug:
+        return
+    if DebugLogger:
+        DebugLogger.debug(debugOutput)
+    else:
+        print u"[{}] {}".format(time.ctime(), debugOutput) # Might be unicode
+
+def exitError(errorOutput, sleep=ExitErrorSleep): # v3 - Exit script with error message and setting status appropriately
+    if 'workflowMessage' in emc_vars: # Workflow
+        time.sleep(sleep) # When workflow run on multiple devices, want ones that error to be last to complete, so THEY set the workflow message
+        emc_results.put("deviceMessage", errorOutput)
+        emc_results.put("activityMessage", errorOutput)
+        emc_results.put("workflowMessage", errorOutput)
+    emc_results.setStatus(emc_results.Status.ERROR)
+    raise RuntimeError(errorOutput)
+
+def abortError(cmd, errorOutput): # v2 - A CLI command failed, before bombing out send any rollback commands which may have been set
+    printLog("Aborting script due to error on previous command")
+    try:
+        rollbackStack()
+    finally:
+        printLog("Aborting because this command failed: {}".format(cmd))
+        exitError(errorOutput)
+
+def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
+    name = None
+    if 'workflowName' in emc_vars: # Workflow
+        name = emc_vars['workflowName']
+    elif 'javax.script.filename' in emc_vars: # Script
+        nameMatch = re.search(r'\/([^\/\.]+)\.py$', emc_vars['javax.script.filename'])
+        name = nameMatch.group(1) if nameMatch else None
+    return name
+
+def workflow_DeviceMessage(msg): # v1 - Set workflow messages appropriately; '&lt;&gt;' is replaced with device IP or list
+    singleDeviceMsg = manyDevicesMsg = msg
+    if '&lt;&gt;' in msg:
+        devicesListStr = emc_vars['devices'][1:-1]
+        singleDeviceMsg = msg.replace('&lt;&gt;', emc_vars['deviceIP']).replace('(s)', '').replace('(es)', '')
+        if len(devicesListStr.split(',')) &gt; 1:
+            manyDevicesMsg = msg.replace('&lt;&gt;', devicesListStr).replace('(s)', 's').replace('(es)', 'es')
+        else:
+            manyDevicesMsg = singleDeviceMsg
+    emc_results.put("deviceMessage", singleDeviceMsg)
+    emc_results.put("activityMessage", manyDevicesMsg)
+    emc_results.put("workflowMessage", manyDevicesMsg)
+
+
+#
+# Family functions
+# family.py v5
+#
+Family = None # This needs to get set by setFamily()
+FamilyChildren = { # Children will be rolled into parent family for these scripts
+    'Extreme Access Series' : 'VSP Series',
+    'Unified Switching VOSS': 'VSP Series',
+    'Unified Switching EXOS': 'Summit Series',
+    'Universal Platform VOSS': 'VSP Series',
+    'Universal Platform EXOS': 'Summit Series',
+    'Universal Platform Fabric Engine': 'VSP Series',
+    'Universal Platform Switch Engine': 'Summit Series',
+    'ISW-24W-4X': 'ISW-Series-Marvell',
+}
+
+def setFamily(cliDict={}, family=None): # v5 - Set global Family variable; automatically handles family children, as far as this script is concerned
+    global Family
+    if family:
+        Family = family
+    elif "family" not in emc_vars:
+        debug("emc_vars = {}".format(emc_vars))
+        exitError('Key "family" not present in emc_vars dictionary')
+    elif emc_vars["family"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["family"]]
+    elif "deviceType" not in emc_vars:
+        debug("emc_vars = {}".format(emc_vars))
+        exitError('Key "deviceType" not present in emc_vars dictionary')
+    elif emc_vars["deviceType"] in FamilyChildren:
+        Family = FamilyChildren[emc_vars["deviceType"]]
+    else:
+        Family = emc_vars["family"]
+    printLog("Using family type '{}' for this script".format(Family))
+    if cliDict and Family not in cliDict:
+        exitError('This scripts only supports family types: {}'.format(", ".join(list(cliDict.keys()))))
+    return Family
+
+
+#
+# CLI/SNMP Rollback functions
+# rollback.py v5
+#
+RollbackStack = [] # Format [ ['cli', &lt;command&gt;], ['snmp', [requestDict, instance, oldValue], ...]]
+
+def rollbackStack(): # v3 - Execute all commands on the rollback stack
+    if RollbackStack:
+        printLog("\nApplying rollback commands to undo partial config and return device to initial state")
+        while RollbackStack:
+            cfgType, data = RollbackStack.pop()
+            if cfgType == 'cli':
+                sendCLI_configChain(data, returnCliError=True)
+            elif cfgType == 'snmp':
+                snmpSet(data[0], instance=data[1], value=data[2], returnError=True)
+            else:
+                printLog("Invalid rollback stack data entry: {}".format(cfgType))
+
+def rollbackCommand(cmd): # v3 - Add a command to the rollback stack; these commands will get popped and executed should we need to abort
+    global RollbackStack
+    RollbackStack.append(['cli', cmd])
+    cmdList = map(str.strip, re.split(r'[;\n]', cmd)) # cmd could be a configChain
+    cmdList = [x for x in cmdList if x] # Weed out empty elements 
+    cmdOneLiner = " / ".join(cmdList)
+    printLog("Pushing onto rollback stack CLI: {}\n".format(cmdOneLiner))
+
+def rollbackSnmp(requestDict, instance, oldValue): # v2 - Add SNMP request to rollback stack
+    # These commands will get popped and executed as snmpSet should we need to abort
+    global RollbackStack
+    RollbackStack.append(['snmp', [requestDict, instance, oldValue]])
+    oidList, instList, _, valueList = snmpInputLists("rollbackSnmp", requestDict, instance, oldValue)
+    printLog("Pushing onto rollback stack SNMP:")
+    for inOid, inst, currVal in zip(oidList, instList, valueList):
+        displayOid, oid = separateOid(inOid)
+        setOid = '.'.join([oid, str(inst)]) if inst != None else oid
+        printLog(" - {}{} revert to {}".format(displayOid, setOid, currVal))
+
+def rollBackPop(number=0): # v2 - Remove entries from RollbackStack
+    global RollbackStack
+    if number == 0:
+        RollbackStack = []
+        printLog("Rollback stack emptied")
+    else:
+        del RollbackStack[-number:]
+        printLog("Rollback stack popped last {} entries".format(number))
+
+
+#
+# CLI functions - (use of rollback requires rollback.py)
+# cli.py v32
+#
+import re
+import time                         # Used by sendCLI_configChain &amp; sendCLI_configChain2 with 'sleep' &amp; 'block directives
+RegexPrompt = re.compile('.*[\?\$%#&gt;]\s?$')
+RegexError  = re.compile(
+    '^%|\x07|error|invalid|cannot|unable|bad|not found|not exist|not allowed|no such|out of range|incomplete|failed|denied|can\'t|ambiguous|do not|unrecognized',
+    re.IGNORECASE | re.MULTILINE
+)
+RegexNoError  = re.compile( # Messages which would be false positives for an error condition, when they are just a warning..
+    '(?:'
+    + 'Both ends of MACsec link cannot have the same key-parity value'
+    + '|% Saving \d+ bytes to flash:startup-config' # ISW: copy running-config startup-config
+    + ')',
+    re.IGNORECASE | re.MULTILINE
+)
+RegexContextPatterns = { # Ported from acli.pl
+    'ERS Series' : [
+        re.compile('^(?:interface |router \w+$|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|ip igmp profile \d+$|wireless|application|ipv6 dhcp guard policy |ipv6 nd raguard policy )'), # level0
+        re.compile('^(?:security|crypto|ap-profile |captive-portal |network-profile |radio-profile )'), # level1
+        re.compile('^(?:locale)'), # level2
+    ],
+    'VSP Series' : [
+        re.compile('^ *(?:interface |router \w+$|router vrf|route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$|application|i-sid \d+|wireless|logical-intf isis \d+|mgmt (?:\d|clip|vlan|oob)|ovsdb$)'), # level0
+        re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
+    ],
+    'ISW-Series' : [
+        re.compile('^ *(?:ringv2-group |interface )'), # level0
+    ],
+    'ISW-Series-Marvell' : [
+        re.compile('^ *(?:ringv2-group |interface )'), # level0
+    ],
+}
+RegexExitInstance = re.compile('^ *(?:exit|back|end|config|save)(?:\s|$)')
+RegexEmbeddedErrMode = re.compile('^#error +(fail|stop|continue) *$')
+RegexEmbeddedSleep = re.compile('^#sleep  +(\d+) *$')
+RegexEmbeddedWarpBlock = re.compile('^#block +(start|execute)(?:(?: +(wait|reconnect))? +(\d+))? *$')
+Indent = 3 # Number of space characters for each indentation
+LastError = None
+LastPrompt = ''
+ConfigHistory = []
+
+def cliError(outputStr): # v1 - Check command output for CLI error message
+    if not RegexNoError.search(outputStr) and RegexError.search(outputStr):
+        return True
+    else:
+        return False
+
+def cleanOutput(outputStr): # v6 - Remove echoed command and final prompt from output
+    if re.match(r'Error:', outputStr): # Case where emc_cli.send timesout: "Error: session exceeded timeout: 30 secs"
+        return outputStr
+    outputLines = outputStr.splitlines()
+    lastLine = outputLines[-1]
+    if RegexPrompt.match(lastLine):
+        global LastPrompt
+        LastPrompt = lastLine
+        return '\n'.join(outputLines[1:-1])
+    else:
+        return '\n'.join(outputLines[1:])
+
+def configChain(chainStr): # v3 - Produces a list of a set of concatenated commands (either with ';' or newlines)
+    chainStr = re.sub(r'\n(\w)(\x0d?\n|\s*;|$)', chr(0) + r'\1\2', chainStr) # Mask trailing "\ny" or "\nn" on commands before making list
+    # Checking for \x0d? is necessary when DOS text files are transferred to XIQ-SE, and read and processed locally..
+    chainStr = re.sub(r'(\".*?\")', lambda m: m.group(1).replace(';', chr(ord(";")|128)), chainStr) # Mask ";" inside double quotes section
+    cmdList = map(str.strip, re.split(r'[;\n]', chainStr))
+    cmdList = filter(None, cmdList) # Filter out empty lines, if any
+    cmdList = [x.replace(chr(ord(";")|128), ';') for x in cmdList] # Unmask after list made
+    cmdList = [re.sub(r'\x00(\w)(\x0d?\n|$)', r'\n\1\2', x) for x in cmdList] # Unmask after list made
+    return cmdList
+
+def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sendCLI_showRegex() and xmcLinuxCommand()
+    # cmdRegexStr format: &lt;type&gt;://&lt;cli-show-command&gt; [&amp; &lt;additional-show-cmd&gt;]||&lt;regex-to-capture-with&gt;
+    if re.match(r'\w+(?:-\w+)?://', cmdRegexStr):
+        mode, cmdRegexStr = map(str.strip, cmdRegexStr.split('://', 1))
+    else:
+        mode = None
+    cmd, regex = map(str.strip, cmdRegexStr.split('||', 1))
+    cmdList = map(str.strip, cmd.split('&amp;'))
+    return mode, cmdList, regex
+
+def formatOutputData(data, mode): # v3 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+    if not mode                 : value = data                                   # Legacy behaviour same as list
+    elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
+    elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
+    elif mode == 'str-lower'    : value = str(data[0]).lower() if data else None # Same as str but string made all lowercase
+    elif mode == 'str-upper'    : value = str(data[0]).upper() if data else None # Same as str but string made all uppercase
+    elif mode == 'str-join'     : value = ''.join(data)                          # Regex with max 1 capturing bracket, joins list to string
+    elif mode == 'str-nwlnjoin' : value = "\n".join(data)                        # Regex with max 1 capturing bracket, joins list to multi-line string
+    elif mode == 'int'          : value = int(data[0]) if data else None         # Regex must have 1 capturing bracket at most
+    elif mode == 'list'         : value = data                                   # If &gt; 1 capturing brackets, will be list of tuples
+    elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
+    elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
+    elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets on same line, returns 1st tuple
+    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
+    elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    elif mode == 'dict-sequence': value = dict((data[x*2][0],data[x*2+1][1]) for x in range(len(data)/2)) # {[0][0]:[1][1], [2][0]:[3][1], etc}
+    else:
+        RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
+    return value
+
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None, retries=0, retryDelay=0): # v4 - Send a CLI show command; return output
+    global LastError
+    if retries and retryDelay: # To be used on very first CLI command sent to device
+        while retries &gt;= 0:
+            resultObj = emc_cli.send(cmd)
+            # If it fails to connect, the following is automatically printed to the session: "Failed to connect to &lt;IP-address&gt;"
+            emc_results.setStatus(emc_results.Status.STARTED) # Clears failed status on XIQ-SE script/workflow activity
+            if resultObj.isSuccess():
+                retries = -1 # All good, come out of while loop
+            else:
+                printLog("Retrying in {} seconds".format(retryDelay))
+                time.sleep(retryDelay)
+                retries -= 1
+    else:
+        resultObj = emc_cli.send(cmd)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and cliError("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only (timestamp banner might shift it by 3 lines)
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    printLog("==&gt; Ignoring above error: {}\n\n".format(msgOnError))
+                return None
+            abortError(cmd, outputStr)
+        LastError = None
+        return outputStr
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnError=None): # v1 - Send show command and extract values from output using regex
+    # Regex is by default case-sensitive; for case-insensitive include (?i) at beginning of regex on input string
+    mode, cmdList, regex = parseRegexInput(cmdRegexStr)
+    for cmd in cmdList:
+        # If cmdList we try each command in turn until one works; we don't want to bomb out on cmds before the last one in the list
+        ignoreCliError = True if len(cmdList) &gt; 1 and cmd != cmdList[-1] else returnCliError
+        outputStr = sendCLI_showCommand(cmd, ignoreCliError, msgOnError)
+        if outputStr:
+            break
+    if not outputStr: # returnCliError true
+        return None
+    data = re.findall(regex, outputStr, re.MULTILINE)
+    debug("sendCLI_showRegex() raw data = {}".format(data))
+    # Format we return data in depends on what '&lt;type&gt;://' was pre-pended to the cmd &amp; regex
+    value = formatOutputData(data, mode)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, value))
+        else: debug("sendCLI_showRegex OUT = {}".format(value))
+    return value
+
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True, historyAppend=True): # v6 - Send a CLI config command
+    global LastError
+    cmd = re.sub(r':\/\/', ':' + chr(0) + chr(0), cmd) # Mask any https:// type string
+    cmd = re.sub(r' *\/\/ *', r'\n', cmd) # Convert "//" to "\n" for embedded // passwords
+    cmd = re.sub(r':\x00\x00', r'://', cmd) # Unmask after // replacemt
+    cmdStore = re.sub(r'\n.+$', '', cmd, flags=re.DOTALL) # Strip added "\n"+[yn] or // passwords
+    if Sanity:
+        printLog("SANITY&gt; {}".format(cmd))
+        if historyAppend:
+            ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    resultObj = emc_cli.send(cmd, waitForPrompt)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and cliError("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
+            if returnCliError: # If we asked to return upon CLI error, then the error message will be held in LastError
+                LastError = outputStr
+                if msgOnError:
+                    printLog("==&gt; Ignoring above error: {}\n\n".format(msgOnError))
+                return False
+            abortError(cmd, outputStr)
+        if historyAppend:
+            ConfigHistory.append(cmdStore)
+        LastError = None
+        return True
+    else:
+        exitError(resultObj.getError())
+
+def sendCLI_configChain(chainStr, returnCliError=False, msgOnError=None, waitForPrompt=True, historyAppend=True, abortOnError=True): # v6 - Send a list of config commands
+    # Syntax: chainStr can be a multi-line string where individual commands are on new lines or separated by the semi-colon ";" character
+    # Some embedded directive commands are allowed, these must always begin with the hash "#" character:
+    # #error fail       : If a subsequent command generates an error, make the entire script fail
+    # #error stop       : If a subsequent command generates an error, do not fail the script but stop processing firther commands
+    # #error continue   : If a subsequent command generates an error, ignore it and continue executing remaining commands
+    # #sleep &lt;secs&gt;     : Sleep for specified seconds
+    cmdList = configChain(chainStr)
+
+    # Check if last command is a directive, as we have special processing for the last line and don't want directives there
+    while RegexEmbeddedWarpBlock.match(cmdList[-1]) or RegexEmbeddedErrMode.match(cmdList[-1]) or RegexEmbeddedSleep.match(cmdList[-1]):
+        cmdList.pop() # We just pop it off, they serve no purpose as last line anyway
+
+    successStatus = True
+    for cmd in cmdList[:-1]: # All but last
+        embeddedErrMode = RegexEmbeddedErrMode.match(cmd)
+        embeddedSleep = RegexEmbeddedSleep.match(cmd)
+        if embeddedErrMode:
+            errorMode = embeddedErrMode.group(1)
+            returnCliError = False if errorMode == 'fail' else True
+            abortOnError = True if errorMode == 'stop' else False
+            continue # After setting the above, we skip the embedded command
+        elif embeddedSleep:
+            time.sleep(embeddedSleep.group(1))
+            continue # Next command
+        success = sendCLI_configCommand(cmd, returnCliError, msgOnError, historyAppend=historyAppend)
+        if not success:
+            successStatus = False
+            if abortOnError:
+                return False
+    # Last now
+    success = sendCLI_configCommand(cmdList[-1], returnCliError, msgOnError, waitForPrompt, historyAppend)
+    if not success:
+        return False
+    return successStatus
+
+def printConfigSummary(): # v5 - Print summary of all config commands executed with context indentation
+    global ConfigHistory
+    emc_cli.close()
+    if not len(ConfigHistory):
+        printLog("No configuration was performed")
+        return
+    printLog("The following configuration was successfully performed on switch:")
+    indent = ''
+    level = 0
+    if Family in RegexContextPatterns:
+        maxLevel = len(RegexContextPatterns[Family])
+    for cmd in ConfigHistory:
+        if Family in RegexContextPatterns:
+            if level &lt; maxLevel and RegexContextPatterns[Family][level].match(cmd):
+                printLog("-&gt; {}{}".format(indent, cmd))
+                level += 1
+                indent = ' ' * Indent * level
+                continue
+            elif RegexExitInstance.match(cmd):
+                if level &gt; 0:
+                    level -= 1
+                indent = ' ' * Indent * level
+        printLog("-&gt; {}{}".format(indent, cmd))
+    ConfigHistory = []
+
+
+#
+# CLI append to config file functions (requires cli.py)
+# cliAppend.py v7
+#
+AppendBuffer = []
+
+def appendBuffer_add(chainStr): # v1 - Preload AppendBuffer with config or configChains; buffer can then be appended to config.cfg with appendConfigDotCfg()
+    if Family != 'VSP Series':
+        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    global AppendBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        AppendBuffer.append(cmdAdd)
+
+def appendConfigDotCfg(chainStr=None): # v6 - Appends config commands to config.cfg (before 'end' statement) to be executed after reboot
+    global LastError
+    if Family != 'VSP Series':
+        exitError('appendConfigDotCfg(): only supported with "VSP Series" family type')
+    global AppendBuffer
+    if chainStr:
+        appendBuffer_add(chainStr)
+    if Sanity:
+        for cmd in AppendBuffer:
+            printLog("SANITY(appended to config.cfg)&gt; {}".format(cmd))
+            ConfigHistory.append('[after reboot] ' + cmd)
+        LastError = None
+        return True
+    # Edit config.cfg
+    cmdStream = "edit config.cfg\n?end\nO" # Edit config, find 'end' from bottom of file, insert text above
+    for cmd in AppendBuffer:
+        cmdStream += cmd + "\n"
+    cmdStream += "\x1bZZ" # Escape edit mode and save file
+    debug("appendConfigDotCfg() - cmdStream:\n{}".format(cmdStream))
+    resultObj = emc_cli.send(cmdStream)
+    if resultObj.isSuccess():
+        outputStr = cleanOutput(resultObj.getOutput())
+        if outputStr and cliError("\n".join(outputStr.split("\n")[:4])): # If there is output, check for error in 1st 4 lines only
+            abortError(cmd, outputStr)
+        else:
+            for cmd in AppendBuffer:
+                printLog("Added to config.cfg: {}".format(cmd))
+                ConfigHistory.append('[after reboot] ' + cmd)
+            LastError = None
+            AppendBuffer = []
+            return True
+    else:
+        exitError(resultObj.getError())
+
+
+#
+# CLI warp buffer functions (requires cli.py v26)
+# cliWarp.py v12
+#
+import os                           # Used by warpBuffer_execute
+WarpBuffer = []
+
+def warpBuffer_add(chainStr): # v1 - Preload WarpBuffer with config or configChains; buffer can then be executed with warpBuffer_execute()
+    global WarpBuffer
+    cmdList = configChain(chainStr)
+    for cmd in cmdList:
+        cmdAdd = re.sub(r'\n.+$', '', cmd) # Strip added CR+y or similar (these are not required when sourcing from file on VOSS and do not work on ERS anyway)
+        WarpBuffer.append(cmdAdd)
+
+def warpBuffer_execute(chainStr=None, returnCliError=False, msgOnError=None, waitForPrompt=True, historyAppend=True): # v11 - Appends to existing WarpBuffer and then executes it
+    # Same as sendCLI_configChain() but all commands are placed in a script file on the switch and then sourced there
+    # Apart from being fast, this approach can be used to make config changes which would otherwise result in the switch becomming unreachable
+    # Use of this function assumes that the connected device (VSP) is already in privExec + config mode
+    global WarpBuffer
+    global LastError
+    xmcTftpRoot = '/tftpboot'
+    xmcServerIP = emc_vars["serverIP"]
+    switchIP = emc_vars["deviceIP"]
+    userName = emc_vars["userName"].replace('.', '_').replace('@', '_')
+    tftpCheck = {
+        #'VSP Series':    'bool://show boot config flags||^flags tftpd true',
+        'VSP Series':    True, # Always enabled as Client,
+        'Summit Series': 'bool://show process tftpd||Ready',
+        'ERS Series':    True, # Always enabled
+    }
+    tftpActivate = {
+        #'VSP Series':    'boot config flags tftpd',
+        'Summit Series': 'start process tftpd',
+    }
+    tftpDeactivate = {
+        'VSP Series':    'no boot config flags tftpd',
+        'Summit Series': 'terminate process tftpd graceful',
+    }
+    tftpExecute = { # XMC server IP (TFTP server), Script file to fetch and execute
+        'VSP Series':    'copy "{0}:{1}" /intflash/.script.src -y; more .script.src; source .script.src debug',
+        'Summit Series': 'tftp get {0} "{1}" .script.xsf; cat .script.xsf; run script .script.xsf',
+        'ERS Series':    'configure network address {0} filename "{1}"',
+    }
+
+    if chainStr:
+        warpBuffer_add(chainStr)
+    if Family not in tftpCheck:
+        exitError('Sourcing commands via TFTP only supported in family types: {}'.format(", ".join(list(tftpCheck.keys()))))
+
+    # Determine whether switch can do TFTP
+    if tftpCheck[Family] == True:
+        tftpEnabled = True
+    else:
+        tftpEnabled = sendCLI_showRegex(tftpCheck[Family], returnCliError=True)
+        if tftpEnabled == None: # Case of X435 which does not have configurable TFTP process, but TFTP is there
+            tftpEnabled = True
+    if not tftpEnabled:
+        if Sanity:
+            printLog("SANITY&gt; {}".format(tftpActivate[Family]))
+            if historyAppend:
+                ConfigHistory.append(tftpActivate[Family])
+        else:
+            sendCLI_configCommand(tftpActivate[Family], returnCliError, msgOnError, historyAppend=historyAppend) # Activate TFTP now
+        warpBuffer_add(tftpDeactivate[Family])      # Restore TFTP state on completion
+
+    if Sanity:
+        for cmd in WarpBuffer:
+            printLog("SANITY(warp)&gt; {}".format(cmd))
+            if historyAppend:
+                ConfigHistory.append(cmd)
+        LastError = None
+        return True
+
+    # Write the commands to a file under XMC's TFTP root directory
+    tftpFileName = (userName + '.' + scriptName()).replace(' ', '_') + '.' + switchIP.replace('.', '_')
+    tftpFilePath = xmcTftpRoot + '/' + tftpFileName
+    try:
+        with open(tftpFilePath, 'w') as f:
+            if Family == 'VSP Series': # Always add these 2 lines, as VSP source command does not inherit current context
+                f.write("enable\n")
+                f.write("config term\n")
+            for cmd in WarpBuffer:
+                f.write(cmd + "\n")
+            f.write("\n") # Make sure we have an empty line at the end, or VSP sourcing won't process last line...
+            debug("warpBuffer - write of TFTP config file : {}".format(tftpFilePath))
+    except Exception as e: # Expect IOError
+        printLog("{}: {}".format(type(e).__name__, str(e)))
+        exitError("Unable to write to TFTP file '{}'".format(tftpFilePath))
+
+    # Make the switch fetch the file and execute it
+    success = sendCLI_configChain(tftpExecute[Family].format(xmcServerIP, tftpFileName), returnCliError, msgOnError, waitForPrompt, historyAppend=False)
+    # Clean up by deleting the file from XMC TFTP directory
+    os.remove(tftpFilePath)
+    debug("warpBuffer - delete of TFTP config file : {}".format(tftpFilePath))
+
+    if not success: # In this case some commands might have executed, before the error; these won't be captured in ConfigHistory
+        WarpBuffer = []
+        return False
+    if historyAppend:
+        ConfigHistory.extend(WarpBuffer)
+    WarpBuffer = []
+    LastError = None
+    return True
+
+
+#
+# XMC GraphQl &amp; RESTCONF &amp; XIQ API required functions
+# apiBase.py v7
+#
+from java.util import LinkedHashMap
+HTTP_RESONSE_OK = {
+    'GET':      [200],
+    'PUT':      [200,201],
+    'POST':     [201],
+    'PATCH':    [200],
+    'DELETE':   [200,204],
+}
+
+def recursionKeySearch(nestedDict, returnKey): # v2 - Used by both nbiQuery() and nbiMutation() and restconfCall()
+    for key, value in nestedDict.iteritems():
+        if key == returnKey:
+            return True, value
+    for key, value in nestedDict.iteritems():
+        if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+            foundKey, foundValue = recursionKeySearch(value, returnKey)
+            if foundKey:
+                return True, foundValue
+    return [None, None] # If we find nothing
+
+def recursionStatusSearch(nestedDict): # v4 - Used by nbiMutation(), seeks the status key and returned message
+    for key, value in nestedDict.iteritems():
+        if key == 'status':
+            if 'message' in nestedDict and nestedDict['message']:
+                return True, value, nestedDict['message']
+            elif 'result' in nestedDict and nestedDict['result'] and 'msg' in nestedDict['result']: # For Policy mutations..
+                return True, value, nestedDict['result']['msg']
+            else:
+                return True, value, None
+    for key, value in nestedDict.iteritems():
+        if isinstance(value, (dict, LinkedHashMap)): # XMC Python is Jython where a dict is in fact a java.util.LinkedHashMap
+            foundKey, foundValue, foundMsg = recursionStatusSearch(value)
+            if foundKey:
+                return True, foundValue, foundMsg
+    return [None, None, None] # If we find nothing
+
+def replaceKwargs(queryString, kwargs): # v2 - Used by both nbiQuery() and nbiMutation() and restconfCall()
+    for key in kwargs:
+        if type(kwargs[key]) == bool:
+            replaceValue = str(kwargs[key]).lower()
+        elif type(kwargs[key]) == unicode:
+            replaceValue = kwargs[key] # Keep as is
+        else:
+            replaceValue = str(kwargs[key]) # Make string
+        queryString = queryString.replace('&lt;'+key+'&gt;', replaceValue)
+    return queryString # Note, might return unicode
+
+
+#
+# XMC GraphQl NBI functions - (requires apiBase.py)
+# apiXmc.py v16
+#
+LastNbiError = None
+NbiUrl = None
+
+def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v8 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+    global LastNbiError
+    jsonQuery = replaceKwargs(jsonQueryDict['json'], kwargs) # Might be unicode
+    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
+    debug(u"NBI Query:\n{}\n".format(jsonQuery))
+    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if response == None: # Should only happen from nbiSessionPost if returnKeyError=True
+        return None
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError(u"nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+    LastNbiError = None
+
+    if returnKey: # If a specific key requested, we find it
+        foundKey, returnValue = recursionKeySearch(response, returnKey)
+        if foundKey:
+            if Debug:
+                if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+            return returnValue
+        if returnKeyError:
+            return None
+        # If requested key not found, raise error
+        abortError(u"nbiQuery for\n{}".format(jsonQuery), 'Key "{}" was not found in query response'.format(returnKey))
+
+    # Else, return the full response
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, response))
+        else: debug("nbiQuery response = {}".format(response))
+    return response
+
+def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): # v9 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+    global LastNbiError
+    jsonQuery = replaceKwargs(jsonQueryDict['json'], kwargs) # Might be unicode
+    returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
+    if Sanity:
+        printLog(u"SANITY - NBI Mutation:\n{}\n".format(jsonQuery))
+        LastNbiError = None
+        return True
+    printLog(u"NBI Mutation Query:\n{}\n".format(jsonQuery))
+    response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
+    debug("nbiQuery response = {}".format(response))
+    if 'errors' in response: # Query response contains errors
+        if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
+            LastNbiError = response['errors'][0].message
+            return None
+        abortError(u"nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+
+    foundKey, returnStatus, returnMessage = recursionStatusSearch(response)
+    if foundKey:
+        debug("nbiMutation status = {} / message = {}".format(returnStatus, returnMessage))
+    elif not returnKeyError:
+        # If status key not found, raise error
+        abortError(u"nbiMutation for\n{}".format(jsonQuery), 'Key "status" was not found in query response')
+
+    if returnStatus == "SUCCESS":
+        LastNbiError = None
+        if returnKey: # If a specific key requested, we find it
+            foundKey, returnValue = recursionKeySearch(response, returnKey)
+            if foundKey:
+                if Debug:
+                    if debugKey: debug("{} = {}".format(debugKey, returnValue))
+                    else: debug("nbiQuery {} = {}".format(returnKey, returnValue))
+                return returnValue
+            if returnKeyError:
+                return None
+            # If requested key not found, raise error
+            abortError(u"nbiMutation for\n{}".format(jsonQuery), 'Key "{}" was not found in mutation response'.format(returnKey))
+        return True
+    else:
+        LastNbiError = returnMessage
+        return False
+
+
+#
+# Port processing functions
+# port.py v7
+#
+RegexPort = re.compile('^(?:[1-9]\d{0,2}[/:])?\d+(?:[/:]\d)?$')
+RegexPortRange = re.compile('^(?:([1-9]\d{0,2})([/:]))?(\d+)(?:[/:](\d))?-(?:([1-9]\d{0,2})[/:])?(\d+)(?:[/:](\d))?$')
+RegexStarRange = re.compile('^([1-9]\d{0,2})(:)\*$') # XOS only
+SlotPortRange = None # Gets set to dict by getSlotPortRanges()
+
+def portValue(port): # v1 - Function to pass to sorted(key) to sort port lists
+    slotPort = re.split('[/:]', port)
+    if len(slotPort) == 3: # slot/port/chan format
+        idx = int(slotPort[0])*400 + int(slotPort[1])*4 + int(slotPort[2])
+    elif len(slotPort) == 2: # slot/port format
+        idx = int(slotPort[0])*400 + int(slotPort[1])*4
+    else: # standalone port (no slot)
+        idx = int(slotPort[0])*4
+    return idx
+
+def getSlotPortRanges(): # v1 - Populates the SlotPortRange dict
+    global SlotPortRange
+    slotCommand = {'Summit Series': 'dict://show slot||^Slot-(\d+) +\S+ +\S+ +\S+ +(\d+)'} # Only XOS supported
+    if Family not in slotCommand:
+        SlotPortRange = {}
+        return
+    SlotPortRange = sendCLI_showRegex(slotCommand[Family])
+    debug("getSlotPortRanges = {}".format(SlotPortRange))
+
+def generatePortList(portStr, debugKey=None): # v4 - Given a port list/range, validates it and returns an ordered port list with no duplicates (can also be used for VLAN-id ranges)
+    # This version of this function will not handle port ranges which span slots
+    debug("generatePortList IN = {}".format(portStr))
+    portDict = {} # Use a dict, will ensure no port duplicate keys
+    for port in portStr.split(','):
+        port = re.sub(r'^[\s\(]+', '', port) # Remove leading spaces  [ or '(' ]
+        port = re.sub(r'[\s\)]+$', '', port) # Remove trailing spaces [ or ')' =&gt; XMC bug on ERS standalone units]
+        if not len(port): # Skip empty string
+            continue
+        rangeMatch = RegexPortRange.match(port)
+        starMatch = RegexStarRange.match(port)
+        if rangeMatch: # We have a range of ports
+            startSlot = rangeMatch.group(1)
+            separator = rangeMatch.group(2)
+            startPort = int(rangeMatch.group(3))
+            startChan = int(rangeMatch.group(4)) if rangeMatch.group(4) else None
+            endSlot = rangeMatch.group(5)
+            endPort = int(rangeMatch.group(6))
+            endChan = int(rangeMatch.group(7)) if rangeMatch.group(4) else None
+            if endSlot and startSlot != endSlot:
+                printLog("ERROR! generatePortList no support for ranges spanning slots: {}".format(port))
+            elif (startChan or endChan) and endPort and startPort != endPort:
+                printLog("ERROR! generatePortList no support for ranges spanning channelized ports: {}".format(port))
+            elif not (startChan or endChan) and startPort &gt;= endPort:
+                printLog("ERROR! generatePortList invalid range: {}".format(port))
+            elif (startChan or endChan) and startChan &gt;= endChan:
+                printLog("ERROR! generatePortList invalid range: {}".format(port))
+            else: # We are good
+                if startChan:
+                    for portCount in range(startChan, endChan + 1):
+                        portDict[startSlot + separator + str(startPort) + separator + str(portCount)] = 1
+                else:
+                    for portCount in range(startPort, endPort + 1):
+                        if startSlot: # slot-based range
+                            portDict[startSlot + separator + str(portCount)] = 1
+                        else: # simple port range (no slot info)
+                            portDict[str(portCount)] = 1
+        elif starMatch: # We have a slot/* range
+            slot = starMatch.group(1)
+            separator = starMatch.group(2)
+            if SlotPortRange == None: # Structure not populated
+                getSlotPortRanges()
+            if SlotPortRange:
+                if slot in SlotPortRange:
+                    for portCount in range(1, int(SlotPortRange[slot]) + 1):
+                        portDict[slot + separator + str(portCount)] = 1
+                else:
+                    printLog("Warning: no range for slot {}; skipping: {}".format(slot, port))
+            else:
+                printLog("Warning: generatePortList skipping star range as not supported on this switch type: {}".format(port))
+        elif RegexPort.match(port): # Port is in valid format
+            portDict[port] = 1
+        else: # Port is in an invalid format; don't add to dict, print an error message, don't raise exception 
+            printLog("Warning: generatePortList skipping unexpected port format: {}".format(port))
+
+    # Sort and return the list as a comma separated string
+    portList = sorted(portDict, key=portValue)
+
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portList))
+        else: debug("generatePortList OUT = {}".format(portList))
+    return portList
+
+def generatePortRange(portList, debugKey=None): # v3 - Given a list of ports, generates a compacted port list/range string for use on CLI commands
+    # Ported from acli.pl; this version of this function only compacts ranges within same slot
+    debug("generatePortRange IN = {}".format(portList))
+    rangeMode = {'VSP Series': 2, 'ERS Series': 1, 'Summit Series': 1}
+    elementList = []
+    elementBuild = None
+    currentType = None
+    currentSlot = None
+    currentPort = None
+    currentChan = None
+    rangeLast = None
+
+    # First off, sort the list
+    portList = sorted(portList, key=portValue)
+    for port in portList:
+        slotPort = re.split("([/:])", port) # Split on '/' (ERS/VSP) or ':'(XOS)
+        # slotPort[0] = slot / slotPort[1] = separator ('/' or ':') / slotPort[2] = port / slotPort[4] = channel
+        if len(slotPort) == 5: # slot/port/chan
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == currentPort and currentChan and slotPort[4] == str(int(currentChan)+1):
+                    currentChan = slotPort[4]
+                    if rangeMode[Family] == 1:
+                        rangeLast = currentChan
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort + slotPort[1] + currentChan
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            currentChan = slotPort[4]
+            elementBuild = port
+
+        if len(slotPort) == 3: # slot/port
+            if elementBuild:
+                if currentType == 's/p' and slotPort[0] == currentSlot and slotPort[2] == str(int(currentPort)+1) and not currentChan:
+                    currentPort = slotPort[2]
+                    if rangeMode[Family] == 1:
+                        rangeLast = currentPort
+                    else: # rangeMode = 2
+                        rangeLast = currentSlot + slotPort[1] + currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 's/p'
+            currentSlot = slotPort[0]
+            currentPort = slotPort[2]
+            currentChan = None
+            elementBuild = port
+
+        if len(slotPort) == 1: # simple port (no slot)
+            if elementBuild:
+                if currentType == 'p' and port == str(int(currentPort)+1):
+                    currentPort = port
+                    rangeLast = currentPort
+                    continue
+                else: # Range complete
+                    if rangeLast:
+                        elementBuild += '-' + rangeLast
+                    elementList.append(elementBuild)
+                    elementBuild = None
+                    rangeLast = None
+                    # Fall through below
+            currentType = 'p'
+            currentPort = port
+            elementBuild = port
+
+    if elementBuild: # Close off last element we were holding
+        if rangeLast:
+            elementBuild += '-' + rangeLast
+        elementList.append(elementBuild)
+
+    portStr = ','.join(elementList)
+    if Debug:
+        if debugKey: debug("{} = {}".format(debugKey, portStr))
+        else: debug("generatePortRange OUT = {}".format(portStr))
+    return portStr
+
+
+#
+# IP address processing functions
+# ip.py v5
+#
+import re                           # Used by maskToNumber
+
+def ipToNumber(dottedDecimalStr): # v1 - Method to convert an IP/Mask dotted decimal address into a long number; can also use for checking validity of IP addresses
+    try: # bytearray ensures that IP bytes are valid (1-255)
+        ipByte = list(bytearray([int(byte) for byte in dottedDecimalStr.split('.')]))
+    except:
+        return None
+    if len(ipByte) != 4:
+        return None
+    debug("ipByte = {}".format(ipByte))
+    ipNumber = (ipByte[0]&lt;&lt;24) + (ipByte[1]&lt;&lt;16) + (ipByte[2]&lt;&lt;8) + ipByte[3]
+    debug("dottedDecimalStr {} = ipNumber {}".format(dottedDecimalStr, hex(ipNumber)))
+    return ipNumber
+
+def numberToIp(ipNumber): # v1 - Method to convert a long number into an IP/Mask dotted decimal address
+    dottedDecimalStr = '.'.join( [ str(ipNumber &gt;&gt; (i&lt;&lt;3) &amp; 0xFF) for i in range(4)[::-1] ] )
+    debug("ipNumber {} = dottedDecimalStr {}".format(hex(ipNumber), dottedDecimalStr))
+    return dottedDecimalStr
+
+def maskToNumber(mask): # v1 - Method to convert a mask (dotted decimal or Cidr number) into a long number
+    if isinstance(mask, int) or re.match(r'^\d+$', mask): # Mask as number
+        if int(mask) &gt; 0 and int(mask) &lt;= 32:
+            maskNumber = (2**32-1) ^ (2**(32-int(mask))-1)
+        else:
+            maskNumber = None
+    else:
+        maskNumber = ipToNumber(mask)
+    if maskNumber:
+        debug("maskNumber = {}".format(hex(maskNumber)))
+    return maskNumber
+
+def subnetMask(ip, mask): # v1 - Return the IP subnet and Mask in dotted decimal and cidr formats for the provided IP address and mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    ipSubnet = numberToIp(subnetNumber)
+    ipDottedMask = numberToIp(maskNumber)
+    ipCidrMask = bin(maskNumber).count('1')
+    debug("ipSubnet = {} / ipDottedMask = {} / ipCidrMask = {}".format(ipSubnet, ipDottedMask, ipCidrMask))
+    return ipSubnet, ipDottedMask, ipCidrMask
+
+def ipGateway(ip, mask, gw): # v1 - Return the gateway IP address, as first or last IP in subnet, based on own IP/mask
+    ipNumber = ipToNumber(ip)
+    maskNumber = maskToNumber(mask)
+    subnetNumber = ipNumber &amp; maskNumber
+    if gw == 'first':
+        gwNumber = subnetNumber + 1
+        ip1numb = gwNumber + 1
+        ip2numb = gwNumber + 2
+    elif gw == 'last':
+        gwNumber = subnetNumber + 2**(32-int(mask)) - 2
+        ip1numb = gwNumber - 2
+        ip2numb = gwNumber - 1
+    else: # Error condition
+        exitError('ipGateway(): invalid gw type {}'.format(gw))
+    debug("gwNumber = {} / ip1numb = {} / ip2numb = {}".format(hex(gwNumber), hex(ip1numb), hex(ip2numb)))
+    gatewayIP = numberToIp(gwNumber)
+    ip1 = numberToIp(ip1numb)
+    ip2 = numberToIp(ip2numb)
+    debug("gatewayIP = {} / ip1 = {} / ip2 = {}".format(gatewayIP, ip1, ip2))
+    return gatewayIP, ip1, ip2
+
+
+#
+# Other Custom Functions
+# misc.py
 
 def extractMltData(include=[]): # v2 - Extract MLT data: optionally include = ['fa', 'vlacp', 'lacp-extra']
     # Only supported for family = 'VSP Series'
@@ -1763,8 +1638,6 @@ def allocateIstIP(role, selfNickname, peerNickname): # v3 - Allocates the vIST I
     return istSubnet, istIPself, istIPpeer
 
 def allocateMltId(offsetId, inUseList1, inUseList2=[]): # v1 - Given the list of in use MLTs from both vIST peers, provides a list of free MLT ids to use
-    debug("allocateMltId() inUseList1 = {}".format(inUseList1))
-    debug("allocateMltId() inUseList2 = {}".format(inUseList2))
     allocatedMltid = None
     mltid = offsetId
     while 1:
@@ -1775,8 +1648,307 @@ def allocateMltId(offsetId, inUseList1, inUseList2=[]): # v1 - Given the list of
     debug("allocateMltId() = {}".format(allocatedMltid))
     return allocatedMltid
 
+
 #
-# Main:
+# XMC Emc threads vars
+# varsEmcThreads.py v4
+#
+
+#
+# IMPORTS:
+#
+import os
+import sys
+import time
+import glob
+import json
+
+#
+# VARIABLES:
+#
+StartTime = time.time()
+TimeDeviation = 5.0 # When XMC runs many instances of same script, not all instances will start at exactly the same time; set this to worst case deviation in secs
+DelayStaleDelete = 1.0 # If stale files exists, all threads will be made to wait this minimum delay, before the ThreadMaster is allowed to delete the stale files 
+Timeout = 10   # Seconds we are ready to wait for reading emc_vars from other threads
+SleepTimer = 1 # While waiting for other threads to make their emc_vars avail, this is the sleep timer in the timeout loop
+SeqNumber = 0
+ThreadMaster = None
+ThreadIPs = []
+ThreadVarsDict = {}
+ReturnOnError = False # When reading data from other threads, determines whether we want to bomb out if some threads don't respond or continue with threads which do
+Emc_vars_copy = emc_vars.copy() # Modifying emc_vars is discouraged, so we take a copy of it; shallow copy is enough, emc_vars is single level dict 
+if 'activityCustomId' in emc_vars: # Workflow
+    ThisScript = emc_vars['activityCustomId'].split(os.path.sep)[-1].split('.')[0]  # Name of workflow activity
+else: # Script
+    ThisScript = __file__.split(os.path.sep)[-1].split('.')[0]  # Name of our script
+try:
+    WorkDir = '/dev/shm'
+    os.chdir(WorkDir)
+except: # If not running on XMC Jython...I develop on my Windows laptop...
+    WorkDir = os.getcwd()
+UserName = emc_vars["userName"].replace('.', '_').replace('@', '_')
+MyIP = emc_vars["deviceIP"]
+RegexFileIP = re.compile('^\.[^\.]+\.[^\.]+\.([\d_]+)\.')
+GlobStamps = '.' + UserName + '.' + ThisScript + '.*.stamp'
+GlobSeqnce = '.' + UserName + '.' + ThisScript + '.' + MyIP.replace('.', '_') + '.[0-9]*'
+GlobSqJson = '.' + UserName + '.' + ThisScript + '.*.&lt;SEQ&gt;.json'
+# The following files are written to the XMC filesystem (default path: /usr/local/Extreme_Networks/NetSight/wildfly/bin)
+# - Stamp file:    .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.stamp        : modify time of this empty file used to track other threads
+# - Sequence file: .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.&lt;seqNb&gt;      : empty file who's sequence number determines which json file to load
+# - JSON file:     .&lt;UserName&gt;.&lt;ThisScript&gt;.&lt;IP&gt;.&lt;seqNb&gt;.json : json file containing IP's Emc_vars_copy
+
+
+#
+# FUNCTIONS:
+#
+def threadFile(ip, seqnum=None, suffix=None): # v1 - Given IP and suffix, returns the script instance specific filenames
+    fileName = '.' + UserName + '.' + ThisScript + '.' + ip.replace('.', '_')
+    if seqnum != None:
+        fileName += '.' + str(seqnum)
+    if suffix:
+        fileName += '.' + suffix
+    return fileName
+
+def threadIP(filename): # v1 - Given a thread filename, returns the thread IP
+    ipMatch = RegexFileIP.match(filename)
+    if not ipMatch:
+        exitError("Unable to extract IP from thread filename '{}'".format(filename))
+    ip = ipMatch.group(1)
+    return ip.replace('_', '.')
+
+def deleteFiles(globStr): # v1 - Deletes all existing sequence files for this thread
+    fileList = glob.glob(globStr)
+    if fileList:
+        debug("Threads - deleteFiles() deleting files : {}".format(fileList))
+        for f in fileList:
+            os.remove(f)
+
+def touch(path): # v2 - Touches a file (and sets its modify time)
+    try:
+        with open(path, 'a'):
+            os.utime(path, None)
+            debug("Threads - touch() file : {}".format(path))
+    except Exception as e: # Expect IOError
+        printLog("{}: {}".format(type(e).__name__, str(e)))
+        exitError("Unable to touch file '{}'".format(path))
+
+def writeJson(dataDict, path): # v2 - Writes a dict to json file
+    try: # Python file locking https://yakking.branchable.com/posts/flocking/
+        with open(path, 'w') as f:
+            json.dump(dataDict, fp=f, indent=4)
+            debug("Threads - writeJson() file : {}".format(path))
+    except Exception as e: # Expect IOError
+        printLog("{}: {}".format(type(e).__name__, str(e)))
+        exitError("Unable to write to json file '{}'".format(path))
+
+def emc_threads(returnOnError=None): # v1 - Returns list of IPs for other instances simultaneously running this same script
+    global ThreadIPs
+    global ReturnOnError
+
+    if ThreadIPs: # We only need to call this function once; if it has already run, simply come out
+        return ThreadIPs
+
+    def electMaster(iplist, myip): # Given a list of IPs, returns true if myip is the numerically lowest in the list
+        myipInt = ipToNumber(myip)
+        for ip in iplist:
+            if ipToNumber(ip) &lt; myipInt:
+                return False
+        return True
+
+    if returnOnError != None: # If returnOnError was set to True/False, then we change the global ReturnOnError
+        ReturnOnError = returnOnError
+
+    waitTime = StartTime - time.time() + TimeDeviation
+    if waitTime &gt; 0:
+        debug("Threads - emc_threads() allowing for deviation of start time between threads / sleep = {}".format(waitTime))
+        time.sleep(waitTime)
+
+    # Get a list of all Stamp files for this script
+    stampFileList = glob.glob(GlobStamps)
+    # - there is a chance that ThreadMaster instance actually deletes some of files in stampFileList, while this instance is on the line below
+    # - and we would error on doing os.path.getmtime(x) on a since non-existent file...
+    # - the solution is the code added in the ThreadMaster if section below, where a delay is added to compensate between time of this thread and slowest thread
+    activeStampFiles = [x for x in stampFileList if os.path.getmtime(x) &gt;= (StartTime - TimeDeviation)]
+    staleStampFiles  = [x for x in stampFileList if x not in activeStampFiles]
+    if staleStampFiles:
+        debug("Threads - staleStampFiles:\n{}".format(staleStampFiles))
+
+    # Only retain IPs for Stamp files newer than StartTime
+    ThreadIPs = [threadIP(x) for x in activeStampFiles]
+    debug("Threads - active device IPs = {}".format(ThreadIPs))
+
+    # Write JSON and sequence number file
+    if SeqNumber == 0: # Only do this if emc_threads_put() has not already been called
+        writeJson(Emc_vars_copy, threadFile(MyIP, seqnum=SeqNumber, suffix='json'))
+        touch(threadFile(MyIP, seqnum=SeqNumber))
+
+    if staleStampFiles: # The master thread will take charge of cleanup of stale thread files of this same script (these could be stale from previous runs)
+        # But we let all threads do the wait below, to keep them in sync as much as possible
+        debug("Threads - stale files exist; electing ThreadMaster")
+        staleStampStart = time.time()
+        # Elect a ThreadMaster; we want only one script instance to perform cleanup of stale files
+        ThreadMaster = electMaster(ThreadIPs, MyIP)
+        # Before deleting any files we need to make sure that all other active threads have passed this function
+        # Identify the active thread with the highest time stamp (= slowest thread)
+        slowestStamp = 0
+        for stampFile in activeStampFiles:
+            stamp = os.path.getmtime(stampFile)
+            if stamp &gt; slowestStamp:
+                slowestStamp = stamp
+        debug("Threads - slowest thread timestamp = {}".format(slowestStamp))
+        # Take the delta of that highest time and our initial timestamp (and adjust for processing to get here)
+        waitTime = slowestStamp - int(StartTime) - (time.time() - staleStampStart) + DelayStaleDelete
+        if waitTime &gt; 0:
+            debug("Threads - emc_threads() allowing for delta between this thread and slowest thread / sleep = {}".format(waitTime))
+            time.sleep(waitTime)
+
+        if ThreadMaster: # The master thread will take charge of cleanup of stale thread files of this same script (these could be stale from previous runs)
+            debug("Threads - acting as ThreadMaster and deleting stale files;")
+            # By now, all other threads will have come out of emc_threads(), so is safe to perform clean up of stale files
+            for fnam in staleStampFiles:
+                fglob = re.sub(r'[^\.]+$', '*', fnam) # This glob will catch all 3 file types
+                debug("** Deleting all files for glob = {}".format(fglob))
+                for fdel in glob.glob(fglob):
+                    debug("-&gt; deleting file = {}".format(fdel))
+                    os.remove(fdel)
+    return ThreadIPs
+
+def emc_threads_vars(ip=None, var=None, returnOnError=None): # v2 - Returns variable dict from other instances simultaneously running this same script
+    # If both ip and var is set, returns value of variable
+    # If only ip is set, returns dict of ip's Emc_vars_copy
+    # If neither ip nor var is set, returns full dict where 1st key is thread ip and 2nd key are Emc_vars_copy keys
+    # This method will also work if the local thread ip is provided, in which case the local ip Emc_vars_copy is returned
+    # If returnOnError=False or returnOnError not set and global ReturnOnError is False:
+    #     This method expects to obtain Emc_vars_copy from all running instances for which Stamp files were recorded
+    #     Failure to read the JSON file of one or more other instances will result in an exception being raised
+    #     This can happen if some script instances fail after starting; the outcome is that all instances will then fail
+    # If returnOnError=True or returnOnError not set and global ReturnOnError is True:
+    #     In this case, failure to read the JSON file of one or more other instances will not result in an exception
+    #     The method will instead return, but the variables requested may or may not be available.
+    #     If the ip provided is for an instance for which the Emc_vars_copy could not be read, then the method will return
+    #     None if a var was requested and an empty dict otherwise.
+    #     If the method is called without any ip or var set, then a dict is returned, but this dict will have some IP keys
+    #     holding an empty dict
+    global ThreadIPs
+    global ThreadVarsDict
+
+    if returnOnError == None: # Unless override provided in method call, use global setting
+        returnOnError = ReturnOnError
+
+    if not ThreadIPs: # emc_threads() has not been called
+        emc_threads() # global ThreadIPs gets set
+
+    if not ThreadVarsDict: # dict is not populated
+        # Set our own Emc_vars_copy
+        ThreadVarsDict[MyIP] = Emc_vars_copy
+
+        timeoutTime = time.time() + Timeout # Prime the timeout time, in case we have to timeout
+        failedFirstRead = {}                # Init dict to track failed file read
+
+        while set(ThreadIPs) != set(ThreadVarsDict.keys()): # Until we have variables for all IPs
+            # Check for available json files
+            jsonFileList = glob.glob(GlobSqJson.replace('&lt;SEQ&gt;', str(SeqNumber)))
+            jsonIPList = [threadIP(x) for x in jsonFileList]
+            debug("Threads - available JSON files on SeqN {} = {}".format(SeqNumber, jsonIPList))
+            newIPList = [x for x in jsonIPList if x in ThreadIPs and x not in ThreadVarsDict]
+
+            if newIPList: # Read in available JSON files
+                debug("Threads - new JSON files to read in for these IPs = {}".format(newIPList))
+                for newip in newIPList:
+                    try:
+                        path = threadFile(newip, seqnum=SeqNumber, suffix='json')
+                        with open(path, 'r') as f:
+                            debug("-&gt; reading file = {}".format(path))
+                            ThreadVarsDict[newip] = json.load(fp=f)
+                    except Exception as e: # Expect IOError or ValueError
+                        printLog("{}: {}".format(type(e).__name__, str(e)))
+                        if newip not in failedFirstRead: # We allow 1 retry
+                            failedFirstRead[newip] = 1
+                            printLog("Threads - WARNING: Unable to read Emc_vars_copy for IP instance {} on first try".format(newip))
+                            time.sleep(1) # Delay 1 sec before retry
+                            continue
+                        if returnOnError:
+                            printLog("Threads - WARNING: Unable to read Emc_vars_copy for IP instance {}".format(newip))
+                            ThreadVarsDict[newip] = {}
+                        else:
+                            exitError("Unable to read to json file '{}'".format(path))
+                # Reset timeout time (we only tick timeout time when we have no JSON to read)
+                timeoutTime = time.time() + Timeout
+
+            else: # No JSON files available; implement timeout
+                if time.time() &gt; timeoutTime: # We timeout
+                    missingIPList = [x for x in ThreadIPs if x not in ThreadVarsDict]
+                    if returnOnError:
+                        printLog("Threads - WARNING: Unable to read Emc_vars_copy from these thread IPs: {}".format(missingIPList))
+                        for failip in missingIPList:
+                            ThreadVarsDict[failip] = {}
+                    else:
+                        exitError("Timing out due to inability to read Emc_vars_copy from these thread IPs: {}".format(missingIPList))
+                time.sleep(SleepTimer)
+
+    if ip and var: # Both are set
+        if var in ThreadVarsDict[ip]:
+            return ThreadVarsDict[ip][var]
+        else: # Case where returnOnError is set and we are missing the Emc_vars_copy for this IP
+            return None
+    elif ip:
+        return ThreadVarsDict[ip]
+    else:
+        return ThreadVarsDict
+
+def emc_threads_put(**dict): # v1 - Set a local Emc_vars_copy variable and ensure this becomes available to other instances simultaneously running this same script
+    global ThreadVarsDict
+    global SeqNumber
+
+    # As we are writing a new variable, every other instance of this script will too, so..
+    ThreadVarsDict = {}         # Clear out the stored thread Emc_vars_copy
+    SeqNumber += 1              # We increase the sequence number
+
+    # Delete any existing sequence number files for this thread IP
+    deleteFiles(GlobSeqnce)
+
+    # Update the value in our local Emc_vars_copy
+    for key, value in dict.items():
+        Emc_vars_copy[key] = value
+
+    # Re-write our thread json file
+    writeJson(Emc_vars_copy, threadFile(MyIP, seqnum=SeqNumber, suffix='json'))
+
+    # Re-post sequence number file
+    touch(threadFile(MyIP, seqnum=SeqNumber))
+
+#
+# INIT: Init code for Threads; signal self thread existence and store Emc_vars_copy as json; we do this as early as possible
+#
+printLog("Threads - StartTime = {}".format(StartTime))
+debug("Threads - ThisScript = {}".format(ThisScript))
+debug("Threads - WorkDir = {}".format(WorkDir))
+deleteFiles(GlobSeqnce)
+touch(threadFile(MyIP, suffix='stamp'))
+
+
+
+#
+# INIT: Init Debug &amp; Sanity flags based on input combos
+#
+try:
+    if emc_vars['userInput_sanity'].lower() == 'enable':
+        Sanity = True
+    elif emc_vars['userInput_sanity'].lower() == 'disable':
+        Sanity = False
+except:
+    pass
+try:
+    if emc_vars['userInput_debug'].lower() == 'enable':
+        Debug = True
+    elif emc_vars['userInput_debug'].lower() == 'disable':
+        Debug = False
+except:
+    pass
+
+
+#
+# MAIN:
 #
 def main():
 
@@ -1926,8 +2098,8 @@ def main():
 
     # Check if we have auto-sense enabled; get auto-sense status for all ports
     autoSensePortDict = {}
-    autoSensePortDict = sendCLI_showRegex(CLI_Dict[Family]['get_auto_sense_status'], 'autoSensePortDict', True)
-
+    if MakeVistNeighbourAutoSensePortsStatic:
+        autoSensePortDict = sendCLI_showRegex(CLI_Dict[Family]['get_auto_sense_status'], 'autoSensePortDict', True)
 
     if configureSmltClustering: # Info to collect if creating SMLT Clustering
         # Get chassis MAC (needed if we want to find our peer among LLDP neighbours)
@@ -2401,14 +2573,14 @@ def main():
 
 main()
 </content>
-    <creationDate>1573331099302</creationDate>
+    <creationDate>1725887232362</creationDate>
     <creator>lstevens</creator>
     <credentialsCacheOveride>false</credentialsCacheOveride>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Groups,</contexts>
-    <lastUpdateDate>1724655857086</lastUpdateDate>
+    <lastUpdateDate>1761234700519</lastUpdateDate>
     <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-fabric-engine,nos-id-voss,</nosIds>
