@@ -120,7 +120,7 @@ v101/1.08
 	  [n] secs are waited and then the same CLI session is resumed; "reconnect" is new; this will now tear down the CLI
 	  session, after the [n] secs wait, and will then re-start a new CLI session (leveraging const_CLI_RETRIES and
 	  const_CLI_RETRY_DELAY)
-v102/1.10 - posted
+v102/1.10
 	- If a key listed in variable const_EXPORT_EMC_VARS is found to not exist in emc_vars, now a warning message is
 	  displayed, instead of failing the workflow. For some of the default keys ("deviceName","deviceSysOid","deviceType",
 	  "family",..) this can happen if this workflow is called by one of the Onboard Mgmt VLAN/CLIP/etc.. workflows
@@ -130,5 +130,8 @@ v102/1.10 - posted
 	  then the workflow will still fail when the variable needs to be replaced; in this case consider increasing the
 	  const_FOLLOW_WORKFLOW_DELAY variable on the calling Onboard Mgmt VLAN/CLIP/etc.. workflow to give XIQ-SE enough
 	  time to re-discover the device
+v103/1.11 - posted
+	- Debug logging moved to /dev/shm as with large templates and debug enabled, the maximum size of the activity log
+	  could be exhausted
 
 Todo:
