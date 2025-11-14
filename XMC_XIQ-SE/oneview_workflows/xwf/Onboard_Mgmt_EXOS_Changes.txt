@@ -86,7 +86,7 @@ v51/1.05
 	- Regex was failing to scrape VLAN IP and mask from "show vlan" if the IP address had 3 digits for all 4 bytes
 v52/1.06
 	- CSV now also extracts the device's lookup (serial number or MAC address) to be used as $<> variable
-v54/1.08 - posted
+v54/1.08
 	- Added more logic to v50 change: if a different site to re-add device to is given, this site is now used
 	  to resolve ${site-variables}
 	  But, the initial site of the switch is still going to be used (instead of re-add site) if any of these
@@ -101,5 +101,10 @@ v54/1.08 - posted
 	- If the switch uplinks are connected to FA Server(s) and those FA Servers are advertizing an untagged FA Mgmt
 	  VLAN (vid=4095) then on completion of the IP migration, default untagged VLAN 1 will be removed from those
 	  uplinks
+v55/1.10 - posted
+	- Mgmt VLAN I-SID input was supposed to be optional, but the workflow failed if no I-SID was provided
+	- Was not detecting application-telemetry mirror config using source IP = "Auto source IP"
+	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
+	  the #elseif condition was true; this issue was introduced with nesting in v89 
 
 Todo:

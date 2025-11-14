@@ -12,7 +12,7 @@ v12
 	  execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY (default 300sec) as before
 v13
 	- CSV now also extracts the device's lookup (serial number or MAC address) to be used as $<> variable
-v14 - posted
+v14
 	- Added more logic to v11 change: if a different site to re-add device to is given, this site is now used
 	  to resolve ${site-variables}
 	  But, the initial site of the switch is still going to be used (instead of re-add site) if any of these
@@ -24,6 +24,8 @@ v14 - posted
 	- When calling a follow on workflow, the NBI call also specifies key wrkfl_deviceFamily and sets it to
 	  the family type used by this workflow; this can facilitate the next workflow, e.g. Apply Config Template,
 	  to set the correct family type, even if XIQ-SE does not yet have it set for the device
-
+v15 - posted
+	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
+	  the #elseif condition was true; this issue was introduced with nesting in v89 
 
 Todo:
