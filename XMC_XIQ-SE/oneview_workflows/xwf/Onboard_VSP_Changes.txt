@@ -272,7 +272,7 @@ v172
 	- Bug in API call for fix above, resolved again!
 	- Policy VLAN Island input can now be provided as a site-path (e.g. /World/SiteX), in which case the final site is
 	  retained (e.g. SiteX) 
-v173 - posted
+v173
 	- Auto-sense Wait interval now accepts values as low as 2 secs, since the min values is reduced from 10sec to 2sec in 9.3
 	- VLAN and I-SID input values now have leading zeros stripped if necessary
 	- If input data is fed into variable wrkfl_deviceJsonData, the lookup index is extracted from the same data, under
@@ -286,6 +286,11 @@ v173 - posted
 	  then the workflow will still fail when the variable needs to be replaced; in this case consider increasing the
 	  const_FOLLOW_WORKFLOW_DELAY variable on the calling Onboard Mgmt VLAN/CLIP/etc.. workflow to give XIQ-SE enough
 	  time to re-discover the device
+v178 - posted
+	- Added input for Message-Authenticator Attribute required/not-required
+	- Added input to determine if the NAC Location Group should be created if not already existing
+	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
+	  the #elseif condition was true; this issue was introduced with nesting in v89 
 
 Todo:
 

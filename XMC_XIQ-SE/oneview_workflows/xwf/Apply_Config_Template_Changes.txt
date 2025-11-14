@@ -130,8 +130,11 @@ v102/1.10
 	  then the workflow will still fail when the variable needs to be replaced; in this case consider increasing the
 	  const_FOLLOW_WORKFLOW_DELAY variable on the calling Onboard Mgmt VLAN/CLIP/etc.. workflow to give XIQ-SE enough
 	  time to re-discover the device
-v103/1.11 - posted
+v103/1.11
 	- Debug logging moved to /dev/shm as with large templates and debug enabled, the maximum size of the activity log
 	  could be exhausted
+v104/1.12 - posted
+	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
+	  the #elseif condition was true; this issue was introduced with nesting in v89 
 
 Todo:
