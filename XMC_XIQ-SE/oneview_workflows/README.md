@@ -7,7 +7,7 @@
 # XIQ Site Engine (XMC) Reporting Workflows
 | Workflow name | Description | Comment | Version |
 | ------------- | ----------- | ------- | ------- |
-|[Platform ONE licensing calculation](xwf/ExtremePlatform_ONE_Subscription_Report-v31.xwf)|The Workflow reports the number of subscriptions for each tier required by ExtremeCloud IQ - Site Engine.|Define the email recipients.|v31|
+|[Platform ONE licensing calculation](xwf/ExtremePlatform_ONE_Subscription_Report-v33.xwf)|The Workflow reports the number of subscriptions for each tier required by ExtremeCloud IQ - Site Engine.|Define the email recipients.|v33|
 |[XIQ-SE licensing calculation](xwf/XIQ-SE_Licensing_calculation-v116.xwf)|The Workflow reports number of Pilot and Navigator licenses required by ExtremeCloud IQ - Site Engine. Check [KB article](https://extremeportal.force.com/ExtrArticleDetail?an=000098925) on how to use it on Windows.|Define the email recipients.|v116|
 |[Aggregated report Device Down](xwf/Aggregated_report_Device_Down-8.5.1.60v20.xwf)|This workflow creates aggregated report over the time. Instead of 300 emails if 300 devices go down, you will get one email with a list of 300 devices.|Create Alarm for Device Down based on contact lost and as action assign this workflow. You can define the aggregation time in minutes in the workflow Input. Define email recipients.|8.5.1.60v20|
 |[Link Aggregate Alarm](xwf/Link_Aggregate_Alarm-8.4.0.115v8.xwf)|This workflow creates one email for each link down event. Instead of 2 emails if the link goes down, you will get one email with all link details.|Create Alarm for Link Down based on selected trap (you can copy or modify the original alarm) and as action assign this workflow. Define email recipients.|8.4.0.115v8|
