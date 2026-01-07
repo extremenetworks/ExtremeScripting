@@ -78,8 +78,11 @@ v20/1.06
 	- When calling a follow on workflow, the NBI call also specifies key wrkfl_deviceFamily and sets it to
 	  the family type used by this workflow; this can facilitate the next workflow, e.g. Apply Config Template,
 	  to set the correct family type, even if XIQ-SE does not yet have it set for the device
-v21/1.07 - posted
+v21/1.07
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
-	  the #elseif condition was true; this issue was introduced with nesting in v89 
+	  the #elseif condition was true
+v22/1.08 - posted
+	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Now all variables are dereferenced
+	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
 
 Todo:
