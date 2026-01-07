@@ -101,10 +101,13 @@ v54/1.08
 	- If the switch uplinks are connected to FA Server(s) and those FA Servers are advertizing an untagged FA Mgmt
 	  VLAN (vid=4095) then on completion of the IP migration, default untagged VLAN 1 will be removed from those
 	  uplinks
-v55/1.10 - posted
+v55/1.10
 	- Mgmt VLAN I-SID input was supposed to be optional, but the workflow failed if no I-SID was provided
 	- Was not detecting application-telemetry mirror config using source IP = "Auto source IP"
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
-	  the #elseif condition was true; this issue was introduced with nesting in v89 
+	  the #elseif condition was true
+v56/1.11 - posted
+	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Now all variables are dereferenced
+	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
 
 Todo:
