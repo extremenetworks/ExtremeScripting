@@ -286,11 +286,14 @@ v173
 	  then the workflow will still fail when the variable needs to be replaced; in this case consider increasing the
 	  const_FOLLOW_WORKFLOW_DELAY variable on the calling Onboard Mgmt VLAN/CLIP/etc.. workflow to give XIQ-SE enough
 	  time to re-discover the device
-v178 - posted
+v178
 	- Added input for Message-Authenticator Attribute required/not-required
 	- Added input to determine if the NAC Location Group should be created if not already existing
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
-	  the #elseif condition was true; this issue was introduced with nesting in v89 
+	  the #elseif condition was true
+v179 - posted
+	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Now all variables are dereferenced
+	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
 
 Todo:
 

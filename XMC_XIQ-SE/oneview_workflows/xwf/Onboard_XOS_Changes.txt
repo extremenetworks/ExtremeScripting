@@ -17,14 +17,17 @@ v6
 	  time to re-discover the device
 	- Implemented retries on performing save config, as seems a save config can sometimes fail with
 	  "Error: This command cannot be executed during configuration save."
-v14 - posted
+v14
 	- Added input for Message-Authenticator Attribute required/not-required
 	- Added input to determine if the NAC Location Group should be created if not already existing
 	- Added option to enable FA message authentication on access ports; with 33.5, this can also lock-in FA auth on the
 	  FA server uplinks as well. Additionally a custom FA auth key can be set as well, but only on the access ports,
 	  never the FA server uplink ports
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
-	  the #elseif condition was true; this issue was introduced with nesting in v89 
+	  the #elseif condition was true
+v15 - posted
+	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Now all variables are dereferenced
+	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
 
 Todo:
 

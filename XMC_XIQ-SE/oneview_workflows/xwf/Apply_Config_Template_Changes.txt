@@ -133,8 +133,16 @@ v102/1.10
 v103/1.11
 	- Debug logging moved to /dev/shm as with large templates and debug enabled, the maximum size of the activity log
 	  could be exhausted
-v104/1.12 - posted
+v104/1.12
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
 	  the #elseif condition was true; this issue was introduced with nesting in v89 
+v107/1.14 - posted
+	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Previously, ${site-variables},
+	  $<csv-variables> and $UD1-4 variables were replaced wherever found in the template file, even inside #if/#else
+	  template blocks which would not get executed for a given device. But this meant that if a part of the template
+	  which would never execute for a given device, contained some variables which were not set for that device, the
+	  workflow would fail. Now all variables are dereferenced as needed as the template #if/#elseif/#else/#end blocks
+	  are evaluated (which incidentally is how the $[eval] variables were already handled).
+	- Added option to execute a follow on workflow on completion
 
 Todo:
