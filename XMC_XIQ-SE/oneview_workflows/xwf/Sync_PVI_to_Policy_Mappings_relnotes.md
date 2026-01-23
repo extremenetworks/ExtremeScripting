@@ -1,10 +1,12 @@
 # Release notes for Workflow **Sync_PVI_to_Policy_Mappings**
 ### written by:   Markus Nikulski
 ### e-mail:       mnikulski@extremenetworks.com
-### date:         06. August 2025
+### date:         23. Januar 2026
 
 | Build | Description |
 | ------------- | ------- |
+|25.11.12.09v482|*new features*<br> • add keyword 'NO-SYNC' for policy roles in description which should not be synchronised.<br><br>*maintenance*<br> • update common library <br><br>*fixed issues*<br> • Policy domain gets unlocked too early.<br><br>|
+
 |25.5.12.6v479|*new features*<br> • provide a messages for each activity like a short summary<br><br>*maintenance*<br> • allow activity name with new line.<br> • optimise time tracing for any activity.<br> • common library handling in 'prep' activity optimised.<br> • execution performance optimisation by reducing the amount of activities<br><br>*fixed issues*<br> • if new switches get added to a location group, the internal description wasn't maintained.<br> • if the default location record description is empty, the 'any' location mapping don't get updated<br> • Supress DB caching while reading the data. For some large scal setups it can happen that not all data well recognized as it should.<br> • Join all three policy reading threads to a sinlge activity, because of a saver policy domain lock during reading.<br><br>|
 |25.2.11.23v432|*new features*<br> • Optimise the Workflow waiting queue and implement a graceful end if too many workflows running at the same time.<br><br>*maintenance*<br> • Adjust log facility initialization.<br><br>*fixed issues*<br> • <br><br>|
 |25.2.11.23v427|*new features*<br> • common Python class integrity checking added<br> • If Workflow runs more than once, the later executed Workflows wait in the queue until the priore Workflow finished or the timeout is reached. This allowes a better parralel onboarding of new switches. Variable called 'WAIT_TIMER' in minutes determinat how long to wait. By default is 30 minutes.<br><br>*maintenance*<br> • Python class performance improvements<br> • update common class library to 0.2.0<br> • automate Python class compilation during the coding process<br><br>*fixed issues*<br> • <br><br>|
