@@ -1,9 +1,12 @@
-host: "192.168.162.8"
-username: "rwa"
-password: "rwa"
-isidStart: 2663000
-isidRange: 10
-isidPort: "1:6"
-vlanStart: 3100
-vlanRange: 10
-vlanPort: "1:5"
+connection:
+  host: "192.168.162.8"
+  username: "rwa"
+  password: "rwa"
+isid:
+  start: 2663000
+  range: 10
+  port: "1:6"
+vlan:
+  start: 3100
+  range: 10
+  port: "1:5"

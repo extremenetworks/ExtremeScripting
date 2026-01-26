@@ -6,7 +6,7 @@ VOSS 8.0 &rarr; RESTconf 1.0<br>
 VOSS 8.5 &rarr; RESTconf 2.0<br>
 Fabric Engine 9.3.x &rarr; OpenAPI<br>
 
-OpenAPI is a strategic API for Extreme Networks, because it is used by Extreme Platform One and continuously expanded.
+OpenAPI is a strategic API for Extreme Networks, because it is used by Extreme Platform One and is continuously expanded.
 <br><br>
 
 ## License

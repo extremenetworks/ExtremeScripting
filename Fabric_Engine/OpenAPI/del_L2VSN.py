@@ -6,7 +6,7 @@ import sys, logging, atexit, time, yaml
 config    = None
 session   = None
 log       = None
-callCount = 0
+callCount = 1
 startTime = time.time()
 
 ########################################################################
@@ -33,7 +33,7 @@ def readConfig(file='config.yaml'):
     return config
 
 ########################################################################
-def login():
+def login(config):
     session = ExtremeOpenAPI.OpenAPI(config['host'],config['username'],config['password'])
     if session.error:
         log.error("login failed: '%s'" % session.message)
@@ -52,13 +52,13 @@ def getAllL2vsn():
     else:
         for type in ['cvlan','suni','tuni']:
             for l2vsn in l2vsns[type]:
-                log.info("got %s %s [%s]" % (type, l2vsn['name'], l2vsn['isid']))
                 l2vsnList.append(l2vsn['isid'])
         log.info("got all %s L2VSNs" % len(l2vsnList))
     return l2vsnList
 
 ########################################################################
 def delL2vsn(isid):
+    global callCount
     session.call(
         type = 'DELETE',
         subUri = '/v0/configuration/spbm/l2/isid/%s/suni' % isid,
@@ -69,22 +69,21 @@ def delL2vsn(isid):
         exit(3)
     else:
         log.info("delete L2VSN Test-%s [%s] in %0.3f seconds" % (isid,isid,session.elapsed))
-
+        callCount += 1
+        
 ########################################################################
 
 log = setupLogger()
 
 config = readConfig()
 
-session = login()
+session = login(config['connection'])
 
 l2vsns = getAllL2vsn()
-callCount += 1
 
-for id in range(config['isidStart'], config['isidStart'] + config['isidRange']):
-    if id in l2vsns:
-        delL2vsn(id)
-        callCount += 1
+for isidId in range(config['isid']['start'], config['isid']['start'] + config['isid']['range']):
+    if isidId in l2vsns:
+        delL2vsn(isidId)
     else:
-        log.info("L2VSN %s does not exist, skipping" % id)
+        log.info("L2VSN %s does not exist, skipping" % isidId)
         continue
