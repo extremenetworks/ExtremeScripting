@@ -33,7 +33,7 @@ def readConfig(file='config.yaml'):
     return config
 
 ########################################################################
-def login():
+def login(config):
     session = ExtremeOpenAPI.OpenAPI(config['host'],config['username'],config['password'])
     if session.error:
         log.error("login failed: '%s'" % session.message)
@@ -69,7 +69,7 @@ log = setupLogger()
 
 config = readConfig()
 
-session = login()
+session = login(config['connection'])
 
 vlans = getAllVlans()
 callCount += 1

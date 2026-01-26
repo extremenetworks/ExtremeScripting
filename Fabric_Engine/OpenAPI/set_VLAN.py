@@ -6,7 +6,7 @@ import sys, logging, atexit, time, yaml
 config    = None
 session   = None
 log       = None
-callCount = 0
+callCount = 1
 startTime = time.time()
 
 ########################################################################
@@ -33,7 +33,7 @@ def readConfig(file='config.yaml'):
     return config
 
 ########################################################################
-def login():
+def login(config):
     session = ExtremeOpenAPI.OpenAPI(config['host'],config['username'],config['password'])
     if session.error:
         log.error("login failed: '%s'" % session.message)
@@ -54,6 +54,7 @@ def getAllVlanIds():
 
 ########################################################################
 def setVlanConfig(vlanId):
+    global callCount
     session.call(
         type = 'POST',
         subUri = '/v0/configuration/vrf/GlobalRouter/vlan',
@@ -69,22 +70,21 @@ def setVlanConfig(vlanId):
         exit(3)
     else:
         log.info("set VLAN Test-%s [%s] in %0.3f seconds" % (vlanId,vlanId,session.elapsed))
-
+        callCount += 1
+        
 ########################################################################
 
 log = setupLogger()
 
 config = readConfig()
 
-session = login()
+session = login(config['connection'])
 
 vlanIds = getAllVlanIds()
-callCount += 1
 
-for id in range(config['vlanStart'], config['vlanStart'] + config['vlanRange']):
-    if not id in vlanIds:
-        setVlanConfig(id)
-        callCount += 1
+for vlanId in range(config['vlan']['start'], config['vlan']['start'] + config['vlan']['range']):
+    if not vlanId in vlanIds:
+        setVlanConfig(vlanId)
     else:
-        log.info("VLAN %s already exists, skipping" % id)
+        log.info("VLAN %s already exists, skipping" % vlanId)
         continue

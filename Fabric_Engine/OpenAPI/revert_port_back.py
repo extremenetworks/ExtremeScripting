@@ -42,18 +42,17 @@ def login():
 
 ########################################################################
 def revertPort(port):
+    global callCount
     '''disable flex-uni on port & enable auto-sense'''
-    # flex uni control not jet integrated in 9.3.1 API, using CLI anternatively
     session.call(
-        type = 'POST',
-        subUri = '/v0/operation/system/cli',
-        body = [
-            "configure terminal",
-            "interface gigabitEthernet %s" % port.replace(':','/'),
-            "no flex-uni enable"
-        ]
+        type = 'PUT',
+        subUri = '/v0/configuration/ports/%s' % port,
+        body = {
+            "flexUni": False
+        }
     )
     log.info("disabled flex-uni on port %s" % port)
+    callCount += 1
 
     session.call(
         type = 'PATCH',
@@ -63,8 +62,7 @@ def revertPort(port):
         }
     )
     log.info("enabled auto-sense on port %s" % port)
-
-
+    callCount += 1
 
 ########################################################################
 
@@ -75,5 +73,4 @@ config = readConfig()
 session = login()
 
 revertPort(config['isidPort'])
-
 revertPort(config['vlanPort'])

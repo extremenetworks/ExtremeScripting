@@ -33,7 +33,7 @@ def readConfig(file='config.yaml'):
     return config
 
 ########################################################################
-def login():
+def login(config):
     session = ExtremeOpenAPI.OpenAPI(config['host'],config['username'],config['password'])
     if session.error:
         log.error("login failed: '%s'" % session.message)
@@ -58,12 +58,25 @@ def getAllL2vsn():
     return l2vsnList
 
 ########################################################################
+def getL2VsnConfig(l2vsnId):
+    l2vsn = session.call('GET','/v0/configuration/spbm/l2/isid/%s' % l2vsnId)
+    if session.error:
+        log.error("I-SID config failed: '%s'" % session.message)
+        exit(3)
+    else:
+        log.info("got I-SID config %s [%s] in %0.3f seconds" % (l2vsn['name'],l2vsnId,session.elapsed))
+
+########################################################################
 
 log = setupLogger()
 
 config = readConfig()
 
-session = login()
+session = login(config['connection'])
 
 l2vsns = getAllL2vsn()
 callCount += 1
+
+for l2vsn in l2vsns:
+    getL2VsnConfig(l2vsn)
+    callCount += 1

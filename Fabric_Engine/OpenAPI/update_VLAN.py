@@ -6,7 +6,7 @@ import sys, logging, atexit, time, yaml
 config    = None
 session   = None
 log       = None
-callCount = 0
+callCount = 1
 startTime = time.time()
 
 ########################################################################
@@ -33,7 +33,7 @@ def readConfig(file='config.yaml'):
     return config
 
 ########################################################################
-def login():
+def login(config):
     session = ExtremeOpenAPI.OpenAPI(config['host'],config['username'],config['password'])
     if session.error:
         log.error("login failed: '%s'" % session.message)
@@ -55,6 +55,7 @@ def getAllVlanIds():
 ########################################################################
 def prepPort(port):
     '''disable auto-sense & enable flex-uni on port'''
+    global callCount
     session.call(
         type = 'PATCH',
         subUri = '/v0/configuration/autosense/port/%s' % port,
@@ -62,9 +63,22 @@ def prepPort(port):
             "enable": False
         }
     )
+    log.info("disabled auto-sense on port %s" % port)
+    callCount += 1
+
+    session.call(
+        type = 'PUT',
+        subUri = '/v0/configuration/ports/%s' % port,
+        body = {
+            "flexUni": True
+        }
+    )
+    log.info("enabled flex-uni on port %s" % port)
+    callCount += 1
 
 ########################################################################
 def updateVlanConfig(vlanId, port):
+    global callCount
     session.call(
         type = 'POST',
         subUri = '/v0/operation/vlan/%s/interfaces/:add' % vlanId,
@@ -81,6 +95,7 @@ def updateVlanConfig(vlanId, port):
         exit(3)
     else:
         log.info("update VLAN Test-%s [%s] to port %s in %0.3f seconds" % (vlanId,vlanId,port,session.elapsed))
+        callCount += 1
 
 ########################################################################
 
@@ -88,17 +103,15 @@ log = setupLogger()
 
 config = readConfig()
 
-session = login()
+session = login(config['connection'])
 
 vlanIds = getAllVlanIds()
-callCount += 1
 
-prepPort(config['vlanPort'])
+prepPort(config['vlan']['port'])
 
-for id in range(config['vlanStart'], config['vlanStart'] + config['vlanRange']):
-    if id in vlanIds:
-        updateVlanConfig(id,config['vlanPort'])
-        callCount += 1
+for vlanId in range(config['vlan']['start'], config['vlan']['start'] + config['vlan']['range']):
+    if vlanId in vlanIds:
+        updateVlanConfig(vlanId, config['vlan']['port'])
     else:
-        log.info("VLAN %s does not exist, skipping" % id)
+        log.info("VLAN %s does not exist, skipping" % vlanId)
         continue
