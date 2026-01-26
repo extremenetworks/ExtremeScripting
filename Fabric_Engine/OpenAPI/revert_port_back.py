@@ -33,7 +33,7 @@ def readConfig(file='config.yaml'):
     return config
 
 ########################################################################
-def login():
+def login(config):
     session = ExtremeOpenAPI.OpenAPI(config['host'],config['username'],config['password'])
     if session.error:
         log.error("login failed: '%s'" % session.message)
@@ -70,7 +70,7 @@ log = setupLogger()
 
 config = readConfig()
 
-session = login()
+session = login(config['connection'])
 
-revertPort(config['isidPort'])
-revertPort(config['vlanPort'])
+revertPort(config['isid']['port'])
+revertPort(config['vlan']['port'])
