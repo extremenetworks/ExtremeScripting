@@ -4,15 +4,17 @@ Scripts and Utilities for working with Extreme Networks Switches and Platforms.
 
 ## Platforms
 
-* [EXOS Switches](EXOS/README.md)
+* [Fabric Engine (VOSS)](Fabric_Engine/README.md)
+* [Switch Engine (EXOS)](Switch_Engine/README.md)
 * [SLXOS Switches](SLXOS/README.md)
-* [XIQ Site Engine - XMC - Netsight Scripts](XMC_XIQ-SE/README.md)
+* [XIQ Site Engine (XMC/Netsight) Scripts](XMC_XIQ-SE/README.md)
 * [ExtremeCloud Appliance (XCA) Scripts](Cloud_Appliance/README.md)
 * [ExtremeCloud IQ (XIQ) Scripts](Cloud_IQ/README.md)
 
 ### Quick links
 
-* [EXOS Python Scripts](EXOS/Python/README.md)
+* [Fabric Engine (VOSS) Python Scripts](Fabric_Engine/OpenAPI/README.md)
+* [Switch Engine (EXOS) Python Scripts](Switch_Engine/Python/README.md)
 * [SLX Event Handler template](SLXOS/SLX_EventHandler/README.md)
 
 ## Support
