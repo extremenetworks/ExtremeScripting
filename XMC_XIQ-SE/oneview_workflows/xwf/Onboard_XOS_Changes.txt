@@ -25,9 +25,18 @@ v14
 	  never the FA server uplink ports
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
 	  the #elseif condition was true
-v15 - posted
+v15
 	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Now all variables are dereferenced
 	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
+v16
+	- Location Group name input now can take a comma separated list
+	- Option for FA message authentication was failing with KeyError: get_ports_list
+	- Trying to configure radius for both netlogin and mgmt-access was failing
+v19 - posted
+	- Addition of Message-Authenticator Attribute required/not-required suport in version 178 made this workflow no
+	  longer compatible with older XIQ-SE versions prior to 25.2; a check is now made on the XIQ-SE version and if it
+	  is older than 25.2, the old NBI is used, without attempting to set a value for Message-Authenticator
+	- Input notes use display field format
 
 Todo:
 
