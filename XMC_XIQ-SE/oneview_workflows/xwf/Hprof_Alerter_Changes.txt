@@ -1,0 +1,14 @@
+Hprof Alerter
+
+v13/1.00
+	- First version
+v14/1.01
+	- Updated base.py module and some cleanups
+v23/1.02
+	- Workflow now also checks for *.hprof files on any Control Engines associated to XIQ-SE
+v24/1.02 - posted
+	- Input notes use display field format
+
+Todo:
+
+
