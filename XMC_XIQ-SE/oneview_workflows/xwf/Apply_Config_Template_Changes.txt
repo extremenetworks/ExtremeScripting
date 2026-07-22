@@ -136,7 +136,7 @@ v103/1.11
 v104/1.12
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
 	  the #elseif condition was true; this issue was introduced with nesting in v89 
-v107/1.14 - posted
+v107/1.14
 	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Previously, ${site-variables},
 	  $<csv-variables> and $UD1-4 variables were replaced wherever found in the template file, even inside #if/#else
 	  template blocks which would not get executed for a given device. But this meant that if a part of the template
@@ -144,5 +144,25 @@ v107/1.14 - posted
 	  workflow would fail. Now all variables are dereferenced as needed as the template #if/#elseif/#else/#end blocks
 	  are evaluated (which incidentally is how the $[eval] variables were already handled).
 	- Added option to execute a follow on workflow on completion
+v110/1.15
+	- Input notes use display field format
+	- The conditional string, inside "(" ")" on pragmas #eval(), #eval <varname>=(), #if(), #elseif() are evaluated
+	  using Python’s eval() function. That eval() function is now pre-loaded with the XIQ-SE emc_vars dictionary, so
+	  any value from that dictionary can be used inside the eval().
+v111/1.16
+	- Workflow messages now always pre-pend the device serial number (except if workflow completes successfully and
+	  was launched against more than 1 device)
+v112/1.17
+	- EXOS command "configure ssh2 key algorithm" gives message that was incorrectly detected as an error message:
+	  "Warning: Legacy clients that do not support this algorithm' # EXOS: configure ssh2 key algorithm
+	- Syntax "#block execute reconnect" was not being handled if that pragma line was the last line in the template
+	  file
+	- Pragma "#block execute" was failing if one of the source commands was seen generating an error message 
+v113/1.18
+	- Empty commands are no longer appended to final summary of executed commands
+v114/1.19 - posted
+	- ASCII Config Template input can now take a file name from XIQ-SE's own configuration templates which can be
+	  edited directly in the XIQ-SE user interface under Configuration Templates tab; in this case no path is
+	  required, just enter the template name
 
 Todo:

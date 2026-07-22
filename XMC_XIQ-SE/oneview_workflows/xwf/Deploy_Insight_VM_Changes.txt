@@ -23,9 +23,20 @@ v102
 	- Start VM activity was failing if no VLAN was provided, for sideband port config only
 	- Added some additional checks in case two Vports entered using same sideband port
 	- Updated all libraries
-v103 - posted
+v103
 	- Updated to implement const_CLI_RETRIES and const_CLI_RETRY_DELAY
-
+v104
+	- Input notes use display field format
+v105
+	- Regex bug was not correctly detecting existing I-SID on switch for some VLANs
+	- If VLAN and I-SID inputs provided, will not error if VLAN exists on switch but with no I-SID configured
+	- Workflow failing on command "no spanning-tree mstp" in VOSS 9.3 and above, as it no longer requires
+	  a "y" confirmation prompt
+v107 - posted
+	- Default input VM image filename is now: TPVM_Ubuntu24.04_04_01April2026.qcow2
+	- Workflow now allows enabling Vport-mgmt and having Vport-1 or Vport-2 set as VTD
+	- On VOSS, Vport-mgmt if enabled, will always now get eth0 assigned
+	
 Todo:
 
 

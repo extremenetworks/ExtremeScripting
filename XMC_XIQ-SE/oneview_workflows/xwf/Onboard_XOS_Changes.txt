@@ -32,13 +32,25 @@ v16
 	- Location Group name input now can take a comma separated list
 	- Option for FA message authentication was failing with KeyError: get_ports_list
 	- Trying to configure radius for both netlogin and mgmt-access was failing
-v19 - posted
+v19
 	- Addition of Message-Authenticator Attribute required/not-required suport in version 178 made this workflow no
 	  longer compatible with older XIQ-SE versions prior to 25.2; a check is now made on the XIQ-SE version and if it
 	  is older than 25.2, the old NBI is used, without attempting to set a value for Message-Authenticator
 	- Input notes use display field format
+v20
+	- Workflow now checks on EXOS software version and refuses to run if older than 30.6; that is because it uses
+	  some FA commands which were only added in 30.6
+v22
+	- Workflow now immediately records device's S/N and MAC address respectively
+	  in workflow variables DeviceSN and DeviceMAC; this so that the workflow
+	  can be monitored via NBI and its activity correlated to a device
+	- Workflow messages now always pre-pend the device serial number (except if workflow completes successfully and
+	  was launched against more than 1 device)
+	- Added input to enable/disable configuration of RADIUS server and dynamic clients on switch using FQDN instead
+	  of IP address; FQDN is configured in lower case
+v23 - posted
+	- If a Location Group name was specified in the workflow inputs, the workflow would fail with error:
+	  KeyError: getNacGroupType 
+
 
 Todo:
-
-
-

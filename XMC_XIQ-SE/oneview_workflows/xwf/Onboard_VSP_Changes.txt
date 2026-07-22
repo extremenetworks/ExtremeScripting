@@ -296,11 +296,33 @@ v179
 	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
 v180
 	- Location Group name input now can take a comma separated list
-v183 - posted
+v183
 	- Addition of Message-Authenticator Attribute required/not-required suport in version 178 made this workflow no
 	  longer compatible with older XIQ-SE versions prior to 25.2; a check is now made on the XIQ-SE version and if it
 	  is older than 25.2, the old NBI is used, without attempting to set a value for Message-Authenticator
 	- Input notes use display field format
+v185
+	- Workflow was failing to configure auto-sense voice I-SID and VLAN id
+	- Added const_RADIUS_USED_BY_MAX variable which can be set with JSON value:
+	  {"eapol":0,"cli":0,"web":0,"endpoint-tracking":0,"snmp":0}
+	  Setting a non-zero value will constrain the number of RADIUS servers created for that use type.
+	  Example: if there are 4 RADIUS servers and RADIUS used-by is set for eapol + cli + web, that would add up to 12
+	  RADIUS servers which is over the VOSS maximum of 10 RADIUS servers. To max out cli and web to just 2 RADIUS
+	  servers while allowing eapol to have 4 RADIUS servers, you can change the json value to:
+	  {"eapol":0,"cli":2,"web":2,"endpoint-tracking":0,"snmp":0}
+	- Added input to enable/disable configuration of RADIUS server and dynamic clients on switch using FQDN instead
+	  of IP address
+v186
+	- Configuration of RADIUS server as FQDN now sets the FQDN to all lowercase
+	- Removal of existing RADIUS servers now also works if those were created as FQDN entries
+	- Workflow now immediately records device's S/N and MAC address respectively
+	  in workflow variables DeviceSN and DeviceMAC; this so that the workflow
+	  can be monitored via NBI and its activity correlated to a device
+	- Workflow messages now always pre-pend the device serial number (except if workflow completes successfully and
+	  was launched against more than 1 device)
+v187 - posted
+	- Fixed race condition issue seen when running workflow against more than 1 switch:
+	  OSError 'No such file or directory' in acquireLock 
 
 Todo:
 

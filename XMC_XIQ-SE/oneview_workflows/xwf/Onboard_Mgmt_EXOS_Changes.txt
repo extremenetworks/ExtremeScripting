@@ -106,8 +106,16 @@ v55/1.10
 	- Was not detecting application-telemetry mirror config using source IP = "Auto source IP"
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
 	  the #elseif condition was true
-v56/1.11 - posted
+v56/1.11
 	- Changed how variables are dereferenced within #if/#elseif/#else/#end blocks. Now all variables are dereferenced
 	  as needed as the template #if/#elseif/#else/#end blocks are evaluated
+v59/1.12
+	- Input notes use display field format
+	- Fixed issue seen on 5120s where the App-telemetry EAN mirror does not appear in the show command, until you
+	  try and unconfigure the IP interface on which it is configured; fix tries a 2nd time after first try fails
+v60/1.14 - posted
+	- Additional CLI commands input now also support the "#block start" and "#block execute" pragmas
+	  (refer to Apply Config Template workflow documentation)
 
 Todo:
+

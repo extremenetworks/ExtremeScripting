@@ -199,7 +199,7 @@ v117/1.09
 v118/1.10
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
 	  the #elseif condition was true
-v121/1.11 - posted
+v121/1.11
 	- If an auto-sense ISIS Hello auth key is provided, the workflow now only proceeds if it sees auto-sense
 	  interfaces in state NNI-AUTH-FAIL or if the switch has no ISIS adjacencies or (new check) it has SD-WAN ISIS
 	  adjacencies; otherwise it delays execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY (default 300sec) as before
@@ -211,5 +211,15 @@ v121/1.11 - posted
 	  key, the onboarding I-SID is presented, by the core switch, as an untagged binding on the uplink, and after this
 	  workflow runs, and the switch gets the ISIS Hello auth key, it is able to bring up the NNI and then the new mgmt
 	  IP address can be on the same I-SID with the same subnet
+v125/1.12 - posted
+	- Input notes use display field format
+	- Workflow input "Site to re-add device ..." can now specify a remote XIQ-SE instance using syntax
+	  <xiqse_ip_or_hostname>:<site_path>; for this to work, the remote XIQ-SE instance must have an equally named Admin
+	  Profile to add the switch with, and the credentials to use the remote XIQ-SE NBI API must be provided in the
+	  activity workflow inputs, using one of two possible syntaxes: <username>:<password>@<xiqse_IP_or_hostname> or,
+	  if using Auth2 "<xiqse_IP_or_hostname> <clientId> <secret>"
+	- Workflow now immediately records device's S/N and MAC address respectively
+	  in workflow variables DeviceSN and DeviceMAC; this so that the workflow
+	  can be monitored via NBI and its activity correlated to a device
 
 Todo:
