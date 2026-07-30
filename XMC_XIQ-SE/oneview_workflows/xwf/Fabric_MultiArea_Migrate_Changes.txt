@@ -12,3 +12,10 @@ v66 - posted
 	- Revert IDs activity completion message was incorrect (referring to RADIUS and EAPoL)
 	- Convert to new area activity now performs a config backup on the switch before making changes
 	  The archive filename is set in workflow variable const_backupArchiveName
+v68
+	- Input notes use display field format
+v81
+	- Fixed regex get_isis_global_settings
+	- Updated to latest library functions
+	- Fixed issue where when workflow was run against both vIST peer nodes, it would end up
+	  configuring the same fabric IDs on both vIST nodes
