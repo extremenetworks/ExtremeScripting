@@ -3,7 +3,7 @@
     <abortOnError>true</abortOnError>
     <auditLogEnabled></auditLogEnabled>
     <category>,Provisioning,</category>
-    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v2.2</comments>
+    <comments>Create mgmt clip IP on VSP and re-add to XMC with that new IP - v2.3</comments>
     <content>'''
 This script is provided free of charge by Extreme. We hope such scripts are
 helpful when used in conjunction with Extreme products and technology and can
@@ -29,7 +29,7 @@ SCRIPTS.
 # Written by Ludovico Stevens, TME Extreme Networks      #
 ##########################################################
 
-__version__ = '2.2'
+__version__ = '2.3'
 
 # 1.0   - Initial
 # 1.1   - Some extra IP validation checks
@@ -58,7 +58,11 @@ __version__ = '2.2'
 #       - Renamed XMC to XIQ-SE
 # 2.2   - Updated to latest modules and script template
 #       - Implements CLI retries
-#       - Added variable delayReConnect set now to 20sec (was previuosly hard coded 5sec)
+#       - Added variable delayReConnect set now to 20sec (was previously hard coded 5sec)
+# 2.3   - Fixed a rare issue where reconnecting to the switch would initially throw "Error: cli session was closed", and the
+#         script would give up; now in that case the script will also implement CLI retries and recover from it
+#       - System Name input was supposed to be an optional input but script would error if none was provided
+ 
 
 
 '''
@@ -362,15 +366,15 @@ NBI_Query = { # GraphQl query / NBI_Query['key'].replace('&lt;IP&gt;', var)
 
 #
 # Base functions
-# base.py v12
+# base.py v14
 #
 import re                           # Used by scriptName
 import time                         # Used by debug &amp; exitError
 ExitErrorSleep = 10
 DebugLogger = None
 
-def printLog(message): # v1 - Print message to stdout but also into debug log file
-    if DebugLogger:
+def printLog(message=""): # v2 - Print message to stdout but also into debug log file
+    if DebugLogger and message:
         DebugLogger.info(message)
     else:
         print message
@@ -409,13 +413,14 @@ def scriptName(): # v1 - Returns the assigned name of the Script or Workflow
         name = nameMatch.group(1) if nameMatch else None
     return name
 
-def workflow_DeviceMessage(msg): # v1 - Set workflow messages appropriately; '&lt;&gt;' is replaced with device IP or list
+def workflow_DeviceMessage(msg): # v2 - Set workflow messages appropriately; '&lt;&gt;' is replaced with device IP or list
     singleDeviceMsg = manyDevicesMsg = msg
     if '&lt;&gt;' in msg:
         devicesListStr = emc_vars['devices'][1:-1]
         singleDeviceMsg = msg.replace('&lt;&gt;', emc_vars['deviceIP']).replace('(s)', '').replace('(es)', '')
         if len(devicesListStr.split(',')) &gt; 1:
             manyDevicesMsg = msg.replace('&lt;&gt;', devicesListStr).replace('(s)', 's').replace('(es)', 'es')
+            manyDevicesMsg = re.sub(r'^\S+: *', '', manyDevicesMsg) # Strip out any pre-pended "SerialNumber: "
         else:
             manyDevicesMsg = singleDeviceMsg
     emc_results.put("deviceMessage", singleDeviceMsg)
@@ -472,7 +477,7 @@ def rollBackPop(number=0): # v2 - Remove entries from RollbackStack
 
 #
 # CLI functions - (use of rollback requires rollback.py)
-# cli.py v32
+# cli.py v37
 #
 import re
 import time                         # Used by sendCLI_configChain &amp; sendCLI_configChain2 with 'sleep' &amp; 'block directives
@@ -485,6 +490,8 @@ RegexNoError  = re.compile( # Messages which would be false positives for an err
     '(?:'
     + 'Both ends of MACsec link cannot have the same key-parity value'
     + '|% Saving \d+ bytes to flash:startup-config' # ISW: copy running-config startup-config
+    + '|no syntax errors in script' # VOSS source command
+    + '|Warning: Legacy clients that do not support this algorithm' # EXOS: configure ssh2 key algorithm
     + ')',
     re.IGNORECASE | re.MULTILINE
 )
@@ -499,6 +506,9 @@ RegexContextPatterns = { # Ported from acli.pl
         re.compile('^ *(?:route-map (?:\"[\w\d\s\.\+-]+\"|[\w\d\.-]+) \d+$)'), # level1
     ],
     'ISW-Series' : [
+        re.compile('^ *(?:ringv2-group |interface )'), # level0
+    ],
+    'ISW-Series-4W' : [
         re.compile('^ *(?:ringv2-group |interface )'), # level0
     ],
     'ISW-Series-Marvell' : [
@@ -552,7 +562,7 @@ def parseRegexInput(cmdRegexStr): # v1 - Parses input command regex for both sen
     cmdList = map(str.strip, cmd.split('&amp;'))
     return mode, cmdList, regex
 
-def formatOutputData(data, mode): # v3 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
+def formatOutputData(data, mode): # v4 - Formats output data for both sendCLI_showRegex() and xmcLinuxCommand()
     if not mode                 : value = data                                   # Legacy behaviour same as list
     elif mode == 'bool'         : value = bool(data)                             # No regex capturing brackets required
     elif mode == 'str'          : value = str(data[0]) if data else None         # Regex should have 1 capturing bracket at most
@@ -565,23 +575,27 @@ def formatOutputData(data, mode): # v3 - Formats output data for both sendCLI_sh
     elif mode == 'list-reverse' : value = list(reversed(data))                   # Same as list but in reverse order
     elif mode == 'list-diagonal': value = [data[x][x] for x in range(len(data))] # Regex pat1|pat2 = list of tuples; want [0][0],[1][1],etc
     elif mode == 'tuple'        : value = data[0] if data else ()                # Regex &gt; 1 capturing brackets on same line, returns 1st tuple
-    elif mode == 'dict'         : value = dict(data)                             # Regex must have 2 capturing brackets exactly
+    elif mode == 'dict' and data and len(data[0])&gt;2:
+                                  value = {x[0]:x[1:] for x in data}             # Regex can have more than 2 capturing brackets
+    elif mode == 'dict'         : value = dict(data)                             # Regex has 2 capturing brackets exactly
     elif mode == 'dict-reverse' : value = dict(map(reversed, data))              # Same as dict, but key/values will be flipped
     elif mode == 'dict-both'    : value = dict(data), dict(map(reversed, data))  # Returns 2 dict: dict + dict-reverse
-    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data))) # {[0][0]:[0][1], [1][2]:[1][3], etc}
+    elif mode == 'dict-diagonal': value = dict((data[x][x*2],data[x][x*2+1]) for x in range(len(data)))   # {[0][0]:[0][1], [1][2]:[1][3], etc}
     elif mode == 'dict-sequence': value = dict((data[x*2][0],data[x*2+1][1]) for x in range(len(data)/2)) # {[0][0]:[1][1], [2][0]:[3][1], etc}
     else:
         RuntimeError("formatOutputData: invalid scheme type '{}'".format(mode))
     return value
 
-def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None, retries=0, retryDelay=0): # v4 - Send a CLI show command; return output
+def sendCLI_showCommand(cmd, returnCliError=False, msgOnError=None, retries=0, retryDelay=0): # v5 - Send a CLI show command; return output
     global LastError
     if retries and retryDelay: # To be used on very first CLI command sent to device
+        debug("sendCLI_showCommand() retries = {}, retryDelay = {}".format(retries, retryDelay))
         while retries &gt;= 0:
             resultObj = emc_cli.send(cmd)
             # If it fails to connect, the following is automatically printed to the session: "Failed to connect to &lt;IP-address&gt;"
+            # In some cases, when trying to re-connect after having closed the session: "Error: cli session was closed"
             emc_results.setStatus(emc_results.Status.STARTED) # Clears failed status on XIQ-SE script/workflow activity
-            if resultObj.isSuccess():
+            if resultObj.isSuccess() and not re.match(r'\n?Error: cli session was closed$', resultObj.getOutput()):
                 retries = -1 # All good, come out of while loop
             else:
                 printLog("Retrying in {} seconds".format(retryDelay))
@@ -623,7 +637,7 @@ def sendCLI_showRegex(cmdRegexStr, debugKey=None, returnCliError=False, msgOnErr
         else: debug("sendCLI_showRegex OUT = {}".format(value))
     return value
 
-def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True, historyAppend=True): # v6 - Send a CLI config command
+def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPrompt=True, historyAppend=True): # v7 - Send a CLI config command
     global LastError
     cmd = re.sub(r':\/\/', ':' + chr(0) + chr(0), cmd) # Mask any https:// type string
     cmd = re.sub(r' *\/\/ *', r'\n', cmd) # Convert "//" to "\n" for embedded // passwords
@@ -645,7 +659,7 @@ def sendCLI_configCommand(cmd, returnCliError=False, msgOnError=None, waitForPro
                     printLog("==&gt; Ignoring above error: {}\n\n".format(msgOnError))
                 return False
             abortError(cmd, outputStr)
-        if historyAppend:
+        if historyAppend and len(cmdStore):
             ConfigHistory.append(cmdStore)
         LastError = None
         return True
@@ -873,16 +887,16 @@ def replaceKwargs(queryString, kwargs): # v2 - Used by both nbiQuery() and nbiMu
 
 #
 # XMC GraphQl NBI functions - (requires apiBase.py)
-# apiXmc.py v16
+# apiXmc.py v17
 #
 LastNbiError = None
-NbiUrl = None
+NbiUrl = ''
 
-def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v8 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
+def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v9 - Makes a GraphQl query of XMC NBI; if returnKey provided returns that key value, else return whole response
     global LastNbiError
     jsonQuery = replaceKwargs(jsonQueryDict['json'], kwargs) # Might be unicode
     returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
-    debug(u"NBI Query:\n{}\n".format(jsonQuery))
+    debug(u"NBI Query: {}\n{}\n".format(NbiUrl, jsonQuery))
     response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
     debug("nbiQuery response = {}".format(response))
     if response == None: # Should only happen from nbiSessionPost if returnKeyError=True
@@ -912,22 +926,22 @@ def nbiQuery(jsonQueryDict, debugKey=None, returnKeyError=False, **kwargs): # v8
         else: debug("nbiQuery response = {}".format(response))
     return response
 
-def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): # v9 - Makes a GraphQl mutation query of XMC NBI; returns true on success
+def nbiMutation(jsonQueryDict, returnKeyError=False, debugKey=None, **kwargs): # v11 - Makes a GraphQl mutation query of XMC NBI; returns true on success
     global LastNbiError
     jsonQuery = replaceKwargs(jsonQueryDict['json'], kwargs) # Might be unicode
     returnKey = jsonQueryDict['key'] if 'key' in jsonQueryDict else None
     if Sanity:
-        printLog(u"SANITY - NBI Mutation:\n{}\n".format(jsonQuery))
+        printLog(u"SANITY - NBI Mutation: {}\n{}\n".format(NbiUrl, jsonQuery))
         LastNbiError = None
         return True
-    printLog(u"NBI Mutation Query:\n{}\n".format(jsonQuery))
+    printLog(u"NBI Mutation Query: {}\n{}\n".format(NbiUrl, jsonQuery))
     response = nbiSessionPost(jsonQuery, returnKeyError) if NbiUrl else emc_nbi.query(jsonQuery)
     debug("nbiQuery response = {}".format(response))
-    if 'errors' in response: # Query response contains errors
+    if not response or 'errors' in response: # Query response contains errors; seen issue where XIQ-SE returns empty response, so handle here as error also
+        LastNbiError = response['errors'][0].message if response else "Empty NBI API response!"
         if returnKeyError: # If we asked to return upon NBI error, then the error message will be held in LastNbiError
-            LastNbiError = response['errors'][0].message
             return None
-        abortError(u"nbiQuery for\n{}".format(jsonQuery), response['errors'][0].message)
+        abortError(u"nbiQuery for\n{}".format(jsonQuery), LastNbiError)
 
     foundKey, returnStatus, returnMessage = recursionStatusSearch(response)
     if foundKey:
@@ -1118,22 +1132,23 @@ def addXmcSyslogEvent(severity, message, ip=None): # v1 - Adds a syslog event to
 #
 # Other Custom Functions
 # misc.py
-def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
+def extractSpbmGlobal(): # v2 - Tricky command to extract from, as it is different across VOSS, VSP8600 and XA
     # Only supported for family = 'VSP Series'
-    cmd = 'list://show isis spbm||(?:(B-VID) +PRIMARY +(NICK) +LSDB +(IP)(?: +(IPV6))?(?: +(MULTICAST))?|^\d+ +(?:(\d+)-(\d+) +\d+ +)?(?:([\da-f]\.[\da-f]{2}\.[\da-f]{2}) +)?(?:disable|enable) +(disable|enable)(?: +(disable|enable))?(?: +(disable|enable))?|^\d+ +(?:primary|secondary) +([\da-f:]+)(?: +([\da-f\.]+))?)'
+    cmd = 'list://show isis spbm||(?:(B-VID) +PRIMARY +(NICK) +LSDB +(IP)(?: +(IPV6))?(?: +(MULTICAST))?|^\d+ +(?:(\d+)-(\d+) +\d+ +)?(?:([\da-f]\.[\da-f]{2}\.[\da-f]{2}) +)?(?:disable|enable) +(disable|enable)(?: +(disable|enable))?(?: +(disable|enable))?|^\d+ +(?:primary|secondary) +([\da-f:]+)(?: +([\da-f\.]+))?)|^\d+ +([\da-f]\.[\da-f]{2}\.[\da-f]{2})'
     data = sendCLI_showRegex(cmd)
     # VOSS:[(u'B-VID', u'NICK', u'IP', u'IPV6', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''), (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.75', u'enable', u'disable', u'disable', u'', u''),           (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'00:00:00:00:00:00', u'')]
     # V86: [(u'B-VID', u'NICK', u'IP', u'', u'MULTICAST', u'', u'', u'', u'', u'', u'', u'', u''),     (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.11', u'enable',             u'disable', u'', u'', u''),      (u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'', u'82:bb:00:00:11:ff', u'82bb.0000.1200')]
     # XA:  [(u'B-VID', u'NICK', u'IP', u'', u'', u'', u'', u'', u'', u'', u'', u'', u''),              (u'', u'', u'', u'', u'', u'4051', u'4052', u'0.00.46', u'enable',                         u'', u'', u'', u'')]
     dataDict = {
-        'SpbmInstance' : False,
-        'BVIDs'        : [],
-        'Nickname'     : None,
-        'IP'           : None,
-        'IPV6'         : None,
-        'Multicast'    : None,
-        'SmltVirtBmac' : None,
-        'SmltPeerBmac' : None,
+        'SpbmInstance'   : False,
+        'BVIDs'          : [],
+        'Nickname'       : None,
+        'IP'             : None,
+        'IPV6'           : None,
+        'Multicast'      : None,
+        'SmltVirtBmac'   : None,
+        'SmltPeerBmac'   : None,
+        'NicknameRemote' : None,
     }
     if len(data) &gt; 1: # If we did not just match the banner line
         dataDict['SpbmInstance'] = True
@@ -1150,10 +1165,12 @@ def extractSpbmGlobal(): # v1 - Tricky command to extract from, as it is differe
         else:
             if data[0][4] == 'MULTICAST':
                 dataDict['Multicast'] = data[1][9]
-    if len(data) == 3: # We got SMLT data (on XA we don't have the line)
+    if len(data) &gt;= 3: # We got SMLT data (on XA we don't have the line)
         if data[2][11] and data[2][11] != '00:00:00:00:00:00':
             dataDict['SmltVirtBmac'] = data[2][11]
             dataDict['SmltPeerBmac'] = data[2][12]
+    if len(data) == 4: # We got Remote Nick-name
+        dataDict['NicknameRemote'] = data[3][13]
     debug("extractSpbmGlobal() = {}".format(dataDict))
     return dataDict
 
@@ -1193,7 +1210,10 @@ def main():
     newVrf              = emc_vars["userInput_vrf"].strip()
     mgmtVlanIpAction    = emc_vars["userInput_mgmtVlanIp"].lower()
     newIp               = emc_vars["userInput_ip"].strip()
-    newSysName          = emc_vars["userInput_sysname"].strip()
+    try:
+        newSysName      = emc_vars["userInput_sysname"].strip()
+    except:
+        newSysName      = None
 
     print "Information provided by User:"
     print " - New CLIP VRF = {}".format(newVrf)
@@ -1224,7 +1244,7 @@ def main():
         exitError('Given IP {} is already used to manange the switch'.format(newIp))
 
     # Sys-name validation
-    if re.search(r'\s', newSysName):
+    if newSysName and re.search(r'\s', newSysName):
         exitError('System Name provided must not contain any spaces: "{}"'.format(newSysName))
 
     # VRF validation
@@ -1469,15 +1489,15 @@ def main():
 
 main()
 </content>
-    <creationDate>1653402348109</creationDate>
-    <creator>root</creator>
+    <creationDate>1785402673334</creationDate>
+    <creator>lstevens</creator>
     <credentialsCacheOveride>false</credentialsCacheOveride>
     <defaultCategory></defaultCategory>
     <devicesRequired>true</devicesRequired>
     <encoded>true</encoded>
     <contexts>,Device,Groups,</contexts>
-    <lastUpdateDate>1756503484701</lastUpdateDate>
-    <lastUpdatedBy>root</lastUpdatedBy>
+    <lastUpdateDate>1785402866424</lastUpdateDate>
+    <lastUpdatedBy>lstevens</lastUpdatedBy>
     <miscXMLData></miscXMLData>
     <nosIds>,nos-id-voss,nos-id-fabric-engine,</nosIds>
     <postprocessScript></postprocessScript>
