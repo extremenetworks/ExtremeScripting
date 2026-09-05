@@ -32,7 +32,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[NON-stacking config converter](non_stacking_config_converter)|Converts a non stacking configuration to a stacking configuration.|
 |[Convert Port Config](convert_port_config)| Allows you the option to translate a slot:port style config to standard port notation or to change port configs per slot.|
 |[QOS Config Wizard](qosconfigpy)|Wizard to aid in creating QoS profiles|
-|[Port Statistics Ssummary](portsum)|Display a consolidated port statistics table|
+|[Port Statistics Summary](portsum)|Display a consolidated port statistics table|
 |[Radius mgmt config](radiusmgmtconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch with RADIUS management information.|
 |[Radius NetLogin config](radiusnetloginconfigpy)|Wizard for configuring an ExtremeXOS(TM) switch for RADIUS netlogin.|
 |[show config clean](show_config_clean)|Hides unused config sections from the output of "show configuration"|
@@ -47,7 +47,7 @@ Add a space at the begining of the Description to omit the script from git_downl
 |[Watch Command](watch)|Simple script that repeats a CLI command every *n* seconds|
 |[JSONRPC CLI Example](jsoncli)| This python script is an example of how to interface with EXOS 21.1 using JSONRPC over HTTP/HTTPS.|
 |[Remote Script Example](rmtscript)| This python script is an example of how run scripts remotely on EXOS switches running 21.1 or later over HTTP/HTTPS.|
-|[EXOS Snmp DatetimeAPI](xosSnmpDatetimeAPI)| Python API that can converts EXOS last config change time to python datetime format.|
+|[EXOS Snmp DatetimeAPI](xosSnmpDatetimeAPI)| Python API that can convert EXOS last config change time to python datetime format.|
 |[Fabric Attach Zero Touch Client](fa-ztc)| This script implements the ERS and VSP FA ZTC functionality on XOS|
 |[ZTP Convert to Fabric Engine](ztp-convert-to-fabric-engine)| Boot universal hardware out of the box directly into VOSS as Fabric Engine|
 
