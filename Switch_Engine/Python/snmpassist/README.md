@@ -82,12 +82,12 @@ The Delete portion of the script does the following:
 14. Enable SNMPv3 default group
 15. Enable SNMPv3 default user
 
-The Configure portion of the scripts asks a series of questions relating to the user name, group configuration, and access profile information. 
+The Configure portion of the script asks a series of questions relating to the user name, group configuration, and access profile information. 
 The configure portion of the script also asks the user if they want to disable SNMP v1v2c access, disable the default SNMPv3 user, and disable 
 the default SNMPV3 group.
 
 In order to use 3DES or AES encryption, the SSH module is required to be installed, configured, and enabled. The script will automatically check to see if SSH is enabled.
-If running EXOS version 21 or later, The switch will enable SSH for you. If running EXOS version 16 or earlier, and SSH is not enabled, the switch will prompt the user to
+If running EXOS version 21 or later, the switch will enable SSH for you. If running EXOS version 16 or earlier, and SSH is not enabled, the switch will prompt the user to
 download SSH from https://support.extremenetworks.com .
 
 In this current iteration, this script does not:
