@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 #############################################################################
 #
 # Script        	: Daily Automatic Backup Script
-# Revision      	: 1.2
-# EXOS Version(s)  	: 31.5.1.6 (EXOS supports Python)
-# Last Updated  	: 19-May-2022
+# Revision      	: 1.3
+# EXOS Version(s)  	: 32.7.x (EXOS supports Python)
+# Last Updated  	: 30-Sep-2026
 #
 # Purpose:
 # Run automated back up on all scripts, including configuration, policies, and scripts. Benefits
@@ -18,6 +18,7 @@
 
 import time
 import os
+from exsh import clicmd
 
 ###############################################################################
 # U S E R   C O N F I G U R A T I O N
@@ -35,21 +36,21 @@ backupTime = '22:00'
 #Set all or none of these global variables. 
 serial = None
 yeardirectory = None
-modirectory = None
-daydirectory = None
-systemTime = None
+modirectory   = None
+daydirectory  = None
+systemTime    = None
 
 def exosCmd(cmd):
-    #print cmd
-    result = exsh.clicmd(cmd, True)
-    #print result
+    #print(cmd) 
+    result = clicmd(cmd, True)
+    #print(result)
     return result
 
 
 def uploadFiles(fileSuffix, uploadPrefix):
-    serialSystem = serial + '_' +  systemTime + '_'
+    serialSystem = f"{serial or 'unknown'}_{systemTime or time.strftime('%H%M%S')}_"
     for line in exosCmd('ls *' + fileSuffix).splitlines():
-        line.strip()
+        line = line.strip()
         if line.endswith(fileSuffix):
             fileName = line.split()[-1]
             if len(fileName) > 32:
@@ -66,7 +67,7 @@ def uploadFiles(fileSuffix, uploadPrefix):
                     virtualRouter=vrtr,
                     sourceFile=fileName,
                     dest=destFileName)
-            print exosCmd(cmd)
+            print(exosCmd(cmd))
             exosCmd('create log message "File ' + fileName + ' exported to ' + tftp  + ' Server as ' + destFileName + '"')
 
 def upmConfig():
@@ -81,11 +82,10 @@ def upmConfig():
 # because we cannot interact with the shell the way TCL can,
 # we need to create a separate script that will create the upm profile
         xsfName = __file__.replace('.py','.xsf')
-        xsf = open(xsfName,'w')
-        xsf.write('create upm profile ' + upmName + '\n')
-        xsf.write('load script ' + os.path.basename(__file__) + '\n')
-        xsf.write('.\n\n')
-        xsf.close()
+        with open(xsfName, 'w') as xsf:
+            xsf.write('create upm profile ' + upmName + '\n')
+            xsf.write('load script ' + os.path.basename(__file__) + '\n')
+            xsf.write('.\n\n')
         exosCmd('load script ' + os.path.basename(xsfName))
         os.remove(xsfName)
 # Here we configure the UPM to have a liberal execution time.
@@ -105,7 +105,8 @@ def upmConfig():
         exosCmd('create upm timer ' + upmName)
         exosCmd('config upm timer ' + upmName + ' profile ' + upmName)
         backupHourMin = backupTime.split(':')
-        cmd = 'config upm timer {name} at {mm} {dd} {yy} {hh} {min} 0 every 86400'.format(name=upmName,
+        cmd = 'config upm timer {name} at {mm} {dd} {yy} {hh} {min} 0 every 86400'.format(
+                name=upmName,
                 mm=modirectory,
                 dd=daydirectory,
                 yy=yeardirectory,
@@ -118,16 +119,19 @@ def upmConfig():
 #Setting time if None values are set. 
 if None in (serial,yeardirectory,modirectory,daydirectory,systemTime):
     yeardirectory = time.strftime('%Y')
-    modirectory = time.strftime('%m')
-    daydirectory = time.strftime('%d')
-    systemTime = time.strftime('%H%M%S')
+    modirectory   = time.strftime('%m')
+    daydirectory  = time.strftime('%d')
+    systemTime    = time.strftime('%H%M%S')
     for line in exosCmd('show version').splitlines():
         if line.startswith('Switch'):
             tokens = line.split()
-            serial = tokens[3]
+            if len(tokens) > 3:
+                serial = tokens[3]
+            else:
+                serial = "unknown"
             break
 
-if upmConfig() == None:
+if upmConfig() is None:
 # upload policy files
     uploadFiles('.pol','p')
 # upload TCL scripts
