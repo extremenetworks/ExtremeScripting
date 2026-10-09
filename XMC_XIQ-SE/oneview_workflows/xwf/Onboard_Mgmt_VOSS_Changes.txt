@@ -27,7 +27,7 @@ v14
 v15
 	- Fixed bug in #elseif Cisco velocity type statement processing; the #elseif condition was never processed even if
 	  the #elseif condition was true
-v17 - posted
+v17
 	- If an auto-sense ISIS Hello auth key is provided, the workflow now only proceeds if it sees auto-sense
 	  interfaces in state NNI-AUTH-FAIL or if the switch has no ISIS adjacencies or (new check) it has SD-WAN ISIS
 	  adjacencies; otherwise it delays execution up to expiry of const_NO_NNI_ISIS_AUTH_DELAY (default 300sec) as before
@@ -38,5 +38,9 @@ v17 - posted
 	  key, the onboarding I-SID is presented, by the core switch, as an untagged binding on the uplink, and after this
 	  workflow runs, and the switch gets the ISIS Hello auth key, it is able to bring up the NNI and then the new mgmt
 	  IP address can be on the same I-SID with the same subnet
+v19
+	- Input notes use display field format
+v20/1.06 - posted
+	- Was failing with gracefulExitIfNoSN not defined if run against a switch not present in the CSV file
 
 Todo:
